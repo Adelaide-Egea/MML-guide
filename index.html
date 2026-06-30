@@ -50,4 +50,989 @@
   .section-divider { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sage); font-weight: 700; margin: 26px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
   .section-divider:first-of-type { margin-top: 4px; }
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .row2, .row3 { grid-template-columns: 1fr; } }
+
+  .child-card { background: var(--card); border: 1.5px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .child-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .child-card-head .child-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: var(--sage); }
+  .remove-child-btn { background: none; border: none; color: var(--navy); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 4px 8px; }
+
+  .age-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+  .chip span { display: inline-block; padding: 7px 13px; border: 1.5px solid var(--line); border-radius: 20px; font-size: 0.84rem; font-weight: 600; color: var(--ink-soft); background: var(--paper); transition: all 0.15s ease; }
+  .chip input:checked + span { background: var(--sage); border-color: var(--sage); color: white; }
+
+  button.add-child-btn { width: 100%; padding: 12px; background: var(--sage-dim); color: var(--sage); border: 1.5px dashed var(--sage); border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; margin-bottom: 4px; }
+  button.primary { width: 100%; padding: 14px; background: var(--sage); color: white; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 8px; }
+  button.primary:active { opacity: 0.85; }
+  button.primary:disabled { background: var(--ink-soft); cursor: not-allowed; }
+  button.secondary { width: 100%; padding: 12px; background: none; border: 1.5px solid var(--line); border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--ink); cursor: pointer; margin-top: 10px; }
+
+  .error-box { background: #F5E6E9; color: #8E3F4F; padding: 12px 14px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 16px; }
+
+  .loading { text-align: center; padding: 40px 0; color: var(--ink-soft); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--sage-dim); border-top-color: var(--sage); border-radius: 50%; margin: 0 auto 12px; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* --- Guide output --- */
+  .guide { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .header-band { padding: 26px 26px 20px; text-align: center; }
+  .header-emojis { font-size: 1.1rem; margin-bottom: 6px; opacity: 0.85; }
+  .header-names { font-family: 'Fraunces', serif; font-style: italic; font-weight: 600; font-size: 1.9rem; color: var(--ink); margin: 0 0 6px; }
+  .header-sub { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; }
+  .header-note { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.92rem; color: var(--ink-soft); max-width: 480px; margin: 0 auto; line-height: 1.5; }
+  .guide-body { padding: 22px 24px 26px; }
+
+  .section-eyebrow { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--sage); margin: 26px 0 12px; }
+  .section-eyebrow:first-child { margin-top: 0; }
+
+  .kid-tag { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.84rem; padding: 1px 9px 1px 6px; border-radius: 12px; color: white; white-space: nowrap; }
+
+  .sched-entry { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .sched-entry:last-child { border-bottom: none; }
+  .sched-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  .sched-time { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--ink); min-width: 74px; }
+  .sched-title { font-weight: 600; font-size: 0.92rem; }
+  .sched-body { padding-left: 84px; }
+  .sched-row { font-size: 0.87rem; line-height: 1.55; margin-bottom: 4px; }
+  .sched-row:last-child { margin-bottom: 0; }
+  .sched-row strong { color: var(--ink); }
+
+  .bedtime-step { display: flex; gap: 11px; margin-bottom: 11px; align-items: flex-start; }
+  .bedtime-step:last-child { margin-bottom: 0; }
+  .step-avatar { width: 26px; height: 26px; border-radius: 50%; color: white; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bedtime-text { font-size: 0.87rem; line-height: 1.55; padding-top: 3px; }
+  .bedtime-text strong { color: var(--ink); }
+
+  .important-list { background: var(--sage-dim); border-radius: 12px; padding: 16px 18px; }
+  .important-item { display: flex; gap: 10px; font-size: 0.87rem; line-height: 1.5; margin-bottom: 10px; }
+  .important-item:last-child { margin-bottom: 0; }
+  .important-item .ii-icon { flex-shrink: 0; }
+
+  .comfort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .comfort-grid { grid-template-columns: 1fr; } }
+  .comfort-card { border-radius: 12px; padding: 14px; }
+  .comfort-card-head { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; }
+  .comfort-card p { margin: 0; font-size: 0.85rem; line-height: 1.55; }
+  .comfort-card ul { margin: 0; padding-left: 16px; }
+  .comfort-card li { font-size: 0.85rem; line-height: 1.5; margin-bottom: 4px; }
+
+  .plain-section { margin-bottom: 16px; }
+  .plain-section:last-child { margin-bottom: 0; }
+  .plain-section-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.86rem; margin-bottom: 6px; color: var(--ink); }
+  .plain-section p { margin: 0; font-size: 0.88rem; line-height: 1.55; }
+  .plain-section ul { margin: 0; padding-left: 18px; }
+  .plain-section li { font-size: 0.88rem; line-height: 1.5; margin-bottom: 4px; }
+
+  .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .contacts-grid { grid-template-columns: 1fr; } }
+  .contact-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .contact-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
+  .contact-line { font-size: 0.85rem; color: var(--ink-soft); }
+
+  .closing-note { margin-top: 26px; text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 0.95rem; color: var(--ink-soft); padding-top: 18px; border-top: 1px solid var(--line); }
+  .closing-note strong { color: var(--sage); font-style: normal; }
+  .guide-footer { margin-top: 14px; text-align: center; font-size: 0.66rem; color: var(--ink-soft); }
+  .guide-footer strong { color: var(--sage); font-family: 'Outfit', sans-serif; }
+
+  .action-row { display: flex; gap: 10px; margin-top: 20px; }
+  .action-row button { flex: 1; }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { padding: 0; background: white; }
+    .no-print { display: none !important; }
+    .wrap { max-width: none; }
+    .guide { border: none; border-radius: 0; }
+    .sched-entry, .comfort-card, .bedtime-step, .contact-card { break-inside: avoid; }
+    @page { size: A4; margin: 14mm; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="formView">
+    <div class="brand-mark no-print"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
+    <h1>Family Guide Generator</h1>
+    <p class="subtitle">Fill this in once per child. Get a clear, print-ready reference guide for whoever's looking after them.</p>
+
+    <div id="errorBox"></div>
+
+    <div class="section-divider" style="margin-top:4px;">⚠ Important</div>
+    <div class="field">
+      <label>Anything critical the caregiver needs to know <span class="hint">(one point per line — a stairgate, an allergy, anything safety-related)</span></label>
+      <textarea id="importantNote" placeholder="e.g. Stairgate always closed&#10;Severe peanut allergy — EpiPen by the front door&#10;No screens today"></textarea>
+    </div>
+
+    <div class="section-divider">Children</div>
+    <div id="childrenContainer"></div>
+    <button type="button" class="add-child-btn" id="addChildBtn">+ Add another child</button>
+
+    <div class="section-divider">Who's this guide for?</div>
+    <div class="row2">
+      <div class="field">
+        <label>Caregiver name</label>
+        <input type="text" id="caregiverName" placeholder="e.g. Claire">
+      </div>
+      <div class="field">
+        <label>Relationship</label>
+        <select id="caregiverRelationship">
+          <option value="">Select…</option>
+          <option>Nanny</option>
+          <option>Grandparent</option>
+          <option>Partner</option>
+          <option>Babysitter</option>
+          <option>Nursery staff</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="relationshipOtherField" style="display:none;">
+      <label>Please specify</label>
+      <input type="text" id="caregiverRelationshipOther" placeholder="e.g. Family friend">
+    </div>
+
+    <div class="field">
+      <label>Guide language</label>
+      <select id="language">
+        <option value="English">English</option>
+        <option value="French">French</option>
+        <option value="Spanish">Spanish</option>
+        <option value="Portuguese">Portuguese</option>
+        <option value="Polish">Polish</option>
+        <option value="Arabic">Arabic</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field" id="languageOtherField" style="display:none;">
+      <label>Please specify</label>
+      <input type="text" id="languageOther" placeholder="e.g. Italian">
+    </div>
+
+    <div class="section-divider">Daily routine</div>
+    <p class="subtitle" style="margin-bottom:14px;">Add one entry per event. Use "Bedtime" for anything that's part of the bedtime sequence — those get grouped into their own step-by-step section.</p>
+    <div id="routineContainer"></div>
+    <button type="button" class="add-child-btn" id="addRoutineBtn">+ Add routine item</button>
+
+    <div class="section-divider">Emergency contacts</div>
+    <div id="contactsContainer"></div>
+    <button type="button" class="add-child-btn" id="addContactBtn">+ Add contact</button>
+
+    <div class="section-divider">Anything else</div>
+    <div class="field">
+      <label>Special instructions <span class="hint">(optional)</span></label>
+      <textarea id="extra" placeholder="Anything else worth knowing"></textarea>
+    </div>
+    <div class="field">
+      <label>Your sign-off <span class="hint">(optional — shown at the end, e.g. "The Smiths")</span></label>
+      <input type="text" id="signOff" placeholder="e.g. The whole family">
+    </div>
+
+    <div class="section-divider">Access</div>
+    <div class="field">
+      <label>Access code <span class="hint">(optional — leave blank to pay £0.99)</span></label>
+      <input type="text" id="accessCode" placeholder="Have a code? Enter it here">
+    </div>
+
+    <button class="primary" id="generateBtn">Generate guide — £0.99</button>
+  </div>
+
+  <div id="loadingView" style="display:none;">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span id="loadingText">Writing the guide…</span>
+    </div>
+  </div>
+
+  <div id="guideView" style="display:none;">
+    <div class="guide" id="guideContent"></div>
+    <div class="action-row no-print">
+      <button class="secondary" id="editBtn">Edit details</button>
+      <button class="primary" id="printBtn">Print / Save as PDF</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'family-guide-last-entry-v3';
+const ALLERGEN_OPTIONS = ['Dairy', 'Eggs', 'Nuts', 'Gluten', 'Soy', 'None known'];
+const NAPPY_OPTIONS = ['Newborn', 'Size 1', 'Size 2', 'Size 3', 'Size 4', 'Size 5', 'Size 6'];
+const MILK_OPTIONS = ['N/A', 'Breastmilk', 'Formula', "Cow's milk", 'Plant milk'];
+const KID_IDENTITIES = [
+  { color: '#6FA3CC', dim: '#E6F0F7', emoji: '🦖' },
+  { color: '#C17B8C', dim: '#F5E6E9', emoji: '🐰' },
+  { color: '#CBA135', dim: '#F7EFD8', emoji: '🦁' },
+  { color: '#9B8AC4', dim: '#ECE8F5', emoji: '🐻' },
+  { color: '#5E9C8F', dim: '#E2EFEC', emoji: '🦋' },
+  { color: '#B98A5E', dim: '#F2E7DA', emoji: '🐢' }
+];
+function getKidIdentity(idx) { return KID_IDENTITIES[idx % KID_IDENTITIES.length]; }
+
+let childCount = 0;
+let routineCount = 0;
+let contactCount = 0;
+
+function getChildOptionsHTML(selectedValue) {
+  const names = Array.from(document.querySelectorAll('.c-name')).map((inp, i) => inp.value.trim() || `Child ${i + 1}`);
+  let html = `<option value="all" ${selectedValue === 'all' ? 'selected' : ''}>All children</option>`;
+  names.forEach(n => {
+    html += `<option value="${n}" ${n === selectedValue ? 'selected' : ''}>${n}</option>`;
+  });
+  return html;
+}
+
+function routineItemHTML(idx) {
+  return `
+    <div class="child-card routine-item" data-routine="${idx}">
+      <div class="child-card-head">
+        <span class="child-label">Routine item</span>
+        <button type="button" class="remove-child-btn" onclick="removeRoutine(${idx})">Remove</button>
+      </div>
+      <div class="row3">
+        <div class="field">
+          <label>Type</label>
+          <select class="r-type">
+            <option>Bedtime</option>
+            <option>Nap</option>
+            <option>Milk/Feed</option>
+            <option>Lunch</option>
+            <option>Snack</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" class="r-time">
+        </div>
+        <div class="field">
+          <label>For</label>
+          <select class="r-child">${getChildOptionsHTML()}</select>
+        </div>
+      </div>
+      <div class="field r-type-other-field" style="display:none;">
+        <label>Please specify</label>
+        <input type="text" class="r-type-other" placeholder="e.g. Bath time">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Notes <span class="hint">(optional — wrap key facts in **double asterisks** to bold them)</span></label>
+        <textarea class="r-notes" placeholder="e.g. Needs **180ml** formula, white noise machine on"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function addRoutineItem(prefill) {
+  const idx = routineCount++;
+  const container = document.getElementById('routineContainer');
+  const div = document.createElement('div');
+  div.innerHTML = routineItemHTML(idx);
+  const card = div.firstElementChild;
+  container.appendChild(card);
+  if (prefill) {
+    const typeSelect = card.querySelector('.r-type');
+    const isStandard = ['Bedtime', 'Nap', 'Milk/Feed', 'Lunch', 'Snack'].includes(prefill.type);
+    typeSelect.value = isStandard ? prefill.type : 'other';
+    if (!isStandard) {
+      card.querySelector('.r-type-other-field').style.display = 'block';
+      card.querySelector('.r-type-other').value = prefill.type || '';
+    }
+    card.querySelector('.r-time').value = prefill.time || '';
+    card.querySelector('.r-child').innerHTML = getChildOptionsHTML(prefill.child);
+    card.querySelector('.r-notes').value = prefill.notes || '';
+  }
+}
+
+function removeRoutine(idx) {
+  const block = document.querySelector(`.routine-item[data-routine="${idx}"]`);
+  if (block) block.remove();
+}
+
+function collectRoutineItems() {
+  const blocks = document.querySelectorAll('.routine-item');
+  return Array.from(blocks).map(b => {
+    const typeSelect = b.querySelector('.r-type').value;
+    const type = typeSelect === 'other' ? b.querySelector('.r-type-other').value.trim() : typeSelect;
+    return {
+      type,
+      time: b.querySelector('.r-time').value,
+      child: b.querySelector('.r-child').value,
+      notes: b.querySelector('.r-notes').value.trim()
+    };
+  });
+}
+
+function formatTime12hr(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+document.getElementById('addRoutineBtn').addEventListener('click', () => addRoutineItem());
+document.getElementById('routineContainer').addEventListener('change', e => {
+  if (e.target.classList.contains('r-type')) {
+    const card = e.target.closest('.routine-item');
+    card.querySelector('.r-type-other-field').style.display = e.target.value === 'other' ? 'block' : 'none';
+  }
+});
+
+/* --- Contacts --- */
+function contactItemHTML(idx) {
+  return `
+    <div class="child-card contact-item" data-contact="${idx}">
+      <div class="child-card-head">
+        <span class="child-label">Contact</span>
+        <button type="button" class="remove-child-btn" onclick="removeContact(${idx})">Remove</button>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" class="ct-name" placeholder="e.g. Mum">
+        </div>
+        <div class="field">
+          <label>Phone / contact</label>
+          <input type="text" class="ct-phone" placeholder="e.g. 07700 900000">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addContact(prefill) {
+  const idx = contactCount++;
+  const container = document.getElementById('contactsContainer');
+  const div = document.createElement('div');
+  div.innerHTML = contactItemHTML(idx);
+  const card = div.firstElementChild;
+  container.appendChild(card);
+  if (prefill) {
+    if (prefill.name) card.querySelector('.ct-name').value = prefill.name;
+    if (prefill.phone) card.querySelector('.ct-phone').value = prefill.phone;
+  }
+}
+
+function removeContact(idx) {
+  const block = document.querySelector(`.contact-item[data-contact="${idx}"]`);
+  if (block) block.remove();
+}
+
+function collectContacts() {
+  const blocks = document.querySelectorAll('.contact-item');
+  return Array.from(blocks)
+    .map(b => ({ name: b.querySelector('.ct-name').value.trim(), phone: b.querySelector('.ct-phone').value.trim() }))
+    .filter(c => c.name || c.phone);
+}
+
+document.getElementById('addContactBtn').addEventListener('click', () => addContact());
+
+function childBlockHTML(idx) {
+  const allergenChips = ALLERGEN_OPTIONS.map(opt =>
+    `<label class="chip">
+      <input type="checkbox" name="allergen-${idx}" value="${opt}">
+      <span>${opt}</span>
+    </label>`
+  ).join('');
+
+  const nappyOpts = NAPPY_OPTIONS.map(o => `<option>${o}</option>`).join('');
+  const milkOpts = MILK_OPTIONS.map(o => `<option>${o}</option>`).join('');
+
+  return `
+    <div class="child-card" data-child="${idx}">
+      <div class="child-card-head">
+        <span class="child-label">Child ${idx + 1}</span>
+        <button type="button" class="remove-child-btn" onclick="removeChild(${idx})">Remove</button>
+      </div>
+
+      <div class="age-row">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" class="c-name" placeholder="e.g. Mia">
+        </div>
+        <div class="row2" style="margin:0;">
+          <div class="field">
+            <label>Age</label>
+            <input type="number" class="c-age-value" min="0" placeholder="e.g. 3">
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <select class="c-age-unit">
+              <option>years</option>
+              <option>months</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Allergies <span class="hint">— tap any that apply</span></label>
+        <div class="chip-grid">${allergenChips}</div>
+      </div>
+      <div class="field">
+        <label>Other allergies or medical notes <span class="hint">(optional)</span></label>
+        <textarea class="c-allergy-notes" placeholder="e.g. Carries an EpiPen, mild asthma"></textarea>
+      </div>
+
+      <div class="baby-fields">
+        <div class="row3">
+          <div class="field">
+            <label>Nappy status</label>
+            <select class="c-nappy-status">
+              <option>Full-time nappies</option>
+              <option>Bedtime/naps only</option>
+              <option>Potty training</option>
+              <option>Fully potty trained</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nappy size</label>
+            <select class="c-nappy">${nappyOpts}</select>
+          </div>
+          <div class="field">
+            <label>Needs cream?</label>
+            <select class="c-cream">
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Cream notes <span class="hint">(optional)</span></label>
+          <input type="text" class="c-cream-notes" placeholder="e.g. Sudocrem at every change">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Milk type</label>
+            <select class="c-milk">${milkOpts}</select>
+          </div>
+          <div class="field">
+            <label>Milk notes <span class="hint">(optional)</span></label>
+            <input type="text" class="c-milk-notes" placeholder="e.g. Whole milk daytime, formula at night">
+          </div>
+        </div>
+        <p class="hint" style="margin: -8px 0 14px;">For exact feed times and doses, add a "Milk/Feed" entry per feed in Daily Routine below.</p>
+      </div>
+
+      <div class="field older-fields" style="display:none;">
+        <label>School / activities & homework notes</label>
+        <textarea class="c-school" placeholder="e.g. Homework before screen time, picked up from football at 5pm"></textarea>
+      </div>
+      <div class="field">
+        <label>Independence & screen time rules</label>
+        <textarea class="c-independence" placeholder="e.g. No devices after 6pm, can play in the garden unsupervised"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Likes, dislikes, comfort items</label>
+        <textarea class="c-likes" placeholder="e.g. Loves the blue rabbit toy, dislikes loud noises"></textarea>
+      </div>
+      <div class="field">
+        <label>What helps if upset</label>
+        <textarea class="c-behaviour" placeholder="e.g. Give space first, then offer the rabbit toy"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function isYoungChild(card) {
+  const unit = card.querySelector('.c-age-unit').value;
+  const raw = card.querySelector('.c-age-value').value;
+  const val = parseFloat(raw);
+  if (unit === 'months') return true;
+  if (raw === '' || isNaN(val)) return true;
+  return val <= 4;
+}
+
+function updateAgeFields(card) {
+  const young = isYoungChild(card);
+  card.querySelectorAll('.baby-fields').forEach(el => { el.style.display = young ? 'block' : 'none'; });
+  card.querySelectorAll('.older-fields').forEach(el => { el.style.display = young ? 'none' : 'block'; });
+}
+
+function addChild(prefill) {
+  const idx = childCount++;
+  const container = document.getElementById('childrenContainer');
+  const div = document.createElement('div');
+  div.innerHTML = childBlockHTML(idx);
+  const card = div.firstElementChild;
+  container.appendChild(card);
+  updateRemoveButtons();
+  if (prefill) applyChildData(idx, prefill);
+  updateAgeFields(card);
+}
+
+function removeChild(idx) {
+  const block = document.querySelector(`.child-card[data-child="${idx}"]`);
+  if (block) block.remove();
+  updateRemoveButtons();
+}
+
+function updateRemoveButtons() {
+  const blocks = document.querySelectorAll('.child-card:not(.routine-item):not(.contact-item)');
+  blocks.forEach(b => {
+    const btn = b.querySelector('.remove-child-btn');
+    btn.style.display = blocks.length > 1 ? 'inline-block' : 'none';
+  });
+}
+
+document.getElementById('childrenContainer').addEventListener('input', e => {
+  if (e.target.classList.contains('c-age-value')) updateAgeFields(e.target.closest('.child-card'));
+});
+document.getElementById('childrenContainer').addEventListener('change', e => {
+  if (e.target.classList.contains('c-age-unit')) updateAgeFields(e.target.closest('.child-card'));
+});
+
+function collectChildren() {
+  const blocks = document.querySelectorAll('#childrenContainer .child-card');
+  return Array.from(blocks).map(b => {
+    const allergens = Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(c => c.value);
+    const young = isYoungChild(b);
+    return {
+      name: b.querySelector('.c-name').value.trim(),
+      age: b.querySelector('.c-age-value').value.trim() + ' ' + b.querySelector('.c-age-unit').value,
+      allergens: allergens.join(', '),
+      allergyNotes: b.querySelector('.c-allergy-notes').value.trim(),
+      nappyStatus: young ? b.querySelector('.c-nappy-status').value : '',
+      nappy: young ? b.querySelector('.c-nappy').value : '',
+      cream: young ? b.querySelector('.c-cream').value : '',
+      creamNotes: young ? b.querySelector('.c-cream-notes').value.trim() : '',
+      milk: young ? b.querySelector('.c-milk').value : '',
+      milkNotes: young ? b.querySelector('.c-milk-notes').value.trim() : '',
+      school: !young ? b.querySelector('.c-school').value.trim() : '',
+      independence: b.querySelector('.c-independence').value.trim(),
+      likes: b.querySelector('.c-likes').value.trim(),
+      behaviour: b.querySelector('.c-behaviour').value.trim()
+    };
+  });
+}
+
+function applyChildData(idx, data) {
+  const b = document.querySelector(`.child-card[data-child="${idx}"]`);
+  if (!b || !data) return;
+  if (data.name) b.querySelector('.c-name').value = data.name;
+  if (data.age) {
+    const parts = data.age.split(' ');
+    b.querySelector('.c-age-value').value = parts[0] || '';
+    if (parts[1]) b.querySelector('.c-age-unit').value = parts[1];
+  }
+  if (data.allergens) {
+    data.allergens.split(', ').forEach(val => {
+      const cb = b.querySelector(`input[value="${val}"]`);
+      if (cb) cb.checked = true;
+    });
+  }
+  if (data.allergyNotes) b.querySelector('.c-allergy-notes').value = data.allergyNotes;
+  if (data.nappyStatus) b.querySelector('.c-nappy-status').value = data.nappyStatus;
+  if (data.nappy) b.querySelector('.c-nappy').value = data.nappy;
+  if (data.cream) b.querySelector('.c-cream').value = data.cream;
+  if (data.creamNotes) b.querySelector('.c-cream-notes').value = data.creamNotes;
+  if (data.milk) b.querySelector('.c-milk').value = data.milk;
+  if (data.milkNotes) b.querySelector('.c-milk-notes').value = data.milkNotes;
+  if (data.school) b.querySelector('.c-school').value = data.school;
+  if (data.independence) b.querySelector('.c-independence').value = data.independence;
+  if (data.likes) b.querySelector('.c-likes').value = data.likes;
+  if (data.behaviour) b.querySelector('.c-behaviour').value = data.behaviour;
+}
+
+document.getElementById('addChildBtn').addEventListener('click', () => addChild());
+
+document.getElementById('caregiverRelationship').addEventListener('change', e => {
+  document.getElementById('relationshipOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
+});
+document.getElementById('language').addEventListener('change', e => {
+  document.getElementById('languageOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
+});
+document.getElementById('accessCode').addEventListener('input', e => {
+  const btn = document.getElementById('generateBtn');
+  btn.textContent = e.target.value.trim() ? 'Generate guide (free with code)' : 'Generate guide — £0.99';
+});
+
+async function loadSavedEntry() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.children && data.children.length) {
+        data.children.forEach(c => addChild(c));
+      } else {
+        addChild();
+      }
+      if (data.routineItems && data.routineItems.length) {
+        data.routineItems.forEach(r => addRoutineItem(r));
+      }
+      if (data.contacts && data.contacts.length) {
+        data.contacts.forEach(c => addContact(c));
+      }
+      if (data.importantNote) document.getElementById('importantNote').value = data.importantNote;
+      if (data.caregiverName) document.getElementById('caregiverName').value = data.caregiverName;
+      if (data.caregiverRelationship) document.getElementById('caregiverRelationship').value = data.caregiverRelationship;
+      if (data.caregiverRelationshipOther) document.getElementById('caregiverRelationshipOther').value = data.caregiverRelationshipOther;
+      if (data.language) document.getElementById('language').value = data.language;
+      if (data.languageOther) document.getElementById('languageOther').value = data.languageOther;
+      if (data.extra) document.getElementById('extra').value = data.extra;
+      if (data.signOff) document.getElementById('signOff').value = data.signOff;
+      document.getElementById('caregiverRelationship').dispatchEvent(new Event('change'));
+      document.getElementById('language').dispatchEvent(new Event('change'));
+      return;
+    }
+  } catch (e) { /* no saved entry yet */ }
+  addChild();
+}
+
+async function saveEntry(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch (e) { console.error('Could not save entry', e); }
+}
+
+function showError(msg) { document.getElementById('errorBox').innerHTML = `<div class="error-box">${msg}</div>`; }
+function clearError() { document.getElementById('errorBox').innerHTML = ''; }
+
+function parseInlineBold(text) {
+  if (!text) return '';
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+function boldChildNames(text, names) {
+  let result = text;
+  names.forEach(name => {
+    if (!name) return;
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('^(' + escaped + ')(\\s*[—:-])', 'i');
+    result = result.replace(re, '<strong>$1</strong>$2');
+  });
+  return result;
+}
+
+function iconForImportantLine(line) {
+  const l = line.toLowerCase();
+  if (l.includes('nut') || l.includes('allerg') || l.includes('epipen')) return '🥜';
+  if (l.includes('stair') || l.includes('gate')) return '🚪';
+  if (l.includes('nappy') || l.includes('diaper') || l.includes('cream')) return '👶';
+  if (l.includes('water') || l.includes('hydrat')) return '💧';
+  if (l.includes('walk') || l.includes('cruis') || l.includes('mobile') || l.includes('climb')) return '🚶';
+  if (l.includes('tooth') || l.includes('teeth')) return '🦷';
+  if (l.includes('toilet') || l.includes('potty')) return '🚽';
+  if (l.includes('screen') || l.includes('tablet') || l.includes('tv')) return '📱';
+  return '⚠️';
+}
+
+function groupByTime(items) {
+  const map = new Map();
+  items.forEach(item => {
+    const key = item.time || 'unspecified';
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(item);
+  });
+  return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function renderGuide(aiData, children, formData) {
+  const kidIdentity = {};
+  children.forEach((c, i) => { kidIdentity[c.name] = getKidIdentity(i); });
+
+  function kidTag(name) {
+    const id = kidIdentity[name];
+    if (!id) return `<span class="kid-tag" style="background:var(--sage);">${name}</span>`;
+    return `<span class="kid-tag" style="background:${id.color};">${id.emoji} ${name}</span>`;
+  }
+
+  const routineItems = formData.routineItems || [];
+  const scheduleItems = routineItems.filter(r => r.type !== 'Bedtime');
+  const bedtimeItems = routineItems.filter(r => r.type === 'Bedtime').sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+
+  let html = '';
+
+  // Header
+  const headerEmojis = children.map((c, i) => getKidIdentity(i).emoji).join(' ');
+  const headerNames = children.map(c => c.name).filter(Boolean).join(' & ');
+  html += `<div class="header-band">
+    <div class="header-emojis">${headerEmojis}</div>
+    <div class="header-names">${headerNames}</div>
+    <div class="header-sub">Guide for ${formData.caregiverName}</div>
+    <div class="header-note">${aiData.intro || ''}</div>
+  </div>`;
+
+  html += `<div class="guide-body">`;
+
+  // Schedule
+  if (scheduleItems.length) {
+    html += `<div class="section-eyebrow">⏰ Today's Schedule</div>`;
+    const groups = groupByTime(scheduleItems);
+    groups.forEach(([time, items]) => {
+      const timeLabel = time === 'unspecified' ? 'Time not set' : formatTime12hr(time);
+      const title = items[0].type;
+      html += `<div class="sched-entry">
+        <div class="sched-head"><span class="sched-time">${timeLabel}</span><span class="sched-title">${title}</span></div>
+        <div class="sched-body">`;
+      items.forEach(item => {
+        const who = item.child === 'all' ? 'All children' : item.child;
+        const tag = item.child === 'all' ? `<span class="kid-tag" style="background:var(--sage);">${who}</span>` : kidTag(item.child);
+        const note = item.notes ? parseInlineBold(item.notes) : '';
+        html += `<div class="sched-row">${tag} ${note ? '— ' + note : ''}</div>`;
+      });
+      html += `</div></div>`;
+    });
+  }
+
+  // Bedtime sequence
+  if (bedtimeItems.length) {
+    html += `<div class="section-eyebrow">🌙 Bedtime Sequence</div>`;
+    bedtimeItems.forEach(item => {
+      const id = item.child === 'all' || item.child === 'unspecified' ? null : kidIdentity[item.child];
+      const avatarBg = id ? id.color : 'var(--sage)';
+      const avatarText = id ? id.emoji : '✓';
+      const text = item.notes ? parseInlineBold(item.notes) : (item.child === 'all' ? 'Bedtime' : `${item.child}'s bedtime`);
+      html += `<div class="bedtime-step">
+        <div class="step-avatar" style="background:${avatarBg};">${avatarText}</div>
+        <div class="bedtime-text">${text}</div>
+      </div>`;
+    });
+  }
+
+  // Important
+  const importantLines = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
+  if (importantLines.length) {
+    html += `<div class="section-eyebrow">⚠ Important</div><div class="important-list">`;
+    importantLines.forEach(line => {
+      html += `<div class="important-item"><span class="ii-icon">${iconForImportantLine(line)}</span><span>${parseInlineBold(line)}</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Comfort & Personality (per child, from AI)
+  if (aiData.childSections && aiData.childSections.length) {
+    html += `<div class="section-eyebrow">💛 Comfort & Personality</div><div class="comfort-grid">`;
+    aiData.childSections.forEach(cs => {
+      const id = kidIdentity[cs.childName] || getKidIdentity(0);
+      html += `<div class="comfort-card" style="background:${id.dim};">
+        <div class="comfort-card-head">${id.emoji} ${cs.childName}</div>
+        <p>${parseInlineBold(cs.comfort || '')}</p>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Other AI sections
+  const childNames = children.map(c => c.name);
+  if (aiData.sections && aiData.sections.length) {
+    aiData.sections.forEach(sec => {
+      const lines = (sec.content || '').split('\n').map(l => l.trim()).filter(Boolean);
+      const isListy = lines.length > 1;
+      html += `<div class="plain-section"><div class="section-eyebrow" style="margin:20px 0 8px;">${sec.label}</div>`;
+      if (isListy) {
+        html += '<ul>' + lines.map(l => `<li>${boldChildNames(parseInlineBold(l.replace(/^[-•]\s*/, '')), childNames)}</li>`).join('') + '</ul>';
+      } else {
+        html += `<p>${boldChildNames(parseInlineBold(sec.content || ''), childNames)}</p>`;
+      }
+      html += `</div>`;
+    });
+  }
+
+  // Contacts
+  const contacts = formData.contacts || [];
+  if (contacts.length) {
+    html += `<div class="section-eyebrow">📞 Contacts</div><div class="contacts-grid">`;
+    contacts.forEach(c => {
+      html += `<div class="contact-card"><div class="contact-name">${c.name || 'Contact'}</div><div class="contact-line">${c.phone || ''}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Closing
+  const signOff = formData.signOff ? formData.signOff : 'the family';
+  html += `<div class="closing-note">Thank you so much for this, ${formData.caregiverName || 'and thank you'} 🤍<br><strong>— ${signOff}</strong></div>`;
+  html += `<div class="guide-footer">Made with <strong>MML</strong> — my mental load</div>`;
+
+  html += `</div>`;
+  document.getElementById('guideContent').innerHTML = html;
+}
+
+function validateAndBuildFormData() {
+  const children = collectChildren();
+  if (!children.length || !children[0].name) {
+    return { valid: false, error: 'Please fill in at least one child\'s name.' };
+  }
+
+  const relSelect = document.getElementById('caregiverRelationship').value;
+  const relationship = relSelect === 'other' ? document.getElementById('caregiverRelationshipOther').value.trim() : relSelect;
+  const langSelect = document.getElementById('language').value;
+  const language = langSelect === 'other' ? document.getElementById('languageOther').value.trim() : langSelect;
+
+  const formData = {
+    children,
+    routineItems: collectRoutineItems(),
+    contacts: collectContacts(),
+    importantNote: document.getElementById('importantNote').value.trim(),
+    caregiverName: document.getElementById('caregiverName').value.trim(),
+    caregiverRelationship: relSelect,
+    caregiverRelationshipOther: document.getElementById('caregiverRelationshipOther').value.trim(),
+    language: langSelect,
+    languageOther: document.getElementById('languageOther').value.trim(),
+    extra: document.getElementById('extra').value.trim(),
+    signOff: document.getElementById('signOff').value.trim()
+  };
+
+  if (!formData.caregiverName) {
+    return { valid: false, error: 'Please fill in who this guide is for.' };
+  }
+
+  return { valid: true, children, formData, relationship, language };
+}
+
+async function performGeneration(authPayload) {
+  clearError();
+  const v = validateAndBuildFormData();
+  if (!v.valid) { showError(v.error); return; }
+  const { children, formData, relationship, language } = v;
+
+  await saveEntry(formData);
+
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('loadingText').textContent = 'Writing the guide…';
+  document.getElementById('loadingView').style.display = 'block';
+
+  const childrenText = children.map((c, i) => {
+    const lines = [
+      `Child ${i + 1}: ${c.name}, age ${c.age}`,
+      `  Allergies: ${[c.allergens, c.allergyNotes].filter(Boolean).join(' — ') || 'None noted'}`
+    ];
+    if (c.nappyStatus || c.nappy || c.cream === 'Yes') {
+      const nappyBits = [];
+      if (c.nappyStatus) nappyBits.push(c.nappyStatus);
+      if (c.nappy) nappyBits.push(`size ${c.nappy}`);
+      if (c.cream === 'Yes') nappyBits.push(`needs nappy cream${c.creamNotes ? ' (' + c.creamNotes + ')' : ''}`);
+      lines.push(`  Nappies: ${nappyBits.join(', ')}`);
+    }
+    if (c.milk || c.milkNotes) lines.push(`  Milk: ${[c.milk, c.milkNotes].filter(Boolean).join(' — ')}`);
+    if (c.school) lines.push(`  School/activities & homework: ${c.school}`);
+    if (c.independence) lines.push(`  Independence & screen time rules: ${c.independence}`);
+    lines.push(`  Likes/dislikes/comfort: ${c.likes}`);
+    lines.push(`  What helps if upset: ${c.behaviour}`);
+    return lines.join('\n');
+  }).join('\n\n');
+
+  const childNamesList = children.map(c => c.name).join(', ');
+
+  const userPrompt = `Children: ${childNamesList}
+
+${childrenText}
+
+Guide is for: ${formData.caregiverName} (${relationship})
+Language to write the guide in: ${language || 'English'}
+Special instructions: ${formData.extra}`;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...authPayload,
+        max_tokens: 1800,
+        system: `You write warm, personal childcare reference guides for caregivers (nannies, grandparents, family members). Respond ONLY with valid JSON, no preamble, no markdown code fences, in exactly this shape:
+{"intro": "string", "childSections": [{"childName": "string", "comfort": "string"}], "sections": [{"label": "string", "content": "string"}]}
+
+"intro": 1-2 warm sentences addressed directly to the caregiver, naming all children, written like a short personal note (e.g. "We'll be back by 7pm — thank you so much for this").
+
+"childSections": one entry per child, "comfort" should be 2-4 full warm sentences (not terse bullets) covering their personality, comfort items, and what helps if they're upset, written as flowing prose. Bold the single most important fact per child using **double asterisks**.
+
+"sections": cover Food & Allergies, Independence & Screen Time, and Anything Else — only include a section if there's real content for at least one child. Write full sentences, not clipped fragments. For any allergy, explain it as a short "can have / avoid" breakdown using this exact format on two separate lines within the content: "✅ Fine: [examples]" then "✅ Avoid: [examples]" — only do this if there's enough information to say something concrete, otherwise just describe the allergy plainly. Bold genuinely critical facts (quantities, timing, safety details) using **double asterisks** — don't overuse it, 1-2 bolded phrases per section is plenty. If there's more than one child, name them clearly within sections rather than merging differing needs together. Do NOT include a Daily Routine or Emergency Info section — those are handled separately. Write the entire response, including all labels, fully translated into the requested language if it isn't English.`,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+
+    if (response.status === 402) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'Payment required.');
+    }
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      throw new Error('Request failed (' + response.status + '): ' + bodyText.slice(0, 200));
+    }
+    const result = await response.json();
+    const textBlock = result.content.find(b => b.type === 'text');
+    if (!textBlock) throw new Error('No text content in API response');
+
+    let cleaned = textBlock.text.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '');
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (parseErr) {
+      const match = cleaned.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+      else throw new Error('Could not parse guide content: ' + parseErr.message);
+    }
+
+    renderGuide(parsed, children, formData);
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('guideView').style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingView').style.display = 'none';
+    document.getElementById('formView').style.display = 'block';
+    showError('Error: ' + (err && err.message ? err.message : 'unknown error') + '. Please try again.');
+  }
+}
+
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  clearError();
+  const accessCode = document.getElementById('accessCode').value.trim();
+
+  if (accessCode) {
+    await performGeneration({ accessCode });
+    return;
+  }
+
+  const v = validateAndBuildFormData();
+  if (!v.valid) { showError(v.error); return; }
+  await saveEntry(v.formData);
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Redirecting to payment…';
+
+  try {
+    const res = await fetch('/api/create-checkout', { method: 'POST' });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showError('Could not start checkout: ' + (data.error || 'unknown error'));
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  } catch (e) {
+    showError('Could not start checkout: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+
+document.getElementById('editBtn').addEventListener('click', () => {
+  document.getElementById('guideView').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+});
+document.getElementById('printBtn').addEventListener('click', () => { window.print(); });
+
+async function init() {
+  await loadSavedEntry();
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  if (sessionId) {
+    history.replaceState({}, '', window.location.pathname);
+    document.getElementById('loadingText').textContent = 'Payment confirmed — writing the guide…';
+    await performGeneration({ sessionId });
+  }
+}
+init();
+</script>
+</body>
+</html>
