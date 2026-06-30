@@ -67,6 +67,43 @@
   .chip span { display: inline-block; padding: 7px 13px; border: 1.5px solid var(--line); border-radius: 20px; font-size: 0.84rem; font-weight: 600; color: var(--ink-soft); background: var(--paper); transition: all 0.15s ease; }
   .chip input:checked + span { background: var(--sage); border-color: var(--sage); color: white; }
 
+  .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .swatch-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
+  .swatch-btn.selected { border-color: var(--ink); box-shadow: 0 0 0 2px white inset; }
+
+  .mode-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .mode-card { text-align: left; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px; background: var(--card); cursor: pointer; font-family: inherit; width: 100%; }
+  .mode-card.selected { border-color: var(--sage); background: var(--sage-dim); }
+  .mode-card-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; color: var(--ink); }
+  .mode-card-desc { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.4; }
+  .back-link { background: none; border: none; color: var(--ink-soft); font-size: 0.82rem; cursor: pointer; padding: 0; margin-bottom: 16px; text-decoration: underline; }
+
+  /* --- Landscape (short) output --- */
+  .lg-pad { padding: 20px 22px; }
+  .lg-grid { display: grid; gap: 16px; }
+  .lg-grid.cols-2 { grid-template-columns: 1.3fr 1fr; }
+  .lg-grid.cols-3 { grid-template-columns: 1.1fr 1fr 1fr; }
+  @media (max-width: 700px) { .lg-grid { grid-template-columns: 1fr !important; } }
+  .lg-sched-entry { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; padding: 5px 0; border-bottom: 1px dashed var(--line); font-size: 0.82rem; }
+  .lg-sched-entry:last-child { border-bottom: none; }
+  .lg-time { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.76rem; min-width: 56px; }
+  .lg-note { color: var(--ink-soft); font-size: 0.72rem; flex-basis: 100%; margin-top: -1px; }
+  .lg-kid-col { border: 1px solid var(--line); border-radius: 12px; padding: 13px; }
+  .lg-kid-head { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 2px solid; }
+  .lg-mini { margin-bottom: 8px; }
+  .lg-mini:last-child { margin-bottom: 0; }
+  .lg-mini-label { font-size: 0.74rem; font-weight: 700; margin-bottom: 2px; }
+  .lg-mini p { margin: 0; font-size: 0.78rem; line-height: 1.4; }
+  .lg-important { background: var(--sage-dim); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.8rem; }
+  .lg-important-item { margin-bottom: 5px; }
+  .lg-important-item:last-child { margin-bottom: 0; }
+  .lg-contacts { font-size: 0.78rem; color: var(--ink-soft); margin-top: 12px; }
+  @media print {
+    .lg-grid.cols-2 { grid-template-columns: 1.3fr 1fr !important; }
+    .lg-grid.cols-3 { grid-template-columns: 1.1fr 1fr 1fr !important; }
+    .lg-kid-col { break-inside: avoid; }
+  }
+
   button.add-child-btn { width: 100%; padding: 12px; background: var(--sage-dim); color: var(--sage); border: 1.5px dashed var(--sage); border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; margin-bottom: 4px; }
   button.primary { width: 100%; padding: 14px; background: var(--sage); color: white; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 8px; }
   button.primary:active { opacity: 0.85; }
@@ -149,7 +186,8 @@
     .no-print { display: none !important; }
     .wrap { max-width: none; }
     .guide { border: none; border-radius: 0; }
-    .sched-entry, .comfort-card, .bedtime-step, .contact-card { break-inside: avoid; }
+    .sched-entry, .comfort-card, .bedtime-step, .contact-card, .plain-section, .important-list, .header-band { break-inside: avoid; }
+    .section-eyebrow { break-after: avoid; }
     @page { size: A4; margin: 14mm; }
   }
 </style>
@@ -157,7 +195,44 @@
 <body>
 <div class="wrap">
 
-  <div id="formView">
+  <div id="modeView">
+    <div class="brand-mark"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
+    <h1>Family Guide Generator</h1>
+    <p class="subtitle">Choose a format and language, then fill in the details.</p>
+
+    <div class="mode-options">
+      <button type="button" class="mode-card" id="modeLandscapeBtn" data-mode="landscape">
+        <div class="mode-card-title">📋 Short Landscape One-Pager</div>
+        <div class="mode-card-desc">Compact, fits on one printed page — quick reference for a short visit.</div>
+      </button>
+      <button type="button" class="mode-card" id="modeIndepthBtn" data-mode="indepth">
+        <div class="mode-card-title">📖 In-Depth Debrief</div>
+        <div class="mode-card-desc">Full detail, step-by-step bedtime sequence, multi-page — for longer stays or someone new.</div>
+      </button>
+    </div>
+
+    <div class="section-divider" style="margin-top:4px;">Language</div>
+    <div class="field">
+      <select id="modeLanguage">
+        <option value="English">English</option>
+        <option value="French">French</option>
+        <option value="Spanish">Spanish</option>
+        <option value="Portuguese">Portuguese</option>
+        <option value="Polish">Polish</option>
+        <option value="Arabic">Arabic</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field" id="modeLanguageOtherField" style="display:none;">
+      <label>Please specify</label>
+      <input type="text" id="modeLanguageOther" placeholder="e.g. Italian">
+    </div>
+
+    <button class="primary" id="continueToFormBtn" disabled>Continue</button>
+  </div>
+
+  <div id="formView" style="display:none;">
+    <button type="button" class="back-link no-print" id="backToModeBtn">← Change format / language</button>
     <div class="brand-mark no-print"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
     <p class="subtitle">Fill this in once per child. Get a clear, print-ready reference guide for whoever's looking after them.</p>
@@ -196,23 +271,6 @@
     <div class="field" id="relationshipOtherField" style="display:none;">
       <label>Please specify</label>
       <input type="text" id="caregiverRelationshipOther" placeholder="e.g. Family friend">
-    </div>
-
-    <div class="field">
-      <label>Guide language</label>
-      <select id="language">
-        <option value="English">English</option>
-        <option value="French">French</option>
-        <option value="Spanish">Spanish</option>
-        <option value="Portuguese">Portuguese</option>
-        <option value="Polish">Polish</option>
-        <option value="Arabic">Arabic</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="field" id="languageOtherField" style="display:none;">
-      <label>Please specify</label>
-      <input type="text" id="languageOther" placeholder="e.g. Italian">
     </div>
 
     <div class="section-divider">Daily routine</div>
@@ -275,9 +333,20 @@ const KID_IDENTITIES = [
 ];
 function getKidIdentity(idx) { return KID_IDENTITIES[idx % KID_IDENTITIES.length]; }
 
+const ENGLISH_LABELS = {
+  schedule: "Today's Schedule",
+  bedtime: 'Bedtime Sequence',
+  important: 'Important',
+  comfort: 'Comfort & Personality',
+  contacts: 'Contacts',
+  allChildren: 'All children',
+  types: { Bedtime: 'Bedtime', Nap: 'Nap', 'Milk/Feed': 'Milk/Feed', Lunch: 'Lunch', Snack: 'Snack' }
+};
+
 let childCount = 0;
 let routineCount = 0;
 let contactCount = 0;
+let selectedMode = null;
 
 function getChildOptionsHTML(selectedValue) {
   const names = Array.from(document.querySelectorAll('.c-name')).map((inp, i) => inp.value.trim() || `Child ${i + 1}`);
@@ -451,6 +520,13 @@ function childBlockHTML(idx) {
         <button type="button" class="remove-child-btn" onclick="removeChild(${idx})">Remove</button>
       </div>
 
+      <div class="field">
+        <label>Personalize <span class="hint">(optional — pick a color and emoji, or leave for an automatic one)</span></label>
+        <div class="swatch-row">${KID_IDENTITIES.map((k, ci) => `<button type="button" class="swatch-btn" data-idx="${ci}" style="background:${k.color};" onclick="selectSwatch(${idx}, ${ci})"></button>`).join('')}</div>
+        <input type="hidden" class="c-color-idx" value="-1">
+        <input type="text" class="c-emoji" placeholder="e.g. 🦁 (leave blank for automatic)" style="max-width:160px;">
+      </div>
+
       <div class="age-row">
         <div class="field">
           <label>Name</label>
@@ -541,6 +617,22 @@ function childBlockHTML(idx) {
   `;
 }
 
+function selectSwatch(childIdx, colorIdx) {
+  const card = document.querySelector(`.child-card[data-child="${childIdx}"]`);
+  if (!card) return;
+  card.querySelector('.c-color-idx').value = colorIdx;
+  card.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('selected'));
+  const btn = card.querySelector(`.swatch-btn[data-idx="${colorIdx}"]`);
+  if (btn) btn.classList.add('selected');
+}
+
+function resolveKidIdentity(child, idx) {
+  const base = (child.colorIdx !== undefined && child.colorIdx !== null && child.colorIdx >= 0 && KID_IDENTITIES[child.colorIdx])
+    ? KID_IDENTITIES[child.colorIdx] : getKidIdentity(idx);
+  const emoji = child.emoji ? child.emoji : base.emoji;
+  return { color: base.color, dim: base.dim, emoji };
+}
+
 function isYoungChild(card) {
   const unit = card.querySelector('.c-age-unit').value;
   const raw = card.querySelector('.c-age-value').value;
@@ -596,6 +688,8 @@ function collectChildren() {
     const young = isYoungChild(b);
     return {
       name: b.querySelector('.c-name').value.trim(),
+      colorIdx: parseInt(b.querySelector('.c-color-idx').value, 10),
+      emoji: b.querySelector('.c-emoji').value.trim(),
       age: b.querySelector('.c-age-value').value.trim() + ' ' + b.querySelector('.c-age-unit').value,
       allergens: allergens.join(', '),
       allergyNotes: b.querySelector('.c-allergy-notes').value.trim(),
@@ -617,6 +711,10 @@ function applyChildData(idx, data) {
   const b = document.querySelector(`.child-card[data-child="${idx}"]`);
   if (!b || !data) return;
   if (data.name) b.querySelector('.c-name').value = data.name;
+  if (data.colorIdx !== undefined && data.colorIdx !== null && data.colorIdx >= 0) {
+    selectSwatch(idx, data.colorIdx);
+  }
+  if (data.emoji) b.querySelector('.c-emoji').value = data.emoji;
   if (data.age) {
     const parts = data.age.split(' ');
     b.querySelector('.c-age-value').value = parts[0] || '';
@@ -641,13 +739,45 @@ function applyChildData(idx, data) {
   if (data.behaviour) b.querySelector('.c-behaviour').value = data.behaviour;
 }
 
+document.querySelectorAll('.mode-card').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMode = btn.dataset.mode;
+    document.getElementById('continueToFormBtn').disabled = false;
+  });
+});
+
+document.getElementById('modeLanguage').addEventListener('change', e => {
+  document.getElementById('modeLanguageOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
+});
+
+document.getElementById('continueToFormBtn').addEventListener('click', () => {
+  document.getElementById('modeView').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+});
+
+document.getElementById('backToModeBtn').addEventListener('click', () => {
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('modeView').style.display = 'block';
+});
+
+function setPrintOrientation(mode) {
+  let styleEl = document.getElementById('dynamicPageStyle');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynamicPageStyle';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = mode === 'landscape'
+    ? '@media print { @page { size: A4 landscape; margin: 12mm; } }'
+    : '@media print { @page { size: A4; margin: 14mm; } }';
+}
+
 document.getElementById('addChildBtn').addEventListener('click', () => addChild());
 
 document.getElementById('caregiverRelationship').addEventListener('change', e => {
   document.getElementById('relationshipOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
-});
-document.getElementById('language').addEventListener('change', e => {
-  document.getElementById('languageOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
 });
 document.getElementById('accessCode').addEventListener('input', e => {
   const btn = document.getElementById('generateBtn');
@@ -674,12 +804,21 @@ async function loadSavedEntry() {
       if (data.caregiverName) document.getElementById('caregiverName').value = data.caregiverName;
       if (data.caregiverRelationship) document.getElementById('caregiverRelationship').value = data.caregiverRelationship;
       if (data.caregiverRelationshipOther) document.getElementById('caregiverRelationshipOther').value = data.caregiverRelationshipOther;
-      if (data.language) document.getElementById('language').value = data.language;
-      if (data.languageOther) document.getElementById('languageOther').value = data.languageOther;
+      if (data.languageSelect) document.getElementById('modeLanguage').value = data.languageSelect;
+      if (data.languageOther) document.getElementById('modeLanguageOther').value = data.languageOther;
       if (data.extra) document.getElementById('extra').value = data.extra;
       if (data.signOff) document.getElementById('signOff').value = data.signOff;
+      if (data.mode) {
+        selectedMode = data.mode;
+        const modeBtn = document.querySelector(`.mode-card[data-mode="${data.mode}"]`);
+        if (modeBtn) {
+          document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+          modeBtn.classList.add('selected');
+        }
+        document.getElementById('continueToFormBtn').disabled = false;
+      }
       document.getElementById('caregiverRelationship').dispatchEvent(new Event('change'));
-      document.getElementById('language').dispatchEvent(new Event('change'));
+      document.getElementById('modeLanguage').dispatchEvent(new Event('change'));
       return;
     }
   } catch (e) { /* no saved entry yet */ }
@@ -733,9 +872,33 @@ function groupByTime(items) {
   return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-function renderGuide(aiData, children, formData) {
+function attachTranslatedNotes(routineItems, aiData) {
+  const schedule = routineItems.filter(r => r.type !== 'Bedtime');
+  const bedtime = routineItems.filter(r => r.type === 'Bedtime');
+  const schedT = Array.isArray(aiData.translatedRoutineNotes) && aiData.translatedRoutineNotes.length === schedule.length
+    ? aiData.translatedRoutineNotes : null;
+  const bedT = Array.isArray(aiData.translatedBedtimeNotes) && aiData.translatedBedtimeNotes.length === bedtime.length
+    ? aiData.translatedBedtimeNotes : null;
+  let si = 0, bi = 0;
+  return routineItems.map(item => {
+    if (item.type === 'Bedtime') {
+      const note = bedT ? bedT[bi] : item.notes;
+      bi++;
+      return { ...item, displayNote: note };
+    } else {
+      const note = schedT ? schedT[si] : item.notes;
+      si++;
+      return { ...item, displayNote: note };
+    }
+  });
+}
+
+function renderGuideIndepth(aiData, children, formData) {
   const kidIdentity = {};
-  children.forEach((c, i) => { kidIdentity[c.name] = getKidIdentity(i); });
+  children.forEach((c, i) => { kidIdentity[c.name] = resolveKidIdentity(c, i); });
+
+  const labels = (aiData.labels && aiData.labels.schedule) ? aiData.labels : ENGLISH_LABELS;
+  const typeLabels = labels.types || ENGLISH_LABELS.types;
 
   function kidTag(name) {
     const id = kidIdentity[name];
@@ -747,10 +910,17 @@ function renderGuide(aiData, children, formData) {
   const scheduleItems = routineItems.filter(r => r.type !== 'Bedtime');
   const bedtimeItems = routineItems.filter(r => r.type === 'Bedtime').sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
 
+  // Translated notes are positional arrays matching scheduleItems/bedtimeItems/importantLines order.
+  // Fall back to raw text if missing or length mismatch, so a translation hiccup never breaks rendering.
+  const schedNotesT = Array.isArray(aiData.translatedRoutineNotes) && aiData.translatedRoutineNotes.length === scheduleItems.length
+    ? aiData.translatedRoutineNotes : null;
+  const bedNotesT = Array.isArray(aiData.translatedBedtimeNotes) && aiData.translatedBedtimeNotes.length === bedtimeItems.length
+    ? aiData.translatedBedtimeNotes : null;
+
   let html = '';
 
   // Header
-  const headerEmojis = children.map((c, i) => getKidIdentity(i).emoji).join(' ');
+  const headerEmojis = children.map((c, i) => resolveKidIdentity(c, i).emoji).join(' ');
   const headerNames = children.map(c => c.name).filter(Boolean).join(' & ');
   html += `<div class="header-band">
     <div class="header-emojis">${headerEmojis}</div>
@@ -763,16 +933,17 @@ function renderGuide(aiData, children, formData) {
 
   // Schedule
   if (scheduleItems.length) {
-    html += `<div class="section-eyebrow">⏰ Today's Schedule</div>`;
-    const groups = groupByTime(scheduleItems);
+    html += `<div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
+    const indexed = scheduleItems.map((item, i) => ({ item, note: schedNotesT ? schedNotesT[i] : item.notes }));
+    const groups = groupByTime(indexed.map(x => ({ ...x.item, notes: x.note })));
     groups.forEach(([time, items]) => {
       const timeLabel = time === 'unspecified' ? 'Time not set' : formatTime12hr(time);
-      const title = items[0].type;
+      const title = typeLabels[items[0].type] || items[0].type;
       html += `<div class="sched-entry">
         <div class="sched-head"><span class="sched-time">${timeLabel}</span><span class="sched-title">${title}</span></div>
         <div class="sched-body">`;
       items.forEach(item => {
-        const who = item.child === 'all' ? 'All children' : item.child;
+        const who = item.child === 'all' ? labels.allChildren : item.child;
         const tag = item.child === 'all' ? `<span class="kid-tag" style="background:var(--sage);">${who}</span>` : kidTag(item.child);
         const note = item.notes ? parseInlineBold(item.notes) : '';
         html += `<div class="sched-row">${tag} ${note ? '— ' + note : ''}</div>`;
@@ -783,12 +954,13 @@ function renderGuide(aiData, children, formData) {
 
   // Bedtime sequence
   if (bedtimeItems.length) {
-    html += `<div class="section-eyebrow">🌙 Bedtime Sequence</div>`;
-    bedtimeItems.forEach(item => {
+    html += `<div class="section-eyebrow">🌙 ${labels.bedtime}</div>`;
+    bedtimeItems.forEach((item, i) => {
       const id = item.child === 'all' || item.child === 'unspecified' ? null : kidIdentity[item.child];
       const avatarBg = id ? id.color : 'var(--sage)';
       const avatarText = id ? id.emoji : '✓';
-      const text = item.notes ? parseInlineBold(item.notes) : (item.child === 'all' ? 'Bedtime' : `${item.child}'s bedtime`);
+      const noteText = bedNotesT ? bedNotesT[i] : item.notes;
+      const text = noteText ? parseInlineBold(noteText) : (item.child === 'all' ? labels.bedtime : `${item.child}'s bedtime`);
       html += `<div class="bedtime-step">
         <div class="step-avatar" style="background:${avatarBg};">${avatarText}</div>
         <div class="bedtime-text">${text}</div>
@@ -797,18 +969,21 @@ function renderGuide(aiData, children, formData) {
   }
 
   // Important
-  const importantLines = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
-  if (importantLines.length) {
-    html += `<div class="section-eyebrow">⚠ Important</div><div class="important-list">`;
-    importantLines.forEach(line => {
-      html += `<div class="important-item"><span class="ii-icon">${iconForImportantLine(line)}</span><span>${parseInlineBold(line)}</span></div>`;
+  const importantLinesRaw = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const importantT = Array.isArray(aiData.translatedImportant) && aiData.translatedImportant.length === importantLinesRaw.length
+    ? aiData.translatedImportant : null;
+  if (importantLinesRaw.length) {
+    html += `<div class="section-eyebrow">⚠ ${labels.important}</div><div class="important-list">`;
+    importantLinesRaw.forEach((line, i) => {
+      const shown = importantT ? importantT[i] : line;
+      html += `<div class="important-item"><span class="ii-icon">${iconForImportantLine(line)}</span><span>${parseInlineBold(shown)}</span></div>`;
     });
     html += `</div>`;
   }
 
   // Comfort & Personality (per child, from AI)
   if (aiData.childSections && aiData.childSections.length) {
-    html += `<div class="section-eyebrow">💛 Comfort & Personality</div><div class="comfort-grid">`;
+    html += `<div class="section-eyebrow">💛 ${labels.comfort}</div><div class="comfort-grid">`;
     aiData.childSections.forEach(cs => {
       const id = kidIdentity[cs.childName] || getKidIdentity(0);
       html += `<div class="comfort-card" style="background:${id.dim};">
@@ -838,7 +1013,7 @@ function renderGuide(aiData, children, formData) {
   // Contacts
   const contacts = formData.contacts || [];
   if (contacts.length) {
-    html += `<div class="section-eyebrow">📞 Contacts</div><div class="contacts-grid">`;
+    html += `<div class="section-eyebrow">📞 ${labels.contacts}</div><div class="contacts-grid">`;
     contacts.forEach(c => {
       html += `<div class="contact-card"><div class="contact-name">${c.name || 'Contact'}</div><div class="contact-line">${c.phone || ''}</div></div>`;
     });
@@ -854,7 +1029,78 @@ function renderGuide(aiData, children, formData) {
   document.getElementById('guideContent').innerHTML = html;
 }
 
+function renderGuideLandscape(aiData, children, formData) {
+  const kidIdentity = {};
+  children.forEach((c, i) => { kidIdentity[c.name] = resolveKidIdentity(c, i); });
+  const labels = (aiData.labels && aiData.labels.schedule) ? aiData.labels : ENGLISH_LABELS;
+  const typeLabels = labels.types || ENGLISH_LABELS.types;
+
+  const itemsWithNotes = attachTranslatedNotes(formData.routineItems || [], aiData);
+  const sorted = [...itemsWithNotes].sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+
+  const importantLinesRaw = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const importantT = Array.isArray(aiData.translatedImportant) && aiData.translatedImportant.length === importantLinesRaw.length
+    ? aiData.translatedImportant : null;
+
+  const numCols = children.length >= 2 ? 3 : 2;
+  const colsClass = numCols === 3 ? 'cols-3' : 'cols-2';
+
+  let html = `<div class="lg-pad">`;
+  html += `<div class="header-names" style="font-size:1.3rem; margin-bottom:2px;">${children.map(c => c.name).filter(Boolean).join(' & ')}</div>`;
+  html += `<div class="header-sub" style="margin-bottom:4px;">Guide for ${formData.caregiverName}</div>`;
+  if (aiData.intro) html += `<div class="header-note" style="font-size:0.82rem; max-width:none; margin:0 0 14px;">${aiData.intro}</div>`;
+
+  if (importantLinesRaw.length) {
+    html += `<div class="lg-important">`;
+    importantLinesRaw.forEach((line, i) => {
+      const shown = importantT ? importantT[i] : line;
+      html += `<div class="lg-important-item">${iconForImportantLine(line)} ${parseInlineBold(shown)}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="lg-grid ${colsClass}">`;
+
+  html += `<div><div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
+  sorted.forEach(item => {
+    const timeLabel = item.time ? formatTime12hr(item.time) : '—';
+    const title = typeLabels[item.type] || item.type;
+    const who = item.child === 'all' ? '' : item.child;
+    const id = who ? kidIdentity[who] : null;
+    const tag = id ? `<span class="kid-tag" style="background:${id.color}; font-size:0.62rem; padding:1px 7px;">${id.emoji} ${who}</span>` : '';
+    const note = item.displayNote ? parseInlineBold(item.displayNote) : '';
+    html += `<div class="lg-sched-entry"><span class="lg-time">${timeLabel}</span>${tag}<span>${title}</span>${note ? `<span class="lg-note">${note}</span>` : ''}</div>`;
+  });
+  html += `</div>`;
+
+  children.forEach(c => {
+    const id = kidIdentity[c.name];
+    const cs = (aiData.childSections || []).find(x => x.childName === c.name);
+    const comfortShort = cs && cs.comfort ? cs.comfort.split(/(?<=[.!?])\s+/).slice(0, 2).join(' ') : '';
+    html += `<div class="lg-kid-col">
+      <div class="lg-kid-head" style="color:${id.color}; border-color:${id.color};">${id.emoji} ${c.name}${c.age ? ', ' + c.age.split(' ')[0] : ''}</div>`;
+    if (comfortShort) html += `<div class="lg-mini"><div class="lg-mini-label">${labels.comfort}</div><p>${parseInlineBold(comfortShort)}</p></div>`;
+    const allergyText = [c.allergens, c.allergyNotes].filter(Boolean).join(' — ');
+    if (allergyText) html += `<div class="lg-mini"><div class="lg-mini-label">Allergies</div><p>${allergyText}</p></div>`;
+    if (c.independence) html += `<div class="lg-mini"><div class="lg-mini-label">Screen time</div><p>${c.independence}</p></div>`;
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+
+  if ((formData.contacts || []).length) {
+    html += `<div class="lg-contacts">${labels.contacts}: ${formData.contacts.map(c => `${c.name} ${c.phone}`).join(' · ')}</div>`;
+  }
+
+  html += `<div class="guide-footer" style="margin-top:14px;">Made with <strong>MML</strong> — my mental load</div>`;
+  html += `</div>`;
+  document.getElementById('guideContent').innerHTML = html;
+}
+
 function validateAndBuildFormData() {
+  if (!selectedMode) {
+    return { valid: false, error: 'Please go back and choose a format first.' };
+  }
   const children = collectChildren();
   if (!children.length || !children[0].name) {
     return { valid: false, error: 'Please fill in at least one child\'s name.' };
@@ -862,8 +1108,8 @@ function validateAndBuildFormData() {
 
   const relSelect = document.getElementById('caregiverRelationship').value;
   const relationship = relSelect === 'other' ? document.getElementById('caregiverRelationshipOther').value.trim() : relSelect;
-  const langSelect = document.getElementById('language').value;
-  const language = langSelect === 'other' ? document.getElementById('languageOther').value.trim() : langSelect;
+  const langSelect = document.getElementById('modeLanguage').value;
+  const language = langSelect === 'other' ? document.getElementById('modeLanguageOther').value.trim() : langSelect;
 
   const formData = {
     children,
@@ -873,8 +1119,9 @@ function validateAndBuildFormData() {
     caregiverName: document.getElementById('caregiverName').value.trim(),
     caregiverRelationship: relSelect,
     caregiverRelationshipOther: document.getElementById('caregiverRelationshipOther').value.trim(),
-    language: langSelect,
-    languageOther: document.getElementById('languageOther').value.trim(),
+    mode: selectedMode,
+    languageSelect: langSelect,
+    languageOther: document.getElementById('modeLanguageOther').value.trim(),
     extra: document.getElementById('extra').value.trim(),
     signOff: document.getElementById('signOff').value.trim()
   };
@@ -894,6 +1141,7 @@ async function performGeneration(authPayload) {
 
   await saveEntry(formData);
 
+  document.getElementById('modeView').style.display = 'none';
   document.getElementById('formView').style.display = 'none';
   document.getElementById('loadingText').textContent = 'Writing the guide…';
   document.getElementById('loadingView').style.display = 'block';
@@ -920,13 +1168,29 @@ async function performGeneration(authPayload) {
 
   const childNamesList = children.map(c => c.name).join(', ');
 
+  const needsTranslation = !!language && language !== 'English';
+  const scheduleItemsForTranslation = (formData.routineItems || []).filter(r => r.type !== 'Bedtime');
+  const bedtimeItemsForTranslation = (formData.routineItems || []).filter(r => r.type === 'Bedtime');
+  const importantLinesForTranslation = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
+
+  let translationBlock = '';
+  if (needsTranslation) {
+    translationBlock = `
+
+TRANSLATION REQUEST — the caregiver reads ${language}, not English. Translate these exact items and return them in the JSON fields described below, preserving order and count exactly:
+Important note lines (${importantLinesForTranslation.length} total): ${JSON.stringify(importantLinesForTranslation)}
+Schedule item notes (${scheduleItemsForTranslation.length} total, in order, empty string if none): ${JSON.stringify(scheduleItemsForTranslation.map(i => i.notes || ''))}
+Bedtime item notes (${bedtimeItemsForTranslation.length} total, in order, empty string if none): ${JSON.stringify(bedtimeItemsForTranslation.map(i => i.notes || ''))}
+Also translate these fixed UI labels into ${language}: "Today's Schedule", "Bedtime Sequence", "Important", "Comfort & Personality", "Contacts", "All children", and the routine type words "Bedtime", "Nap", "Milk/Feed", "Lunch", "Snack".`;
+  }
+
   const userPrompt = `Children: ${childNamesList}
 
 ${childrenText}
 
 Guide is for: ${formData.caregiverName} (${relationship})
 Language to write the guide in: ${language || 'English'}
-Special instructions: ${formData.extra}`;
+Special instructions: ${formData.extra}${translationBlock}`;
 
   try {
     const response = await fetch("/api/generate", {
@@ -934,15 +1198,21 @@ Special instructions: ${formData.extra}`;
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...authPayload,
-        max_tokens: 1800,
-        system: `You write warm, personal childcare reference guides for caregivers (nannies, grandparents, family members). Respond ONLY with valid JSON, no preamble, no markdown code fences, in exactly this shape:
-{"intro": "string", "childSections": [{"childName": "string", "comfort": "string"}], "sections": [{"label": "string", "content": "string"}]}
+        max_tokens: 2200,
+        system: `You write warm but economical childcare reference guides for caregivers (nannies, grandparents, family members). A grandparent skimming this in 30 seconds should get every fact that matters. Respond ONLY with valid JSON, no preamble, no markdown code fences, in exactly this shape:
+{"intro": "string", "childSections": [{"childName": "string", "comfort": "string"}], "sections": [{"label": "string", "content": "string"}], "labels": {"schedule": "string", "bedtime": "string", "important": "string", "comfort": "string", "contacts": "string", "allChildren": "string", "types": {"Bedtime": "string", "Nap": "string", "Milk/Feed": "string", "Lunch": "string", "Snack": "string"}}, "translatedImportant": ["string"], "translatedRoutineNotes": ["string"], "translatedBedtimeNotes": ["string"]}
 
-"intro": 1-2 warm sentences addressed directly to the caregiver, naming all children, written like a short personal note (e.g. "We'll be back by 7pm — thank you so much for this").
+STYLE — this is the most important instruction: be direct and economical. Every sentence must carry a real fact or instruction. No generic warmth, no padding adjectives, no exclamation marks, no sentences that could apply to any child. Short is good. A single accurate sentence beats three pleasant-sounding ones.
 
-"childSections": one entry per child, "comfort" should be 2-4 full warm sentences (not terse bullets) covering their personality, comfort items, and what helps if they're upset, written as flowing prose. Bold the single most important fact per child using **double asterisks**.
+"intro": one short sentence addressed to the caregiver, naming the children. Practical, not flowery.
 
-"sections": cover Food & Allergies, Independence & Screen Time, and Anything Else — only include a section if there's real content for at least one child. Write full sentences, not clipped fragments. For any allergy, explain it as a short "can have / avoid" breakdown using this exact format on two separate lines within the content: "✅ Fine: [examples]" then "✅ Avoid: [examples]" — only do this if there's enough information to say something concrete, otherwise just describe the allergy plainly. Bold genuinely critical facts (quantities, timing, safety details) using **double asterisks** — don't overuse it, 1-2 bolded phrases per section is plenty. If there's more than one child, name them clearly within sections rather than merging differing needs together. Do NOT include a Daily Routine or Emergency Info section — those are handled separately. Write the entire response, including all labels, fully translated into the requested language if it isn't English.`,
+"childSections": one entry per child, "comfort" is 1-3 short sentences — personality, comfort items, what helps if upset. Only real, specific facts. Bold the single most important fact per child using **double asterisks**.
+
+"sections": cover Food & Allergies, Independence & Screen Time, and Anything Else — only include a section if there's real content. Short, direct sentences. For any allergy, use this exact two-line format if there's enough detail: "✅ Fine: [examples]" then "✅ Avoid: [examples]" — otherwise describe it plainly in one sentence. Bold genuinely critical facts (quantities, timing, safety) using **double asterisks**, 1-2 per section maximum. Name children clearly if there's more than one — never merge differing needs into one vague sentence. Do NOT include a Daily Routine or Emergency Info section — those are handled separately.
+
+LANGUAGE: if the requested language isn't English, write the entire response — intro, all sections, all labels — fully in that language, not just labeled in it.
+
+TRANSLATION FIELDS: only include "labels", "translatedImportant", "translatedRoutineNotes", and "translatedBedtimeNotes" if the user message contains a "TRANSLATION REQUEST" block. When it does: translate each listed item faithfully and return arrays in the exact same order and count as given — this is critical, a missing or extra item breaks the layout. If there's no translation request (language is English), omit these four fields entirely.`,
         messages: [{ role: "user", content: userPrompt }]
       })
     });
@@ -969,7 +1239,12 @@ Special instructions: ${formData.extra}`;
       else throw new Error('Could not parse guide content: ' + parseErr.message);
     }
 
-    renderGuide(parsed, children, formData);
+    setPrintOrientation(formData.mode);
+    if (formData.mode === 'landscape') {
+      renderGuideLandscape(parsed, children, formData);
+    } else {
+      renderGuideIndepth(parsed, children, formData);
+    }
     document.getElementById('loadingView').style.display = 'none';
     document.getElementById('guideView').style.display = 'block';
 
