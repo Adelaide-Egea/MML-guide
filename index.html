@@ -3,215 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Family Guide Generator</title>
+<title>My Mental Load</title>
+<meta name="theme-color" content="#7C9473">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Mental Load">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Fraunces:ital,wght@1,500;1,600&family=Inter:wght@400;500;600;700&display=swap');
-
   :root {
-    --paper: #F8F6FA;
-    --ink: #322C42;
-    --ink-soft: #756E87;
-    --sage: #7C9473;
-    --sage-dim: #E7EEE4;
-    --navy: #2E4F6E;
-    --line: #E4DFEC;
-    --card: #FFFFFF;
+    --paper:#F8F6FA;--ink:#322C42;--ink-soft:#756E87;--sage:#7C9473;--sage-dim:#E7EEE4;
+    --navy:#2E4F6E;--line:#E4DFEC;--card:#FFFFFF;--warning:#C25E00;--warning-dim:#FFF4EA;
   }
-
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    padding: 24px 16px 60px;
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding:24px 16px 60px;}
+  .wrap{max-width:680px;margin:0 auto;}
+  .brand-mark{display:flex;align-items:baseline;gap:7px;margin-bottom:6px;}
+  .brand-mark .mml{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.02rem;color:var(--sage);}
+  .brand-mark .tagline{font-size:0.64rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--navy);}
+  h1{font-family:'Outfit',sans-serif;font-weight:700;font-size:1.5rem;margin:0 0 4px;letter-spacing:-0.01em;}
+  .subtitle{color:var(--ink-soft);font-size:0.92rem;margin:0 0 24px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:0.82rem;font-weight:700;margin-bottom:5px;color:var(--ink);}
+  .field .hint{font-weight:400;color:var(--ink-soft);font-size:0.78rem;}
+  .field input,.field textarea,.field select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:0.95rem;background:var(--card);color:var(--ink);resize:vertical;}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--sage);}
+  .field textarea{min-height:60px;}
+  .field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);background-position:calc(100% - 18px) center,calc(100% - 13px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:32px;}
+  .section-divider{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--sage);font-weight:700;margin:26px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  .section-divider:first-of-type{margin-top:4px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  @media(max-width:480px){.row2,.row3{grid-template-columns:1fr;}}
+  .child-card{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px;}
+  .child-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .child-card-head .child-label{font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;color:var(--sage);}
+  .remove-child-btn{background:none;border:none;color:var(--navy);font-size:0.8rem;font-weight:700;cursor:pointer;padding:4px 8px;}
+  .age-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;}
+  .chip{position:relative;}
+  .chip input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0;}
+  .chip span{display:inline-block;padding:7px 13px;border:1.5px solid var(--line);border-radius:20px;font-size:0.84rem;font-weight:600;color:var(--ink-soft);background:var(--paper);transition:all 0.15s ease;}
+  .chip input:checked+span{background:var(--sage);border-color:var(--sage);color:white;}
+  .swatch-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .swatch-btn{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;}
+  .swatch-btn.selected{border-color:var(--ink);box-shadow:0 0 0 2px white inset;}
+  /* MODE + DURATION CARDS */
+  .mode-options{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+  .mode-card,.duration-card{text-align:left;border:1.5px solid var(--line);border-radius:12px;padding:16px;background:var(--card);cursor:pointer;font-family:inherit;width:100%;}
+  .mode-card.selected,.duration-card.selected{border-color:var(--sage);background:var(--sage-dim);}
+  .mode-card-title,.duration-card-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;margin-bottom:4px;color:var(--ink);}
+  .mode-card-desc,.duration-card-desc{font-size:0.85rem;color:var(--ink-soft);line-height:1.4;}
+  .duration-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+  .back-link{background:none;border:none;color:var(--ink-soft);font-size:0.82rem;cursor:pointer;padding:0;margin-bottom:16px;text-decoration:underline;}
+  /* QUICK CHIPS */
+  .quick-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .quick-chip{padding:7px 12px;border:1.5px solid var(--sage);border-radius:20px;font-size:0.82rem;font-weight:600;color:var(--sage);background:var(--sage-dim);cursor:pointer;font-family:inherit;}
+  .quick-chip:hover{background:var(--sage);color:white;}
+  /* UNIT TOGGLE (ml/oz) */
+  .amount-row{display:flex;gap:8px;align-items:center;}
+  .amount-row input[type=number]{flex:1;}
+  .unit-toggle{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;flex-shrink:0;}
+  .unit-btn{padding:8px 12px;border:none;background:var(--paper);font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;color:var(--ink-soft);}
+  .unit-btn.active{background:var(--sage);color:white;}
+  /* IMPORTANT warning style */
+  .important-divider{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;font-weight:700;margin:26px 0 8px;padding:10px 14px;border-radius:8px;background:var(--warning-dim);color:var(--warning);border:1.5px solid #E8A56B;}
+  /* Voice input */
+  .textarea-wrap{position:relative;}
+  .voice-btn{position:absolute;bottom:8px;right:8px;background:none;border:none;cursor:pointer;font-size:1.15rem;padding:4px;opacity:0.7;}
+  .voice-btn:hover{opacity:1;}
+  .voice-btn.recording{animation:pulse 1s infinite;}
+  .voice-gate-badge{font-size:0.68rem;font-weight:700;color:var(--navy);background:#EAF0F7;border:1px solid #B8D0E8;border-radius:10px;padding:1px 7px;margin-left:4px;vertical-align:middle;}
+  @keyframes pulse{0%,100%{opacity:0.7;}50%{opacity:1;color:red;}}
+  /* LANDSCAPE OUTPUT */
+  .lg-pad{padding:20px 22px;}
+  .lg-grid{display:grid;gap:16px;}
+  .lg-grid.cols-2{grid-template-columns:1.3fr 1fr;}
+  .lg-grid.cols-3{grid-template-columns:1.1fr 1fr 1fr;}
+  @media(max-width:700px){.lg-grid{grid-template-columns:1fr!important;}}
+  .lg-sched-entry{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;padding:5px 0;border-bottom:1px dashed var(--line);font-size:0.82rem;}
+  .lg-sched-entry:last-child{border-bottom:none;}
+  .lg-time{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.76rem;min-width:56px;}
+  .lg-note{color:var(--ink-soft);font-size:0.72rem;flex-basis:100%;margin-top:-1px;}
+  .lg-kid-col{border:1px solid var(--line);border-radius:12px;padding:13px;}
+  .lg-kid-head{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.88rem;margin-bottom:9px;padding-bottom:7px;border-bottom:2px solid;}
+  .lg-mini{margin-bottom:8px;}
+  .lg-mini:last-child{margin-bottom:0;}
+  .lg-mini-label{font-size:0.74rem;font-weight:700;margin-bottom:2px;}
+  .lg-mini p{margin:0;font-size:0.78rem;line-height:1.4;}
+  .lg-important{border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:0.8rem;background:var(--warning-dim);border:1px solid #E8A56B;}
+  .lg-important-item{margin-bottom:5px;}
+  .lg-important-item:last-child{margin-bottom:0;}
+  .lg-contacts{font-size:0.78rem;color:var(--ink-soft);margin-top:12px;}
+  @media print{
+    .lg-grid.cols-2{grid-template-columns:1.3fr 1fr!important;}
+    .lg-grid.cols-3{grid-template-columns:1.1fr 1fr 1fr!important;}
+    .lg-kid-col{break-inside:avoid;}
   }
-  .wrap { max-width: 680px; margin: 0 auto; }
-
-  .brand-mark { display: flex; align-items: baseline; gap: 7px; margin-bottom: 6px; }
-  .brand-mark .mml { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.02rem; color: var(--sage); }
-  .brand-mark .tagline { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); }
-
-  h1 { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em; }
-  .subtitle { color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 24px; }
-
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 5px; color: var(--ink); }
-  .field .hint { font-weight: 400; color: var(--ink-soft); font-size: 0.78rem; }
-  .field input, .field textarea, .field select {
-    width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 8px;
-    font-family: inherit; font-size: 0.95rem; background: var(--card); color: var(--ink); resize: vertical;
-  }
-  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--sage); }
-  .field textarea { min-height: 60px; }
-  .field select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%); background-position: calc(100% - 18px) center, calc(100% - 13px) center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
-
-  .section-divider { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sage); font-weight: 700; margin: 26px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
-  .section-divider:first-of-type { margin-top: 4px; }
-
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 480px) { .row2, .row3 { grid-template-columns: 1fr; } }
-
-  .child-card { background: var(--card); border: 1.5px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
-  .child-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .child-card-head .child-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; color: var(--sage); }
-  .remove-child-btn { background: none; border: none; color: var(--navy); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 4px 8px; }
-
-  .age-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-  .chip { position: relative; }
-  .chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
-  .chip span { display: inline-block; padding: 7px 13px; border: 1.5px solid var(--line); border-radius: 20px; font-size: 0.84rem; font-weight: 600; color: var(--ink-soft); background: var(--paper); transition: all 0.15s ease; }
-  .chip input:checked + span { background: var(--sage); border-color: var(--sage); color: white; }
-
-  .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-  .swatch-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
-  .swatch-btn.selected { border-color: var(--ink); box-shadow: 0 0 0 2px white inset; }
-
-  .mode-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
-  .mode-card { text-align: left; border: 1.5px solid var(--line); border-radius: 12px; padding: 16px; background: var(--card); cursor: pointer; font-family: inherit; width: 100%; }
-  .mode-card.selected { border-color: var(--sage); background: var(--sage-dim); }
-  .mode-card-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 4px; color: var(--ink); }
-  .mode-card-desc { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.4; }
-  .back-link { background: none; border: none; color: var(--ink-soft); font-size: 0.82rem; cursor: pointer; padding: 0; margin-bottom: 16px; text-decoration: underline; }
-
-  /* --- Landscape (short) output --- */
-  .lg-pad { padding: 20px 22px; }
-  .lg-grid { display: grid; gap: 16px; }
-  .lg-grid.cols-2 { grid-template-columns: 1.3fr 1fr; }
-  .lg-grid.cols-3 { grid-template-columns: 1.1fr 1fr 1fr; }
-  @media (max-width: 700px) { .lg-grid { grid-template-columns: 1fr !important; } }
-  .lg-sched-entry { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; padding: 5px 0; border-bottom: 1px dashed var(--line); font-size: 0.82rem; }
-  .lg-sched-entry:last-child { border-bottom: none; }
-  .lg-time { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.76rem; min-width: 56px; }
-  .lg-note { color: var(--ink-soft); font-size: 0.72rem; flex-basis: 100%; margin-top: -1px; }
-  .lg-kid-col { border: 1px solid var(--line); border-radius: 12px; padding: 13px; }
-  .lg-kid-head { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 2px solid; }
-  .lg-mini { margin-bottom: 8px; }
-  .lg-mini:last-child { margin-bottom: 0; }
-  .lg-mini-label { font-size: 0.74rem; font-weight: 700; margin-bottom: 2px; }
-  .lg-mini p { margin: 0; font-size: 0.78rem; line-height: 1.4; }
-  .lg-important { background: var(--sage-dim); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 0.8rem; }
-  .lg-important-item { margin-bottom: 5px; }
-  .lg-important-item:last-child { margin-bottom: 0; }
-  .lg-contacts { font-size: 0.78rem; color: var(--ink-soft); margin-top: 12px; }
-  @media print {
-    .lg-grid.cols-2 { grid-template-columns: 1.3fr 1fr !important; }
-    .lg-grid.cols-3 { grid-template-columns: 1.1fr 1fr 1fr !important; }
-    .lg-kid-col { break-inside: avoid; }
-  }
-
-  button.add-child-btn { width: 100%; padding: 12px; background: var(--sage-dim); color: var(--sage); border: 1.5px dashed var(--sage); border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; margin-bottom: 4px; }
-  button.primary { width: 100%; padding: 14px; background: var(--sage); color: white; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 8px; }
-  button.primary:active { opacity: 0.85; }
-  button.primary:disabled { background: var(--ink-soft); cursor: not-allowed; }
-  button.secondary { width: 100%; padding: 12px; background: none; border: 1.5px solid var(--line); border-radius: 9px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--ink); cursor: pointer; margin-top: 10px; }
-
-  .error-box { background: #F5E6E9; color: #8E3F4F; padding: 12px 14px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 16px; }
-
-  .loading { text-align: center; padding: 40px 0; color: var(--ink-soft); }
-  .spinner { width: 28px; height: 28px; border: 3px solid var(--sage-dim); border-top-color: var(--sage); border-radius: 50%; margin: 0 auto 12px; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* --- Guide output --- */
-  .guide { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  .header-band { padding: 26px 26px 20px; text-align: center; }
-  .header-emojis { font-size: 1.1rem; margin-bottom: 6px; opacity: 0.85; }
-  .header-names { font-family: 'Fraunces', serif; font-style: italic; font-weight: 600; font-size: 1.9rem; color: var(--ink); margin: 0 0 6px; }
-  .header-sub { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; }
-  .header-note { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.92rem; color: var(--ink-soft); max-width: 480px; margin: 0 auto; line-height: 1.5; }
-  .guide-body { padding: 22px 24px 26px; }
-
-  .section-eyebrow { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--sage); margin: 26px 0 12px; }
-  .section-eyebrow:first-child { margin-top: 0; }
-
-  .kid-tag { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.84rem; padding: 1px 9px 1px 6px; border-radius: 12px; color: white; white-space: nowrap; }
-
-  .sched-entry { padding: 12px 0; border-bottom: 1px solid var(--line); }
-  .sched-entry:last-child { border-bottom: none; }
-  .sched-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-  .sched-time { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.92rem; color: var(--ink); min-width: 74px; }
-  .sched-title { font-weight: 600; font-size: 0.92rem; }
-  .sched-body { padding-left: 84px; }
-  .sched-row { font-size: 0.87rem; line-height: 1.55; margin-bottom: 4px; }
-  .sched-row:last-child { margin-bottom: 0; }
-  .sched-row strong { color: var(--ink); }
-
-  .bedtime-step { display: flex; gap: 11px; margin-bottom: 11px; align-items: flex-start; }
-  .bedtime-step:last-child { margin-bottom: 0; }
-  .step-avatar { width: 26px; height: 26px; border-radius: 50%; color: white; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .bedtime-text { font-size: 0.87rem; line-height: 1.55; padding-top: 3px; }
-  .bedtime-text strong { color: var(--ink); }
-
-  .important-list { background: var(--sage-dim); border-radius: 12px; padding: 16px 18px; }
-  .important-item { display: flex; gap: 10px; font-size: 0.87rem; line-height: 1.5; margin-bottom: 10px; }
-  .important-item:last-child { margin-bottom: 0; }
-  .important-item .ii-icon { flex-shrink: 0; }
-
-  .comfort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 520px) { .comfort-grid { grid-template-columns: 1fr; } }
-  .comfort-card { border-radius: 12px; padding: 14px; }
-  .comfort-card-head { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 8px; }
-  .comfort-card p { margin: 0; font-size: 0.85rem; line-height: 1.55; }
-  .comfort-card ul { margin: 0; padding-left: 16px; }
-  .comfort-card li { font-size: 0.85rem; line-height: 1.5; margin-bottom: 4px; }
-
-  .plain-section { margin-bottom: 16px; }
-  .plain-section:last-child { margin-bottom: 0; }
-  .plain-section-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.86rem; margin-bottom: 6px; color: var(--ink); }
-  .plain-section p { margin: 0; font-size: 0.88rem; line-height: 1.55; }
-  .plain-section ul { margin: 0; padding-left: 18px; }
-  .plain-section li { font-size: 0.88rem; line-height: 1.5; margin-bottom: 4px; }
-
-  .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 480px) { .contacts-grid { grid-template-columns: 1fr; } }
-  .contact-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  .contact-name { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
-  .contact-line { font-size: 0.85rem; color: var(--ink-soft); }
-
-  .closing-note { margin-top: 26px; text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 0.95rem; color: var(--ink-soft); padding-top: 18px; border-top: 1px solid var(--line); }
-  .closing-note strong { color: var(--sage); font-style: normal; }
-  .guide-footer { margin-top: 14px; text-align: center; font-size: 0.66rem; color: var(--ink-soft); }
-  .guide-footer strong { color: var(--sage); font-family: 'Outfit', sans-serif; }
-
-  .action-row { display: flex; gap: 10px; margin-top: 20px; }
-  .action-row button { flex: 1; }
-
-  @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body { padding: 0; background: white; }
-    .no-print { display: none !important; }
-    .wrap { max-width: none; }
-    .guide { border: none; border-radius: 0; }
-    .sched-entry, .comfort-card, .bedtime-step, .contact-card, .plain-section, .important-list, .header-band { break-inside: avoid; }
-    .section-eyebrow { break-after: avoid; }
-    @page { size: A4; margin: 14mm; }
+  button.add-child-btn{width:100%;padding:12px;background:var(--sage-dim);color:var(--sage);border:1.5px dashed var(--sage);border-radius:9px;font-family:'Inter',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;margin-bottom:4px;}
+  button.primary{width:100%;padding:14px;background:var(--sage);color:white;border:none;border-radius:9px;font-family:'Inter',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px;}
+  button.primary:active{opacity:0.85;}
+  button.primary:disabled{background:var(--ink-soft);cursor:not-allowed;}
+  button.secondary{width:100%;padding:12px;background:none;border:1.5px solid var(--line);border-radius:9px;font-family:'Inter',sans-serif;font-weight:600;font-size:0.9rem;color:var(--ink);cursor:pointer;margin-top:10px;}
+  .error-box{background:#F5E6E9;color:#8E3F4F;padding:12px 14px;border-radius:8px;font-size:0.88rem;margin-bottom:16px;}
+  .loading{text-align:center;padding:40px 0;color:var(--ink-soft);}
+  .spinner{width:28px;height:28px;border:3px solid var(--sage-dim);border-top-color:var(--sage);border-radius:50%;margin:0 auto 12px;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  /* GUIDE OUTPUT */
+  .guide{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .header-band{padding:26px 26px 20px;text-align:center;}
+  .header-emojis{font-size:1.1rem;margin-bottom:6px;opacity:0.85;}
+  .header-names{font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:1.9rem;color:var(--ink);margin:0 0 6px;}
+  .header-sub{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  .header-note{font-family:'Fraunces',serif;font-style:italic;font-size:0.92rem;color:var(--ink-soft);max-width:480px;margin:0 auto;line-height:1.5;}
+  .header-duration{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:20px;background:var(--sage-dim);color:var(--sage);font-family:'Outfit',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.05em;}
+  .guide-body{padding:22px 24px 26px;}
+  .section-eyebrow{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--sage);margin:26px 0 12px;}
+  .section-eyebrow:first-child{margin-top:0;}
+  .kid-tag{display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:0.84rem;padding:1px 9px 1px 6px;border-radius:12px;color:white;white-space:nowrap;}
+  .sched-entry{padding:12px 0;border-bottom:1px solid var(--line);}
+  .sched-entry:last-child{border-bottom:none;}
+  .sched-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+  .sched-time{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.92rem;color:var(--ink);min-width:74px;}
+  .sched-title{font-weight:600;font-size:0.92rem;}
+  .sched-body{padding-left:84px;}
+  .sched-row{font-size:0.87rem;line-height:1.55;margin-bottom:4px;}
+  .sched-row:last-child{margin-bottom:0;}
+  .sched-row strong{color:var(--ink);}
+  .bedtime-step{display:flex;gap:11px;margin-bottom:11px;align-items:flex-start;}
+  .bedtime-step:last-child{margin-bottom:0;}
+  .step-avatar{width:26px;height:26px;border-radius:50%;color:white;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .bedtime-text{font-size:0.87rem;line-height:1.55;padding-top:3px;}
+  .bedtime-text strong{color:var(--ink);}
+  .important-list{background:var(--warning-dim);border:1.5px solid #E8A56B;border-radius:12px;padding:16px 18px;}
+  .important-item{display:flex;gap:10px;font-size:0.87rem;line-height:1.5;margin-bottom:10px;}
+  .important-item:last-child{margin-bottom:0;}
+  .important-item .ii-icon{flex-shrink:0;}
+  .comfort-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:520px){.comfort-grid{grid-template-columns:1fr;}}
+  .comfort-card{border-radius:12px;padding:14px;}
+  .comfort-card-head{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.88rem;margin-bottom:8px;}
+  .comfort-section{margin-bottom:8px;}
+  .comfort-section:last-child{margin-bottom:0;}
+  .comfort-mini-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);margin-bottom:4px;}
+  .comfort-card p{margin:0;font-size:0.85rem;line-height:1.55;}
+  .upset-note{margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.08);font-size:0.83rem;line-height:1.5;}
+  .upset-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:3px;}
+  .plain-section{margin-bottom:16px;}
+  .plain-section:last-child{margin-bottom:0;}
+  .plain-section-label{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.86rem;margin-bottom:6px;color:var(--ink);}
+  .plain-section p{margin:0;font-size:0.88rem;line-height:1.55;}
+  .plain-section ul{margin:0;padding-left:18px;}
+  .plain-section li{font-size:0.88rem;line-height:1.5;margin-bottom:4px;}
+  .contacts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:480px){.contacts-grid{grid-template-columns:1fr;}}
+  .contact-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .contact-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.88rem;margin-bottom:4px;}
+  .contact-line{font-size:0.85rem;color:var(--ink-soft);}
+  .closing-note{margin-top:26px;text-align:center;font-family:'Fraunces',serif;font-style:italic;font-size:0.95rem;color:var(--ink-soft);padding-top:18px;border-top:1px solid var(--line);}
+  .closing-note strong{color:var(--sage);font-style:normal;}
+  .guide-footer{margin-top:14px;text-align:center;font-size:0.66rem;color:var(--ink-soft);}
+  .guide-footer strong{color:var(--sage);font-family:'Outfit',sans-serif;}
+  .action-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+  .action-row button{flex:1;min-width:140px;}
+  .print-link{text-align:center;margin-top:8px;font-size:0.8rem;color:var(--ink-soft);cursor:pointer;text-decoration:underline;background:none;border:none;width:100%;font-family:inherit;}
+  @media print{
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    body{padding:0;background:white;}
+    .no-print{display:none!important;}
+    .wrap{max-width:none;}
+    .guide{border:none;border-radius:0;}
+    .sched-entry,.comfort-card,.bedtime-step,.contact-card,.plain-section,.important-list,.header-band{break-inside:avoid;}
+    .section-eyebrow{break-after:avoid;}
+    @page{size:A4;margin:14mm;}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
 
+  <!-- ── MODE / DURATION SELECTION ── -->
   <div id="modeView">
     <div class="brand-mark"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
-    <p class="subtitle">Choose a format and language, then fill in the details.</p>
+    <p class="subtitle">Two quick choices, then fill in the details.</p>
 
-    <div class="mode-options">
-      <button type="button" class="mode-card" id="modeLandscapeBtn" data-mode="landscape">
-        <div class="mode-card-title">📋 Short Landscape One-Pager</div>
-        <div class="mode-card-desc">Compact, fits on one printed page — quick reference for a short visit.</div>
+    <div class="section-divider" style="margin-top:4px;">How long is this for?</div>
+    <div class="duration-options">
+      <button type="button" class="duration-card" data-duration="evening">
+        <div class="duration-card-title">🌙 Evening / Few Hours</div>
+        <div class="duration-card-desc">Babysitter or quick handover — evening routine and bedtime only. Compact and focused.</div>
       </button>
-      <button type="button" class="mode-card" id="modeIndepthBtn" data-mode="indepth">
-        <div class="mode-card-title">📖 In-Depth Debrief</div>
-        <div class="mode-card-desc">Full detail, step-by-step bedtime sequence, multi-page — for longer stays or someone new.</div>
+      <button type="button" class="duration-card" data-duration="fullday">
+        <div class="duration-card-title">☀️ Full Day</div>
+        <div class="duration-card-desc">All meals, naps, activities — a complete day with the children.</div>
+      </button>
+      <button type="button" class="duration-card" data-duration="fewdays">
+        <div class="duration-card-title">📅 A Few Days / Overnight</div>
+        <div class="duration-card-desc">Extended stay — everything plus overnight notes and multi-day routine.</div>
       </button>
     </div>
 
-    <div class="section-divider" style="margin-top:4px;">Language</div>
+    <div id="formatRecommendation" style="display:none;background:var(--sage-dim);border:1.5px solid var(--sage);border-radius:10px;padding:12px 16px;font-size:0.88rem;margin-bottom:16px;line-height:1.5;"></div>
+
+    <div class="section-divider">Format <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--ink-soft);">(we've suggested one based on your duration)</span></div>
+    <div class="mode-options">
+      <button type="button" class="mode-card" data-mode="landscape">
+        <div class="mode-card-title">📋 Short One-Pager</div>
+        <div class="mode-card-desc">Compact, fits on one printed page — quick reference to stick on the fridge.</div>
+      </button>
+      <button type="button" class="mode-card" data-mode="indepth">
+        <div class="mode-card-title">📖 Full Detail Guide</div>
+        <div class="mode-card-desc">Step-by-step bedtime sequence, multi-page — for someone new or a longer stay.</div>
+      </button>
+    </div>
+
+    <div class="section-divider">Language</div>
     <div class="field">
       <select id="modeLanguage">
         <option value="English">English</option>
@@ -220,7 +232,7 @@
         <option value="Portuguese">Portuguese</option>
         <option value="Polish">Polish</option>
         <option value="Arabic">Arabic</option>
-        <option value="other">Other</option>
+        <option value="other">Other…</option>
       </select>
     </div>
     <div class="field" id="modeLanguageOtherField" style="display:none;">
@@ -228,22 +240,49 @@
       <input type="text" id="modeLanguageOther" placeholder="e.g. Italian">
     </div>
 
-    <button class="primary" id="continueToFormBtn" disabled>Continue</button>
+    <button class="primary" id="continueToFormBtn" disabled>Continue →</button>
   </div>
 
+  <!-- ── FORM ── -->
   <div id="formView" style="display:none;">
-    <button type="button" class="back-link no-print" id="backToModeBtn">← Change format / language</button>
+    <button type="button" class="back-link no-print" id="backToModeBtn">← Change format / duration</button>
     <div class="brand-mark no-print"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
-    <p class="subtitle">Fill this in once per child. Get a clear, print-ready reference guide for whoever's looking after them.</p>
+    <p class="subtitle" id="formSubtitle">Fill in the details below.</p>
 
     <div id="errorBox"></div>
 
-    <div class="section-divider" style="margin-top:4px;">⚠ Important</div>
+    <!-- IMPORTANT — more visible -->
+    <div class="important-divider">⚠️ Important — read first</div>
     <div class="field">
-      <label>Anything critical the caregiver needs to know <span class="hint">(one point per line — a stairgate, an allergy, anything safety-related)</span></label>
-      <textarea id="importantNote" placeholder="e.g. Stairgate always closed&#10;Severe peanut allergy — EpiPen by the front door&#10;No screens today"></textarea>
+      <label>Critical info the caregiver must know <span class="hint">(one point per line — allergies, safety, medication)</span></label>
+      <div class="textarea-wrap">
+        <textarea id="importantNote" placeholder="e.g. Stairgate always closed&#10;Severe peanut allergy — EpiPen by the front door&#10;No screens today"></textarea>
+        <button type="button" class="voice-btn" title="Tap to speak — Starter plan feature" onclick="startVoice(this, document.getElementById('importantNote'))">🎤 <span class="voice-gate-badge">Starter+</span></button>
+      </div>
     </div>
+
+    <!-- Country for emergency numbers -->
+    <div class="field">
+      <label>Country <span class="hint">(used to include the right emergency numbers in the guide)</span></label>
+      <select id="countrySelect">
+        <option value="">Select country…</option>
+        <option>United Kingdom</option>
+        <option>France</option>
+        <option>Spain</option>
+        <option>Germany</option>
+        <option>Italy</option>
+        <option>Portugal</option>
+        <option>Belgium</option>
+        <option>Switzerland</option>
+        <option>Netherlands</option>
+        <option>USA</option>
+        <option>Canada</option>
+        <option>Australia</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div id="countryEmergencyHint" style="font-size:0.8rem;color:var(--sage);margin:-8px 0 14px;font-weight:600;"></div>
 
     <div class="section-divider">Children</div>
     <div id="childrenContainer"></div>
@@ -263,6 +302,7 @@
           <option>Grandparent</option>
           <option>Partner</option>
           <option>Babysitter</option>
+          <option>Au pair</option>
           <option>Nursery staff</option>
           <option value="other">Other</option>
         </select>
@@ -274,9 +314,29 @@
     </div>
 
     <div class="section-divider">Daily routine</div>
-    <p class="subtitle" style="margin-bottom:14px;">Add one entry per event. Use "Bedtime" for anything that's part of the bedtime sequence — those get grouped into their own step-by-step section.</p>
+    <p class="subtitle" style="margin-bottom:10px;">Quick-add common items — tap to add instantly:</p>
+    <div class="quick-chips" id="quickChips"></div>
     <div id="routineContainer"></div>
     <button type="button" class="add-child-btn" id="addRoutineBtn">+ Add routine item</button>
+
+    <!-- Multi-day notes (shown only for "few days" duration) -->
+    <div id="multiDaySection" style="display:none;">
+      <div class="section-divider">Multi-day notes</div>
+      <div class="field">
+        <label>Day-by-day routine or weekly pattern <span class="hint">(optional)</span></label>
+        <div class="textarea-wrap">
+          <textarea id="multiDayNotes" placeholder="e.g. Mon/Wed: nursery 9–3pm. Tue: home all day. Nap every day after lunch. Swimming Thursday 4pm."></textarea>
+          <button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this, document.getElementById('multiDayNotes'))">🎤</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Overnight routine / night waking <span class="hint">(optional)</span></label>
+        <div class="textarea-wrap">
+          <textarea id="overnightNotes" placeholder="e.g. May wake once around 2am — offer water, back to sleep within 10 mins usually. Do not bring into bed."></textarea>
+          <button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this, document.getElementById('overnightNotes'))">🎤</button>
+        </div>
+      </div>
+    </div>
 
     <div class="section-divider">Emergency contacts</div>
     <div id="contactsContainer"></div>
@@ -285,22 +345,26 @@
     <div class="section-divider">Anything else</div>
     <div class="field">
       <label>Special instructions <span class="hint">(optional)</span></label>
-      <textarea id="extra" placeholder="Anything else worth knowing"></textarea>
+      <div class="textarea-wrap">
+        <textarea id="extra" placeholder="Anything else worth knowing"></textarea>
+        <button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this, document.getElementById('extra'))">🎤</button>
+      </div>
     </div>
     <div class="field">
-      <label>Your sign-off <span class="hint">(optional — shown at the end, e.g. "The Smiths")</span></label>
+      <label>Your sign-off <span class="hint">(optional — shown at the end)</span></label>
       <input type="text" id="signOff" placeholder="e.g. The whole family">
     </div>
 
     <div class="section-divider">Access</div>
     <div class="field">
-      <label>Access code <span class="hint">(optional — leave blank to pay £0.99)</span></label>
+      <label>Access code <span class="hint">(optional — leave blank to pay)</span></label>
       <input type="text" id="accessCode" placeholder="Have a code? Enter it here">
     </div>
 
     <button class="primary" id="generateBtn">Generate guide — £0.99</button>
   </div>
 
+  <!-- ── LOADING ── -->
   <div id="loadingView" style="display:none;">
     <div class="loading">
       <div class="spinner"></div>
@@ -308,1006 +372,880 @@
     </div>
   </div>
 
+  <!-- ── GUIDE OUTPUT ── -->
   <div id="guideView" style="display:none;">
     <div class="guide" id="guideContent"></div>
     <div class="action-row no-print">
       <button class="secondary" id="editBtn">Edit details</button>
-      <button class="primary" id="printBtn">Print / Save as PDF</button>
+      <button class="primary" id="downloadPdfBtn">⬇ Download PDF</button>
     </div>
+    <button type="button" class="print-link no-print" onclick="window.print()">Prefer to print? Open print dialog</button>
   </div>
 
 </div>
-
 <script>
-const STORAGE_KEY = 'family-guide-last-entry-v3';
-const ALLERGEN_OPTIONS = ['Dairy', 'Eggs', 'Nuts', 'Gluten', 'Soy', 'None known'];
-const NAPPY_OPTIONS = ['Newborn', 'Size 1', 'Size 2', 'Size 3', 'Size 4', 'Size 5', 'Size 6'];
-const MILK_OPTIONS = ['N/A', 'Breastmilk', 'Formula', "Cow's milk", 'Plant milk'];
+const STORAGE_KEY = 'family-guide-last-entry-v4';
+const ALLERGEN_OPTIONS = ['Dairy','Eggs','Nuts','Gluten','Soy','None known'];
+const NAPPY_OPTIONS = ['Newborn','Size 1','Size 2','Size 3','Size 4','Size 5','Size 6'];
 const KID_IDENTITIES = [
-  { color: '#6FA3CC', dim: '#E6F0F7', emoji: '🦖' },
-  { color: '#C17B8C', dim: '#F5E6E9', emoji: '🐰' },
-  { color: '#CBA135', dim: '#F7EFD8', emoji: '🦁' },
-  { color: '#9B8AC4', dim: '#ECE8F5', emoji: '🐻' },
-  { color: '#5E9C8F', dim: '#E2EFEC', emoji: '🦋' },
-  { color: '#B98A5E', dim: '#F2E7DA', emoji: '🐢' }
+  {color:'#6FA3CC',dim:'#E6F0F7',emoji:'🦖'},
+  {color:'#C17B8C',dim:'#F5E6E9',emoji:'🐰'},
+  {color:'#CBA135',dim:'#F7EFD8',emoji:'🦁'},
+  {color:'#9B8AC4',dim:'#ECE8F5',emoji:'🐻'},
+  {color:'#5E9C8F',dim:'#E2EFEC',emoji:'🦋'},
+  {color:'#B98A5E',dim:'#F2E7DA',emoji:'🐢'}
 ];
-function getKidIdentity(idx) { return KID_IDENTITIES[idx % KID_IDENTITIES.length]; }
-
 const ENGLISH_LABELS = {
-  schedule: "Today's Schedule",
-  bedtime: 'Bedtime Sequence',
-  important: 'Important',
-  comfort: 'Comfort & Personality',
-  contacts: 'Contacts',
-  allChildren: 'All children',
-  types: { Bedtime: 'Bedtime', Nap: 'Nap', 'Milk/Feed': 'Milk/Feed', Lunch: 'Lunch', Snack: 'Snack' }
+  schedule:"Today's Schedule",bedtime:'Bedtime Sequence',important:'Important',
+  comfort:'Personality & Comfort',contacts:'Contacts',allChildren:'All children',
+  whenUpset:'If They Get Upset',
+  types:{Bedtime:'Bedtime',Nap:'Nap','Milk/Feed':'Milk/Feed',Lunch:'Lunch',
+    Snack:'Snack',Breakfast:'Breakfast',Dinner:'Dinner',Bath:'Bath',
+    Play:'Play time','School pick-up':'School pick-up',Activity:'Activity'}
 };
+const EMERGENCY_NUMBERS = {
+  'United Kingdom':'999 (emergency) · 111 (NHS non-emergency)',
+  'France':'15 (SAMU) · 17 (Police) · 18 (Fire) · 112 (Europe)',
+  'Spain':'112 (all emergencies) · 061 (ambulance)',
+  'Germany':'110 (Police) · 112 (Fire/Ambulance)',
+  'Italy':'112 (all emergencies) · 118 (ambulance)',
+  'Portugal':'112 (all emergencies)',
+  'Belgium':'101 (Police) · 100 (Ambulance/Fire) · 112',
+  'Switzerland':'117 (Police) · 144 (Ambulance) · 118 (Fire)',
+  'Netherlands':'112 (all emergencies)',
+  'USA':'911 (all emergencies)',
+  'Canada':'911 (all emergencies)',
+  'Australia':'000 (all emergencies)',
+};
+const ALL_ROUTINE_TYPES = ['Breakfast','Milk/Feed','Nap','Lunch','Snack','Dinner','Bath','Bedtime','Play','School pick-up','Activity','Other'];
+const QUICK_CHIPS_DEF = [
+  {label:'🥣 Breakfast',type:'Breakfast',time:'07:30'},
+  {label:'🍼 Feed',type:'Milk/Feed',time:'08:00'},
+  {label:'💤 Nap',type:'Nap',time:'10:00'},
+  {label:'🍽 Lunch',type:'Lunch',time:'12:00'},
+  {label:'🍎 Snack',type:'Snack',time:'15:00'},
+  {label:'🍽 Dinner',type:'Dinner',time:'17:30'},
+  {label:'🛁 Bath',type:'Bath',time:'18:30'},
+  {label:'🌙 Bedtime',type:'Bedtime',time:'19:00'},
+];
+const EVENING_CHIPS = [
+  {label:'🍽 Dinner',type:'Dinner',time:'17:30'},
+  {label:'🍎 Snack',type:'Snack',time:'18:00'},
+  {label:'🛁 Bath',type:'Bath',time:'18:30'},
+  {label:'🌙 Bedtime',type:'Bedtime',time:'19:00'},
+];
 
-let childCount = 0;
-let routineCount = 0;
-let contactCount = 0;
-let selectedMode = null;
+function getKidIdentity(idx){return KID_IDENTITIES[idx%KID_IDENTITIES.length];}
+function resolveKidIdentity(child,idx){
+  const base=(child.colorIdx!==undefined&&child.colorIdx!==null&&child.colorIdx>=0&&KID_IDENTITIES[child.colorIdx])
+    ?KID_IDENTITIES[child.colorIdx]:getKidIdentity(idx);
+  return{color:base.color,dim:base.dim,emoji:child.emoji||base.emoji};
+}
 
-function getChildOptionsHTML(selectedValue) {
-  const names = Array.from(document.querySelectorAll('.c-name')).map((inp, i) => inp.value.trim() || `Child ${i + 1}`);
-  let html = `<option value="all" ${selectedValue === 'all' ? 'selected' : ''}>All children</option>`;
-  names.forEach(n => {
-    html += `<option value="${n}" ${n === selectedValue ? 'selected' : ''}>${n}</option>`;
+let childCount=0,routineCount=0,contactCount=0,selectedMode=null,selectedDuration=null;
+
+// ── VOICE INPUT ──
+function startVoice(btn,textarea){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){alert('Voice input is not supported in this browser. Try Chrome on Android or Safari on iOS.');return;}
+  const rec=new SpeechRecognition();
+  rec.continuous=false;rec.interimResults=false;
+  btn.classList.add('recording');btn.textContent='⏹️';
+  rec.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    textarea.value+=(textarea.value?'\n':'')+t;
+  };
+  rec.onend=()=>{btn.classList.remove('recording');btn.textContent='🎤';};
+  rec.onerror=()=>{btn.classList.remove('recording');btn.textContent='🎤';};
+  rec.start();
+}
+
+// ── COUNTRY EMERGENCY HINT ──
+document.getElementById('countrySelect').addEventListener('change',e=>{
+  const hint=document.getElementById('countryEmergencyHint');
+  const nums=EMERGENCY_NUMBERS[e.target.value];
+  hint.textContent=nums?'📞 Emergency numbers: '+nums:'';
+});
+
+// ── QUICK CHIPS ──
+function renderQuickChips(){
+  const chips=selectedDuration==='evening'?EVENING_CHIPS:QUICK_CHIPS_DEF;
+  const container=document.getElementById('quickChips');
+  container.innerHTML=chips.map(c=>`<button type="button" class="quick-chip" data-type="${c.type}" data-time="${c.time}">${c.label}</button>`).join('');
+  container.querySelectorAll('.quick-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>addRoutineItem({type:btn.dataset.type,time:btn.dataset.time,child:'all',notes:''}));
   });
+}
+
+// ── ROUTINE ITEMS ──
+function routineTypeOptions(selectedVal){
+  return ALL_ROUTINE_TYPES.map(t=>`<option value="${t==='Other'?'other':t}"${t===selectedVal||('other'===selectedVal&&t==='Other')?'selected':''}>${t}</option>`).join('');
+}
+function getChildOptionsHTML(selectedValue){
+  const names=Array.from(document.querySelectorAll('.c-name')).map((inp,i)=>inp.value.trim()||`Child ${i+1}`);
+  let html=`<option value="all"${selectedValue==='all'?' selected':''}>All children</option>`;
+  names.forEach(n=>{html+=`<option value="${n}"${n===selectedValue?' selected':''}>${n}</option>`;});
   return html;
 }
-
-function routineItemHTML(idx) {
-  return `
-    <div class="child-card routine-item" data-routine="${idx}">
-      <div class="child-card-head">
-        <span class="child-label">Routine item</span>
-        <button type="button" class="remove-child-btn" onclick="removeRoutine(${idx})">Remove</button>
-      </div>
-      <div class="row3">
-        <div class="field">
-          <label>Type</label>
-          <select class="r-type">
-            <option>Bedtime</option>
-            <option>Nap</option>
-            <option>Milk/Feed</option>
-            <option>Lunch</option>
-            <option>Snack</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Time</label>
-          <input type="time" class="r-time">
-        </div>
-        <div class="field">
-          <label>For</label>
-          <select class="r-child">${getChildOptionsHTML()}</select>
-        </div>
-      </div>
-      <div class="field r-type-other-field" style="display:none;">
-        <label>Please specify</label>
-        <input type="text" class="r-type-other" placeholder="e.g. Bath time">
-      </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>Notes <span class="hint">(optional — wrap key facts in **double asterisks** to bold them)</span></label>
-        <textarea class="r-notes" placeholder="e.g. Needs **180ml** formula, white noise machine on"></textarea>
+function routineItemHTML(idx){
+  return`<div class="child-card routine-item" data-routine="${idx}">
+    <div class="child-card-head"><span class="child-label">Routine item</span><button type="button" class="remove-child-btn" onclick="removeRoutine(${idx})">Remove</button></div>
+    <div class="row3">
+      <div class="field"><label>Type</label><select class="r-type">${routineTypeOptions('')}</select></div>
+      <div class="field"><label>Time</label><input type="time" class="r-time"></div>
+      <div class="field"><label>For</label><select class="r-child">${getChildOptionsHTML()}</select></div>
+    </div>
+    <div class="field r-type-other-field" style="display:none;"><label>Please specify</label><input type="text" class="r-type-other" placeholder="e.g. Swimming class"></div>
+    <div class="field" style="margin-bottom:0;">
+      <label>Notes <span class="hint">(use **double asterisks** to bold key facts like amounts)</span></label>
+      <div class="textarea-wrap">
+        <textarea class="r-notes" placeholder="e.g. Needs **180ml** formula, white noise on"></textarea>
+        <button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button>
       </div>
     </div>
-  `;
+  </div>`;
 }
-
-function addRoutineItem(prefill) {
-  const idx = routineCount++;
-  const container = document.getElementById('routineContainer');
-  const div = document.createElement('div');
-  div.innerHTML = routineItemHTML(idx);
-  const card = div.firstElementChild;
-  container.appendChild(card);
-  if (prefill) {
-    const typeSelect = card.querySelector('.r-type');
-    const isStandard = ['Bedtime', 'Nap', 'Milk/Feed', 'Lunch', 'Snack'].includes(prefill.type);
-    typeSelect.value = isStandard ? prefill.type : 'other';
-    if (!isStandard) {
-      card.querySelector('.r-type-other-field').style.display = 'block';
-      card.querySelector('.r-type-other').value = prefill.type || '';
-    }
-    card.querySelector('.r-time').value = prefill.time || '';
-    card.querySelector('.r-child').innerHTML = getChildOptionsHTML(prefill.child);
-    card.querySelector('.r-notes').value = prefill.notes || '';
+function addRoutineItem(prefill){
+  const idx=routineCount++;
+  const div=document.createElement('div');
+  div.innerHTML=routineItemHTML(idx);
+  const card=div.firstElementChild;
+  document.getElementById('routineContainer').appendChild(card);
+  if(prefill){
+    const ts=card.querySelector('.r-type');
+    const std=ALL_ROUTINE_TYPES.filter(t=>t!=='Other').includes(prefill.type);
+    ts.value=std?prefill.type:'other';
+    if(!std){card.querySelector('.r-type-other-field').style.display='block';card.querySelector('.r-type-other').value=prefill.type||'';}
+    card.querySelector('.r-time').value=prefill.time||'';
+    card.querySelector('.r-child').innerHTML=getChildOptionsHTML(prefill.child);
+    card.querySelector('.r-notes').value=prefill.notes||'';
   }
 }
-
-function removeRoutine(idx) {
-  const block = document.querySelector(`.routine-item[data-routine="${idx}"]`);
-  if (block) block.remove();
-}
-
-function collectRoutineItems() {
-  const blocks = document.querySelectorAll('.routine-item');
-  return Array.from(blocks).map(b => {
-    const typeSelect = b.querySelector('.r-type').value;
-    const type = typeSelect === 'other' ? b.querySelector('.r-type-other').value.trim() : typeSelect;
-    return {
-      type,
-      time: b.querySelector('.r-time').value,
-      child: b.querySelector('.r-child').value,
-      notes: b.querySelector('.r-notes').value.trim()
-    };
+function removeRoutine(idx){const b=document.querySelector(`.routine-item[data-routine="${idx}"]`);if(b)b.remove();}
+function collectRoutineItems(){
+  return Array.from(document.querySelectorAll('.routine-item')).map(b=>{
+    const ts=b.querySelector('.r-type').value;
+    return{type:ts==='other'?b.querySelector('.r-type-other').value.trim():ts,time:b.querySelector('.r-time').value,child:b.querySelector('.r-child').value,notes:b.querySelector('.r-notes').value.trim()};
   });
 }
-
-function formatTime12hr(t) {
-  if (!t) return '';
-  const [h, m] = t.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
-}
-
-document.getElementById('addRoutineBtn').addEventListener('click', () => addRoutineItem());
-document.getElementById('routineContainer').addEventListener('change', e => {
-  if (e.target.classList.contains('r-type')) {
-    const card = e.target.closest('.routine-item');
-    card.querySelector('.r-type-other-field').style.display = e.target.value === 'other' ? 'block' : 'none';
+document.getElementById('addRoutineBtn').addEventListener('click',()=>addRoutineItem());
+document.getElementById('routineContainer').addEventListener('change',e=>{
+  if(e.target.classList.contains('r-type')){
+    const card=e.target.closest('.routine-item');
+    card.querySelector('.r-type-other-field').style.display=e.target.value==='other'?'block':'none';
   }
 });
 
-/* --- Contacts --- */
-function contactItemHTML(idx) {
-  return `
-    <div class="child-card contact-item" data-contact="${idx}">
-      <div class="child-card-head">
-        <span class="child-label">Contact</span>
-        <button type="button" class="remove-child-btn" onclick="removeContact(${idx})">Remove</button>
+// ── CONTACTS ──
+function contactItemHTML(idx){
+  return`<div class="child-card contact-item" data-contact="${idx}">
+    <div class="child-card-head"><span class="child-label">Contact</span><button type="button" class="remove-child-btn" onclick="removeContact(${idx})">Remove</button></div>
+    <div class="row2">
+      <div class="field"><label>Name</label><input type="text" class="ct-name" placeholder="e.g. Mum"></div>
+      <div class="field"><label>Phone</label><input type="text" class="ct-phone" placeholder="e.g. 07700 900000"></div>
+    </div>
+  </div>`;
+}
+function addContact(prefill){
+  const idx=contactCount++;
+  const div=document.createElement('div');
+  div.innerHTML=contactItemHTML(idx);
+  const card=div.firstElementChild;
+  document.getElementById('contactsContainer').appendChild(card);
+  if(prefill){if(prefill.name)card.querySelector('.ct-name').value=prefill.name;if(prefill.phone)card.querySelector('.ct-phone').value=prefill.phone;}
+}
+function removeContact(idx){const b=document.querySelector(`.contact-item[data-contact="${idx}"]`);if(b)b.remove();}
+function collectContacts(){
+  return Array.from(document.querySelectorAll('.contact-item'))
+    .map(b=>({name:b.querySelector('.ct-name').value.trim(),phone:b.querySelector('.ct-phone').value.trim()}))
+    .filter(c=>c.name||c.phone);
+}
+document.getElementById('addContactBtn').addEventListener('click',()=>addContact());
+
+// ── FOOD TYPE OPTIONS ──
+function foodTypeOptions(ageYears,ageMonths){
+  const totalMonths=ageYears*12+ageMonths;
+  if(totalMonths<6) return'<option>Breast milk / Formula only</option>';
+  if(totalMonths<12) return`<option>Purées only</option><option>Purées + some mashed</option><option>Breast milk / Formula only</option>`;
+  if(totalMonths<36) return`<option>Purées</option><option>Mashed</option><option>Soft finger foods</option><option>Mix of mashed + finger foods</option><option>Normal family food (soft)</option>`;
+  return`<option>Normal family food</option><option>Soft foods preferred</option><option>Special diet</option><option>Everything</option>`;
+}
+
+// ── CHILD CARD ──
+function childBlockHTML(idx){
+  const allergenChips=ALLERGEN_OPTIONS.map(opt=>`<label class="chip"><input type="checkbox" name="allergen-${idx}" value="${opt}"><span>${opt}</span></label>`).join('');
+  return`<div class="child-card" data-child="${idx}">
+    <div class="child-card-head"><span class="child-label">Child ${idx+1}</span><button type="button" class="remove-child-btn" onclick="removeChild(${idx})">Remove</button></div>
+    <div class="field">
+      <label>Personalise <span class="hint">(pick a colour and emoji or leave for automatic)</span></label>
+      <div class="swatch-row">${KID_IDENTITIES.map((k,ci)=>`<button type="button" class="swatch-btn" data-idx="${ci}" style="background:${k.color};" onclick="selectSwatch(${idx},${ci})"></button>`).join('')}</div>
+      <input type="hidden" class="c-color-idx" value="-1">
+      <input type="text" class="c-emoji" placeholder="🦁 (leave blank for automatic)" style="max-width:160px;">
+    </div>
+    <div class="age-row">
+      <div class="field"><label>Name</label><input type="text" class="c-name" placeholder="e.g. Mia"></div>
+      <div class="row2" style="margin:0;">
+        <div class="field"><label>Age</label><input type="number" class="c-age-value" min="0" placeholder="e.g. 2"></div>
+        <div class="field"><label>&nbsp;</label><select class="c-age-unit"><option>years</option><option>months</option></select></div>
       </div>
+    </div>
+    <div class="field"><label>Allergies <span class="hint">— tap any that apply</span></label><div class="chip-grid">${allergenChips}</div></div>
+    <div class="field"><label>Other allergies / medical notes <span class="hint">(optional)</span></label><div class="textarea-wrap"><textarea class="c-allergy-notes" placeholder="e.g. Carries EpiPen, mild asthma"></textarea><button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
+
+    <!-- BABY / TODDLER FIELDS -->
+    <div class="baby-fields">
+      <div class="row3">
+        <div class="field"><label>Nappy status</label><select class="c-nappy-status"><option>Full-time nappies</option><option>Bedtime/naps only</option><option>Potty training</option><option>Fully potty trained</option></select></div>
+        <div class="field"><label>Nappy size</label><select class="c-nappy">${NAPPY_OPTIONS.map(o=>`<option>${o}</option>`).join('')}</select></div>
+        <div class="field"><label>Needs cream?</label><select class="c-cream"><option>No</option><option>Yes</option></select></div>
+      </div>
+      <div class="field"><label>Cream notes <span class="hint">(optional)</span></label><input type="text" class="c-cream-notes" placeholder="e.g. Sudocrem at every change"></div>
       <div class="row2">
-        <div class="field">
-          <label>Name</label>
-          <input type="text" class="ct-name" placeholder="e.g. Mum">
+        <div class="field"><label>Milk type</label><select class="c-milk"><option>N/A</option><option>Breastmilk</option><option>Formula</option><option>Cow's milk</option><option>Plant milk</option></select></div>
+        <div class="field"><label>Milk notes <span class="hint">(optional)</span></label><input type="text" class="c-milk-notes" placeholder="e.g. Whole milk daytime, formula at night"></div>
+      </div>
+      <!-- BOTTLE AMOUNT with ml/oz toggle -->
+      <div class="field bottle-amount-wrap">
+        <label>Bottle amount <span class="hint">(per feed)</span></label>
+        <div class="amount-row">
+          <input type="number" class="c-bottle-amount" min="0" placeholder="e.g. 180">
+          <div class="unit-toggle">
+            <button type="button" class="unit-btn active" data-unit="ml" onclick="setUnit(this,'ml',${idx})">ml</button>
+            <button type="button" class="unit-btn" data-unit="oz" onclick="setUnit(this,'oz',${idx})">oz</button>
+          </div>
         </div>
+        <input type="hidden" class="c-bottle-unit" value="ml">
+      </div>
+      <p class="hint" style="margin:-6px 0 14px;">For exact feed times add a "Feed" entry in Daily Routine below.</p>
+    </div>
+
+    <!-- FOOD TYPE — all ages -->
+    <div class="field">
+      <label>Food type <span class="hint">(what stage of eating is this child at?)</span></label>
+      <select class="c-food-type">${foodTypeOptions(0,6)}</select>
+    </div>
+
+    <!-- OLDER CHILD FIELDS -->
+    <div class="field older-fields" style="display:none;">
+      <label>School / activities & homework</label>
+      <div class="textarea-wrap"><textarea class="c-school" placeholder="e.g. Homework before screen time, football pick-up at 5pm"></textarea><button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div>
+    </div>
+
+    <!-- OLDER — optional bottle override -->
+    <div class="bottle-override-wrap" style="display:none;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;font-weight:700;margin-bottom:10px;">
+        <input type="checkbox" class="c-still-bottle"> Still drinks from a bottle
+      </label>
+      <div class="bottle-override-detail" style="display:none;">
         <div class="field">
-          <label>Phone / contact</label>
-          <input type="text" class="ct-phone" placeholder="e.g. 07700 900000">
+          <label>Bottle amount</label>
+          <div class="amount-row">
+            <input type="number" class="c-bottle-amount" min="0" placeholder="e.g. 200">
+            <div class="unit-toggle">
+              <button type="button" class="unit-btn active" data-unit="ml" onclick="setUnit(this,'ml',${idx})">ml</button>
+              <button type="button" class="unit-btn" data-unit="oz" onclick="setUnit(this,'oz',${idx})">oz</button>
+            </div>
+          </div>
+          <input type="hidden" class="c-bottle-unit" value="ml">
         </div>
       </div>
     </div>
-  `;
+
+    <div class="field"><label>Screen time & independence rules</label><div class="textarea-wrap"><textarea class="c-independence" placeholder="e.g. No devices after 6pm, can play in the garden unsupervised"></textarea><button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
+    <div class="field"><label>Personality, likes & comfort items <span class="hint">(what they love, their comforter, favourite toy)</span></label><div class="textarea-wrap"><textarea class="c-likes" placeholder="e.g. Loves the blue rabbit toy, hates loud noises, always needs rabbit in left hand"></textarea><button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
+    <div class="field"><label>What to do if they get upset <span class="hint">(practical steps — not the same as their likes!)</span></label><div class="textarea-wrap"><textarea class="c-behaviour" placeholder="e.g. Give space first, then offer the rabbit. Singing works better than talking. Never pick up immediately."></textarea><button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
+  </div>`;
 }
 
-function addContact(prefill) {
-  const idx = contactCount++;
-  const container = document.getElementById('contactsContainer');
-  const div = document.createElement('div');
-  div.innerHTML = contactItemHTML(idx);
-  const card = div.firstElementChild;
-  container.appendChild(card);
-  if (prefill) {
-    if (prefill.name) card.querySelector('.ct-name').value = prefill.name;
-    if (prefill.phone) card.querySelector('.ct-phone').value = prefill.phone;
+function setUnit(btn,unit,childIdx){
+  const card=btn.closest('.child-card,[data-child]')||btn.closest('.bottle-amount-wrap,.bottle-override-detail');
+  const wrap=btn.closest('.bottle-amount-wrap')||btn.closest('.bottle-override-detail');
+  if(!wrap)return;
+  wrap.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const hidden=wrap.querySelector('.c-bottle-unit');
+  if(hidden)hidden.value=unit;
+}
+
+function selectSwatch(childIdx,colorIdx){
+  const card=document.querySelector(`.child-card[data-child="${childIdx}"]`);
+  if(!card)return;
+  card.querySelector('.c-color-idx').value=colorIdx;
+  card.querySelectorAll('.swatch-btn').forEach(b=>b.classList.remove('selected'));
+  const btn=card.querySelector(`.swatch-btn[data-idx="${colorIdx}"]`);
+  if(btn)btn.classList.add('selected');
+}
+
+function getChildAge(card){
+  const unit=card.querySelector('.c-age-unit').value;
+  const raw=card.querySelector('.c-age-value').value;
+  const val=parseFloat(raw)||0;
+  return{years:unit==='years'?val:0,months:unit==='months'?val:0,totalMonths:unit==='years'?val*12:val};
+}
+function isYoungChild(card){
+  const{totalMonths}=getChildAge(card);
+  return totalMonths<36||card.querySelector('.c-age-value').value==='';
+}
+
+function updateAgeFields(card){
+  const{years,months,totalMonths}=getChildAge(card);
+  const young=totalMonths<36||card.querySelector('.c-age-value').value==='';
+  const isOld=totalMonths>=36&&card.querySelector('.c-age-value').value!=='';
+  card.querySelectorAll('.baby-fields').forEach(el=>{el.style.display=young?'block':'none';});
+  card.querySelectorAll('.older-fields').forEach(el=>{el.style.display=isOld?'block':'none';});
+  card.querySelectorAll('.bottle-override-wrap').forEach(el=>{el.style.display=isOld?'block':'none';});
+  // update food type options
+  const foodSel=card.querySelector('.c-food-type');
+  const prev=foodSel?foodSel.value:'';
+  if(foodSel){foodSel.innerHTML=foodTypeOptions(years,months>0?months:0);}
+}
+
+document.getElementById('childrenContainer').addEventListener('input',e=>{if(e.target.classList.contains('c-age-value'))updateAgeFields(e.target.closest('.child-card'));});
+document.getElementById('childrenContainer').addEventListener('change',e=>{
+  if(e.target.classList.contains('c-age-unit'))updateAgeFields(e.target.closest('.child-card'));
+  if(e.target.classList.contains('c-still-bottle')){
+    const wrap=e.target.closest('.bottle-override-wrap');
+    if(wrap)wrap.querySelector('.bottle-override-detail').style.display=e.target.checked?'block':'none';
   }
-}
+});
 
-function removeContact(idx) {
-  const block = document.querySelector(`.contact-item[data-contact="${idx}"]`);
-  if (block) block.remove();
-}
-
-function collectContacts() {
-  const blocks = document.querySelectorAll('.contact-item');
-  return Array.from(blocks)
-    .map(b => ({ name: b.querySelector('.ct-name').value.trim(), phone: b.querySelector('.ct-phone').value.trim() }))
-    .filter(c => c.name || c.phone);
-}
-
-document.getElementById('addContactBtn').addEventListener('click', () => addContact());
-
-function childBlockHTML(idx) {
-  const allergenChips = ALLERGEN_OPTIONS.map(opt =>
-    `<label class="chip">
-      <input type="checkbox" name="allergen-${idx}" value="${opt}">
-      <span>${opt}</span>
-    </label>`
-  ).join('');
-
-  const nappyOpts = NAPPY_OPTIONS.map(o => `<option>${o}</option>`).join('');
-  const milkOpts = MILK_OPTIONS.map(o => `<option>${o}</option>`).join('');
-
-  return `
-    <div class="child-card" data-child="${idx}">
-      <div class="child-card-head">
-        <span class="child-label">Child ${idx + 1}</span>
-        <button type="button" class="remove-child-btn" onclick="removeChild(${idx})">Remove</button>
-      </div>
-
-      <div class="field">
-        <label>Personalize <span class="hint">(optional — pick a color and emoji, or leave for an automatic one)</span></label>
-        <div class="swatch-row">${KID_IDENTITIES.map((k, ci) => `<button type="button" class="swatch-btn" data-idx="${ci}" style="background:${k.color};" onclick="selectSwatch(${idx}, ${ci})"></button>`).join('')}</div>
-        <input type="hidden" class="c-color-idx" value="-1">
-        <input type="text" class="c-emoji" placeholder="e.g. 🦁 (leave blank for automatic)" style="max-width:160px;">
-      </div>
-
-      <div class="age-row">
-        <div class="field">
-          <label>Name</label>
-          <input type="text" class="c-name" placeholder="e.g. Mia">
-        </div>
-        <div class="row2" style="margin:0;">
-          <div class="field">
-            <label>Age</label>
-            <input type="number" class="c-age-value" min="0" placeholder="e.g. 3">
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <select class="c-age-unit">
-              <option>years</option>
-              <option>months</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Allergies <span class="hint">— tap any that apply</span></label>
-        <div class="chip-grid">${allergenChips}</div>
-      </div>
-      <div class="field">
-        <label>Other allergies or medical notes <span class="hint">(optional)</span></label>
-        <textarea class="c-allergy-notes" placeholder="e.g. Carries an EpiPen, mild asthma"></textarea>
-      </div>
-
-      <div class="baby-fields">
-        <div class="row3">
-          <div class="field">
-            <label>Nappy status</label>
-            <select class="c-nappy-status">
-              <option>Full-time nappies</option>
-              <option>Bedtime/naps only</option>
-              <option>Potty training</option>
-              <option>Fully potty trained</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Nappy size</label>
-            <select class="c-nappy">${nappyOpts}</select>
-          </div>
-          <div class="field">
-            <label>Needs cream?</label>
-            <select class="c-cream">
-              <option>No</option>
-              <option>Yes</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Cream notes <span class="hint">(optional)</span></label>
-          <input type="text" class="c-cream-notes" placeholder="e.g. Sudocrem at every change">
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>Milk type</label>
-            <select class="c-milk">${milkOpts}</select>
-          </div>
-          <div class="field">
-            <label>Milk notes <span class="hint">(optional)</span></label>
-            <input type="text" class="c-milk-notes" placeholder="e.g. Whole milk daytime, formula at night">
-          </div>
-        </div>
-        <p class="hint" style="margin: -8px 0 14px;">For exact feed times and doses, add a "Milk/Feed" entry per feed in Daily Routine below.</p>
-      </div>
-
-      <div class="field older-fields" style="display:none;">
-        <label>School / activities & homework notes</label>
-        <textarea class="c-school" placeholder="e.g. Homework before screen time, picked up from football at 5pm"></textarea>
-      </div>
-      <div class="field">
-        <label>Independence & screen time rules</label>
-        <textarea class="c-independence" placeholder="e.g. No devices after 6pm, can play in the garden unsupervised"></textarea>
-      </div>
-
-      <div class="field">
-        <label>Likes, dislikes, comfort items</label>
-        <textarea class="c-likes" placeholder="e.g. Loves the blue rabbit toy, dislikes loud noises"></textarea>
-      </div>
-      <div class="field">
-        <label>What helps if upset</label>
-        <textarea class="c-behaviour" placeholder="e.g. Give space first, then offer the rabbit toy"></textarea>
-      </div>
-    </div>
-  `;
-}
-
-function selectSwatch(childIdx, colorIdx) {
-  const card = document.querySelector(`.child-card[data-child="${childIdx}"]`);
-  if (!card) return;
-  card.querySelector('.c-color-idx').value = colorIdx;
-  card.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('selected'));
-  const btn = card.querySelector(`.swatch-btn[data-idx="${colorIdx}"]`);
-  if (btn) btn.classList.add('selected');
-}
-
-function resolveKidIdentity(child, idx) {
-  const base = (child.colorIdx !== undefined && child.colorIdx !== null && child.colorIdx >= 0 && KID_IDENTITIES[child.colorIdx])
-    ? KID_IDENTITIES[child.colorIdx] : getKidIdentity(idx);
-  const emoji = child.emoji ? child.emoji : base.emoji;
-  return { color: base.color, dim: base.dim, emoji };
-}
-
-function isYoungChild(card) {
-  const unit = card.querySelector('.c-age-unit').value;
-  const raw = card.querySelector('.c-age-value').value;
-  const val = parseFloat(raw);
-  if (unit === 'months') return true;
-  if (raw === '' || isNaN(val)) return true;
-  return val <= 4;
-}
-
-function updateAgeFields(card) {
-  const young = isYoungChild(card);
-  card.querySelectorAll('.baby-fields').forEach(el => { el.style.display = young ? 'block' : 'none'; });
-  card.querySelectorAll('.older-fields').forEach(el => { el.style.display = young ? 'none' : 'block'; });
-}
-
-function addChild(prefill) {
-  const idx = childCount++;
-  const container = document.getElementById('childrenContainer');
-  const div = document.createElement('div');
-  div.innerHTML = childBlockHTML(idx);
-  const card = div.firstElementChild;
-  container.appendChild(card);
+function addChild(prefill){
+  const idx=childCount++;
+  const div=document.createElement('div');
+  div.innerHTML=childBlockHTML(idx);
+  const card=div.firstElementChild;
+  document.getElementById('childrenContainer').appendChild(card);
   updateRemoveButtons();
-  if (prefill) applyChildData(idx, prefill);
+  if(prefill)applyChildData(idx,prefill);
   updateAgeFields(card);
 }
-
-function removeChild(idx) {
-  const block = document.querySelector(`.child-card[data-child="${idx}"]`);
-  if (block) block.remove();
-  updateRemoveButtons();
+function removeChild(idx){const block=document.querySelector(`.child-card[data-child="${idx}"]`);if(block)block.remove();updateRemoveButtons();}
+function updateRemoveButtons(){
+  const blocks=document.querySelectorAll('.child-card:not(.routine-item):not(.contact-item)');
+  blocks.forEach(b=>{const btn=b.querySelector('.remove-child-btn');btn.style.display=blocks.length>1?'inline-block':'none';});
 }
 
-function updateRemoveButtons() {
-  const blocks = document.querySelectorAll('.child-card:not(.routine-item):not(.contact-item)');
-  blocks.forEach(b => {
-    const btn = b.querySelector('.remove-child-btn');
-    btn.style.display = blocks.length > 1 ? 'inline-block' : 'none';
-  });
-}
-
-document.getElementById('childrenContainer').addEventListener('input', e => {
-  if (e.target.classList.contains('c-age-value')) updateAgeFields(e.target.closest('.child-card'));
-});
-document.getElementById('childrenContainer').addEventListener('change', e => {
-  if (e.target.classList.contains('c-age-unit')) updateAgeFields(e.target.closest('.child-card'));
-});
-
-function collectChildren() {
-  const blocks = document.querySelectorAll('#childrenContainer .child-card');
-  return Array.from(blocks).map(b => {
-    const allergens = Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(c => c.value);
-    const young = isYoungChild(b);
-    return {
-      name: b.querySelector('.c-name').value.trim(),
-      colorIdx: parseInt(b.querySelector('.c-color-idx').value, 10),
-      emoji: b.querySelector('.c-emoji').value.trim(),
-      age: b.querySelector('.c-age-value').value.trim() + ' ' + b.querySelector('.c-age-unit').value,
-      allergens: allergens.join(', '),
-      allergyNotes: b.querySelector('.c-allergy-notes').value.trim(),
-      nappyStatus: young ? b.querySelector('.c-nappy-status').value : '',
-      nappy: young ? b.querySelector('.c-nappy').value : '',
-      cream: young ? b.querySelector('.c-cream').value : '',
-      creamNotes: young ? b.querySelector('.c-cream-notes').value.trim() : '',
-      milk: young ? b.querySelector('.c-milk').value : '',
-      milkNotes: young ? b.querySelector('.c-milk-notes').value.trim() : '',
-      school: !young ? b.querySelector('.c-school').value.trim() : '',
-      independence: b.querySelector('.c-independence').value.trim(),
-      likes: b.querySelector('.c-likes').value.trim(),
-      behaviour: b.querySelector('.c-behaviour').value.trim()
+function collectChildren(){
+  return Array.from(document.querySelectorAll('#childrenContainer .child-card')).map(b=>{
+    const allergens=Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(c=>c.value);
+    const{totalMonths}=getChildAge(b);
+    const young=totalMonths<36||b.querySelector('.c-age-value').value==='';
+    const isOld=!young;
+    const bottleAmountEl=b.querySelector('.bottle-amount-wrap .c-bottle-amount')||b.querySelector('.bottle-override-detail .c-bottle-amount');
+    const bottleUnitEl=b.querySelector('.bottle-amount-wrap .c-bottle-unit')||b.querySelector('.bottle-override-detail .c-bottle-unit');
+    return{
+      name:b.querySelector('.c-name').value.trim(),
+      colorIdx:parseInt(b.querySelector('.c-color-idx').value,10),
+      emoji:b.querySelector('.c-emoji').value.trim(),
+      age:b.querySelector('.c-age-value').value.trim()+' '+b.querySelector('.c-age-unit').value,
+      allergens:allergens.join(', '),
+      allergyNotes:b.querySelector('.c-allergy-notes').value.trim(),
+      foodType:b.querySelector('.c-food-type')?b.querySelector('.c-food-type').value:'',
+      nappyStatus:young?b.querySelector('.c-nappy-status').value:'',
+      nappy:young?b.querySelector('.c-nappy').value:'',
+      cream:young?b.querySelector('.c-cream').value:'',
+      creamNotes:young?b.querySelector('.c-cream-notes').value.trim():'',
+      milk:young?b.querySelector('.c-milk').value:'',
+      milkNotes:young?b.querySelector('.c-milk-notes').value.trim():'',
+      bottleAmount:bottleAmountEl?bottleAmountEl.value.trim():'',
+      bottleUnit:bottleUnitEl?bottleUnitEl.value:'ml',
+      school:isOld?b.querySelector('.c-school').value.trim():'',
+      independence:b.querySelector('.c-independence').value.trim(),
+      likes:b.querySelector('.c-likes').value.trim(),
+      behaviour:b.querySelector('.c-behaviour').value.trim(),
     };
   });
 }
 
-function applyChildData(idx, data) {
-  const b = document.querySelector(`.child-card[data-child="${idx}"]`);
-  if (!b || !data) return;
-  if (data.name) b.querySelector('.c-name').value = data.name;
-  if (data.colorIdx !== undefined && data.colorIdx !== null && data.colorIdx >= 0) {
-    selectSwatch(idx, data.colorIdx);
-  }
-  if (data.emoji) b.querySelector('.c-emoji').value = data.emoji;
-  if (data.age) {
-    const parts = data.age.split(' ');
-    b.querySelector('.c-age-value').value = parts[0] || '';
-    if (parts[1]) b.querySelector('.c-age-unit').value = parts[1];
-  }
-  if (data.allergens) {
-    data.allergens.split(', ').forEach(val => {
-      const cb = b.querySelector(`input[value="${val}"]`);
-      if (cb) cb.checked = true;
-    });
-  }
-  if (data.allergyNotes) b.querySelector('.c-allergy-notes').value = data.allergyNotes;
-  if (data.nappyStatus) b.querySelector('.c-nappy-status').value = data.nappyStatus;
-  if (data.nappy) b.querySelector('.c-nappy').value = data.nappy;
-  if (data.cream) b.querySelector('.c-cream').value = data.cream;
-  if (data.creamNotes) b.querySelector('.c-cream-notes').value = data.creamNotes;
-  if (data.milk) b.querySelector('.c-milk').value = data.milk;
-  if (data.milkNotes) b.querySelector('.c-milk-notes').value = data.milkNotes;
-  if (data.school) b.querySelector('.c-school').value = data.school;
-  if (data.independence) b.querySelector('.c-independence').value = data.independence;
-  if (data.likes) b.querySelector('.c-likes').value = data.likes;
-  if (data.behaviour) b.querySelector('.c-behaviour').value = data.behaviour;
+function applyChildData(idx,data){
+  const b=document.querySelector(`.child-card[data-child="${idx}"]`);
+  if(!b||!data)return;
+  if(data.name)b.querySelector('.c-name').value=data.name;
+  if(data.colorIdx!==undefined&&data.colorIdx>=0)selectSwatch(idx,data.colorIdx);
+  if(data.emoji)b.querySelector('.c-emoji').value=data.emoji;
+  if(data.age){const p=data.age.split(' ');b.querySelector('.c-age-value').value=p[0]||'';if(p[1])b.querySelector('.c-age-unit').value=p[1];}
+  if(data.allergens)data.allergens.split(', ').forEach(val=>{const cb=b.querySelector(`input[value="${val}"]`);if(cb)cb.checked=true;});
+  if(data.allergyNotes)b.querySelector('.c-allergy-notes').value=data.allergyNotes;
+  if(data.nappyStatus)b.querySelector('.c-nappy-status').value=data.nappyStatus;
+  if(data.nappy)b.querySelector('.c-nappy').value=data.nappy;
+  if(data.cream)b.querySelector('.c-cream').value=data.cream;
+  if(data.creamNotes)b.querySelector('.c-cream-notes').value=data.creamNotes;
+  if(data.milk)b.querySelector('.c-milk').value=data.milk;
+  if(data.milkNotes)b.querySelector('.c-milk-notes').value=data.milkNotes;
+  if(data.school&&b.querySelector('.c-school'))b.querySelector('.c-school').value=data.school;
+  if(data.independence)b.querySelector('.c-independence').value=data.independence;
+  if(data.likes)b.querySelector('.c-likes').value=data.likes;
+  if(data.behaviour)b.querySelector('.c-behaviour').value=data.behaviour;
+  updateAgeFields(b);
 }
 
-document.querySelectorAll('.mode-card').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
+// ── MODE + DURATION SELECTION ──
+const FORMAT_RECS={
+  evening:{mode:'landscape',msg:'📋 <strong>One-Pager auto-selected.</strong> For an evening, one printed page covers everything — easy to stick on the fridge. You can still switch below if you prefer.'},
+  fullday:{mode:null,msg:'☀️ <strong>Choose a format below.</strong> Pick the Short One-Pager if the carer knows your child well, or the Full Guide for someone newer or a longer day.'},
+  fewdays:{mode:'indepth',msg:'📖 <strong>Full Guide auto-selected.</strong> For a multi-day stay, more detail means fewer 2am questions. You can still switch below if you prefer.'},
+};
+document.querySelectorAll('.duration-card').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.duration-card').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
-    selectedMode = btn.dataset.mode;
-    document.getElementById('continueToFormBtn').disabled = false;
+    selectedDuration=btn.dataset.duration;
+    const rec=FORMAT_RECS[selectedDuration];
+    const banner=document.getElementById('formatRecommendation');
+    if(rec){banner.innerHTML=rec.msg;banner.style.display='block';}
+    if(rec&&rec.mode){
+      document.querySelectorAll('.mode-card').forEach(b=>b.classList.remove('selected'));
+      const mb=document.querySelector(`.mode-card[data-mode="${rec.mode}"]`);
+      if(mb)mb.classList.add('selected');
+      selectedMode=rec.mode;
+    } else if(rec&&!rec.mode){
+      document.querySelectorAll('.mode-card').forEach(b=>b.classList.remove('selected'));
+      selectedMode=null;
+    }
+    checkContinueReady();
   });
 });
-
-document.getElementById('modeLanguage').addEventListener('change', e => {
-  document.getElementById('modeLanguageOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
+document.querySelectorAll('.mode-card').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-card').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMode=btn.dataset.mode;
+    checkContinueReady();
+  });
+});
+function checkContinueReady(){
+  document.getElementById('continueToFormBtn').disabled=!(selectedMode&&selectedDuration);
+}
+document.getElementById('modeLanguage').addEventListener('change',e=>{
+  document.getElementById('modeLanguageOtherField').style.display=e.target.value==='other'?'block':'none';
+});
+document.getElementById('continueToFormBtn').addEventListener('click',()=>{
+  document.getElementById('modeView').style.display='none';
+  document.getElementById('formView').style.display='block';
+  // Duration-specific form adjustments
+  const durationLabels={evening:'🌙 Evening / Few Hours',fullday:'☀️ Full Day',fewdays:'📅 A Few Days'};
+  document.getElementById('formSubtitle').textContent=`${durationLabels[selectedDuration]||''} · Fill in the details below.`;
+  document.getElementById('multiDaySection').style.display=selectedDuration==='fewdays'?'block':'none';
+  renderQuickChips();
+});
+document.getElementById('backToModeBtn').addEventListener('click',()=>{
+  document.getElementById('formView').style.display='none';
+  document.getElementById('modeView').style.display='block';
 });
 
-document.getElementById('continueToFormBtn').addEventListener('click', () => {
-  document.getElementById('modeView').style.display = 'none';
-  document.getElementById('formView').style.display = 'block';
-});
-
-document.getElementById('backToModeBtn').addEventListener('click', () => {
-  document.getElementById('formView').style.display = 'none';
-  document.getElementById('modeView').style.display = 'block';
-});
-
-function setPrintOrientation(mode) {
-  let styleEl = document.getElementById('dynamicPageStyle');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'dynamicPageStyle';
-    document.head.appendChild(styleEl);
-  }
-  styleEl.textContent = mode === 'landscape'
-    ? '@media print { @page { size: A4 landscape; margin: 12mm; } }'
-    : '@media print { @page { size: A4; margin: 14mm; } }';
+function setPrintOrientation(mode){
+  let s=document.getElementById('dynamicPageStyle');
+  if(!s){s=document.createElement('style');s.id='dynamicPageStyle';document.head.appendChild(s);}
+  s.textContent=mode==='landscape'?'@media print{@page{size:A4 landscape;margin:12mm;}}':'@media print{@page{size:A4;margin:14mm;}}';
 }
 
-document.getElementById('addChildBtn').addEventListener('click', () => addChild());
-
-document.getElementById('caregiverRelationship').addEventListener('change', e => {
-  document.getElementById('relationshipOtherField').style.display = e.target.value === 'other' ? 'block' : 'none';
+document.getElementById('addChildBtn').addEventListener('click',()=>addChild());
+document.getElementById('caregiverRelationship').addEventListener('change',e=>{
+  document.getElementById('relationshipOtherField').style.display=e.target.value==='other'?'block':'none';
 });
-document.getElementById('accessCode').addEventListener('input', e => {
-  const btn = document.getElementById('generateBtn');
-  btn.textContent = e.target.value.trim() ? 'Generate guide (free with code)' : 'Generate guide — £0.99';
+document.getElementById('accessCode').addEventListener('input',e=>{
+  document.getElementById('generateBtn').textContent=e.target.value.trim()?'Generate guide (free with code)':'Generate guide — £0.99';
 });
 
-async function loadSavedEntry() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data.children && data.children.length) {
-        data.children.forEach(c => addChild(c));
-      } else {
-        addChild();
-      }
-      if (data.routineItems && data.routineItems.length) {
-        data.routineItems.forEach(r => addRoutineItem(r));
-      }
-      if (data.contacts && data.contacts.length) {
-        data.contacts.forEach(c => addContact(c));
-      }
-      if (data.importantNote) document.getElementById('importantNote').value = data.importantNote;
-      if (data.caregiverName) document.getElementById('caregiverName').value = data.caregiverName;
-      if (data.caregiverRelationship) document.getElementById('caregiverRelationship').value = data.caregiverRelationship;
-      if (data.caregiverRelationshipOther) document.getElementById('caregiverRelationshipOther').value = data.caregiverRelationshipOther;
-      if (data.languageSelect) document.getElementById('modeLanguage').value = data.languageSelect;
-      if (data.languageOther) document.getElementById('modeLanguageOther').value = data.languageOther;
-      if (data.extra) document.getElementById('extra').value = data.extra;
-      if (data.signOff) document.getElementById('signOff').value = data.signOff;
-      if (data.mode) {
-        selectedMode = data.mode;
-        const modeBtn = document.querySelector(`.mode-card[data-mode="${data.mode}"]`);
-        if (modeBtn) {
-          document.querySelectorAll('.mode-card').forEach(b => b.classList.remove('selected'));
-          modeBtn.classList.add('selected');
-        }
-        document.getElementById('continueToFormBtn').disabled = false;
-      }
+// ── SAVE / LOAD ──
+async function saveEntry(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}catch(e){}}
+async function loadSavedEntry(){
+  try{
+    const saved=localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      const data=JSON.parse(saved);
+      if(data.children&&data.children.length)data.children.forEach(c=>addChild(c));else addChild();
+      if(data.routineItems&&data.routineItems.length)data.routineItems.forEach(r=>addRoutineItem(r));
+      if(data.contacts&&data.contacts.length)data.contacts.forEach(c=>addContact(c));
+      if(data.importantNote)document.getElementById('importantNote').value=data.importantNote;
+      if(data.caregiverName)document.getElementById('caregiverName').value=data.caregiverName;
+      if(data.caregiverRelationship)document.getElementById('caregiverRelationship').value=data.caregiverRelationship;
+      if(data.caregiverRelationshipOther)document.getElementById('caregiverRelationshipOther').value=data.caregiverRelationshipOther;
+      if(data.languageSelect)document.getElementById('modeLanguage').value=data.languageSelect;
+      if(data.languageOther)document.getElementById('modeLanguageOther').value=data.languageOther;
+      if(data.extra)document.getElementById('extra').value=data.extra;
+      if(data.signOff)document.getElementById('signOff').value=data.signOff;
+      if(data.country)document.getElementById('countrySelect').value=data.country;
+      if(data.multiDayNotes)document.getElementById('multiDayNotes').value=data.multiDayNotes;
+      if(data.overnightNotes)document.getElementById('overnightNotes').value=data.overnightNotes;
+      if(data.mode){selectedMode=data.mode;const b=document.querySelector(`.mode-card[data-mode="${data.mode}"]`);if(b){document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}}
+      if(data.duration){selectedDuration=data.duration;const b=document.querySelector(`.duration-card[data-duration="${data.duration}"]`);if(b){document.querySelectorAll('.duration-card').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}}
+      checkContinueReady();
       document.getElementById('caregiverRelationship').dispatchEvent(new Event('change'));
       document.getElementById('modeLanguage').dispatchEvent(new Event('change'));
+      document.getElementById('countrySelect').dispatchEvent(new Event('change'));
       return;
     }
-  } catch (e) { /* no saved entry yet */ }
+  }catch(e){}
   addChild();
 }
 
-async function saveEntry(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-  catch (e) { console.error('Could not save entry', e); }
+// ── UTILS ──
+function formatTime12hr(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12===0?12:h%12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${msg}</div>`;}
+function clearError(){document.getElementById('errorBox').innerHTML='';}
+function parseInlineBold(text){if(!text)return'';return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+function boldChildNames(text,names){let r=text;names.forEach(n=>{if(!n)return;const re=new RegExp('^('+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—:-])','i');r=r.replace(re,'<strong>$1</strong>');});return r;}
+function iconForImportantLine(line){
+  const l=line.toLowerCase();
+  if(l.includes('nut')||l.includes('allerg')||l.includes('epipen'))return'🥜';
+  if(l.includes('stair')||l.includes('gate'))return'🚪';
+  if(l.includes('medic')||l.includes('inhaler')||l.includes('asthma'))return'💊';
+  if(l.includes('nappy')||l.includes('cream'))return'👶';
+  if(l.includes('screen')||l.includes('tablet'))return'📱';
+  if(l.includes('water')||l.includes('hydrat'))return'💧';
+  if(l.includes('toilet')||l.includes('potty'))return'🚽';
+  if(l.includes('tooth')||l.includes('teeth'))return'🦷';
+  return'⚠️';
+}
+function groupByTime(items){
+  const map=new Map();
+  items.forEach(item=>{const k=item.time||'unspecified';if(!map.has(k))map.set(k,[]);map.get(k).push(item);});
+  return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
 }
 
-function showError(msg) { document.getElementById('errorBox').innerHTML = `<div class="error-box">${msg}</div>`; }
-function clearError() { document.getElementById('errorBox').innerHTML = ''; }
-
-function parseInlineBold(text) {
-  if (!text) return '';
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-}
-
-function boldChildNames(text, names) {
-  let result = text;
-  names.forEach(name => {
-    if (!name) return;
-    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp('^(' + escaped + ')(\\s*[—:-])', 'i');
-    result = result.replace(re, '<strong>$1</strong>$2');
-  });
-  return result;
-}
-
-function iconForImportantLine(line) {
-  const l = line.toLowerCase();
-  if (l.includes('nut') || l.includes('allerg') || l.includes('epipen')) return '🥜';
-  if (l.includes('stair') || l.includes('gate')) return '🚪';
-  if (l.includes('nappy') || l.includes('diaper') || l.includes('cream')) return '👶';
-  if (l.includes('water') || l.includes('hydrat')) return '💧';
-  if (l.includes('walk') || l.includes('cruis') || l.includes('mobile') || l.includes('climb')) return '🚶';
-  if (l.includes('tooth') || l.includes('teeth')) return '🦷';
-  if (l.includes('toilet') || l.includes('potty')) return '🚽';
-  if (l.includes('screen') || l.includes('tablet') || l.includes('tv')) return '📱';
-  return '⚠️';
-}
-
-function groupByTime(items) {
-  const map = new Map();
-  items.forEach(item => {
-    const key = item.time || 'unspecified';
-    if (!map.has(key)) map.set(key, []);
-    map.get(key).push(item);
-  });
-  return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-}
-
-function attachTranslatedNotes(routineItems, aiData) {
-  const schedule = routineItems.filter(r => r.type !== 'Bedtime');
-  const bedtime = routineItems.filter(r => r.type === 'Bedtime');
-  const schedT = Array.isArray(aiData.translatedRoutineNotes) && aiData.translatedRoutineNotes.length === schedule.length
-    ? aiData.translatedRoutineNotes : null;
-  const bedT = Array.isArray(aiData.translatedBedtimeNotes) && aiData.translatedBedtimeNotes.length === bedtime.length
-    ? aiData.translatedBedtimeNotes : null;
-  let si = 0, bi = 0;
-  return routineItems.map(item => {
-    if (item.type === 'Bedtime') {
-      const note = bedT ? bedT[bi] : item.notes;
-      bi++;
-      return { ...item, displayNote: note };
-    } else {
-      const note = schedT ? schedT[si] : item.notes;
-      si++;
-      return { ...item, displayNote: note };
-    }
-  });
-}
-
-function renderGuideIndepth(aiData, children, formData) {
-  const kidIdentity = {};
-  children.forEach((c, i) => { kidIdentity[c.name] = resolveKidIdentity(c, i); });
-
-  const labels = (aiData.labels && aiData.labels.schedule) ? aiData.labels : ENGLISH_LABELS;
-  const typeLabels = labels.types || ENGLISH_LABELS.types;
-
-  function kidTag(name) {
-    const id = kidIdentity[name];
-    if (!id) return `<span class="kid-tag" style="background:var(--sage);">${name}</span>`;
-    return `<span class="kid-tag" style="background:${id.color};">${id.emoji} ${name}</span>`;
-  }
-
-  const routineItems = formData.routineItems || [];
-  const scheduleItems = routineItems.filter(r => r.type !== 'Bedtime');
-  const bedtimeItems = routineItems.filter(r => r.type === 'Bedtime').sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
-
-  // Translated notes are positional arrays matching scheduleItems/bedtimeItems/importantLines order.
-  // Fall back to raw text if missing or length mismatch, so a translation hiccup never breaks rendering.
-  const schedNotesT = Array.isArray(aiData.translatedRoutineNotes) && aiData.translatedRoutineNotes.length === scheduleItems.length
-    ? aiData.translatedRoutineNotes : null;
-  const bedNotesT = Array.isArray(aiData.translatedBedtimeNotes) && aiData.translatedBedtimeNotes.length === bedtimeItems.length
-    ? aiData.translatedBedtimeNotes : null;
-
-  let html = '';
-
-  // Header
-  const headerEmojis = children.map((c, i) => resolveKidIdentity(c, i).emoji).join(' ');
-  const headerNames = children.map(c => c.name).filter(Boolean).join(' & ');
-  html += `<div class="header-band">
-    <div class="header-emojis">${headerEmojis}</div>
-    <div class="header-names">${headerNames}</div>
-    <div class="header-sub">Guide for ${formData.caregiverName}</div>
-    <div class="header-note">${aiData.intro || ''}</div>
-  </div>`;
-
-  html += `<div class="guide-body">`;
-
-  // Schedule
-  if (scheduleItems.length) {
-    html += `<div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
-    const indexed = scheduleItems.map((item, i) => ({ item, note: schedNotesT ? schedNotesT[i] : item.notes }));
-    const groups = groupByTime(indexed.map(x => ({ ...x.item, notes: x.note })));
-    groups.forEach(([time, items]) => {
-      const timeLabel = time === 'unspecified' ? 'Time not set' : formatTime12hr(time);
-      const title = typeLabels[items[0].type] || items[0].type;
-      html += `<div class="sched-entry">
-        <div class="sched-head"><span class="sched-time">${timeLabel}</span><span class="sched-title">${title}</span></div>
-        <div class="sched-body">`;
-      items.forEach(item => {
-        const who = item.child === 'all' ? labels.allChildren : item.child;
-        const tag = item.child === 'all' ? `<span class="kid-tag" style="background:var(--sage);">${who}</span>` : kidTag(item.child);
-        const note = item.notes ? parseInlineBold(item.notes) : '';
-        html += `<div class="sched-row">${tag} ${note ? '— ' + note : ''}</div>`;
-      });
-      html += `</div></div>`;
-    });
-  }
-
-  // Bedtime sequence
-  if (bedtimeItems.length) {
-    html += `<div class="section-eyebrow">🌙 ${labels.bedtime}</div>`;
-    bedtimeItems.forEach((item, i) => {
-      const id = item.child === 'all' || item.child === 'unspecified' ? null : kidIdentity[item.child];
-      const avatarBg = id ? id.color : 'var(--sage)';
-      const avatarText = id ? id.emoji : '✓';
-      const noteText = bedNotesT ? bedNotesT[i] : item.notes;
-      const text = noteText ? parseInlineBold(noteText) : (item.child === 'all' ? labels.bedtime : `${item.child}'s bedtime`);
-      html += `<div class="bedtime-step">
-        <div class="step-avatar" style="background:${avatarBg};">${avatarText}</div>
-        <div class="bedtime-text">${text}</div>
-      </div>`;
-    });
-  }
-
-  // Important
-  const importantLinesRaw = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
-  const importantT = Array.isArray(aiData.translatedImportant) && aiData.translatedImportant.length === importantLinesRaw.length
-    ? aiData.translatedImportant : null;
-  if (importantLinesRaw.length) {
-    html += `<div class="section-eyebrow">⚠ ${labels.important}</div><div class="important-list">`;
-    importantLinesRaw.forEach((line, i) => {
-      const shown = importantT ? importantT[i] : line;
-      html += `<div class="important-item"><span class="ii-icon">${iconForImportantLine(line)}</span><span>${parseInlineBold(shown)}</span></div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Comfort & Personality (per child, from AI)
-  if (aiData.childSections && aiData.childSections.length) {
-    html += `<div class="section-eyebrow">💛 ${labels.comfort}</div><div class="comfort-grid">`;
-    aiData.childSections.forEach(cs => {
-      const id = kidIdentity[cs.childName] || getKidIdentity(0);
-      html += `<div class="comfort-card" style="background:${id.dim};">
-        <div class="comfort-card-head">${id.emoji} ${cs.childName}</div>
-        <p>${parseInlineBold(cs.comfort || '')}</p>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Other AI sections
-  const childNames = children.map(c => c.name);
-  if (aiData.sections && aiData.sections.length) {
-    aiData.sections.forEach(sec => {
-      const lines = (sec.content || '').split('\n').map(l => l.trim()).filter(Boolean);
-      const isListy = lines.length > 1;
-      html += `<div class="plain-section"><div class="section-eyebrow" style="margin:20px 0 8px;">${sec.label}</div>`;
-      if (isListy) {
-        html += '<ul>' + lines.map(l => `<li>${boldChildNames(parseInlineBold(l.replace(/^[-•]\s*/, '')), childNames)}</li>`).join('') + '</ul>';
-      } else {
-        html += `<p>${boldChildNames(parseInlineBold(sec.content || ''), childNames)}</p>`;
-      }
-      html += `</div>`;
-    });
-  }
-
-  // Contacts
-  const contacts = formData.contacts || [];
-  if (contacts.length) {
-    html += `<div class="section-eyebrow">📞 ${labels.contacts}</div><div class="contacts-grid">`;
-    contacts.forEach(c => {
-      html += `<div class="contact-card"><div class="contact-name">${c.name || 'Contact'}</div><div class="contact-line">${c.phone || ''}</div></div>`;
-    });
-    html += `</div>`;
-  }
-
-  // Closing
-  const signOff = formData.signOff ? formData.signOff : 'the family';
-  html += `<div class="closing-note">Thank you so much for this, ${formData.caregiverName || 'and thank you'} 🤍<br><strong>— ${signOff}</strong></div>`;
-  html += `<div class="guide-footer">Made with <strong>MML</strong> — my mental load</div>`;
-
-  html += `</div>`;
-  document.getElementById('guideContent').innerHTML = html;
-}
-
-function renderGuideLandscape(aiData, children, formData) {
-  const kidIdentity = {};
-  children.forEach((c, i) => { kidIdentity[c.name] = resolveKidIdentity(c, i); });
-  const labels = (aiData.labels && aiData.labels.schedule) ? aiData.labels : ENGLISH_LABELS;
-  const typeLabels = labels.types || ENGLISH_LABELS.types;
-
-  const itemsWithNotes = attachTranslatedNotes(formData.routineItems || [], aiData);
-  const sorted = [...itemsWithNotes].sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
-
-  const importantLinesRaw = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
-  const importantT = Array.isArray(aiData.translatedImportant) && aiData.translatedImportant.length === importantLinesRaw.length
-    ? aiData.translatedImportant : null;
-
-  const numCols = children.length >= 2 ? 3 : 2;
-  const colsClass = numCols === 3 ? 'cols-3' : 'cols-2';
-
-  let html = `<div class="lg-pad">`;
-  html += `<div class="header-names" style="font-size:1.3rem; margin-bottom:2px;">${children.map(c => c.name).filter(Boolean).join(' & ')}</div>`;
-  html += `<div class="header-sub" style="margin-bottom:4px;">Guide for ${formData.caregiverName}</div>`;
-  if (aiData.intro) html += `<div class="header-note" style="font-size:0.82rem; max-width:none; margin:0 0 14px;">${aiData.intro}</div>`;
-
-  if (importantLinesRaw.length) {
-    html += `<div class="lg-important">`;
-    importantLinesRaw.forEach((line, i) => {
-      const shown = importantT ? importantT[i] : line;
-      html += `<div class="lg-important-item">${iconForImportantLine(line)} ${parseInlineBold(shown)}</div>`;
-    });
-    html += `</div>`;
-  }
-
-  html += `<div class="lg-grid ${colsClass}">`;
-
-  html += `<div><div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
-  sorted.forEach(item => {
-    const timeLabel = item.time ? formatTime12hr(item.time) : '—';
-    const title = typeLabels[item.type] || item.type;
-    const who = item.child === 'all' ? '' : item.child;
-    const id = who ? kidIdentity[who] : null;
-    const tag = id ? `<span class="kid-tag" style="background:${id.color}; font-size:0.62rem; padding:1px 7px;">${id.emoji} ${who}</span>` : '';
-    const note = item.displayNote ? parseInlineBold(item.displayNote) : '';
-    html += `<div class="lg-sched-entry"><span class="lg-time">${timeLabel}</span>${tag}<span>${title}</span>${note ? `<span class="lg-note">${note}</span>` : ''}</div>`;
-  });
-  html += `</div>`;
-
-  children.forEach(c => {
-    const id = kidIdentity[c.name];
-    const cs = (aiData.childSections || []).find(x => x.childName === c.name);
-    const comfortShort = cs && cs.comfort ? cs.comfort.split(/(?<=[.!?])\s+/).slice(0, 2).join(' ') : '';
-    html += `<div class="lg-kid-col">
-      <div class="lg-kid-head" style="color:${id.color}; border-color:${id.color};">${id.emoji} ${c.name}${c.age ? ', ' + c.age.split(' ')[0] : ''}</div>`;
-    if (comfortShort) html += `<div class="lg-mini"><div class="lg-mini-label">${labels.comfort}</div><p>${parseInlineBold(comfortShort)}</p></div>`;
-    const allergyText = [c.allergens, c.allergyNotes].filter(Boolean).join(' — ');
-    if (allergyText) html += `<div class="lg-mini"><div class="lg-mini-label">Allergies</div><p>${allergyText}</p></div>`;
-    if (c.independence) html += `<div class="lg-mini"><div class="lg-mini-label">Screen time</div><p>${c.independence}</p></div>`;
-    html += `</div>`;
-  });
-
-  html += `</div>`;
-
-  if ((formData.contacts || []).length) {
-    html += `<div class="lg-contacts">${labels.contacts}: ${formData.contacts.map(c => `${c.name} ${c.phone}`).join(' · ')}</div>`;
-  }
-
-  html += `<div class="guide-footer" style="margin-top:14px;">Made with <strong>MML</strong> — my mental load</div>`;
-  html += `</div>`;
-  document.getElementById('guideContent').innerHTML = html;
-}
-
-function validateAndBuildFormData() {
-  if (!selectedMode) {
-    return { valid: false, error: 'Please go back and choose a format first.' };
-  }
-  const children = collectChildren();
-  if (!children.length || !children[0].name) {
-    return { valid: false, error: 'Please fill in at least one child\'s name.' };
-  }
-
-  const relSelect = document.getElementById('caregiverRelationship').value;
-  const relationship = relSelect === 'other' ? document.getElementById('caregiverRelationshipOther').value.trim() : relSelect;
-  const langSelect = document.getElementById('modeLanguage').value;
-  const language = langSelect === 'other' ? document.getElementById('modeLanguageOther').value.trim() : langSelect;
-
-  const formData = {
-    children,
-    routineItems: collectRoutineItems(),
-    contacts: collectContacts(),
-    importantNote: document.getElementById('importantNote').value.trim(),
-    caregiverName: document.getElementById('caregiverName').value.trim(),
-    caregiverRelationship: relSelect,
-    caregiverRelationshipOther: document.getElementById('caregiverRelationshipOther').value.trim(),
-    mode: selectedMode,
-    languageSelect: langSelect,
-    languageOther: document.getElementById('modeLanguageOther').value.trim(),
-    extra: document.getElementById('extra').value.trim(),
-    signOff: document.getElementById('signOff').value.trim()
+// ── VALIDATE & BUILD FORM DATA ──
+function validateAndBuildFormData(){
+  if(!selectedMode)return{valid:false,error:'Please go back and choose a format.'};
+  if(!selectedDuration)return{valid:false,error:'Please go back and choose a duration.'};
+  const children=collectChildren();
+  if(!children.length||!children[0].name)return{valid:false,error:"Please fill in at least one child's name."};
+  const relSelect=document.getElementById('caregiverRelationship').value;
+  const relationship=relSelect==='other'?document.getElementById('caregiverRelationshipOther').value.trim():relSelect;
+  const langSelect=document.getElementById('modeLanguage').value;
+  const language=langSelect==='other'?document.getElementById('modeLanguageOther').value.trim():langSelect;
+  const formData={
+    children,routineItems:collectRoutineItems(),contacts:collectContacts(),
+    importantNote:document.getElementById('importantNote').value.trim(),
+    caregiverName:document.getElementById('caregiverName').value.trim(),
+    caregiverRelationship:relSelect,
+    caregiverRelationshipOther:document.getElementById('caregiverRelationshipOther').value.trim(),
+    mode:selectedMode,duration:selectedDuration,
+    languageSelect:langSelect,languageOther:document.getElementById('modeLanguageOther').value.trim(),
+    extra:document.getElementById('extra').value.trim(),
+    signOff:document.getElementById('signOff').value.trim(),
+    country:document.getElementById('countrySelect').value,
+    multiDayNotes:document.getElementById('multiDayNotes').value.trim(),
+    overnightNotes:document.getElementById('overnightNotes').value.trim(),
   };
-
-  if (!formData.caregiverName) {
-    return { valid: false, error: 'Please fill in who this guide is for.' };
-  }
-
-  return { valid: true, children, formData, relationship, language };
+  if(!formData.caregiverName)return{valid:false,error:'Please fill in who this guide is for.'};
+  return{valid:true,children,formData,relationship,language};
 }
 
-async function performGeneration(authPayload) {
+// ── GENERATE ──
+async function performGeneration(authPayload){
   clearError();
-  const v = validateAndBuildFormData();
-  if (!v.valid) { showError(v.error); return; }
-  const { children, formData, relationship, language } = v;
-
+  const v=validateAndBuildFormData();
+  if(!v.valid){showError(v.error);return;}
+  const{children,formData,relationship,language}=v;
   await saveEntry(formData);
 
-  document.getElementById('modeView').style.display = 'none';
-  document.getElementById('formView').style.display = 'none';
-  document.getElementById('loadingText').textContent = 'Writing the guide…';
-  document.getElementById('loadingView').style.display = 'block';
+  document.getElementById('modeView').style.display='none';
+  document.getElementById('formView').style.display='none';
+  document.getElementById('loadingText').textContent='Writing the guide…';
+  document.getElementById('loadingView').style.display='block';
 
-  const childrenText = children.map((c, i) => {
-    const lines = [
-      `Child ${i + 1}: ${c.name}, age ${c.age}`,
-      `  Allergies: ${[c.allergens, c.allergyNotes].filter(Boolean).join(' — ') || 'None noted'}`
-    ];
-    if (c.nappyStatus || c.nappy || c.cream === 'Yes') {
-      const nappyBits = [];
-      if (c.nappyStatus) nappyBits.push(c.nappyStatus);
-      if (c.nappy) nappyBits.push(`size ${c.nappy}`);
-      if (c.cream === 'Yes') nappyBits.push(`needs nappy cream${c.creamNotes ? ' (' + c.creamNotes + ')' : ''}`);
-      lines.push(`  Nappies: ${nappyBits.join(', ')}`);
+  // Duration context for prompt
+  const durationContext={
+    evening:'EVENING / FEW HOURS: Cover only dinner (if applicable), bath if mentioned, and the full bedtime sequence. Do NOT invent daytime activities. Keep the guide focused and brief.',
+    fullday:'FULL DAY: Cover all meals, naps, and activities as provided. Full detail.',
+    fewdays:'A FEW DAYS / OVERNIGHT: Cover the full routine. Where information is given, indicate daily patterns. Include overnight routine. If medication or specific timing is mentioned, make it prominent.',
+  }[formData.duration]||'Full detail.';
+
+  // Emergency numbers
+  const emergencyNums=EMERGENCY_NUMBERS[formData.country]||'';
+
+  // Children text for prompt
+  const childrenText=children.map((c,i)=>{
+    const lines=[`Child ${i+1}: ${c.name}, age ${c.age}`];
+    lines.push(`  Food type: ${c.foodType||'not specified'}`);
+    lines.push(`  Allergies: ${[c.allergens,c.allergyNotes].filter(Boolean).join(' — ')||'None noted'}`);
+    if(c.nappyStatus||c.nappy||c.cream==='Yes'){
+      const b=[];if(c.nappyStatus)b.push(c.nappyStatus);if(c.nappy)b.push(`size ${c.nappy}`);
+      if(c.cream==='Yes')b.push(`needs cream${c.creamNotes?' ('+c.creamNotes+')':''}`);
+      lines.push(`  Nappies: ${b.join(', ')}`);
     }
-    if (c.milk || c.milkNotes) lines.push(`  Milk: ${[c.milk, c.milkNotes].filter(Boolean).join(' — ')}`);
-    if (c.school) lines.push(`  School/activities & homework: ${c.school}`);
-    if (c.independence) lines.push(`  Independence & screen time rules: ${c.independence}`);
-    lines.push(`  Likes/dislikes/comfort: ${c.likes}`);
-    lines.push(`  What helps if upset: ${c.behaviour}`);
+    if(c.milk||c.milkNotes)lines.push(`  Milk: ${[c.milk,c.milkNotes].filter(Boolean).join(' — ')}`);
+    if(c.bottleAmount)lines.push(`  Bottle amount: ${c.bottleAmount}${c.bottleUnit} per feed`);
+    if(c.school)lines.push(`  School/activities: ${c.school}`);
+    if(c.independence)lines.push(`  Screen time & independence: ${c.independence}`);
+    // CLEARLY SEPARATED — likes vs what to do when upset
+    lines.push(`  PERSONALITY, LIKES & COMFORT ITEMS (use ONLY for the comfort/personality section): ${c.likes||'not specified'}`);
+    lines.push(`  WHAT TO DO WHEN CHILD IS UPSET (use ONLY for the when-upset section, NOT as comfort): ${c.behaviour||'not specified'}`);
     return lines.join('\n');
   }).join('\n\n');
 
-  const childNamesList = children.map(c => c.name).join(', ');
+  const childNamesList=children.map(c=>c.name).join(', ');
+  const needsTranslation=!!language&&language!=='English';
+  const schedItems=(formData.routineItems||[]).filter(r=>r.type!=='Bedtime');
+  const bedItems=(formData.routineItems||[]).filter(r=>r.type==='Bedtime');
+  const importantLines=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
 
-  const needsTranslation = !!language && language !== 'English';
-  const scheduleItemsForTranslation = (formData.routineItems || []).filter(r => r.type !== 'Bedtime');
-  const bedtimeItemsForTranslation = (formData.routineItems || []).filter(r => r.type === 'Bedtime');
-  const importantLinesForTranslation = (formData.importantNote || '').split('\n').map(l => l.trim()).filter(Boolean);
-
-  let translationBlock = '';
-  if (needsTranslation) {
-    translationBlock = `
-
-TRANSLATION REQUEST — the caregiver reads ${language}, not English. Translate these exact items and return them in the JSON fields described below, preserving order and count exactly:
-Important note lines (${importantLinesForTranslation.length} total): ${JSON.stringify(importantLinesForTranslation)}
-Schedule item notes (${scheduleItemsForTranslation.length} total, in order, empty string if none): ${JSON.stringify(scheduleItemsForTranslation.map(i => i.notes || ''))}
-Bedtime item notes (${bedtimeItemsForTranslation.length} total, in order, empty string if none): ${JSON.stringify(bedtimeItemsForTranslation.map(i => i.notes || ''))}
-Also translate these fixed UI labels into ${language}: "Today's Schedule", "Bedtime Sequence", "Important", "Comfort & Personality", "Contacts", "All children", and the routine type words "Bedtime", "Nap", "Milk/Feed", "Lunch", "Snack".`;
+  let translationBlock='';
+  if(needsTranslation){
+    translationBlock=`\n\nTRANSLATION REQUEST — the caregiver reads ${language}. Translate faithfully and return in the JSON fields, preserving order and count exactly:\nImportant lines (${importantLines.length}): ${JSON.stringify(importantLines)}\nSchedule notes (${schedItems.length}): ${JSON.stringify(schedItems.map(i=>i.notes||''))}\nBedtime notes (${bedItems.length}): ${JSON.stringify(bedItems.map(i=>i.notes||''))}\nAlso translate these UI labels into ${language}: "Today's Schedule", "Bedtime Sequence", "Important", "Personality & Comfort", "If They Get Upset", "Contacts", "All children", and routine types: Bedtime, Nap, Milk/Feed, Lunch, Snack, Breakfast, Dinner, Bath.`;
   }
 
-  const userPrompt = `Children: ${childNamesList}
+  const multiDayBlock=formData.multiDayNotes||formData.overnightNotes?`\n\nMulti-day / overnight notes:\n${formData.multiDayNotes||''}\nOvernight routine: ${formData.overnightNotes||''}`:'';
+  const emergencyBlock=emergencyNums?`\n\nLocal emergency numbers (${formData.country}): ${emergencyNums}`:'';
 
-${childrenText}
+  const userPrompt=`Children: ${childNamesList}\n\n${childrenText}\n\nGuide for: ${formData.caregiverName} (${relationship})\nLanguage: ${language||'English'}\nSpecial instructions: ${formData.extra}${multiDayBlock}${emergencyBlock}${translationBlock}`;
 
-Guide is for: ${formData.caregiverName} (${relationship})
-Language to write the guide in: ${language || 'English'}
-Special instructions: ${formData.extra}${translationBlock}`;
+  const systemPrompt=`You write warm but economical childcare reference guides for caregivers. A grandparent skimming in 30 seconds must get every critical fact. Respond ONLY with valid JSON, no preamble, no markdown fences:
+{"intro":"string","childSections":[{"childName":"string","comfort":"string","whenUpset":"string"}],"sections":[{"label":"string","content":"string"}],"labels":{"schedule":"string","bedtime":"string","important":"string","comfort":"string","whenUpset":"string","contacts":"string","allChildren":"string","types":{"Bedtime":"string","Nap":"string","Milk/Feed":"string","Lunch":"string","Snack":"string","Breakfast":"string","Dinner":"string","Bath":"string"}},"translatedImportant":["string"],"translatedRoutineNotes":["string"],"translatedBedtimeNotes":["string"]}
 
-  try {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...authPayload,
-        max_tokens: 2200,
-        system: `You write warm but economical childcare reference guides for caregivers (nannies, grandparents, family members). A grandparent skimming this in 30 seconds should get every fact that matters. Respond ONLY with valid JSON, no preamble, no markdown code fences, in exactly this shape:
-{"intro": "string", "childSections": [{"childName": "string", "comfort": "string"}], "sections": [{"label": "string", "content": "string"}], "labels": {"schedule": "string", "bedtime": "string", "important": "string", "comfort": "string", "contacts": "string", "allChildren": "string", "types": {"Bedtime": "string", "Nap": "string", "Milk/Feed": "string", "Lunch": "string", "Snack": "string"}}, "translatedImportant": ["string"], "translatedRoutineNotes": ["string"], "translatedBedtimeNotes": ["string"]}
+DURATION CONTEXT: ${durationContext}
 
-STYLE — this is the most important instruction: be direct and economical. Every sentence must carry a real fact or instruction. No generic warmth, no padding adjectives, no exclamation marks, no sentences that could apply to any child. Short is good. A single accurate sentence beats three pleasant-sounding ones.
+STYLE: direct and economical. Every sentence carries a real fact. No generic warmth, no padding, no exclamation marks. Short is good.
 
-"intro": one short sentence addressed to the caregiver, naming the children. Practical, not flowery.
+"intro": one sentence to the caregiver, naming the children. Practical, not flowery.
 
-"childSections": one entry per child, "comfort" is 1-3 short sentences — personality, comfort items, what helps if upset. Only real, specific facts. Bold the single most important fact per child using **double asterisks**.
+"childSections": one entry per child.
+CRITICAL SEPARATION — these are two different fields:
+- "comfort": ONLY personality traits, specific likes, interests, and comfort items from the PERSONALITY/LIKES field. Do NOT include crisis or upset management here. Bold the single most important comfort item with **double asterisks**.
+- "whenUpset": ONLY practical step-by-step instructions from the WHAT-TO-DO-WHEN-UPSET field. Write as actionable steps. Do not invent advice. Do not repeat what the child likes.
 
-"sections": cover Food & Allergies, Independence & Screen Time, and Anything Else — only include a section if there's real content. Short, direct sentences. For any allergy, use this exact two-line format if there's enough detail: "✅ Fine: [examples]" then "✅ Avoid: [examples]" — otherwise describe it plainly in one sentence. Bold genuinely critical facts (quantities, timing, safety) using **double asterisks**, 1-2 per section maximum. Name children clearly if there's more than one — never merge differing needs into one vague sentence. Do NOT include a Daily Routine or Emergency Info section — those are handled separately.
+"sections": cover Food & Allergies (include food type stage), Screen Time, and Anything Else — only if there's real content. If emergency numbers were provided, add a section "Emergency Numbers" listing them clearly. Bold critical facts with **double asterisks**.
 
-LANGUAGE: if the requested language isn't English, write the entire response — intro, all sections, all labels — fully in that language, not just labeled in it.
+LANGUAGE: if not English, write the entire response in that language.
 
-TRANSLATION FIELDS: only include "labels", "translatedImportant", "translatedRoutineNotes", and "translatedBedtimeNotes" if the user message contains a "TRANSLATION REQUEST" block. When it does: translate each listed item faithfully and return arrays in the exact same order and count as given — this is critical, a missing or extra item breaks the layout. If there's no translation request (language is English), omit these four fields entirely.`,
-        messages: [{ role: "user", content: userPrompt }]
-      })
+TRANSLATION FIELDS: only include labels/translatedImportant/translatedRoutineNotes/translatedBedtimeNotes when a TRANSLATION REQUEST is present. Match arrays exactly in order and count.`;
+
+  try{
+    const response=await fetch('/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...authPayload,max_tokens:2500,system:systemPrompt,messages:[{role:'user',content:userPrompt}]})
     });
-
-    if (response.status === 402) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error || 'Payment required.');
-    }
-    if (!response.ok) {
-      const bodyText = await response.text().catch(() => '');
-      throw new Error('Request failed (' + response.status + '): ' + bodyText.slice(0, 200));
-    }
-    const result = await response.json();
-    const textBlock = result.content.find(b => b.type === 'text');
-    if (!textBlock) throw new Error('No text content in API response');
-
-    let cleaned = textBlock.text.trim().replace(/^```json\s*/i, '').replace(/```\s*$/, '');
+    if(response.status===402){const d=await response.json().catch(()=>({}));throw new Error(d.error||'Payment required.');}
+    if(!response.ok){const t=await response.text().catch(()=>'');throw new Error('Request failed ('+response.status+'): '+t.slice(0,200));}
+    const result=await response.json();
+    const textBlock=result.content.find(b=>b.type==='text');
+    if(!textBlock)throw new Error('No text content in API response');
+    let cleaned=textBlock.text.trim().replace(/^```json\s*/i,'').replace(/```\s*$/,'');
     let parsed;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch (parseErr) {
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-      else throw new Error('Could not parse guide content: ' + parseErr.message);
-    }
-
+    try{parsed=JSON.parse(cleaned);}
+    catch(e){const m=cleaned.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Could not parse guide: '+e.message);}
     setPrintOrientation(formData.mode);
-    if (formData.mode === 'landscape') {
-      renderGuideLandscape(parsed, children, formData);
-    } else {
-      renderGuideIndepth(parsed, children, formData);
-    }
-    document.getElementById('loadingView').style.display = 'none';
-    document.getElementById('guideView').style.display = 'block';
-
-  } catch (err) {
+    if(formData.mode==='landscape')renderGuideLandscape(parsed,children,formData);
+    else renderGuideIndepth(parsed,children,formData);
+    document.getElementById('loadingView').style.display='none';
+    document.getElementById('guideView').style.display='block';
+  }catch(err){
     console.error(err);
-    document.getElementById('loadingView').style.display = 'none';
-    document.getElementById('formView').style.display = 'block';
-    showError('Error: ' + (err && err.message ? err.message : 'unknown error') + '. Please try again.');
+    document.getElementById('loadingView').style.display='none';
+    document.getElementById('formView').style.display='block';
+    showError('Error: '+(err&&err.message?err.message:'unknown error')+'. Please try again.');
   }
 }
 
-document.getElementById('generateBtn').addEventListener('click', async () => {
+// ── RENDER IN-DEPTH ──
+function renderGuideIndepth(aiData,children,formData){
+  const kidIdentity={};children.forEach((c,i)=>{kidIdentity[c.name]=resolveKidIdentity(c,i);});
+  const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
+  const typeLabels=labels.types||ENGLISH_LABELS.types;
+  function kidTag(name){const id=kidIdentity[name];if(!id)return`<span class="kid-tag" style="background:var(--sage);">${name}</span>`;return`<span class="kid-tag" style="background:${id.color};">${id.emoji} ${name}</span>`;}
+
+  const routineItems=formData.routineItems||[];
+  const scheduleItems=routineItems.filter(r=>r.type!=='Bedtime');
+  const bedtimeItems=routineItems.filter(r=>r.type==='Bedtime').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const schedNotesT=Array.isArray(aiData.translatedRoutineNotes)&&aiData.translatedRoutineNotes.length===scheduleItems.length?aiData.translatedRoutineNotes:null;
+  const bedNotesT=Array.isArray(aiData.translatedBedtimeNotes)&&aiData.translatedBedtimeNotes.length===bedtimeItems.length?aiData.translatedBedtimeNotes:null;
+
+  let html='';
+  const headerEmojis=children.map((c,i)=>resolveKidIdentity(c,i).emoji).join(' ');
+  const headerNames=children.map(c=>c.name).filter(Boolean).join(' & ');
+  const durationBadge={evening:'🌙 Evening guide',fullday:'☀️ Full day guide',fewdays:'📅 Extended stay guide'}[formData.duration]||'';
+  html+=`<div class="header-band"><div class="header-emojis">${headerEmojis}</div><div class="header-names">${headerNames}</div><div class="header-sub">Guide for ${formData.caregiverName}</div>${durationBadge?`<div class="header-duration">${durationBadge}</div>`:''}<div class="header-note">${aiData.intro||''}</div></div>`;
+  html+=`<div class="guide-body">`;
+
+  if(scheduleItems.length){
+    html+=`<div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
+    const indexed=scheduleItems.map((item,i)=>({...item,notes:schedNotesT?schedNotesT[i]:item.notes}));
+    groupByTime(indexed).forEach(([time,items])=>{
+      const timeLabel=time==='unspecified'?'Time not set':formatTime12hr(time);
+      const title=typeLabels[items[0].type]||items[0].type;
+      html+=`<div class="sched-entry"><div class="sched-head"><span class="sched-time">${timeLabel}</span><span class="sched-title">${title}</span></div><div class="sched-body">`;
+      items.forEach(item=>{
+        const who=item.child==='all'?labels.allChildren:item.child;
+        const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--sage);">${who}</span>`:kidTag(item.child);
+        html+=`<div class="sched-row">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;
+      });
+      html+=`</div></div>`;
+    });
+  }
+
+  if(bedtimeItems.length){
+    html+=`<div class="section-eyebrow">🌙 ${labels.bedtime}</div>`;
+    bedtimeItems.forEach((item,i)=>{
+      const id=item.child==='all'||item.child==='unspecified'?null:kidIdentity[item.child];
+      const avatarBg=id?id.color:'var(--sage)';const avatarText=id?id.emoji:'✓';
+      const noteText=bedNotesT?bedNotesT[i]:item.notes;
+      const text=noteText?parseInlineBold(noteText):(item.child==='all'?labels.bedtime:`${item.child}'s bedtime`);
+      html+=`<div class="bedtime-step"><div class="step-avatar" style="background:${avatarBg};">${avatarText}</div><div class="bedtime-text">${text}</div></div>`;
+    });
+  }
+
+  const importantLinesRaw=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const importantT=Array.isArray(aiData.translatedImportant)&&aiData.translatedImportant.length===importantLinesRaw.length?aiData.translatedImportant:null;
+  if(importantLinesRaw.length){
+    html+=`<div class="section-eyebrow">⚠️ ${labels.important}</div><div class="important-list">`;
+    importantLinesRaw.forEach((line,i)=>{const shown=importantT?importantT[i]:line;html+=`<div class="important-item"><span class="ii-icon">${iconForImportantLine(line)}</span><span>${parseInlineBold(shown)}</span></div>`;});
+    html+=`</div>`;
+  }
+
+  // COMFORT & WHEN UPSET — clearly separated per child
+  if(aiData.childSections&&aiData.childSections.length){
+    html+=`<div class="section-eyebrow">💛 ${labels.comfort||'Personality & Comfort'}</div><div class="comfort-grid">`;
+    aiData.childSections.forEach(cs=>{
+      const id=kidIdentity[cs.childName]||getKidIdentity(0);
+      html+=`<div class="comfort-card" style="background:${id.dim};">
+        <div class="comfort-card-head">${id.emoji} ${cs.childName}</div>`;
+      if(cs.comfort){html+=`<div class="comfort-section"><div class="comfort-mini-label">Likes & personality</div><p>${parseInlineBold(cs.comfort)}</p></div>`;}
+      if(cs.whenUpset){html+=`<div class="upset-note"><div class="upset-label">🧸 If upset</div><div>${parseInlineBold(cs.whenUpset)}</div></div>`;}
+      html+=`</div>`;
+    });
+    html+=`</div>`;
+  }
+
+  const childNames=children.map(c=>c.name);
+  if(aiData.sections&&aiData.sections.length){
+    aiData.sections.forEach(sec=>{
+      const lines=(sec.content||'').split('\n').map(l=>l.trim()).filter(Boolean);
+      html+=`<div class="plain-section"><div class="section-eyebrow" style="margin:20px 0 8px;">${sec.label}</div>`;
+      if(lines.length>1)html+='<ul>'+lines.map(l=>`<li>${boldChildNames(parseInlineBold(l.replace(/^[-•]\s*/,'')),childNames)}</li>`).join('')+'</ul>';
+      else html+=`<p>${boldChildNames(parseInlineBold(sec.content||''),childNames)}</p>`;
+      html+=`</div>`;
+    });
+  }
+
+  const contacts=formData.contacts||[];
+  if(contacts.length){
+    html+=`<div class="section-eyebrow">📞 ${labels.contacts}</div><div class="contacts-grid">`;
+    contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${c.name||'Contact'}</div><div class="contact-line">${c.phone||''}</div></div>`;});
+    html+=`</div>`;
+  }
+
+  const signOff=formData.signOff||'the family';
+  html+=`<div class="closing-note">Thank you so much for this, ${formData.caregiverName||'and thank you'} 🤍<br><strong>— ${signOff}</strong></div>`;
+  html+=`<div class="guide-footer">Made with <strong>MML</strong> — my mental load</div></div>`;
+  document.getElementById('guideContent').innerHTML=html;
+}
+
+// ── RENDER LANDSCAPE ──
+function renderGuideLandscape(aiData,children,formData){
+  const kidIdentity={};children.forEach((c,i)=>{kidIdentity[c.name]=resolveKidIdentity(c,i);});
+  const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
+  const typeLabels=labels.types||ENGLISH_LABELS.types;
+  const routineItems=formData.routineItems||[];
+  const schedNotesT=Array.isArray(aiData.translatedRoutineNotes)?aiData.translatedRoutineNotes:null;
+  const bedNotesT=Array.isArray(aiData.translatedBedtimeNotes)?aiData.translatedBedtimeNotes:null;
+  const schedItems=routineItems.filter(r=>r.type!=='Bedtime');
+  const bedItems=routineItems.filter(r=>r.type==='Bedtime');
+  const sorted=[...schedItems.map((item,i)=>({...item,notes:schedNotesT?schedNotesT[i]:item.notes})),...bedItems.map((item,i)=>({...item,notes:bedNotesT?bedNotesT[i]:item.notes}))].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const importantLinesRaw=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const importantT=Array.isArray(aiData.translatedImportant)&&aiData.translatedImportant.length===importantLinesRaw.length?aiData.translatedImportant:null;
+  const numCols=children.length>=2?3:2;
+  const durationBadge={evening:'🌙 Evening',fullday:'☀️ Full day',fewdays:'📅 Extended stay'}[formData.duration]||'';
+  let html=`<div class="lg-pad">`;
+  html+=`<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;"><div class="header-names" style="font-size:1.3rem;">${children.map(c=>c.name).filter(Boolean).join(' & ')}</div>${durationBadge?`<span style="font-size:0.75rem;color:var(--sage);font-weight:700;">${durationBadge}</span>`:''}</div>`;
+  html+=`<div class="header-sub" style="margin-bottom:4px;">Guide for ${formData.caregiverName}</div>`;
+  if(aiData.intro)html+=`<div class="header-note" style="font-size:0.82rem;max-width:none;margin:0 0 14px;">${aiData.intro}</div>`;
+  if(importantLinesRaw.length){
+    html+=`<div class="lg-important">`;
+    importantLinesRaw.forEach((line,i)=>{const shown=importantT?importantT[i]:line;html+=`<div class="lg-important-item">${iconForImportantLine(line)} ${parseInlineBold(shown)}</div>`;});
+    html+=`</div>`;
+  }
+  html+=`<div class="lg-grid ${numCols===3?'cols-3':'cols-2'}">`;
+  html+=`<div><div class="section-eyebrow">⏰ ${labels.schedule}</div>`;
+  sorted.forEach(item=>{
+    const tl=item.time?formatTime12hr(item.time):'—';
+    const title=typeLabels[item.type]||item.type;
+    const who=item.child==='all'?'':item.child;
+    const id=who?kidIdentity[who]:null;
+    const tag=id?`<span class="kid-tag" style="background:${id.color};font-size:0.62rem;padding:1px 7px;">${id.emoji} ${who}</span>`:'';
+    const note=item.notes?parseInlineBold(item.notes):'';
+    html+=`<div class="lg-sched-entry"><span class="lg-time">${tl}</span>${tag}<span>${title}</span>${note?`<span class="lg-note">${note}</span>`:''}</div>`;
+  });
+  html+=`</div>`;
+  children.forEach(c=>{
+    const id=kidIdentity[c.name];
+    const cs=(aiData.childSections||[]).find(x=>x.childName===c.name);
+    const comfortShort=cs&&cs.comfort?cs.comfort.split(/(?<=[.!?])\s+/).slice(0,2).join(' '):'';
+    const upsetShort=cs&&cs.whenUpset?cs.whenUpset.split(/(?<=[.!?])\s+/).slice(0,1).join(' '):'';
+    html+=`<div class="lg-kid-col"><div class="lg-kid-head" style="color:${id.color};border-color:${id.color};">${id.emoji} ${c.name}${c.age?', '+c.age.split(' ')[0]:''}</div>`;
+    if(comfortShort)html+=`<div class="lg-mini"><div class="lg-mini-label">Likes</div><p>${parseInlineBold(comfortShort)}</p></div>`;
+    if(upsetShort)html+=`<div class="lg-mini"><div class="lg-mini-label">🧸 If upset</div><p>${parseInlineBold(upsetShort)}</p></div>`;
+    const allergyText=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
+    if(allergyText)html+=`<div class="lg-mini"><div class="lg-mini-label">Allergies</div><p>${allergyText}</p></div>`;
+    if(c.independence)html+=`<div class="lg-mini"><div class="lg-mini-label">Screens</div><p>${c.independence}</p></div>`;
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  if((formData.contacts||[]).length)html+=`<div class="lg-contacts">📞 ${labels.contacts}: ${formData.contacts.map(c=>`${c.name} ${c.phone}`).join(' · ')}</div>`;
+  html+=`<div class="guide-footer" style="margin-top:14px;">Made with <strong>MML</strong> — my mental load</div></div>`;
+  document.getElementById('guideContent').innerHTML=html;
+}
+
+// ── PDF DOWNLOAD ──
+document.getElementById('downloadPdfBtn').addEventListener('click',()=>{
+  const el=document.getElementById('guideContent');
+  const childName=document.querySelector('.c-name')?document.querySelector('.c-name').value.trim():'family';
+  const opt={
+    margin:[8,8,8,8],
+    filename:`mml-guide-${childName.toLowerCase().replace(/\s+/g,'-')}.pdf`,
+    image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2,useCORS:true,logging:false},
+    jsPDF:{unit:'mm',format:'a4',orientation:selectedMode==='landscape'?'landscape':'portrait'}
+  };
+  const btn=document.getElementById('downloadPdfBtn');
+  btn.textContent='Generating PDF…';btn.disabled=true;
+  html2pdf().set(opt).from(el).save().then(()=>{btn.textContent='⬇ Download PDF';btn.disabled=false;});
+});
+
+document.getElementById('generateBtn').addEventListener('click',async()=>{
   clearError();
-  const accessCode = document.getElementById('accessCode').value.trim();
-
-  if (accessCode) {
-    await performGeneration({ accessCode });
-    return;
-  }
-
-  const v = validateAndBuildFormData();
-  if (!v.valid) { showError(v.error); return; }
+  const accessCode=document.getElementById('accessCode').value.trim();
+  if(accessCode){await performGeneration({accessCode});return;}
+  const v=validateAndBuildFormData();
+  if(!v.valid){showError(v.error);return;}
   await saveEntry(v.formData);
-
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = 'Redirecting to payment…';
-
-  try {
-    const res = await fetch('/api/create-checkout', { method: 'POST' });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showError('Could not start checkout: ' + (data.error || 'unknown error'));
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
-  } catch (e) {
-    showError('Could not start checkout: ' + e.message);
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
+  const btn=document.getElementById('generateBtn');
+  btn.disabled=true;btn.textContent='Redirecting to payment…';
+  try{
+    const res=await fetch('/api/create-checkout',{method:'POST'});
+    const data=await res.json();
+    if(data.url){window.location.href=data.url;}
+    else{showError('Could not start checkout: '+(data.error||'unknown error'));btn.disabled=false;btn.textContent='Generate guide — £0.99';}
+  }catch(e){showError('Could not start checkout: '+e.message);btn.disabled=false;btn.textContent='Generate guide — £0.99';}
 });
 
-document.getElementById('editBtn').addEventListener('click', () => {
-  document.getElementById('guideView').style.display = 'none';
-  document.getElementById('formView').style.display = 'block';
+document.getElementById('editBtn').addEventListener('click',()=>{
+  document.getElementById('guideView').style.display='none';
+  document.getElementById('formView').style.display='block';
 });
-document.getElementById('printBtn').addEventListener('click', () => { window.print(); });
 
-async function init() {
+async function init(){
   await loadSavedEntry();
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('session_id');
-  if (sessionId) {
-    history.replaceState({}, '', window.location.pathname);
-    document.getElementById('loadingText').textContent = 'Payment confirmed — writing the guide…';
-    await performGeneration({ sessionId });
+  const params=new URLSearchParams(window.location.search);
+  const sessionId=params.get('session_id');
+  if(sessionId){
+    history.replaceState({},'',window.location.pathname);
+    document.getElementById('loadingText').textContent='Payment confirmed — writing the guide…';
+    await performGeneration({sessionId});
   }
 }
 init();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('MML SW registered:', reg.scope))
+        .catch(err => console.log('SW registration failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
