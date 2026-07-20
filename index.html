@@ -226,22 +226,10 @@
       </button>
     </div>
 
-    <div class="section-divider">Language</div>
-    <div class="field">
-      <select id="modeLanguage">
-        <option value="English">English</option>
-        <option value="French">French</option>
-        <option value="Spanish">Spanish</option>
-        <option value="Portuguese">Portuguese</option>
-        <option value="Polish">Polish</option>
-        <option value="Arabic">Arabic</option>
-        <option value="other">Other…</option>
-      </select>
-    </div>
-    <div class="field" id="modeLanguageOtherField" style="display:none;">
-      <label>Please specify</label>
-      <input type="text" id="modeLanguageOther" placeholder="e.g. Italian">
-    </div>
+    <!-- Language moved to form view for clarity -->
+    <input type="hidden" id="modeLanguage" value="English">
+    <input type="hidden" id="modeLanguageOther" value="">
+    <div id="modeLanguageOtherField" style="display:none;"></div>
 
     <button class="primary" id="continueToFormBtn" disabled>Continue →</button>
   </div>
@@ -286,6 +274,30 @@
       </select>
     </div>
     <div id="countryEmergencyHint" style="font-size:0.8rem;color:var(--sage);margin:-8px 0 14px;font-weight:600;"></div>
+
+    <div class="field">
+      <label>Guide language <span class="hint">— type in any language, the guide will be translated into this one</span></label>
+      <select id="modeLanguage" onchange="document.getElementById('modeLanguageOtherField').style.display=this.value==='other'?'block':'none';">
+        <option value="English">🇬🇧 English</option>
+        <option value="French">🇫🇷 French — Français</option>
+        <option value="Spanish">🇪🇸 Spanish — Español</option>
+        <option value="Portuguese">🇵🇹 Portuguese — Português</option>
+        <option value="Polish">🇵🇱 Polish — Polski</option>
+        <option value="Arabic">🇸🇦 Arabic — العربية</option>
+        <option value="Italian">🇮🇹 Italian — Italiano</option>
+        <option value="German">🇩🇪 German — Deutsch</option>
+        <option value="Romanian">🇷🇴 Romanian — Română</option>
+        <option value="Filipino">🇵🇭 Filipino / Tagalog</option>
+        <option value="other">Other…</option>
+      </select>
+    </div>
+    <div class="field" id="modeLanguageOtherField" style="display:none;">
+      <label>Which language?</label>
+      <input type="text" id="modeLanguageOther" placeholder="e.g. Dutch, Swedish, Hindi…">
+    </div>
+    <div style="background:#E7EEE4;border-radius:8px;padding:10px 14px;font-size:0.82rem;color:#4A7C59;margin-bottom:6px;line-height:1.5;">
+      🌍 <strong>How translation works:</strong> You can fill in the form in any language. Everything — including your notes and routine — will be translated into the language above. The caregiver only sees the final translated guide.
+    </div>
 
     <div class="section-divider">Children</div>
     <div id="childrenContainer"></div>
@@ -822,9 +834,7 @@ document.querySelectorAll('.mode-card').forEach(btn=>{
 function checkContinueReady(){
   document.getElementById('continueToFormBtn').disabled=!(selectedMode&&selectedDuration);
 }
-document.getElementById('modeLanguage').addEventListener('change',e=>{
-  document.getElementById('modeLanguageOtherField').style.display=e.target.value==='other'?'block':'none';
-});
+// Language listener now inline on select element
 document.getElementById('continueToFormBtn').addEventListener('click',()=>{
   document.getElementById('modeView').style.display='none';
   document.getElementById('formView').style.display='block';
@@ -1157,6 +1167,10 @@ function renderGuideIndepth(aiData,children,formData){
 
   const signOff=formData.signOff||'the family';
   html+=`<div class="closing-note">Thank you so much for this, ${formData.caregiverName||'and thank you'} 🤍<br><strong>— ${signOff}</strong></div>`;
+  const guideLanguage=formData.languageSelect&&formData.languageSelect!=='English'?formData.languageSelect:null;
+  if(guideLanguage){
+    html+=`<div style="margin-top:16px;padding:10px 14px;background:#F0EBF8;border-radius:8px;font-size:0.78rem;color:#756E87;text-align:center;line-height:1.5;">🤖 This guide was translated into <strong>${guideLanguage}</strong> by AI. Please review key safety instructions before sharing with the caregiver.</div>`;
+  }
   html+=`<div class="guide-footer">Made with <strong>MML</strong> — my mental load</div></div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
@@ -1220,6 +1234,8 @@ function renderGuideLandscape(aiData,children,formData){
   }
   const signOffLg=formData.signOff||'the family';
   html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--ink-soft);text-align:center;">Thank you so much, ${formData.caregiverName||''} 🤍 <strong style="color:var(--sage);font-style:normal;">— ${signOffLg}</strong></div>`;
+  const lgLang=formData.languageSelect&&formData.languageSelect!=='English'?formData.languageSelect:null;
+  if(lgLang){html+=`<div style="margin-top:10px;font-size:0.7rem;color:var(--ink-soft);text-align:center;">🤖 AI translated into ${lgLang} — please review safety notes before sharing.</div>`;}
   html+=`<div class="guide-footer" style="margin-top:10px;">Made with <strong>MML</strong> — my mental load</div></div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
