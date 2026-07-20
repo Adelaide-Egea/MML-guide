@@ -189,6 +189,9 @@
 
   <!-- ── MODE / DURATION SELECTION ── -->
   <div id="modeView">
+    <div style="background:#E7EEE4;border:1px solid #7C9473;border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:0.82rem;color:#4A7C59;line-height:1.5;">
+      📲 <strong>Save as an app:</strong> open this page in <strong>Safari</strong> on your iPhone → tap the <strong>Share</strong> button (box with arrow) → tap <strong>"Add to Home Screen"</strong>
+    </div>
     <div class="brand-mark"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
     <p class="subtitle">Two quick choices, then fill in the details.</p>
@@ -264,7 +267,7 @@
 
     <!-- Country for emergency numbers -->
     <div class="field">
-      <label>Country <span class="hint">(used to include the right emergency numbers in the guide)</span></label>
+      <label>Country <span class="hint">(adds local emergency numbers to the guide — important for au pairs!)</span></label>
       <select id="countrySelect">
         <option value="">Select country…</option>
         <option>United Kingdom</option>
@@ -355,10 +358,10 @@
       <input type="text" id="signOff" placeholder="e.g. The whole family">
     </div>
 
-    <div class="section-divider">Access</div>
+    <div class="section-divider">Access code</div>
     <div class="field">
-      <label>Access code <span class="hint">(optional — leave blank to pay)</span></label>
-      <input type="text" id="accessCode" placeholder="Have a code? Enter it here">
+      <label>Beta tester code <span class="hint">(enter your code to generate for free)</span></label>
+      <input type="text" id="accessCode" placeholder="e.g. BETAFREE or FOUNDING50" style="font-size:1rem;font-weight:700;letter-spacing:0.05em;">
     </div>
 
     <button class="primary" id="generateBtn">Generate guide — £0.99</button>
@@ -376,10 +379,13 @@
   <div id="guideView" style="display:none;">
     <div class="guide" id="guideContent"></div>
     <div class="action-row no-print">
-      <button class="secondary" id="editBtn">Edit details</button>
+      <button class="secondary" id="editBtn">✏️ Edit & regenerate</button>
       <button class="primary" id="downloadPdfBtn">⬇ Download PDF</button>
     </div>
-    <button type="button" class="print-link no-print" onclick="window.print()">Prefer to print? Open print dialog</button>
+    <div style="display:flex;gap:10px;margin-top:8px;" class="no-print">
+      <button type="button" class="print-link" onclick="window.print()" style="flex:1;">Prefer to print? Open print dialog</button>
+      <button type="button" class="print-link" id="startOverBtn" style="flex:1;color:#C25E00;">🗑 Start over (clear all)</button>
+    </div>
   </div>
 
 </div>
@@ -580,7 +586,7 @@ function childBlockHTML(idx){
       <label>Personalise <span class="hint">(pick a colour and emoji or leave for automatic)</span></label>
       <div class="swatch-row">${KID_IDENTITIES.map((k,ci)=>`<button type="button" class="swatch-btn" data-idx="${ci}" style="background:${k.color};" onclick="selectSwatch(${idx},${ci})"></button>`).join('')}</div>
       <input type="hidden" class="c-color-idx" value="-1">
-      <input type="text" class="c-emoji" placeholder="🦁 (leave blank for automatic)" style="max-width:160px;">
+      <input type="text" class="c-emoji" placeholder="🦁 or leave blank" style="max-width:160px;">
     </div>
     <div class="age-row">
       <div class="field"><label>Name</label><input type="text" class="c-name" placeholder="e.g. Mia"></div>
@@ -885,6 +891,15 @@ function formatTime12hr(t){if(!t)return'';const[h,m]=t.split(':').map(Number);re
 function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${msg}</div>`;}
 function clearError(){document.getElementById('errorBox').innerHTML='';}
 function parseInlineBold(text){if(!text)return'';return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+function cleanProse(text){
+  if(!text)return'';
+  return text
+    .replace(/\b\d+\.\s+/g,'')    // strip "1. " "2. " anywhere in text
+    .replace(/^\s*[-•]\s*/gm,'')    // strip bullet points
+    .replace(/\n+/g,' ')             // join lines into prose
+    .replace(/\s{2,}/g,' ')          // clean extra spaces
+    .trim();
+}
 function boldChildNames(text,names){let r=text;names.forEach(n=>{if(!n)return;const re=new RegExp('^('+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—:-])','i');r=r.replace(re,'<strong>$1</strong>');});return r;}
 function iconForImportantLine(line){
   const l=line.toLowerCase();
@@ -987,29 +1002,33 @@ async function performGeneration(authPayload){
   }
 
   const multiDayBlock=formData.multiDayNotes||formData.overnightNotes?`\n\nMulti-day / overnight notes:\n${formData.multiDayNotes||''}\nOvernight routine: ${formData.overnightNotes||''}`:'';
-  const emergencyBlock=emergencyNums?`\n\nLocal emergency numbers (${formData.country}): ${emergencyNums}`:'';
+  const emergencyBlock=''; // Emergency numbers now rendered directly in guide, not via Claude
 
   const userPrompt=`Children: ${childNamesList}\n\n${childrenText}\n\nGuide for: ${formData.caregiverName} (${relationship})\nLanguage: ${language||'English'}\nSpecial instructions: ${formData.extra}${multiDayBlock}${emergencyBlock}${translationBlock}`;
 
-  const systemPrompt=`You write warm but economical childcare reference guides for caregivers. A grandparent skimming in 30 seconds must get every critical fact. Respond ONLY with valid JSON, no preamble, no markdown fences:
+  const systemPrompt=`You are helping reduce parents' mental load. Your job: write a childcare guide a caregiver can scan in 30 seconds and have everything they need. Every word must earn its place. Respond ONLY with valid JSON, no preamble, no markdown fences:
 {"intro":"string","childSections":[{"childName":"string","comfort":"string","whenUpset":"string"}],"sections":[{"label":"string","content":"string"}],"labels":{"schedule":"string","bedtime":"string","important":"string","comfort":"string","whenUpset":"string","contacts":"string","allChildren":"string","types":{"Bedtime":"string","Nap":"string","Milk/Feed":"string","Lunch":"string","Snack":"string","Breakfast":"string","Dinner":"string","Bath":"string"}},"translatedImportant":["string"],"translatedRoutineNotes":["string"],"translatedBedtimeNotes":["string"]}
 
-DURATION CONTEXT: ${durationContext}
+DURATION: ${durationContext}
 
-STYLE: direct and economical. Every sentence carries a real fact. No generic warmth, no padding, no exclamation marks. Short is good.
+RULES — follow every single one without exception:
 
-"intro": one sentence to the caregiver, naming the children. Practical, not flowery.
+1. "intro": One sentence only. Name the child, address the caregiver by name. Warm and practical. Example: "Here's everything you need for Elise's evening, Gen."
 
-"childSections": one entry per child.
-CRITICAL SEPARATION — these are two different fields:
-- "comfort": ONLY personality traits, specific likes, interests, and comfort items from the PERSONALITY/LIKES field. Do NOT include crisis or upset management here. Bold the single most important comfort item with **double asterisks**.
-- "whenUpset": ONLY practical step-by-step instructions from the WHAT-TO-DO-WHEN-UPSET field. Write as actionable steps. Do not invent advice. Do not repeat what the child likes.
+2. "childSections" — BOTH fields are REQUIRED for every child. Never return empty or N/A.
+   - "comfort": 2-3 sentences. Specific likes, personality, comfort items ONLY. Prose — never a numbered list. Bold the most important comfort item with **double asterisks**. If limited info, write what you know briefly.
+   - "whenUpset": 2-3 sentences of practical steps. PROSE ONLY — never use 1. or 2. or any numbering or bullet points. Begin directly with the action. Never mention what the child likes here — only what to DO when upset.
 
-"sections": cover Food & Allergies (include food type stage), Screen Time, and Anything Else — only if there's real content. If emergency numbers were provided, add a section "Emergency Numbers" listing them clearly. Bold critical facts with **double asterisks**.
+3. "sections": Only include if real content exists:
+   - Food & Allergies: Always include if allergies exist. Bold allergens with **double asterisks**.
+   - Screen time: Include only if rules were given.
+   - Other: Only if extra info was provided.
+   Maximum 2-3 sentences per section.
 
-LANGUAGE: if not English, write the entire response in that language.
+4. STYLE: No filler, no generic reassurances. Every sentence = one real fact the caregiver needs.
 
-TRANSLATION FIELDS: only include labels/translatedImportant/translatedRoutineNotes/translatedBedtimeNotes when a TRANSLATION REQUEST is present. Match arrays exactly in order and count.`;
+LANGUAGE: Write entirely in the requested language if not English.
+TRANSLATION FIELDS: Only include if a TRANSLATION REQUEST block is present. Match array length exactly.` + '';
 
   try{
     const response=await fetch('/api/generate',{
@@ -1035,7 +1054,12 @@ TRANSLATION FIELDS: only include labels/translatedImportant/translatedRoutineNot
     console.error(err);
     document.getElementById('loadingView').style.display='none';
     document.getElementById('formView').style.display='block';
-    showError('Error: '+(err&&err.message?err.message:'unknown error')+'. Please try again.');
+    const isNetworkErr=err&&(err.message==='Load failed'||err.message==='Failed to fetch'||err.message==='NetworkError');
+    if(isNetworkErr){
+      showError('⚡ Connection issue — this sometimes happens. Tap Generate again to retry. If it keeps failing, check your internet connection.');
+    } else {
+      showError('Something went wrong: '+(err&&err.message?err.message:'unknown error')+'. Please tap Generate to try again.');
+    }
   }
 }
 
@@ -1079,11 +1103,14 @@ function renderGuideIndepth(aiData,children,formData){
     html+=`<div class="section-eyebrow">🌙 ${labels.bedtime}</div>`;
     bedtimeItems.forEach((item,i)=>{
       const id=item.child==='all'||item.child==='unspecified'?null:kidIdentity[item.child];
-      const avatarBg=id?id.color:'var(--sage)';const avatarText=id?id.emoji:'✓';
+      const avatarBg=id?id.color:'var(--sage)';const avatarText=id?id.emoji:'🌙';
       const noteText=bedNotesT?bedNotesT[i]:item.notes;
-      const text=noteText?parseInlineBold(noteText):(item.child==='all'?labels.bedtime:`${item.child}'s bedtime`);
-      html+=`<div class="bedtime-step"><div class="step-avatar" style="background:${avatarBg};">${avatarText}</div><div class="bedtime-text">${text}</div></div>`;
+      const timeStr=item.time?`<span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;color:var(--ink-soft);margin-right:6px;">${formatTime12hr(item.time)}</span>`:'';
+      const who=item.child&&item.child!=='all'?`${item.child}'s bedtime`:'Bedtime';
+      const mainText=noteText?parseInlineBold(noteText):who;
+      html+=`<div class="bedtime-step"><div class="step-avatar" style="background:${avatarBg};">${avatarText}</div><div class="bedtime-text">${timeStr}${mainText}</div></div>`;
     });
+    html+=`<div style="font-size:0.8rem;color:var(--ink-soft);margin-top:8px;font-style:italic;">💡 Add notes to each bedtime item (e.g. stories, milk, white noise) for a detailed step-by-step sequence.</div>`;
   }
 
   const importantLinesRaw=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
@@ -1102,7 +1129,7 @@ function renderGuideIndepth(aiData,children,formData){
       html+=`<div class="comfort-card" style="background:${id.dim};">
         <div class="comfort-card-head">${id.emoji} ${cs.childName}</div>`;
       if(cs.comfort){html+=`<div class="comfort-section"><div class="comfort-mini-label">Likes & personality</div><p>${parseInlineBold(cs.comfort)}</p></div>`;}
-      if(cs.whenUpset){html+=`<div class="upset-note"><div class="upset-label">🧸 If upset</div><div>${parseInlineBold(cs.whenUpset)}</div></div>`;}
+      if(cs.whenUpset){html+=`<div class="upset-note"><div class="upset-label">🧸 If upset</div><div>${parseInlineBold(cleanProse(cs.whenUpset))}</div></div>`;}
       html+=`</div>`;
     });
     html+=`</div>`;
@@ -1120,9 +1147,11 @@ function renderGuideIndepth(aiData,children,formData){
   }
 
   const contacts=formData.contacts||[];
-  if(contacts.length){
+  const emergNums=EMERGENCY_NUMBERS[formData.country]||'';
+  if(contacts.length||emergNums){
     html+=`<div class="section-eyebrow">📞 ${labels.contacts}</div><div class="contacts-grid">`;
     contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${c.name||'Contact'}</div><div class="contact-line">${c.phone||''}</div></div>`;});
+    if(emergNums){html+=`<div class="contact-card" style="border-color:#E8A56B;background:#FFF4EA;"><div class="contact-name" style="color:#C25E00;">🚨 Emergency (${formData.country})</div><div class="contact-line">${emergNums}</div></div>`;}
     html+=`</div>`;
   }
 
@@ -1175,15 +1204,23 @@ function renderGuideLandscape(aiData,children,formData){
     const upsetShort=cs&&cs.whenUpset?cs.whenUpset.split(/(?<=[.!?])\s+/).slice(0,1).join(' '):'';
     html+=`<div class="lg-kid-col"><div class="lg-kid-head" style="color:${id.color};border-color:${id.color};">${id.emoji} ${c.name}${c.age?', '+c.age.split(' ')[0]:''}</div>`;
     if(comfortShort)html+=`<div class="lg-mini"><div class="lg-mini-label">Likes</div><p>${parseInlineBold(comfortShort)}</p></div>`;
-    if(upsetShort)html+=`<div class="lg-mini"><div class="lg-mini-label">🧸 If upset</div><p>${parseInlineBold(upsetShort)}</p></div>`;
+    if(cs&&cs.whenUpset){const upsetClean=cleanProse(cs.whenUpset).split(/(?<=[.!?])\s+/).slice(0,1).join(' ');if(upsetClean)html+=`<div class="lg-mini"><div class="lg-mini-label">🧸 If upset</div><p>${parseInlineBold(upsetClean)}</p></div>`;}
     const allergyText=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
     if(allergyText)html+=`<div class="lg-mini"><div class="lg-mini-label">Allergies</div><p>${allergyText}</p></div>`;
     if(c.independence)html+=`<div class="lg-mini"><div class="lg-mini-label">Screens</div><p>${c.independence}</p></div>`;
     html+=`</div>`;
   });
   html+=`</div>`;
-  if((formData.contacts||[]).length)html+=`<div class="lg-contacts">📞 ${labels.contacts}: ${formData.contacts.map(c=>`${c.name} ${c.phone}`).join(' · ')}</div>`;
-  html+=`<div class="guide-footer" style="margin-top:14px;">Made with <strong>MML</strong> — my mental load</div></div>`;
+  const lgContacts=formData.contacts||[];
+  const lgEmerg=EMERGENCY_NUMBERS[formData.country]||'';
+  if(lgContacts.length||lgEmerg){
+    let contactParts=lgContacts.map(c=>`${c.name} ${c.phone}`);
+    if(lgEmerg)contactParts.push(`🚨 Emergency (${formData.country}): ${lgEmerg}`);
+    html+=`<div class="lg-contacts">📞 ${contactParts.join(' · ')}</div>`;
+  }
+  const signOffLg=formData.signOff||'the family';
+  html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--ink-soft);text-align:center;">Thank you so much, ${formData.caregiverName||''} 🤍 <strong style="color:var(--sage);font-style:normal;">— ${signOffLg}</strong></div>`;
+  html+=`<div class="guide-footer" style="margin-top:10px;">Made with <strong>MML</strong> — my mental load</div></div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
 
@@ -1223,6 +1260,14 @@ document.getElementById('generateBtn').addEventListener('click',async()=>{
 document.getElementById('editBtn').addEventListener('click',()=>{
   document.getElementById('guideView').style.display='none';
   document.getElementById('formView').style.display='block';
+  // Show a reminder banner
+  showError('✏️ Make your changes below then tap Generate to create an updated guide.');
+});
+document.getElementById('startOverBtn').addEventListener('click',()=>{
+  if(confirm('Clear everything and start from scratch?')){
+    try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+    window.location.reload();
+  }
 });
 
 async function init(){
