@@ -17,15 +17,30 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:ital,wght@1,500;1,600&display=swap');
   :root {
-    --forest:#2F5D50;--forest-dim:#EDF3F1;
-    --sage:#A8C8B8;--sage-dim:#EBF5F0;--sage-mid:#5E9E86;
-    --raspberry:#D94F70;--raspberry-dim:#FBEAEE;
-    --dusty:#A9C9E8;--dusty-dim:#EDF4FB;
-    --navy:#264A6B;
-    --paper:#FAF8F5;--ink:#264A6B;--ink-soft:#5E7D8F;
-    --line:#E2EDE8;--card:#FFFFFF;
-    --warning:#D94F70;--warning-dim:#FBEAEE;
-    --shadow:0 8px 24px rgba(0,0,0,0.05);
+    /* Deep Botanical Green — primary brand */
+    --forest:       #335C4A;
+    --forest-dim:   #EEF4F1;
+    --forest-mid:   #4A7A63;
+    /* Soft Sage — support, breathing room */
+    --sage:         #B7D2C4;
+    --sage-dim:     #EDF5F0;
+    --sage-mid:     #6A9E87;
+    /* Raspberry — CTA only, moments of delight */
+    --raspberry:    #D9577E;
+    --raspberry-dim:#FCEEF3;
+    /* Deep Navy — primary text */
+    --navy:         #223A5E;
+    /* Warm Linen — background, never pure white */
+    --paper:        #FCFAF6;
+    --ink:          #223A5E;
+    --ink-soft:     #5A6E82;
+    /* Structure */
+    --line:         #E3EDE7;
+    --card:         #FFFFFF;
+    --shadow:       0 8px 24px rgba(0,0,0,0.05);
+    /* Legacy compatibility */
+    --warning:      #D9577E;
+    --warning-dim:  #FCEEF3;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:'Manrope',sans-serif;-webkit-font-smoothing:antialiased;padding:24px 16px 60px;}
@@ -46,6 +61,31 @@
   .section-divider:first-of-type{margin-top:4px;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  /* ═══════ HOME SCREEN ═══════ */
+  .home-topbar{display:flex;justify-content:space-between;align-items:center;padding:0 0 32px;}
+  .home-brand-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:0.9rem;color:var(--forest);letter-spacing:-0.01em;}
+  .home-logo-m{width:36px;height:36px;background:var(--forest);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:800;font-size:1.05rem;}
+  .home-hero{padding:8px 0 40px;}
+  .home-greeting{font-size:0.95rem;color:var(--ink-soft);font-weight:500;margin-bottom:14px;letter-spacing:0.01em;}
+  .home-h1{font-family:'Manrope',sans-serif;font-weight:800;font-size:2.5rem;color:var(--ink);line-height:1.08;letter-spacing:-0.04em;margin:0 0 16px;}
+  .home-sub{font-size:1rem;color:var(--ink-soft);line-height:1.7;margin:0;font-weight:400;max-width:320px;}
+  .btn-hero{width:100%;padding:20px;background:var(--raspberry);color:white;border:none;border-radius:20px;font-family:'Manrope',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;margin-bottom:40px;box-shadow:0 10px 32px rgba(217,87,126,0.28);letter-spacing:0.01em;transition:transform 0.1s,box-shadow 0.1s;}
+  .btn-hero:active{transform:scale(0.98);box-shadow:0 4px 16px rgba(217,87,126,0.2);}
+  .home-section-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--forest);margin-bottom:14px;opacity:0.8;}
+  .recent-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+  .rgc{background:var(--card);border-radius:20px;padding:18px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;border:none;width:100%;font-family:'Manrope',sans-serif;cursor:pointer;text-align:left;transition:transform 0.15s;}
+  .rgc:active{transform:scale(0.98);}
+  .rgc-left{display:flex;align-items:center;gap:14px;}
+  .rgc-avatar{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+  .rgc-name{font-weight:700;font-size:1rem;color:var(--ink);margin-bottom:2px;}
+  .rgc-meta{font-size:0.78rem;color:var(--ink-soft);}
+  .rgc-arrow{color:var(--forest);font-weight:800;font-size:1rem;flex-shrink:0;}
+  .btn-new-guide{width:100%;padding:14px;background:none;border:1.5px solid var(--line);border-radius:16px;font-family:'Manrope',sans-serif;font-weight:600;font-size:0.9rem;color:var(--forest);cursor:pointer;margin-top:4px;margin-bottom:4px;}
+  .home-empty{text-align:center;padding:36px 24px;background:var(--card);border-radius:24px;box-shadow:0 4px 20px rgba(0,0,0,0.04);margin-top:4px;}
+  .home-empty-icon{font-size:2.6rem;margin-bottom:16px;}
+  .home-empty-title{font-family:'Manrope',sans-serif;font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:8px;}
+  .home-empty-body{font-size:0.9rem;color:var(--ink-soft);line-height:1.65;}
   @media(max-width:480px){.row2,.row3{grid-template-columns:1fr;}}
   .child-card{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
   .child-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
@@ -194,14 +234,42 @@
 <body>
 <div class="wrap">
 
+  <!-- ══ HOME SCREEN ══ -->
+  <div id="homeView">
+    <div class="home-topbar">
+      <span class="home-brand-name">My Mental Load</span>
+      <div class="home-logo-m">M</div>
+    </div>
+    <div class="home-hero">
+      <div class="home-greeting" id="homeGreeting">Good morning 👋</div>
+      <h1 class="home-h1">One less thing<br>to carry today.</h1>
+      <p class="home-sub">Everything your caregiver needs to know — in minutes.</p>
+    </div>
+    <button class="btn-hero" id="heroCreateBtn">Create Care Guide</button>
+    <div id="recentSection" style="display:none;">
+      <div class="home-section-label">Your guides</div>
+      <div class="recent-cards" id="recentCards"></div>
+    </div>
+    <div id="emptySection" class="home-empty">
+      <div class="home-empty-icon">🌿</div>
+      <div class="home-empty-title">Ready when you are.</div>
+      <div class="home-empty-body">Create your first Care Guide — everything your caregiver needs, organised in one place.</div>
+    </div>
+  </div>
+
   <!-- ── MODE / DURATION SELECTION ── -->
-  <div id="modeView">
+  <div id="modeView" style="display:none;">
     <div style="background:#E7EEE4;border:1px solid #7C9473;border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:0.82rem;color:#4A7C59;line-height:1.5;">
-      📲 <strong>Save as an app:</strong> open this page in <strong>Safari</strong> on your iPhone → tap the <strong>Share</strong> button (box with arrow) → tap <strong>"Add to Home Screen"</strong>
+      📲 <strong>Add to your home screen:</strong> tap <strong>Share</strong> in Safari → <strong>"Add to Home Screen"</strong> — it opens like a real app, no download needed
     </div>
     <div class="brand-mark"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
     <p class="subtitle">Two quick choices, then fill in the details.</p>
+
+    <div style="background:var(--forest-dim);border-left:3px solid var(--forest);border-radius:0 16px 16px 0;padding:16px 20px;margin-bottom:28px;line-height:1.7;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--forest);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">One less thing to carry</div>
+      <div style="font-size:1rem;color:var(--ink);font-weight:500;line-height:1.65;">Every time someone new looks after your children, the mental load doubles. My Mental Load takes it off your plate — one form, one guide, nothing forgotten.</div>
+    </div>
 
     <div class="section-divider" style="margin-top:4px;">How long is this for?</div>
     <div class="duration-options">
@@ -233,6 +301,7 @@
       </button>
     </div>
 
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin-bottom:20px;opacity:0.6;">Step 1 of 2 — Guide settings</div>
     <!-- Language moved to form view for clarity -->
     <input type="hidden" id="modeLanguage" value="English">
     <input type="hidden" id="modeLanguageOther" value="">
@@ -243,11 +312,12 @@
 
   <!-- ── FORM ── -->
   <div id="formView" style="display:none;">
-    <button type="button" class="back-link no-print" id="backToModeBtn">← Change format / duration</button>
+    <button type="button" class="back-link no-print" id="backToModeBtn">← Back</button>
     <div class="brand-mark no-print"><span class="mml">MML</span><span class="tagline">my mental load</span></div>
     <h1>Family Guide Generator</h1>
     <p class="subtitle" id="formSubtitle">Fill in the details below.</p>
 
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-soft);margin-bottom:20px;opacity:0.6;">Step 2 of 2 — About your children</div>
     <div id="errorBox"></div>
 
     <!-- IMPORTANT — more visible -->
@@ -368,7 +438,7 @@
     <div class="field">
       <label>Special instructions <span class="hint">(optional)</span></label>
       <div class="textarea-wrap">
-        <textarea id="extra" placeholder="Anything else worth knowing"></textarea>
+        <textarea id="extra" placeholder="Anything else worth knowing — voice notes welcome, tap the mic"></textarea>
         <button type="button" class="voice-btn" title="Tap to speak" onclick="startVoice(this, document.getElementById('extra'))">🎤</button>
       </div>
     </div>
@@ -380,10 +450,10 @@
     <div class="section-divider">Access code</div>
     <div class="field">
       <label>Beta tester code <span class="hint">(enter your code to generate for free)</span></label>
-      <input type="text" id="accessCode" placeholder="e.g. BETAFREE or FOUNDING50" style="font-size:1rem;font-weight:700;letter-spacing:0.05em;">
+      <input type="text" id="accessCode" placeholder="Enter your code to create your guide for free" style="font-size:1rem;font-weight:700;letter-spacing:0.05em;">
     </div>
 
-    <button class="primary" id="generateBtn">Generate guide — £0.99</button>
+    <button class="primary" id="generateBtn">Create my guide — £0.99</button>
   </div>
 
   <!-- ── LOADING ── -->
@@ -398,7 +468,7 @@
   <div id="guideView" style="display:none;">
     <div class="guide" id="guideContent"></div>
     <div class="action-row no-print">
-      <button class="secondary" id="editBtn">✏️ Edit & regenerate</button>
+      <button class="secondary" id="editBtn">✏️ Edit details</button>
       <button class="primary" id="downloadPdfBtn">⬇ Download PDF</button>
     </div>
     <div style="display:flex;gap:10px;margin-top:8px;" class="no-print">
@@ -804,6 +874,70 @@ function applyChildData(idx,data){
   updateAgeFields(b);
 }
 
+
+// ── HOME SCREEN ──────────────────────────────────────────────
+function getGreeting(){
+  const h=new Date().getHours();
+  if(h<5)return'Still up? 🌙';
+  if(h<12)return'Good morning 👋';
+  if(h<17)return'Good afternoon 👋';
+  return'Good evening 👋';
+}
+
+const KID_HOME=[
+  {bg:'#E6F0F7',emoji:'🦖'},{bg:'#F5E6E9',emoji:'🐰'},
+  {bg:'#F7EFD8',emoji:'🦁'},{bg:'#ECE8F5',emoji:'🐻'},{bg:'#E2EFEC',emoji:'🦋'},
+];
+
+function renderHome(){
+  document.getElementById('homeGreeting').textContent=getGreeting();
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+    const hasGuide=saved&&saved.children&&saved.children.some(c=>c.name);
+    if(hasGuide){
+      document.getElementById('recentSection').style.display='block';
+      document.getElementById('emptySection').style.display='none';
+      const cards=document.getElementById('recentCards');
+      cards.innerHTML='';
+      saved.children.filter(c=>c.name).forEach((child,i)=>{
+        const id=KID_HOME[i%KID_HOME.length];
+        const btn=document.createElement('button');
+        btn.className='rgc';
+        btn.innerHTML=`<div class="rgc-left"><div class="rgc-avatar" style="background:${id.bg};">${id.emoji}</div><div><div class="rgc-name">${child.name}</div><div class="rgc-meta">Continue where you left off</div></div></div><div class="rgc-arrow">→</div>`;
+        btn.onclick=()=>showView('modeView');
+        cards.appendChild(btn);
+      });
+      const newBtn=document.createElement('button');
+      newBtn.className='btn-new-guide';
+      newBtn.textContent='+ New guide';
+      newBtn.onclick=()=>{
+        if(confirm('Start a fresh guide? Your saved details will be cleared.')){
+          try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+          location.reload();
+        }
+      };
+      cards.appendChild(newBtn);
+    }else{
+      document.getElementById('recentSection').style.display='none';
+      document.getElementById('emptySection').style.display='block';
+    }
+  }catch(e){
+    document.getElementById('emptySection').style.display='block';
+  }
+}
+
+function showView(id){
+  ['homeView','modeView','formView','loadingView','guideView'].forEach(v=>{
+    const el=document.getElementById(v);
+    if(el)el.style.display=v===id?'block':'none';
+  });
+  window.scrollTo(0,0);
+}
+
+document.getElementById('heroCreateBtn').addEventListener('click',()=>{
+  showView('modeView');
+});
+
 // ── MODE + DURATION SELECTION ──
 const FORMAT_RECS={
   evening:{mode:'landscape',msg:'📋 <strong>One-Pager auto-selected.</strong> For an evening, one printed page covers everything — easy to stick on the fridge. You can still switch below if you prefer.'},
@@ -843,18 +977,14 @@ function checkContinueReady(){
 }
 // Language listener now inline on select element
 document.getElementById('continueToFormBtn').addEventListener('click',()=>{
-  document.getElementById('modeView').style.display='none';
-  document.getElementById('formView').style.display='block';
+  showView('formView');
   // Duration-specific form adjustments
   const durationLabels={evening:'🌙 Evening / Few Hours',fullday:'☀️ Full Day',fewdays:'📅 A Few Days'};
   document.getElementById('formSubtitle').textContent=`${durationLabels[selectedDuration]||''} · Fill in the details below.`;
   document.getElementById('multiDaySection').style.display=selectedDuration==='fewdays'?'block':'none';
   renderQuickChips();
 });
-document.getElementById('backToModeBtn').addEventListener('click',()=>{
-  document.getElementById('formView').style.display='none';
-  document.getElementById('modeView').style.display='block';
-});
+document.getElementById('backToModeBtn').addEventListener('click',()=>showView('modeView'));
 
 function setPrintOrientation(mode){
   let s=document.getElementById('dynamicPageStyle');
@@ -867,7 +997,7 @@ document.getElementById('caregiverRelationship').addEventListener('change',e=>{
   document.getElementById('relationshipOtherField').style.display=e.target.value==='other'?'block':'none';
 });
 document.getElementById('accessCode').addEventListener('input',e=>{
-  document.getElementById('generateBtn').textContent=e.target.value.trim()?'Generate guide (free with code)':'Generate guide — £0.99';
+  document.getElementById('generateBtn').textContent=e.target.value.trim()?'Create my guide (free with code)':'Create my guide — £0.99';
 });
 
 // ── SAVE / LOAD ──
@@ -972,10 +1102,8 @@ async function performGeneration(authPayload){
   const{children,formData,relationship,language}=v;
   await saveEntry(formData);
 
-  document.getElementById('modeView').style.display='none';
-  document.getElementById('formView').style.display='none';
-  document.getElementById('loadingText').textContent='Writing the guide…';
-  document.getElementById('loadingView').style.display='block';
+  showView('loadingView');
+  document.getElementById('loadingText').textContent='Getting everything out of your head…';
 
   // Duration context for prompt
   const durationContext={
@@ -1065,8 +1193,7 @@ TRANSLATION FIELDS: Only include if a TRANSLATION REQUEST block is present. Matc
     setPrintOrientation(formData.mode);
     if(formData.mode==='landscape')renderGuideLandscape(parsed,children,formData);
     else renderGuideIndepth(parsed,children,formData);
-    document.getElementById('loadingView').style.display='none';
-    document.getElementById('guideView').style.display='block';
+    showView('guideView');
   }catch(err){
     console.error(err);
     document.getElementById('loadingView').style.display='none';
@@ -1173,12 +1300,12 @@ function renderGuideIndepth(aiData,children,formData){
   }
 
   const signOff=formData.signOff||'the family';
-  html+=`<div class="closing-note">Thank you so much for this, ${formData.caregiverName||'and thank you'} 🤍<br><strong>— ${signOff}</strong></div>`;
+  html+=`<div class="closing-note">Your caregiver now has everything they need. 🤍<br><strong>— ${signOff}</strong></div>`;
   const guideLanguage=formData.languageSelect&&formData.languageSelect!=='English'?formData.languageSelect:null;
   if(guideLanguage){
     html+=`<div style="margin-top:16px;padding:10px 14px;background:#F0EBF8;border-radius:8px;font-size:0.78rem;color:#756E87;text-align:center;line-height:1.5;">🤖 This guide was translated into <strong>${guideLanguage}</strong> by AI. Please review key safety instructions before sharing with the caregiver.</div>`;
   }
-  html+=`<div class="guide-footer">Made with <strong>MML</strong> — my mental load</div></div>`;
+  html+=`<div class="guide-footer">Made with <strong>My Mental Load</strong> — nothing forgotten</div></div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
 
@@ -1240,10 +1367,10 @@ function renderGuideLandscape(aiData,children,formData){
     html+=`<div class="lg-contacts">📞 ${contactParts.join(' · ')}</div>`;
   }
   const signOffLg=formData.signOff||'the family';
-  html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--ink-soft);text-align:center;">Thank you so much, ${formData.caregiverName||''} 🤍 <strong style="color:var(--sage);font-style:normal;">— ${signOffLg}</strong></div>`;
+  html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--ink-soft);text-align:center;">Your caregiver has everything they need. <strong style="color:var(--forest);font-style:normal;">— ${signOffLg}</strong></div>`;
   const lgLang=formData.languageSelect&&formData.languageSelect!=='English'?formData.languageSelect:null;
   if(lgLang){html+=`<div style="margin-top:10px;font-size:0.7rem;color:var(--ink-soft);text-align:center;">🤖 AI translated into ${lgLang} — please review safety notes before sharing.</div>`;}
-  html+=`<div class="guide-footer" style="margin-top:10px;">Made with <strong>MML</strong> — my mental load</div></div>`;
+  html+=`<div class="guide-footer" style="margin-top:10px;">Made with <strong>My Mental Load</strong> — nothing forgotten</div></div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
 
@@ -1276,24 +1403,24 @@ document.getElementById('generateBtn').addEventListener('click',async()=>{
     const res=await fetch('/api/create-checkout',{method:'POST'});
     const data=await res.json();
     if(data.url){window.location.href=data.url;}
-    else{showError('Could not start checkout: '+(data.error||'unknown error'));btn.disabled=false;btn.textContent='Generate guide — £0.99';}
-  }catch(e){showError('Could not start checkout: '+e.message);btn.disabled=false;btn.textContent='Generate guide — £0.99';}
+    else{showError('Could not start checkout: '+(data.error||'unknown error'));btn.disabled=false;btn.textContent='Create my guide — £0.99';}
+  }catch(e){showError('Could not start checkout: '+e.message);btn.disabled=false;btn.textContent='Create my guide — £0.99';}
 });
 
 document.getElementById('editBtn').addEventListener('click',()=>{
-  document.getElementById('guideView').style.display='none';
-  document.getElementById('formView').style.display='block';
-  // Show a reminder banner
+  showView('formView');
   showError('✏️ Make your changes below then tap Generate to create an updated guide.');
 });
 document.getElementById('startOverBtn').addEventListener('click',()=>{
   if(confirm('Clear everything and start from scratch?')){
     try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
-    window.location.reload();
+    location.reload();
   }
 });
 
 async function init(){
+  renderHome();
+  showView('homeView');
   await loadSavedEntry();
   const params=new URLSearchParams(window.location.search);
   const sessionId=params.get('session_id');
