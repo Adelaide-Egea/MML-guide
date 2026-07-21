@@ -679,7 +679,7 @@ body {
     <span class="ht-label">Coming soon</span>
     <span class="ht-body">Hand over your <strong>dog</strong> 🐾 and your <strong>home</strong> 🧺 too. Tell us which you'd use.</span>
   </div>
-  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21b</div>
+  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21c</div>
 </div>
 
 <!-- ══ MODE SELECTION ══ -->
@@ -1441,7 +1441,7 @@ async function performGeneration(authPayload){
     const lines=[`Child ${i+1}: ${c.name}, age ${c.age}`];
     if(c.foodType)lines.push(`  Food type: ${c.foodType}`);
     lines.push(`  Allergies: ${[c.allergens,c.allergyNotes].filter(Boolean).join(' — ')||'None noted'}`);
-    if(c.nappyStatus)lines.push(`  Nappies: ${c.nappyStatus}${c.nappy?' size '+c.nappy:''}${c.cream==='Yes'?' needs cream'+(c.creamNotes?' ('+c.creamNotes+')'):''}` );
+    if(c.nappyStatus)lines.push(`  Nappies: ${c.nappyStatus}${c.nappy?' size '+c.nappy:''}${c.cream==='Yes'?' needs cream'+(c.creamNotes?' ('+c.creamNotes+')':''):''}` );
     if(c.milk||c.milkNotes)lines.push(`  Milk: ${[c.milk,c.milkNotes].filter(Boolean).join(' — ')}`);
     if(c.bottleAmount)lines.push(`  Bottle amount: ${c.bottleAmount}${c.bottleUnit} per feed`);
     if(c.school)lines.push(`  School/activities: ${c.school}`);
