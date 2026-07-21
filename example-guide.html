@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>Example guide — Held</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,600&display=swap');
+:root{
+  --green:#335C4A;--green-dim:#EEF4F1;--berry:#D9577E;--berry-dim:#FCEEF3;
+  --linen:#FCFAF6;--ink:#1A2E1F;--soft:#7A8E85;--softer:#A8B8B0;--line:rgba(26,46,31,0.07);--card:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+@media print { @page { size: A4; margin: 12mm; } }
+body{background:var(--linen);color:var(--ink);font-family:'Manrope',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;padding:28px 16px 60px;}
+.wrap{max-width:480px;margin:0 auto;}
+
+.demo-banner{background:var(--green-dim);border:1px solid #D8E6DF;border-radius:16px;padding:16px 18px;margin-bottom:24px;text-align:center;}
+.demo-banner .tag{font-size:0.6rem;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+.demo-banner p{font-size:0.85rem;color:var(--ink);line-height:1.55;}
+.demo-banner .fictional{font-size:0.72rem;color:var(--softer);margin-top:8px;font-style:italic;}
+
+.guide-wrap { background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+.sched-row, .bed-step, .important-list, .comfort-card, .contact-card, .guide-header {
+  break-inside: avoid; page-break-inside: avoid;
+}
+.g-section { break-after: avoid; page-break-after: avoid; }
+.guide-header { padding: 36px 28px 28px; text-align: center; border-bottom: 1px solid var(--line); background: var(--green); color: white; }
+.guide-emojis { font-size: 1.5rem; margin-bottom: 10px; opacity: 0.9; }
+.guide-names { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 2.2rem; color: white; margin-bottom: 6px; line-height: 1.0; }
+.guide-for { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.guide-duration { display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; margin-bottom: 14px; letter-spacing: 0.05em; }
+.guide-intro { font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.65; max-width: 340px; margin: 0 auto; }
+.guide-body { padding: 24px 24px 32px; }
+.g-section { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green); margin: 28px 0 14px; }
+.g-section:first-child { margin-top: 0; }
+.kid-tag { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
+.sched-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sched-row:last-child { border-bottom: none; }
+.sched-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.sched-time { font-weight: 800; font-size: 0.82rem; color: var(--green); min-width: 64px; }
+.sched-title { font-weight: 600; font-size: 0.88rem; }
+.sched-body { padding-left: 74px; }
+.sched-note { font-size: 0.83rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
+.bed-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.bed-step:last-child { margin-bottom: 0; }
+.bed-dot { width: 26px; height: 26px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.bed-text { font-size: 0.86rem; line-height: 1.6; padding-top: 3px; }
+.important-list { background: var(--berry-dim); border-radius: 16px; padding: 16px 18px; }
+.important-item { display: flex; gap: 10px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 8px; }
+.important-item:last-child { margin-bottom: 0; }
+.comfort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:420px) { .comfort-grid { grid-template-columns: 1fr; } }
+.comfort-card { border-radius: 16px; padding: 14px 16px; }
+.comfort-card-name { font-weight: 700; font-size: 0.87rem; margin-bottom: 8px; }
+.comfort-micro { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--softer); margin-bottom: 4px; }
+.comfort-text { font-size: 0.83rem; line-height: 1.55; }
+.upset-strip { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
+.contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:420px) { .contacts-grid { grid-template-columns: 1fr; } }
+.contact-card { background: var(--linen); border-radius: 14px; padding: 13px 16px; }
+.contact-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 3px; }
+.contact-line { font-size: 0.8rem; color: var(--soft); }
+.guide-closing { text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.1rem; color: var(--soft); line-height: 1.5; }
+.guide-closing strong { color: var(--green); font-style: normal; font-weight: 700; }
+.guide-footer { text-align: center; margin-top: 12px; font-size: 0.62rem; color: var(--softer); letter-spacing: 0.08em; text-transform: uppercase; }
+.cta-footer{margin-top:26px;text-align:center;}
+.cta-footer p{font-size:0.78rem;color:var(--softer);}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="demo-banner">
+    <div class="tag">Example guide</div>
+    <p>This is what you get after a 3-minute brain-dump — a real Held guide, ready to print or hand to anyone caring for your kids.</p>
+    <p class="fictional">(The family below is fictional — just here to show you the format.)</p>
+  </div>
+
+  <div class="guide-wrap">
+    <div class="guide-header">
+      <div class="guide-emojis">🦕 🐰</div>
+      <div class="guide-names">Noah &amp; Ivy</div>
+      <div class="guide-for">Guide for Priya</div>
+      <div class="guide-duration">Full Day</div>
+      <div class="guide-intro">Thank you so much for being with Noah and Ivy today — everything you need is right here. Text or call anytime, no question is a silly one. 💛</div>
+    </div>
+
+    <div class="guide-body">
+      <div class="g-section">⏰ Today's Schedule</div>
+      <div class="sched-row">
+        <div class="sched-head"><span class="sched-time">7:30 AM</span><span class="sched-title">Breakfast</span></div>
+        <div class="sched-body">
+          <div class="sched-note"><span class="kid-tag" style="background:#C17B8C;">🦕 Noah</span> — Porridge with banana, no honey yet. Whole milk in the blue cup only, he's fussy about cups.</div>
+          <div class="sched-note"><span class="kid-tag" style="background:#6FA3CC;">🐰 Ivy</span> — Purée pouch is fine, or mashed banana. She'll try to feed herself — let her, just expect mess.</div>
+        </div>
+      </div>
+      <div class="sched-row">
+        <div class="sched-head"><span class="sched-time">9:30 AM</span><span class="sched-title">Milk/Feed</span></div>
+        <div class="sched-body"><div class="sched-note"><span class="kid-tag" style="background:#6FA3CC;">🐰 Ivy</span> — Bottle, 6oz. She likes to hold it herself now.</div></div>
+      </div>
+      <div class="sched-row">
+        <div class="sched-head"><span class="sched-time">12:30 PM</span><span class="sched-title">Lunch</span></div>
+        <div class="sched-body"><div class="sched-note"><span class="kid-tag" style="background:var(--green);">All children</span> — Whatever's in the fridge labelled "lunch" — usually pasta or a wrap. Noah eats better if Ivy eats first, weirdly.</div></div>
+      </div>
+      <div class="sched-row">
+        <div class="sched-head"><span class="sched-time">1:00 PM</span><span class="sched-title">Nap</span></div>
+        <div class="sched-body"><div class="sched-note"><span class="kid-tag" style="background:#6FA3CC;">🐰 Ivy</span> — Down by 1, up around 3. White noise machine is already on in her room, just press the middle button.</div></div>
+      </div>
+      <div class="sched-row">
+        <div class="sched-head"><span class="sched-time">3:30 PM</span><span class="sched-title">Goûter</span></div>
+        <div class="sched-body"><div class="sched-note"><span class="kid-tag" style="background:var(--green);">All children</span> — Fruit and a small snack, nothing too filling before dinner.</div></div>
+      </div>
+    </div>
+
+    <div class="guide-body" style="padding-top:0;">
+      <div class="g-section">🌙 Bedtime Sequence</div>
+      <div class="bed-step"><div class="bed-dot" style="background:#335C4A;">1</div><div class="bed-text"><span style="font-size:0.8rem;font-weight:800;color:var(--soft);margin-right:6px;">6:00 PM</span>Bath — Noah first, then Ivy. Noah can mostly wash himself now, just check behind his ears.</div></div>
+      <div class="bed-step"><div class="bed-dot" style="background:#335C4A;">2</div><div class="bed-text">Pyjamas, then teeth — Noah likes to "race" you, let him win.</div></div>
+      <div class="bed-step"><div class="bed-dot" style="background:#335C4A;">3</div><div class="bed-text">One story each, Ivy's doudou (the grey rabbit) must be in the cot before the light goes off or she'll notice.</div></div>
+      <div class="bed-step"><div class="bed-dot" style="background:#335C4A;">4</div><div class="bed-text"><span style="font-size:0.8rem;font-weight:800;color:var(--soft);margin-right:6px;">7:00 PM</span>Lights off. Noah is allowed the small nightlight; Ivy is not, she finds it too stimulating.</div></div>
+    </div>
+
+    <div class="guide-body" style="padding-top:0;">
+      <div class="g-section">⚠️ Important</div>
+      <div class="important-list">
+        <div class="important-item"><span>🥜</span><span>Noah has a mild peanut allergy — EpiPen is in the kitchen drawer by the kettle, in the red pouch.</span></div>
+        <div class="important-item"><span>🚪</span><span>Front door locks itself — keep the spare key on the hook, not in your pocket (we've lost two that way).</span></div>
+        <div class="important-item"><span>📵</span><span>No screens for Ivy — she gets overstimulated and bedtime becomes a nightmare.</span></div>
+      </div>
+    </div>
+
+    <div class="guide-body" style="padding-top:0;">
+      <div class="g-section">💛 Personality &amp; Comfort</div>
+      <div class="comfort-grid">
+        <div class="comfort-card" style="background:#F5E6E9;">
+          <div class="comfort-card-name">🦕 Noah</div>
+          <div class="comfort-micro">Likes &amp; personality</div>
+          <div class="comfort-text">Big dinosaur phase — ask him "which one's your favourite today" and you've got 20 minutes covered. Loves being the "big brother helper."</div>
+          <div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">Give him a job to do (carry something, "help" you). Talking about feelings mid-meltdown doesn't land — action does.</div></div>
+        </div>
+        <div class="comfort-card" style="background:#E6F0F7;">
+          <div class="comfort-card-name">🐰 Ivy</div>
+          <div class="comfort-micro">Likes &amp; personality</div>
+          <div class="comfort-text">Grey rabbit doudou goes everywhere. Loves being sung to, especially "Twinkle Twinkle" — badly is fine, she doesn't mind.</div>
+          <div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">Pick her up and walk, don't sit still. Singing works faster than talking.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-body" style="padding-top:0;">
+      <div class="g-section">📞 Contacts</div>
+      <div class="contacts-grid">
+        <div class="contact-card"><div class="contact-name">Mum — Claire</div><div class="contact-line">07700 900 123</div></div>
+        <div class="contact-card"><div class="contact-name">Dad — James</div><div class="contact-line">07700 900 456</div></div>
+        <div class="contact-card"><div class="contact-name">Grandma (backup)</div><div class="contact-line">07700 900 789</div></div>
+        <div class="contact-card"><div class="contact-name">Emergency</div><div class="contact-line">999 (emergency) · 111 (NHS)</div></div>
+      </div>
+      <div class="guide-closing">Thank you for looking after our little dinosaur hunter and our rabbit-hugger today. <strong>With love, Claire &amp; James</strong> 💛</div>
+      <div class="guide-footer">Made with Held · My Mental Load</div>
+    </div>
+  </div>
+
+  <div class="cta-footer">
+    <p>That's the whole thing — took Claire about 3 minutes to brain-dump, Held wrote the rest.</p>
+  </div>
+
+</div>
+</body></html>
