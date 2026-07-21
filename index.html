@@ -686,7 +686,7 @@ html.is-standalone .voice-btn { display: none; }
     <span class="ht-label">Coming soon</span>
     <span class="ht-body">Hand over your <strong>dog</strong> 🐾 and your <strong>home</strong> 🧺 too. Tell us which you'd use.</span>
   </div>
-  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21e</div>
+  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21f</div>
 </div>
 
 <!-- ══ MODE SELECTION ══ -->
@@ -1729,7 +1729,17 @@ async function init(){
 
 // SW
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+  let refreshedOnce=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(refreshedOnce)return;
+    refreshedOnce=true;
+    window.location.reload();
+  });
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      reg.update().catch(()=>{});
+    }).catch(()=>{});
+  });
 }
 
 init();
