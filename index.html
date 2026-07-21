@@ -210,6 +210,7 @@ body {
 }
 .home-empty-icon { font-size: 2rem; margin-bottom: 16px; opacity: 0.5; }
 .home-empty-h { font-weight: 700; font-size: 1rem; color: var(--soft); margin-bottom: 8px; }
+.sample-link { display:inline-block; margin-top:14px; font-size:0.82rem; font-weight:700; color:var(--green); text-decoration:none; border-bottom:1px solid var(--green); padding-bottom:1px; }
 .home-empty-b { font-size: 0.85rem; color: var(--softer); line-height: 1.65; max-width: 240px; margin: 0 auto; }
 
 /* ── MODE SELECTION ── */
@@ -463,6 +464,7 @@ body {
 }
 .t-hint { font-weight: 400; color: var(--softer); font-size: 0.7rem; }
 .t-required { color: var(--berry); font-weight: 800; }
+.reassure-row { display:flex; gap:14px; font-size:0.76rem; color:var(--soft); font-weight:600; margin:-2px 0 16px; }
 .required-legend { font-size: 0.74rem; color: var(--softer); margin: -4px 0 14px; }
 .required-legend .t-required { margin-right: 2px; }
 .field input, .field textarea, .field select {
@@ -691,13 +693,14 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjus
   <div id="emptySection" class="home-empty">
     <div class="home-empty-icon"><svg width="42" height="42" viewBox="0 0 120 120" fill="none" aria-hidden="true"><path d="M60 88 C34 68 26 44 42 35 C53 29 60 38 60 46 C60 38 67 29 78 35 C94 44 86 68 60 88" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     <div class="home-empty-h">Ready when you are.</div>
-    <div class="home-empty-b">Create your first Care Guide — everything your caregiver needs, in one place.</div>
+    <div class="home-empty-b">The 11pm "let me just explain everything" text — written once, not every time. Not for perfect parents. For busy ones.</div>
+    <a href="example-guide.html" target="_blank" class="sample-link">See a sample guide →</a>
   </div>
   <div class="home-teaser no-print">
     <span class="ht-label">Coming soon</span>
     <span class="ht-body">Hand over your <strong>dog</strong> 🐾 and your <strong>home</strong> 🧺 too. Tell us which you'd use.</span>
   </div>
-  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21i</div>
+  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21k</div>
 </div>
 
 <!-- ══ MODE SELECTION ══ -->
@@ -741,6 +744,7 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjus
     <span class="form-context" id="formBadge">Step 2 of 2</span>
     <h2 class="form-h">Tell us about<br>your children.</h2>
     <p class="form-sub">Everything in one place.</p>
+    <div class="reassure-row"><span>⏱ ~5 min</span><span>🔒 Private</span><span>🚫 Never shared</span></div>
     <p class="required-legend"><span class="t-required">*</span>Required — everything else is optional, add what's useful.</p>
   </div>
   <div id="errorBox"></div>
@@ -874,11 +878,12 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjus
   </div><div class="form-section"><span class="form-section-label">Access</span>
   <div class="field">
     <label class="t-label">Beta code <span class="t-hint">(enter to generate for free)</span></label>
-    <div style="font-size:0.72rem;color:var(--soft);margin-bottom:8px;line-height:1.5;">🔒 Your words, beautifully organised by AI — never stored, never used to train models, never shared.</div>
+    <div style="font-size:0.72rem;color:var(--soft);margin-bottom:8px;line-height:1.5;">🔒 Saved on this device so you never have to retype it — sent to AI only to write your guide, never used to train models, never sold.</div>
     <input type="text" id="accessCode" placeholder="e.g. BETAFREE" style="font-weight:700;letter-spacing:0.05em;">
   </div>
 
   <button class="btn-primary" id="generateBtn" style="margin-top:8px;padding:20px;font-size:1.05rem;">Create my guide →</button>
+  <p style="text-align:center;font-size:0.74rem;color:var(--softer);margin-top:10px;">Everything you've entered is saved — if you pay or add a code, you won't need to fill this in again.</p>
 </div>
 
 <!-- ══ LOADING ══ -->
@@ -895,7 +900,7 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjus
   <div id="successMoment" class="success-moment">
     <div class="success-check"><span>✓</span></div>
     <div class="success-h">Your guide<br>is ready.</div>
-    <p class="success-sub">You can leave now.<br>They have everything they need.</p>
+    <p class="success-sub">That's one less thing to carry.<br>They have everything they need.</p>
   </div>
   <div class="guide-wrap" id="guideContent"></div>
   <div class="action-row no-print" style="margin-top:20px;">
@@ -1515,7 +1520,7 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
       body:JSON.stringify({...authPayload,max_tokens:2500,system:systemPrompt,messages:[{role:'user',content:userPrompt}]})
     });
     clearInterval(interval);
-    if(response.status===402){const d=await response.json().catch(()=>({}));throw new Error(d.error||'Payment required.');}
+    if(response.status===402){const d=await response.json().catch(()=>({}));const e=new Error(d.error||'Payment required.');e.isPaymentRequired=true;throw e;}
     if(!response.ok){const t=await response.text().catch(()=>'');throw new Error('Request failed ('+response.status+'): '+t.slice(0,200));}
     const result=await response.json();
     const textBlock=result.content.find(b=>b.type==='text');
@@ -1532,7 +1537,11 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
     clearInterval(interval);
     showView('formView');
     const isNet=err&&(err.message==='Load failed'||err.message==='Failed to fetch'||err.message==='NetworkError');
-    showError(isNet?'⚡ Connection issue — tap Create again to retry.':'Something went wrong: '+(err&&err.message?err.message:'unknown error')+'. Please try again.');
+    if(err&&err.isPaymentRequired){
+      showError('💛 Everything you\'ve entered is saved. Add a code or pay to create this guide — nothing to re-type.');
+    } else {
+      showError(isNet?'⚡ Connection issue — tap Create again to retry.':'Something went wrong: '+(err&&err.message?err.message:'unknown error')+'. Please try again.');
+    }
   }
 }
 
@@ -1674,7 +1683,7 @@ function renderGuideIndepth(aiData,children,formData){
   }
   html+=`<div class="guide-closing">Your guide is ready. You can leave now. 🤍<br><strong>— ${signOff}</strong></div>`;
   if(guideLanguage)html+=`<div style="margin-top:16px;padding:10px 14px;background:var(--green-dim);border-radius:12px;font-size:0.75rem;color:var(--soft);text-align:center;line-height:1.5;">🤖 Translated into <strong>${guideLanguage}</strong> by AI — please review safety notes before sharing.</div>`;
-  html+=`<div class="guide-footer">Made with <strong>My Mental Load</strong> — everything handled</div>`;
+  html+=`<div class="guide-footer">The Held Method · by <strong>My Mental Load</strong></div>`;
   html+=`</div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
@@ -1734,7 +1743,7 @@ function renderGuideLandscape(aiData,children,formData){
   if(emergNums)cParts.push(`🚨 ${formData.country}: ${emergNums}`);
   if(cParts.length)html+=`<div style="font-size:0.76rem;color:var(--soft);margin-top:12px;">📞 ${cParts.join(' · ')}</div>`;
   html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--soft);text-align:center;">Your caregiver has everything they need. <strong style="color:var(--green);font-style:normal;">— ${signOff}</strong></div>`;
-  html+=`<div class="guide-footer" style="margin-top:8px;">Made with <strong>My Mental Load</strong> — everything handled</div>`;
+  html+=`<div class="guide-footer" style="margin-top:8px;">The Held Method · by <strong>My Mental Load</strong></div>`;
   html+=`</div>`;
   document.getElementById('guideContent').innerHTML=html;
 }
