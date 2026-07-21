@@ -1,8 +1,9 @@
 // Held — service worker
-// IMPORTANT: bump CACHE_VERSION on every deploy where you want installed
-// users to pick up changes immediately. This is what stops the "old
-// version stuck on my phone" problem.
-const CACHE_VERSION = '2026-07-21-2';
+// CACHE_VERSION is stamped automatically whenever this file changes —
+// no manual step needed. Most content edits to index.html don't even
+// require this, since navigation requests below always go to the
+// network first anyway (see the fetch handler).
+const CACHE_VERSION = '2026-07-21T14:55-auto';
 const CACHE_NAME = `held-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
