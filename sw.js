@@ -2,7 +2,7 @@
 // IMPORTANT: bump CACHE_VERSION on every deploy where you want installed
 // users to pick up changes immediately. This is what stops the "old
 // version stuck on my phone" problem.
-const CACHE_VERSION = '2026-07-21';
+const CACHE_VERSION = '2026-07-21-2';
 const CACHE_NAME = `held-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
