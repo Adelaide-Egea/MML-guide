@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v10">
+  <meta name="app-version" content="held-v12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — step by step</title>
@@ -141,6 +141,8 @@
   .r-card input[type=time]{width:auto;padding:9px 11px;font-size:0.88rem;border-radius:10px;}
   .r-card .r-del{background:none;border:none;color:var(--softer);font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1;}
   .r-card .r-del:active{color:var(--berry);}
+  .r-who{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);font-weight:600;}
+  .r-who:focus{outline:none;border-color:var(--green);background:var(--card);}
   .r-note{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);}
   .r-note:focus{outline:none;border-color:var(--green);background:var(--card);}
   .r-row{display:flex;align-items:center;gap:10px;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:9px;box-shadow:var(--shadow);}
@@ -260,6 +262,21 @@
 .comfort-grid{ grid-template-columns: 1fr; }
 .comfort-card{ border-radius: 16px; padding: 14px 16px; }
 .comfort-card-name{ font-weight: 700; font-size: 0.87rem; margin-bottom: 8px; }
+
+/* ── READABLE ON PHONE: stack the one-pager columns ── */
+@media screen and (max-width: 700px){
+  .ls-grid{ display: block !important; }
+  .ls-grid > div{ margin-bottom: 16px; }
+  .kid-col{ width:100% !important; margin-bottom:12px; }
+  .kid-col-name{ font-size:1rem !important; }
+  .kid-col div[style*="font-size:0.8rem"]{ font-size:0.9rem !important; line-height:1.6 !important; }
+  .sched-row{ font-size:0.9rem !important; }
+  .guide-body{ padding:18px 16px 24px !important; }
+}
+/* child card polish (applies everywhere) */
+.comfort-card{ line-height: 1.55; }
+.comfort-card-name{ font-size: 0.95rem; margin-bottom: 10px; letter-spacing: -0.01em; }
+.comfort-lbl{ font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.65; font-weight: 800; display:block; margin: 10px 0 4px; }
 .comfort-micro{ font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--softer); margin-bottom: 4px; }
 .comfort-text{ font-size: 0.83rem; line-height: 1.55; }
 .contact-card{ background: var(--linen); border-radius: 14px; padding: 13px 16px; }
@@ -274,7 +291,7 @@
 .sched-row, .bed-step, .important-list, .comfort-card, .contact-card, .guide-header{
   break-inside: avoid; page-break-inside: avoid;
 }
-.no-print{ display: none !important; }
+@media print { .no-print{ display: none !important; } }
 .guide-wrap{ border: none; border-radius: 0; box-shadow: none; }
 @page{ size: A4; margin: 14mm; }
 </style>
@@ -530,16 +547,10 @@
     <p class="success-sub">That's one less thing to carry.<br>They have everything they need.</p>
   </div>
   <div class="guide-wrap" id="guideContent"></div>
-  <!-- Held credit — appears on screen AND in the PDF/print -->
-  <div class="guide-credit">
-    <svg width="20" height="20" viewBox="0 0 120 120" fill="none" style="vertical-align:middle;">
-      <path d="M44 88 V32 M44 60 C44 47 76 47 76 62 V88" stroke="#335C4A" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span><strong>Held</strong> · My Mental Load</span>
-  </div>
 
   <div class="guide-actions no-print">
     <button class="btn-primary" id="downloadPdfBtn">⬇ Save as PDF</button>
+    <button class="btn-guide-2nd" id="saveImgBtn">🖼 Save as image <span style="font-weight:500;opacity:.7;">(for WhatsApp)</span></button>
     <button class="btn-guide-2nd" onclick="window.print()">🖨 Print</button>
     <button class="btn-guide-2nd" id="shareBtn">📤 Share</button>
     <button class="btn-guide-2nd" id="editBtn">✏️ Edit details</button>
@@ -594,7 +605,7 @@
       skipBtn.style.display = childSubstep===0 ? 'none':'block'; // basics required
       nextBtn.textContent = childSubstep===2 ? 'Save child ✓':'Continue';
     }
-    if(step==='routine'){ buildRoutineChips(); }
+    if(step==='routine'){ buildRoutineChips(); renderRoutine(); }
     hideErrors();
     el('.screens').scrollTop=0;
   }
@@ -811,22 +822,30 @@
     c.innerHTML=set.map(x=>`<span class="chip" onclick='addRoutineRow(${JSON.stringify(x.name)},${JSON.stringify(x.time)},${JSON.stringify(x.emoji)})'>${x.emoji} ${x.name}</span>`).join('');
   }
   function addRoutineRow(name,time,emoji){
-    routineItems.push({name,time:time||'',emoji:emoji||'🕐'});
+    routineItems.push({name,time:time||'',emoji:emoji||'🕐',notes:'',child:'all'});
     renderRoutine();
   }
   function renderRoutine(){
     const list=el('#routineList');
-    list.innerHTML=routineItems.map((r,i)=>`<div class="r-card">
+    const named=children.filter(c=>c.name);
+    // only show the child picker when there's more than one child
+    const showWho=named.length>1;
+    list.innerHTML=routineItems.map((r,i)=>{
+      const opts=['<option value="all">👨‍👩‍👧 All children</option>']
+        .concat(named.map(c=>`<option value="${c.name}"${r.child===c.name?' selected':''}>${c.emoji} ${c.name}</option>`))
+        .join('');
+      return `<div class="r-card">
       <div class="r-top">
         <span class="r-emoji">${r.emoji}</span>
         <span class="r-name">${r.name}</span>
         <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value">
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
+      ${showWho?`<select class="r-who" onchange="routineItems[${i}].child=this.value">${opts}</select>`:''}
       <input type="text" class="r-note" value="${(r.notes||'').replace(/"/g,'&quot;')}"
              placeholder="Add a note (optional) — e.g. half a banana, no milk"
              oninput="routineItems[${i}].notes=this.value">
-    </div>`).join('');
+    </div>`;}).join('');
   }
   function delRoutine(i){ routineItems.splice(i,1); renderRoutine(); }
 
@@ -858,7 +877,7 @@
     });
   }
   function collectRoutineData(){
-    return routineItems.map(r=>({type:r.name,time:r.time||'',child:'all',notes:r.notes||''}));
+    return routineItems.map(r=>({type:r.name,time:r.time||'',child:r.child||'all',notes:r.notes||''}));
   }
   function collectContactsData(){
     return contacts.filter(x=>x.name||x.phone).map(x=>({name:x.name,phone:x.phone,relationship:x.rel||''}));
@@ -1149,7 +1168,7 @@ function renderGuideLandscape(aiData,children,formData){
     impLines.forEach((line,i)=>{const shown=impT?impT[i]:line;html+=`<div class="important-item">${iconForLine(line)} ${parseInlineBold(shown)}</div>`;});
     html+=`</div>`;
   }
-  html+=`<div style="display:grid;grid-template-columns:${numCols===3?'1.1fr 1fr 1fr':'1.3fr 1fr'};gap:16px;">`;
+  html+=`<div class="ls-grid ls-cols-${numCols}" style="display:grid;grid-template-columns:${numCols===3?'1.1fr 1fr 1fr':'1.3fr 1fr'};gap:16px;">`;
   html+=`<div><div class="g-section">⏰ ${labels.schedule}</div>`;
   sorted.forEach(item=>{
     const tl=item.time?formatTime12hr(item.time):'—';
@@ -1164,8 +1183,8 @@ function renderGuideLandscape(aiData,children,formData){
   children.forEach(c=>{
     const id=kidId[c.name];
     const cs=(aiData.childSections||[]).find(x=>x.childName===c.name);
-    html+=`<div style="background:${id.dim};border-radius:18px;padding:14px;">
-      <div style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${id.emoji} ${c.name}${c.age?', '+c.age.split(' ')[0]:''}</div>`;
+    html+=`<div class="kid-col" style="background:${id.dim};border-radius:18px;padding:14px;">
+      <div class="kid-col-name" style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${id.emoji} ${c.name}${c.age?', '+c.age.split(' ')[0]:''}</div>`;
     if(cs&&cs.comfort)html+=`<div class="comfort-micro">Likes</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort.split(/(?<=[.!?])\s+/).slice(0,2).join(' '))}</div>`;
     if(cs&&cs.whenUpset)html+=`<div class="comfort-micro">🧸 If upset</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset).split(/(?<=[.!?])\s+/).slice(0,1).join(' '))}</div>`;
     const allergy=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
@@ -1311,6 +1330,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
     if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} location.reload(); } }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
+    if(t.id==='saveImgBtn'){ doSaveImage(); }
     if(t.id==='shareBtn'){ doShare(); }
   });
   function doDownloadPdf(){
@@ -1318,16 +1338,35 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     const kids=(window.__held&&window.__held.children)||[];
     const nm=(kids[0]&&kids[0].name)||'guide';
     const mode=(window.__held&&window.__held.formData.mode)||'indepth';
-    // wrap guide + Held credit together so the PDF is branded
-    const wrap=document.createElement('div');
-    wrap.appendChild(document.getElementById('guideContent').cloneNode(true));
-    const credit=document.querySelector('.guide-credit');
-    if(credit) wrap.appendChild(credit.cloneNode(true));
     html2pdf().set({margin:[10,10,10,10],filename:`held-${nm.toLowerCase().replace(/\s+/g,'-')}.pdf`,
       image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,logging:false},
       jsPDF:{unit:'mm',format:'a4',orientation:mode==='landscape'?'landscape':'portrait'},
-      pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header','.guide-credit']}
-    }).from(wrap).save();
+      pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header']}
+    }).from(document.getElementById('guideContent')).save();
+  }
+  async function doSaveImage(){
+    const node=document.getElementById('guideContent');
+    const kids=(window.__held&&window.__held.children)||[];
+    const nm=((kids[0]&&kids[0].name)||'guide').toLowerCase().replace(/\s+/g,'-');
+    const h2c=window.html2canvas||(window.html2pdf&&window.html2pdf.html2canvas);
+    if(!h2c){ alert('Image export unavailable — try Save as PDF.'); return; }
+    try{
+      const canvas=await h2c(node,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+      canvas.toBlob(async blob=>{
+        if(!blob){ alert('Could not create the image.'); return; }
+        const file=new File([blob],`held-${nm}.png`,{type:'image/png'});
+        // try native share first (lets you send straight to WhatsApp)
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          try{ await navigator.share({files:[file],title:'Held care guide'}); return; }
+          catch(e){ if(e&&e.name==='AbortError')return; }
+        }
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=`held-${nm}.png`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1500);
+      },'image/png');
+    }catch(e){ alert('Could not save the image. Try Save as PDF instead.'); }
   }
   async function doShare(){
     const kids=(window.__held&&window.__held.children)||[];
