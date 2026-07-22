@@ -1,342 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v8">
+  <meta name="app-version" content="held-v9">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Held — by My Mental Load</title>
-<meta name="theme-color" content="#FCFAF6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C2823" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Held">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icons/icon-180.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Held — step by step</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,600&display=swap');
-
-:root {
-  --green:      #335C4A;
-  --green-dim:  #EEF4F1;
-  --green-mid:  #4A7A63;
-  --sage:       #B7D2C4;
-  --berry:      #D9577E;
-  --berry-dim:  #FCEEF3;
-  --navy:       #223A5E;
-  --linen:      #FCFAF6;
-  --ink:        #1A2E1F;
-  --soft:       #7A8E85;
-  --softer:     #A8B8B0;
-  --line:       rgba(26,46,31,0.07);
-  --card:       #FFFFFF;
-  --on-green:   #FFFFFF;   /* text that sits on a green button */
-  --on-berry:   #FFFFFF;   /* text that sits on a raspberry button */
-  --shadow:     0 1px 8px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06);
-}
-
-/* ═══════════════════ 🌙 DARK MODE ═══════════════════
-   Warm charcoal-green — never pure black — so the brand still
-   feels like itself at night. Greens LIFT to a bright sage so
-   the logo, headings and accents actually show up, and buttons
-   flip to dark text so a bright button never washes out. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --green:      #6FBFA0;   /* bright sage — logo/buttons/accents pop */
-    --green-dim:  #223730;
-    --green-mid:  #86CDB0;
-    --sage:       #3C5A4E;
-    --berry:      #E87AA0;   /* success rose, brightened for dark */
-    --berry-dim:  #34222A;
-    --navy:       #A9C0DE;   /* was dark navy text — now legible */
-    --linen:      #1C2823;   /* page bg: warm dark green, NOT black */
-    --ink:        #EAF1EC;   /* body text: soft off-white */
-    --soft:       #9FB2A9;
-    --softer:     #6F847B;
-    --line:       rgba(255,255,255,0.10);
-    --card:       #2E4038;   /* cards sit clearly above the page */
-    --on-green:   #0E1F18;   /* dark text on the bright-green buttons */
-    --on-berry:   #2A121B;   /* dark text on the bright rose buttons */
-    --shadow:     0 1px 8px rgba(0,0,0,0.30), 0 4px 20px rgba(0,0,0,0.38);
+  :root{
+    --green:#335C4A; --green-dim:#EEF4F1; --green-mid:#4A7A63;
+    --sage:#B7D2C4; --berry:#D9577E; --berry-dim:#FCEEF3;
+    --navy:#223A5E; --linen:#FCFAF6; --ink:#1A2E1F;
+    --soft:#7A8E85; --softer:#A8B8B0; --line:rgba(26,46,31,0.09);
+    --card:#FFFFFF; --on-green:#FFFFFF;
+    --shadow:0 1px 8px rgba(0,0,0,0.04),0 4px 20px rgba(0,0,0,0.06);
   }
-}
+  @media(prefers-color-scheme:dark){
+    :root{
+      --green:#6FBFA0; --green-dim:#223730; --green-mid:#86CDB0;
+      --sage:#3C5A4E; --berry:#E87AA0; --berry-dim:#34222A;
+      --navy:#A9C0DE; --linen:#1C2823; --ink:#EAF1EC;
+      --soft:#9FB2A9; --softer:#6F847B; --line:rgba(255,255,255,0.10);
+      --card:#2E4038; --on-green:#0E1F18;
+      --shadow:0 1px 8px rgba(0,0,0,0.30),0 4px 20px rgba(0,0,0,0.38);
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:'Manrope',-apple-system,sans-serif;background:var(--linen);color:var(--ink);display:flex;justify-content:center;overflow:hidden;}
+  .phone{width:100%;max-width:430px;height:100dvh;background:var(--linen);display:flex;flex-direction:column;position:relative;}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 8px;flex-shrink:0;}
+  .back{width:38px;height:38px;border:none;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);cursor:pointer;font-size:18px;color:var(--ink);transition:transform .15s;}
+  .back:active{transform:scale(.9);}
+  .back.hidden{visibility:hidden;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand svg{color:var(--green);flex-shrink:0;}
+  .brand-lockup{display:flex;flex-direction:column;line-height:1;}
+  .brand-name{font-weight:800;font-size:1.5rem;letter-spacing:-0.02em;color:var(--green);}
+  .brand-sub{font-size:0.58rem;color:var(--softer);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-top:3px;}
+  .header-spacer{width:38px;}
 
-html { -webkit-tap-highlight-color: transparent; }
+  .progress{height:4px;background:var(--green-dim);margin:6px 18px 0;border-radius:99px;overflow:hidden;flex-shrink:0;}
+  .progress-fill{height:100%;background:var(--green);border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);width:10%;}
+  .step-count{font-size:0.68rem;color:var(--softer);padding:8px 18px 0;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0;}
 
-body {
-  background: var(--linen);
-  color: var(--ink);
-  font-family: 'Manrope', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.5;
-}
+  .screens{flex:1;position:relative;overflow:hidden;}
+  .screen{position:absolute;inset:0;padding:14px 20px 0;display:none;flex-direction:column;overflow-y:auto;animation:slide .3s ease;}
+  .screen.active{display:flex;}
+  @keyframes slide{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:translateX(0);}}
 
-/* ── SCREENS ── */
-.screen {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 0 24px 100px;
-  animation: appear 0.22s ease;
-}
-@keyframes appear {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  .q{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:600;line-height:1.15;letter-spacing:-0.01em;margin-top:12px;margin-bottom:6px;color:var(--ink);}
+  .sub{font-size:0.9rem;color:var(--soft);line-height:1.5;margin-bottom:22px;}
 
-/* ── HOME ── */
-.home-wordmark {
-  display: block;
-  padding-top: 52px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--green);
-  margin-bottom: 56px;
-}
+  .field{margin-bottom:15px;}
+  .t-label{display:block;font-size:0.78rem;font-weight:700;color:var(--ink);margin-bottom:7px;}
+  .t-hint{font-weight:500;color:var(--softer);font-size:0.72rem;}
+  .t-req{color:var(--berry);}
+  input,select,textarea{width:100%;padding:14px 15px;border:1.5px solid var(--line);border-radius:14px;font-size:1rem;background:var(--card);color:var(--ink);font-family:inherit;transition:border-color .2s;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
+  input.err,textarea.err{border-color:var(--berry);}
+  ::placeholder{color:var(--softer);}
+  textarea{resize:none;min-height:74px;line-height:1.5;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+  .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;}
 
-/* logo lockup on the landing screen */
-.home-brand { display:flex; align-items:center; gap:12px; padding-top:44px; margin-bottom:40px; }
-.home-logo { color:var(--green); flex-shrink:0; }
-.home-brand-lockup { display:flex; flex-direction:column; line-height:1; }
-.home-brand-name { font-family:'Manrope',sans-serif; font-weight:800; font-size:1.5rem; letter-spacing:-0.02em; color:var(--green); }
-.home-brand-sub { font-size:0.56rem; color:var(--softer); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-top:3px; }
-.install-banner { display:flex; align-items:center; gap:12px; background:var(--green-dim);
-  border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin:24px 0 0; }
-.install-banner .ib-icon { font-size:1.15rem; flex-shrink:0; }
-.install-banner .ib-text { display:flex; flex-direction:column; line-height:1.3; }
-.install-banner .ib-text strong { font-size:0.84rem; font-weight:700; color:var(--green); }
-.install-banner .ib-text span { font-size:0.76rem; color:var(--soft); }
-.home-teaser { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;
-  margin:30px auto 40px; max-width:320px; }
-.home-teaser .ht-label { font-size:0.6rem; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--softer); }
-.home-teaser .ht-body { font-size:0.82rem; color:var(--soft); line-height:1.6; }
-.home-teaser strong { color:var(--green); font-weight:700; }
+  /* stepper (how many children) */
+  .stepper{display:flex;align-items:center;justify-content:center;gap:22px;margin:8px 0 24px;}
+  .stepper button{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);font-size:1.6rem;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;padding:0;}
+  .stepper button:active{transform:scale(.9);}
+  .stepper .count{font-family:'Fraunces',serif;font-size:3rem;font-weight:600;color:var(--ink);min-width:60px;text-align:center;}
 
-.home-greeting {
-  font-size: 0.85rem;
-  color: var(--softer);
-  font-weight: 500;
-  margin-bottom: 18px;
-}
-.home-heading {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 4rem;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  margin-bottom: 20px;
-}
-.home-sub {
-  font-size: 0.95rem;
-  color: var(--soft);
-  line-height: 1.7;
-  margin-bottom: 44px;
-  max-width: 280px;
-}
-.home-cta {
-  width: 100%;
-  padding: 20px 24px;
-  background: var(--green);
-  color: var(--on-green);
-  border: none;
-  border-radius: 100px;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(51,92,74,0.22);
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-.home-cta:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(51,92,74,0.2); }
-.home-permission {
-  font-size: 0.78rem;
-  color: var(--softer);
-  text-align: center;
-  font-style: italic;
-  margin-bottom: 56px;
-}
-.home-sl {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--softer);
-  margin-bottom: 16px;
-}
-.rgc {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 18px 20px;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: none;
-  width: 100%;
-  font-family: 'Manrope', sans-serif;
-  cursor: pointer;
-  text-align: left;
-  margin-bottom: 10px;
-  transition: transform 0.12s;
-}
-.rgc:active { transform: scale(0.99); }
-.rgc-l { display: flex; align-items: center; gap: 14px; }
-.rgc-av { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
-.rgc-name { font-weight: 700; font-size: 0.95rem; color: var(--ink); margin-bottom: 1px; }
-.rgc-meta { font-size: 0.75rem; color: var(--softer); }
-.rgc-arrow { color: var(--green); font-weight: 800; font-size: 0.85rem; }
-.home-new {
-  width: 100%;
-  padding: 14px;
-  background: none;
-  border: 1.5px solid var(--line);
-  border-radius: 100px;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--soft);
-  cursor: pointer;
-  margin-top: 4px;
-}
-.home-empty {
-  text-align: center;
-  padding: 48px 0 0;
-}
-.home-empty-icon { font-size: 2rem; margin-bottom: 16px; opacity: 0.5; }
-.home-empty-h { font-weight: 700; font-size: 1rem; color: var(--soft); margin-bottom: 8px; }
-.sample-link { display:inline-block; margin-top:14px; font-size:0.82rem; font-weight:700; color:var(--green); text-decoration:none; border-bottom:1px solid var(--green); padding-bottom:1px; }
-.home-empty-b { font-size: 0.85rem; color: var(--softer); line-height: 1.65; max-width: 240px; margin: 0 auto; }
+  /* combined vs split (shown only when 2+) */
+  .opt{display:flex;align-items:center;gap:13px;padding:16px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;transition:all .18s;margin-bottom:10px;}
+  .opt:active{transform:scale(.98);}
+  .opt.sel{border-color:var(--green);background:var(--green-dim);}
+  .opt-ico{width:42px;height:42px;border-radius:11px;background:var(--sage);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .opt-label{font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:2px;}
+  .opt.sel .opt-label{color:var(--green);}
+  .opt-desc{font-size:0.78rem;color:var(--soft);line-height:1.4;}
+  .fmt-label{font-size:0.68rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--softer);display:block;margin:6px 0 10px;}
 
-/* ── MODE SELECTION ── */
-.screen-eyebrow {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--softer);
-  margin-bottom: 16px;
-  display: block;
-  padding-top: 48px;
-}
-.screen-h {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 2.6rem;
-  line-height: 1.0;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin-bottom: 10px;
-}
-.screen-sub {
-  font-size: 0.88rem;
-  color: var(--soft);
-  margin-bottom: 36px;
-  line-height: 1.6;
-}
-.option-card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 20px 22px;
-  margin-bottom: 10px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  font-family: 'Manrope', sans-serif;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  transition: transform 0.12s;
-  position: relative;
-  overflow: hidden;
-}
-.option-card::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 0;
-  background: var(--green);
-  transition: width 0.15s ease;
-  border-radius: 2px 0 0 2px;
-}
-.option-card.selected::before { width: 4px; }
-.option-card.selected { background: var(--green-dim); }
-.option-card:active { transform: scale(0.99); }
-.option-emoji { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
-.option-label { font-size: 0.97rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; transition: color 0.12s; }
-.option-desc  { font-size: 0.8rem; color: var(--soft); line-height: 1.5; }
-.option-card.selected .option-label { color: var(--green); }
-/* visual tiles — step 1 */
-.tile-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:6px; }
-.option-card.tile { flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:22px 8px 18px; margin-bottom:0; text-align:center; }
-.tile-emoji { font-size:1.7rem; line-height:1; }
-.tile-label { font-size:0.8rem; font-weight:700; color:var(--ink); }
-.option-card.tile.selected .tile-label { color:var(--green); }
-@media(max-width:360px){ .tile-label{font-size:0.72rem;} }
-.rec-banner {
-  background: var(--green-dim);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 12px 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--green-mid);
-  line-height: 1.5;
-  display: none;
-}
-.format-label {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--softer);
-  margin: 32px 0 14px;
-  display: block;
-}
+  /* duration tiles */
+  .tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:22px;}
+  .tile{padding:16px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer;text-align:center;transition:all .18s;}
+  .tile:active{transform:scale(.96);}
+  .tile.sel{border-color:var(--green);background:var(--green-dim);}
+  .tile-ico{font-size:1.5rem;display:block;margin-bottom:6px;}
+  .tile-label{font-size:0.78rem;font-weight:700;color:var(--ink);}
+  .tile.sel .tile-label{color:var(--green);}
+  .rec-msg{background:var(--berry-dim);border-radius:12px;padding:12px 14px;font-size:0.8rem;color:var(--ink);line-height:1.5;margin-bottom:14px;}
 
-/* ── BUTTONS ── */
-.btn-primary {
-  width: 100%;
-  padding: 18px 24px;
-  background: var(--green);
-  color: var(--on-green);
-  border: none;
-  border-radius: 100px;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 0.97rem;
-  cursor: pointer;
-  margin-top: 16px;
-  letter-spacing: 0.01em;
-  transition: transform 0.1s, opacity 0.1s;
-}
-.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-primary:not(:disabled):active { transform: scale(0.99); }
-.btn-berry {
-  width: 100%;
-  padding: 18px 24px;
-  background: var(--berry);
-  color: var(--on-berry);
-  border: none;
-  border-radius: 100px;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 0.97rem;
-  cursor: pointer;
-  letter-spacing: 0.01em;
-}
-.btn-ghost {
+  /* important */
+  .important{background:transparent;border:1.5px solid var(--berry);border-radius:14px;padding:14px;margin-bottom:16px;}
+  .important-label{display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:800;color:var(--berry);margin-bottom:10px;}
+  .important textarea{background:var(--card);border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;min-height:78px;font-size:0.92rem;}
+  .important textarea:focus{border-color:var(--berry);}
+
+  /* colour + emoji */
+  .swatches{display:flex;gap:12px;margin-bottom:6px;}
+  .sw{width:42px;height:42px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s;}
+  .sw:active{transform:scale(.9);}
+  .sw.sel{border-color:var(--ink);}
+  .emoji-row{display:flex;flex-wrap:wrap;gap:9px;}
+  .em{width:46px;height:46px;border-radius:12px;background:var(--card);border:1.5px solid var(--line);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;}
+  .em.sel{border-color:var(--green);background:var(--green-dim);}
+  .em:active{transform:scale(.9);}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:8px 13px;border:1.5px solid var(--line);border-radius:99px;background:var(--card);font-size:0.82rem;font-weight:600;cursor:pointer;color:var(--soft);transition:all .15s;}
+  .chip.sel{border-color:var(--green);background:var(--green-dim);color:var(--green);}
+  .chip:active{transform:scale(.94);}
+
+  /* children hub */
+  .child-card{display:flex;align-items:center;gap:13px;padding:15px;border:1.5px solid var(--line);border-radius:15px;background:var(--card);margin-bottom:11px;box-shadow:var(--shadow);}
+  .child-avatar{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0;}
+  .child-info{flex:1;min-width:0;}
+  .child-name{font-weight:700;font-size:1rem;color:var(--ink);}
+  .child-meta{font-size:0.78rem;color:var(--soft);margin-top:1px;}
+  .child-edit{background:var(--green-dim);color:var(--green);border:none;border-radius:10px;padding:9px 14px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;}
+  .child-edit:active{transform:scale(.95);}
+  .child-del{background:none;border:none;color:var(--berry);font-size:1.05rem;cursor:pointer;padding:6px 4px;line-height:1;border-radius:8px;flex-shrink:0;}
+  .child-del:active{background:var(--berry-dim);}
+  .child-status{font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:99px;}
+  .status-done{background:var(--green-dim);color:var(--green);}
+  .status-todo{background:var(--berry-dim);color:var(--berry);}
+
+  .btn-add{width:100%;padding:15px;border:2px dashed var(--green);border-radius:14px;background:var(--green-dim);color:var(--green);font-weight:800;font-size:0.95rem;cursor:pointer;font-family:inherit;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-add:active{transform:scale(.98);}
+  .btn-add-sm{width:100%;padding:13px;border:1.5px dashed var(--line);border-radius:13px;background:transparent;color:var(--green);font-weight:700;font-size:0.9rem;cursor:pointer;font-family:inherit;margin-top:4px;}
+
+  .child-substep{font-size:0.68rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--green);margin-bottom:4px;}
+  .age-group{margin-bottom:0;}
+  .age-badge{display:inline-block;font-size:0.68rem;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--green);background:var(--green-dim);padding:4px 10px;border-radius:99px;margin-bottom:14px;}
+  /* routine rows */
+  .r-row{display:flex;align-items:center;gap:10px;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:9px;box-shadow:var(--shadow);}
+  .r-row .r-emoji{font-size:1.2rem;}
+  .r-row .r-name{flex:1;font-weight:700;font-size:0.9rem;color:var(--ink);}
+  .r-row input[type=time]{width:auto;padding:9px 11px;font-size:0.88rem;border-radius:10px;}
+  .r-row .r-del{background:none;border:none;color:var(--softer);font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1;}
+  .r-row .r-del:active{color:var(--berry);}
+  .err-msg{background:var(--berry-dim);color:var(--berry);font-size:0.8rem;font-weight:700;padding:10px 13px;border-radius:11px;margin-bottom:12px;display:none;}
+  .err-msg.show{display:block;}
+
+  .foot{padding:12px 20px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:linear-gradient(to top,var(--linen) 72%,transparent);}
+  .btn-primary{width:100%;padding:16px;border:none;border-radius:15px;background:var(--green);color:var(--on-green);font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .15s;}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{opacity:.4;}
+  .btn-skip{background:none;border:none;color:var(--softer);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:inherit;padding:5px;}
+  .btn-skip:active{opacity:.6;}
+
+  .home{padding:20px 26px;}
+  .home .install{display:flex;align-items:center;gap:11px;background:var(--green-dim);border:1px solid var(--line);border-radius:14px;padding:11px 15px;margin:28px 0 0;}
+  .home .install .ico{font-size:1.2rem;}
+  .home .install strong{font-size:0.8rem;font-weight:700;color:var(--green);display:block;}
+  .home .install span{font-size:0.72rem;color:var(--soft);}
+  .home .greeting{font-size:0.85rem;color:var(--soft);font-weight:600;margin-bottom:10px;}
+  .home h1{font-family:'Fraunces',serif;font-size:2.6rem;font-weight:600;line-height:1.05;letter-spacing:-0.02em;margin-bottom:14px;color:var(--ink);}
+  .home .hsub{font-size:0.95rem;color:var(--soft);line-height:1.5;margin-bottom:28px;}
+  .home .perm{font-size:0.78rem;color:var(--softer);text-align:center;margin-top:14px;}
+  .sample-link{display:inline-block;color:var(--green);font-weight:700;font-size:0.85rem;text-decoration:none;margin-top:20px;}
+
+  .done{justify-content:center;align-items:center;text-align:center;padding:20px 30px;}
+  .done .check{width:74px;height:74px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:22px;font-size:34px;color:var(--on-green);}
+  .done h2{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:600;margin-bottom:10px;color:var(--ink);}
+  .done p{font-size:0.92rem;color:var(--soft);margin-bottom:30px;line-height:1.5;}
+  .spinner{width:44px;height:44px;border:4px solid var(--green-dim);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:22px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── GUIDE OUTPUT (from engine) ── */
+.btn-ghost{
   width: 100%;
   padding: 16px 24px;
   background: none;
@@ -349,264 +182,10 @@ body {
   cursor: pointer;
   margin-top: 10px;
 }
-.btn-add {
-  width: 100%;
-  padding: 14px 24px;
-  background: none;
-  border: 1.5px dashed var(--sage);
-  border-radius: 100px;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--green);
-  cursor: pointer;
-  margin-bottom: 8px;
-}
-.btn-remove {
-  background: none;
-  border: none;
-  color: var(--berry);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: 'Manrope', sans-serif;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-.btn-remove:active { background: var(--berry-dim); }
-
-/* ── BACK LINK ── */
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: var(--softer);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 0;
-  font-family: 'Manrope', sans-serif;
-  padding-top: 48px;
-}
-
-/* ── FORM ── */
-.form-header { margin-bottom: 36px; }
-.form-context {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--softer);
-  margin-bottom: 10px;
-  display: block;
-}
-.form-h {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 2.2rem;
-  line-height: 1.05;
-  color: var(--ink);
-  margin-bottom: 8px;
-}
-.form-sub { font-size: 0.88rem; color: var(--soft); line-height: 1.6; }
-.form-section {
-  margin: 36px 0 20px;
-}
-.form-section-label {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--green);
-  margin-bottom: 16px;
-  display: block;
-}
-.form-card {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 22px;
-  box-shadow: var(--shadow);
-  margin-bottom: 12px;
-}
-.form-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.form-card-title { font-size: 0.85rem; font-weight: 700; color: var(--green); }
-
-/* ── IMPORTANT BOX ── */
-.important-box {
-  background: var(--berry-dim);
-  border-radius: 16px;
-  padding: 18px 20px;
-  margin-bottom: 28px;
-}
-.important-label {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--berry);
-  margin-bottom: 10px;
-  display: block;
-}
-
-/* ── FIELDS ── */
-.field { margin-bottom: 18px; }
-.field:last-child { margin-bottom: 0; }
-.t-label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--soft);
-  margin-bottom: 7px;
-  letter-spacing: 0.01em;
-}
-.t-hint { font-weight: 400; color: var(--softer); font-size: 0.7rem; }
-.t-required { color: var(--berry); font-weight: 800; }
-.reassure-row { display:flex; gap:14px; font-size:0.76rem; color:var(--soft); font-weight:600; margin:-2px 0 16px; }
-.required-legend { font-size: 0.74rem; color: var(--softer); margin: -4px 0 14px; }
-.required-legend .t-required { margin-right: 2px; }
-.field input, .field textarea, .field select {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1.5px solid var(--line);
-  border-radius: 14px;
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.93rem;
-  background: var(--linen);
-  color: var(--ink);
-  resize: vertical;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  -webkit-appearance: none;
-}
-.field input:focus, .field textarea:focus, .field select:focus {
-  outline: none;
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(51,92,74,0.1);
-  background: white;
-}
-.field textarea { min-height: 72px; line-height: 1.6; }
-.field select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237A8E85' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 10px;
-  padding-right: 36px;
-  cursor: pointer;
-}
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-@media(max-width:440px) { .row2, .row3 { grid-template-columns: 1fr; } }
-
-/* ── CHIPS ── */
-.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 4px; }
-.chip { position: relative; }
-.chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
-.chip span {
-  display: inline-block;
-  padding: 7px 14px;
-  border: 1.5px solid var(--line);
-  border-radius: 100px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--soft);
-  background: var(--linen);
-  transition: all 0.12s;
-  cursor: pointer;
-}
-.chip input:checked + span { background: var(--green); border-color: var(--green); color: white; }
-.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
-.quick-chip {
-  padding: 8px 14px;
-  border: 1.5px solid var(--line);
-  border-radius: 100px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--soft);
-  background: var(--linen);
-  cursor: pointer;
-  font-family: 'Manrope', sans-serif;
-  transition: all 0.12s;
-}
-.quick-chip:hover { border-color: var(--green); color: var(--green); background: var(--green-dim); }
-.milk-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.milk-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 14px; border: 1.5px solid var(--line); border-radius: 100px;
-  font-size: 0.82rem; font-weight: 600; color: var(--soft);
-  background: var(--card); cursor: pointer; transition: all 0.12s;
-  user-select: none;
-}
-.milk-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
-.milk-chip:has(input:checked) { border-color: var(--green); background: var(--green-dim); color: var(--green); }
-
-/* ── APP-FORMAT STEP UI ── */
-#formView { display:flex; flex-direction:column; height:100dvh; padding:0; }
-.app-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px 8px; flex-shrink:0; }
-.app-back { width:38px; height:38px; border:none; background:var(--card); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); cursor:pointer; font-size:18px; color:var(--ink); }
-.app-back:active { transform:scale(.9); }
-.app-brand { display:flex; align-items:center; gap:10px; }
-.app-brand-lockup { display:flex; flex-direction:column; line-height:1; }
-.app-brand-name { font-family:'Manrope',sans-serif; font-weight:800; font-size:1.35rem; letter-spacing:-.02em; color:var(--green); }
-.app-brand-sub { font-size:0.54rem; color:var(--softer); font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-top:3px; }
-.step-progress { height:4px; background:var(--green-dim); margin:6px 18px 0; border-radius:99px; overflow:hidden; flex-shrink:0; }
-.step-progress-fill { height:100%; background:var(--green); border-radius:99px; transition:width .35s cubic-bezier(.4,0,.2,1); width:14%; }
-.step-count { font-size:0.66rem; color:var(--softer); padding:8px 20px 0; font-weight:800; letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; }
-.step-body { flex:1; overflow-y:auto; padding:6px 20px 12px; }
-.form-step { animation:stepIn .3s ease; }
-@keyframes stepIn { from{opacity:0;transform:translateX(14px);} to{opacity:1;transform:translateX(0);} }
-.step-h { font-family:'Fraunces',serif; font-size:1.7rem; font-weight:600; line-height:1.15; letter-spacing:-.01em; margin:10px 0 6px; color:var(--ink); }
-.step-sub { font-size:0.9rem; color:var(--soft); line-height:1.5; margin-bottom:20px; }
-.step-foot { padding:12px 20px calc(16px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; flex-shrink:0; background:linear-gradient(to top,var(--linen) 72%,transparent); }
-.btn-step-skip { background:none; border:none; color:var(--softer); font-size:0.85rem; font-weight:700; cursor:pointer; font-family:'Manrope',sans-serif; padding:5px; }
-.btn-step-skip:active { opacity:.6; }
-
-/* ── SWATCHES ── */
-.swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-.swatch-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; transition: transform 0.12s; }
-.swatch-btn.selected { border-color: var(--ink); transform: scale(1.15); }
-
-/* ── UNIT TOGGLE ── */
-.amount-row { display: flex; gap: 8px; align-items: center; }
-.amount-row input[type=number] { flex: 1; }
-.unit-toggle { display: flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--linen); }
-.unit-btn { padding: 9px 12px; border: none; background: transparent; font-family: 'Manrope', sans-serif; font-size: 0.82rem; font-weight: 700; cursor: pointer; color: var(--soft); transition: all 0.12s; }
-.unit-btn.active { background: var(--green); color: white; }
-
-/* ── VOICE ── */
-.textarea-wrap { position: relative; }
-.voice-btn { position: absolute; bottom: 10px; right: 10px; background: none; border: none; cursor: pointer; font-size: 0.95rem; padding: 4px; opacity: 0.4; transition: opacity 0.12s; }
-html.is-standalone .voice-btn { display: none; }
-.voice-btn:hover { opacity: 0.8; }
-.voice-btn.recording { animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1;} }
-
-/* ── ERROR ── */
-.error-box { background: var(--berry-dim); color: var(--berry); padding: 14px 18px; border-radius: 14px; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
-
-/* ── LOADING ── */
-.loading-screen { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 24px; }
-.spinner { width: 32px; height: 32px; border: 2.5px solid var(--sage); border-top-color: var(--green); border-radius: 50%; margin: 0 auto 28px; animation: spin 0.9s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-h { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.5rem; color: var(--ink); margin-bottom: 10px; }
-.loading-sub { font-size: 0.85rem; color: var(--softer); }
-
-/* ── SUCCESS MOMENT ── */
-.success-moment {
-  text-align: center;
-  padding: 52px 24px 36px;
-}
-.success-check {
+.spinner{ width: 32px; height: 32px; border: 2.5px solid var(--sage); border-top-color: var(--green); border-radius: 50%; margin: 0 auto 28px; animation: spin 0.9s linear infinite; }
+.loading-h{ font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.5rem; color: var(--ink); margin-bottom: 10px; }
+.loading-sub{ font-size: 0.85rem; color: var(--softer); }
+.success-check{
   width: 48px; height: 48px;
   background: var(--berry-dim);
   border-radius: 50%;
@@ -616,8 +195,8 @@ html.is-standalone .voice-btn { display: none; }
   margin: 0 auto 20px;
   border: 1.5px solid rgba(217,87,126,0.2);
 }
-.success-check span { color: var(--berry); font-size: 1.2rem; font-weight: 800; }
-.success-h {
+.success-check span{ color: var(--berry); font-size: 1.2rem; font-weight: 800; }
+.success-h{
   font-family: 'Fraunces', serif;
   font-style: italic;
   font-weight: 300;
@@ -626,337 +205,287 @@ html.is-standalone .voice-btn { display: none; }
   margin-bottom: 8px;
   line-height: 1.1;
 }
-.success-sub { font-size: 0.9rem; color: var(--soft); line-height: 1.6; }
-
+.success-sub{ font-size: 0.9rem; color: var(--soft); line-height: 1.6; }
 /* ── GUIDE OUTPUT ── */
-.guide-wrap { background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
-.guide-header { padding: 36px 28px 28px; text-align: center; border-bottom: 1px solid var(--line); background: var(--green); color: white; }
-.guide-emojis { font-size: 1.5rem; margin-bottom: 10px; opacity: 0.9; }
-.guide-names { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 2.2rem; color: white; margin-bottom: 6px; line-height: 1.0; }
-.guide-for { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
-.guide-duration { display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; margin-bottom: 14px; letter-spacing: 0.05em; }
-.guide-intro { font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.65; max-width: 340px; margin: 0 auto; }
-.guide-body { padding: 24px 24px 32px; }
-.g-section { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green); margin: 28px 0 14px; }
-.g-section:first-child { margin-top: 0; }
-.kid-tag { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
-.sched-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
-.sched-row:last-child { border-bottom: none; }
-.sched-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-.sched-time { font-weight: 800; font-size: 0.82rem; color: var(--green); min-width: 64px; }
-.sched-title { font-weight: 600; font-size: 0.88rem; }
-.sched-body { padding-left: 74px; }
-.sched-note { font-size: 0.83rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
-.bed-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
-.bed-step:last-child { margin-bottom: 0; }
-.bed-dot { width: 26px; height: 26px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.bed-text { font-size: 0.86rem; line-height: 1.6; padding-top: 3px; }
-.important-list { background: var(--berry-dim); border-radius: 16px; padding: 16px 18px; }
-.important-item { display: flex; gap: 10px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 8px; }
-.important-item:last-child { margin-bottom: 0; }
-.comfort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media(max-width:420px) { .comfort-grid { grid-template-columns: 1fr; } }
-.comfort-card { border-radius: 16px; padding: 14px 16px; }
-.comfort-card-name { font-weight: 700; font-size: 0.87rem; margin-bottom: 8px; }
-.comfort-micro { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--softer); margin-bottom: 4px; }
-.comfort-text { font-size: 0.83rem; line-height: 1.55; }
-.upset-strip { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
-.plain-sec { margin-bottom: 12px; }
-.plain-sec p { margin: 0; font-size: 0.85rem; line-height: 1.6; }
-.plain-sec ul { margin: 0; padding-left: 18px; }
-.plain-sec li { font-size: 0.85rem; line-height: 1.5; margin-bottom: 4px; }
-.contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media(max-width:420px) { .contacts-grid { grid-template-columns: 1fr; } }
-.contact-card { background: var(--linen); border-radius: 14px; padding: 13px 16px; }
-.contact-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 3px; }
-.contact-line { font-size: 0.8rem; color: var(--soft); }
-.guide-closing { text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.1rem; color: var(--soft); line-height: 1.5; }
-.guide-closing strong { color: var(--green); font-style: normal; font-weight: 700; }
-.guide-footer { text-align: center; margin-top: 12px; font-size: 0.62rem; color: var(--softer); letter-spacing: 0.08em; text-transform: uppercase; }
-.action-row { display: flex; gap: 10px; margin-top: 20px; }
-.action-row button { flex: 1; }
-.print-link { text-align: center; margin-top: 10px; font-size: 0.75rem; color: var(--softer); cursor: pointer; text-decoration: underline; background: none; border: none; width: 100%; font-family: 'Manrope', sans-serif; }
-
+.guide-wrap{ background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+.guide-header{ padding: 36px 28px 28px; text-align: center; border-bottom: 1px solid var(--line); background: var(--green); color: white; }
+.guide-emojis{ font-size: 1.5rem; margin-bottom: 10px; opacity: 0.9; }
+.guide-names{ font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 2.2rem; color: white; margin-bottom: 6px; line-height: 1.0; }
+.guide-for{ font-size: 0.65rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.guide-duration{ display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; margin-bottom: 14px; letter-spacing: 0.05em; }
+.guide-intro{ font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.65; max-width: 340px; margin: 0 auto; }
+.guide-body{ padding: 24px 24px 32px; }
+.kid-tag{ display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
+.sched-row{ padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sched-row:last-child{ border-bottom: none; }
+.sched-head{ display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.sched-time{ font-weight: 800; font-size: 0.82rem; color: var(--green); min-width: 64px; }
+.sched-title{ font-weight: 600; font-size: 0.88rem; }
+.sched-body{ padding-left: 74px; }
+.sched-note{ font-size: 0.83rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
+.bed-step{ display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.bed-step:last-child{ margin-bottom: 0; }
+.bed-dot{ width: 26px; height: 26px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.bed-text{ font-size: 0.86rem; line-height: 1.6; padding-top: 3px; }
+.important-list{ background: var(--berry-dim); border-radius: 16px; padding: 16px 18px; }
+.comfort-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.comfort-grid{ grid-template-columns: 1fr; }
+.comfort-card{ border-radius: 16px; padding: 14px 16px; }
+.comfort-card-name{ font-weight: 700; font-size: 0.87rem; margin-bottom: 8px; }
+.comfort-micro{ font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--softer); margin-bottom: 4px; }
+.comfort-text{ font-size: 0.83rem; line-height: 1.55; }
+.contact-card{ background: var(--linen); border-radius: 14px; padding: 13px 16px; }
+.guide-closing{ text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.1rem; color: var(--soft); line-height: 1.5; }
+.guide-closing strong{ color: var(--green); font-style: normal; font-weight: 700; }
+.guide-footer{ text-align: center; margin-top: 12px; font-size: 0.62rem; color: var(--softer); letter-spacing: 0.08em; text-transform: uppercase; }
+.action-row{ display: flex; gap: 10px; margin-top: 20px; }
+.action-row button{ flex: 1; }
+.print-link{ text-align: center; margin-top: 10px; font-size: 0.75rem; color: var(--softer); cursor: pointer; text-decoration: underline; background: none; border: none; width: 100%; font-family: 'Manrope', sans-serif; }
 /* ── PRINT ── */
 /* keep each block of content together across page/PDF breaks */
-.sched-row, .bed-step, .important-list, .comfort-card, .contact-card, .guide-header {
+.sched-row, .bed-step, .important-list, .comfort-card, .contact-card, .guide-header{
   break-inside: avoid; page-break-inside: avoid;
 }
-.g-section { break-after: avoid; page-break-after: avoid; }
-
-html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
-
-@media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  body { background: white; }
-  .no-print { display: none !important; }
-  .guide-wrap { border: none; border-radius: 0; box-shadow: none; }
-  @page { size: A4; margin: 14mm; }
-}
+.no-print{ display: none !important; }
+.guide-wrap{ border: none; border-radius: 0; box-shadow: none; }
+@page{ size: A4; margin: 14mm; }
 </style>
-<script>
-(function(){
-  var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  if(isStandalone){ document.documentElement.classList.add('is-standalone'); }
-})();
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-<div id="app">
+<div class="phone">
 
-<!-- ══ HOME ══ -->
-<div id="homeView" class="screen" style="display:block;">
-  <div class="home-brand no-print">
-    <svg class="home-logo" width="44" height="44" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-      <path d="M44 88 V32 M44 60 C44 47 76 47 76 62 V88"
-            stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <div class="home-brand-lockup">
-      <span class="home-brand-name">Held</span>
-      <span class="home-brand-sub">My Mental Load</span>
+  <header>
+    <button class="back hidden" id="backBtn" onclick="prev()">←</button>
+    <div class="brand">
+      <svg width="42" height="42" viewBox="0 0 120 120" fill="none">
+        <path d="M44 88 V32 M44 60 C44 47 76 47 76 62 V88" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-lockup"><span class="brand-name">Held</span><span class="brand-sub">My Mental Load</span></div>
     </div>
-  </div>
-  <div class="home-greeting" id="homeGreeting">Good morning</div>
-  <h1 class="home-heading">You can<br>leave now.</h1>
-  <p class="home-sub">One guide. Everything they need to know &mdash; so you can actually be present.</p>
-  <button class="home-cta" id="heroBtn">Create a care guide</button>
-  <div class="install-banner no-print">
-    <span class="ib-icon">📲</span>
-    <span class="ib-text"><strong>Turn this into an app</strong><span>Tap Share → Add to Home Screen</span></span>
-  </div>
-  <p class="home-permission">Handed over with care. Nothing to explain twice.</p>
-  <p class="home-privacy no-print">Used only to build your guide. Never sold, never used to train anyone else's AI.</p>
-  <div id="recentSection" style="display:none;">
-    <div class="home-sl">YOUR GUIDES</div>
-    <div id="recentCards"></div>
-  </div>
-  <div id="emptySection" class="home-empty">
-    <div class="home-empty-icon"><svg width="42" height="42" viewBox="0 0 120 120" fill="none" aria-hidden="true"><path d="M60 88 C34 68 26 44 42 35 C53 29 60 38 60 46 C60 38 67 29 78 35 C94 44 86 68 60 88" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="home-empty-h">Ready when you are.</div>
-    <div class="home-empty-b">You've explained this before. This time, write it once. Not for perfect parents — for busy ones.</div>
-    <a href="example-guide.html" target="_blank" class="sample-link">See a sample guide →</a>
-  </div>
-  <div class="home-teaser no-print">
-    <span class="ht-label">Coming soon</span>
-    <span class="ht-body">Hand over your <strong>dog</strong> 🐾 and your <strong>home</strong> 🧺 too. Tell us which you'd use.</span>
-  </div>
-  <div class="no-print" style="text-align:center;font-size:0.6rem;color:var(--softer);opacity:0.5;margin-top:16px;">Held · build 2026-07-21l</div>
-</div>
+    <div class="header-spacer"></div>
+  </header>
 
-<!-- ══ MODE SELECTION ══ -->
-<div id="modeView" class="screen" style="display:none;">
-  <button class="back-link no-print" id="backHomeBtn">← Back</button>
-  <span class="screen-eyebrow">Step 1 of 2</span>
-  <h2 class="screen-h">How long will<br>you be away?</h2>
-  <div id="durationCards" class="tile-grid">
-    <button class="option-card tile" data-dur="evening">
-      <span class="tile-emoji">🌙</span>
-      <span class="tile-label">An evening</span>
-    </button>
-    <button class="option-card tile" data-dur="fullday">
-      <span class="tile-emoji">☀️</span>
-      <span class="tile-label">A full day</span>
-    </button>
-    <button class="option-card tile" data-dur="fewdays">
-      <span class="tile-emoji">🌙☀️</span>
-      <span class="tile-label">A few days</span>
-    </button>
-  </div>
-  <div id="recBanner" class="rec-banner" style="display:none;"></div>
-  <span class="format-label">Format</span>
-  <div id="modeCards">
-    <button class="option-card" data-mode="landscape">
-      <span class="option-emoji">📋</span>
-      <div><div class="option-label">Short One-Pager</div><div class="option-desc">One page. For the fridge.</div></div>
-    </button>
-    <button class="option-card" data-mode="indepth">
-      <span class="option-emoji">📖</span>
-      <div><div class="option-label">Full Detail Guide</div><div class="option-desc">Step-by-step. For someone new.</div></div>
-    </button>
-  </div>
-  <button class="btn-primary" id="continueBtn" disabled>Continue →</button>
-</div>
+  <div class="progress" id="progressWrap" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="step-count" id="stepCount" style="display:none;"></div>
 
-<!-- ══ FORM ══ -->
-<div id="formView" class="screen" style="display:none;">
-  <div class="app-header no-print">
-    <button class="app-back" id="stepBackBtn">←</button>
-    <div class="app-brand">
-      <svg width="34" height="34" viewBox="0 0 120 120" fill="none"><path d="M44 88 V32 M44 60 C44 47 76 47 76 62 V88" stroke="var(--green)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div class="app-brand-lockup"><span class="app-brand-name">Held</span><span class="app-brand-sub">My Mental Load</span></div>
-    </div>
-    <div style="width:38px;"></div>
-  </div>
-  <div class="step-progress no-print"><div class="step-progress-fill" id="stepProgressFill"></div></div>
-  <div class="step-count no-print" id="stepCountLabel"></div>
   <div id="errorBox"></div>
+  <style id="dynamicPageStyle"></style>
+  <div class="screens">
 
-  <div class="step-body">
+    <!-- HOME -->
+    <section class="screen home active" data-step="home">
+      <div class="greeting">Good morning</div>
+      <h1>You can<br>leave now.</h1>
+      <p class="hsub">One guide. Everything they need to know — so you can actually be present.</p>
+      <button class="btn-primary" onclick="go('intro')">Create a care guide</button>
+      <a href="#" class="sample-link" onclick="viewExample(event)">See a sample guide →</a>
+      <div class="install"><span class="ico">📲</span><div><strong>Turn this into an app</strong><span>Tap Share → Add to Home Screen</span></div></div>
+      <p class="perm">Handed over with care. Nothing to explain twice.</p>
+    </section>
 
-  <!-- STEP: IMPORTANT + COUNTRY/LANGUAGE -->
-  <div class="form-step" data-step="essentials">
-    <h2 class="step-h">First, the<br>essentials.</h2>
-    <p class="step-sub">The one thing a carer must not miss.</p>
-    <div class="important-box" style="margin-bottom:16px;">
-      <div class="important-label">⚠️ Important — read first</div>
-      <div style="font-size:0.75rem;color:var(--soft);margin-bottom:10px;line-height:1.45;">The one thing your carer must not miss. Type it below 👇</div>
-      <div class="textarea-wrap">
-        <textarea id="importantNote" placeholder="e.g. Stairgate always closed. Severe peanut allergy — EpiPen by the front door. No screens today." style="min-height:80px;"></textarea>
-        <button class="voice-btn no-print" onclick="startVoice(this,document.getElementById('importantNote'))">🎤</button>
+    <!-- INTRO: how many children + combined/split -->
+    <section class="screen" data-step="intro">
+      <div class="q">How many children<br>is this for?</div>
+      <div class="sub">You can add or remove more later.</div>
+      <div class="stepper">
+        <button onclick="bumpKids(-1)">−</button>
+        <span class="count" id="kidCount">1</span>
+        <button onclick="bumpKids(1)">+</button>
       </div>
-    </div>
-    <div class="card" style="margin-bottom:0;">
+      <div id="splitWrap" style="display:none;">
+        <span class="fmt-label">One guide or one each?</span>
+        <div class="opt sel" data-split="combined" onclick="pickSplit(this)">
+          <div class="opt-ico">📘</div>
+          <div><div class="opt-label">One combined guide</div><div class="opt-desc">All children in a single doc. Best for one carer.</div></div>
+        </div>
+        <div class="opt" data-split="separate" onclick="pickSplit(this)">
+          <div class="opt-ico">📑</div>
+          <div><div class="opt-label">A separate guide each</div><div class="opt-desc">One doc per child. Best for different carers.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DURATION + FORMAT -->
+    <section class="screen" data-step="format">
+      <div class="q">How long will<br>you be away?</div>
+      <div class="sub">This picks the right length of guide.</div>
+      <div class="tiles">
+        <div class="tile" data-dur="evening" onclick="pickDur(this)"><span class="tile-ico">🌆</span><span class="tile-label">An evening</span></div>
+        <div class="tile" data-dur="fullday" onclick="pickDur(this)"><span class="tile-ico">☀️</span><span class="tile-label">A full day</span></div>
+        <div class="tile" data-dur="fewdays" onclick="pickDur(this)"><span class="tile-ico">🌙</span><span class="tile-label">A few days</span></div>
+      </div>
+      <div class="rec-msg" id="recMsg" style="display:none;"></div>
+      <span class="fmt-label">Format</span>
+      <div class="opt" data-mode="landscape" onclick="pickMode(this)"><div class="opt-ico">📄</div><div><div class="opt-label">Short One-Pager</div><div class="opt-desc">One page. For the fridge.</div></div></div>
+      <div class="opt" data-mode="indepth" onclick="pickMode(this)"><div class="opt-ico">📖</div><div><div class="opt-label">Full Detail Guide</div><div class="opt-desc">Step-by-step. For someone new.</div></div></div>
+      <div class="err-msg" id="fmtErr">Pick a format to continue.</div>
+    </section>
+
+    <!-- ESSENTIALS -->
+    <section class="screen" data-step="essentials">
+      <div class="q">First, the<br>essentials.</div>
+      <div class="sub">The one thing a carer must not miss.</div>
+      <div class="important">
+        <div class="important-label">⚠️ Important — read first</div>
+        <div style="font-size:0.75rem;color:var(--soft);margin-bottom:10px;line-height:1.45;">The one thing your carer must not miss. Type it below 👇</div>
+        <textarea id="importantNote" placeholder="e.g. Stairgate always closed. Severe peanut allergy — EpiPen by the front door. No screens today."></textarea>
+      </div>
       <div class="row2">
-        <div class="field">
-          <label class="t-label">Country</label>
-          <select id="countrySelect">
-            <option value="">Select…</option>
-            <option>United Kingdom</option><option>France</option><option>Spain</option>
-            <option>Germany</option><option>Italy</option><option>Portugal</option>
-            <option>Belgium</option><option>Switzerland</option><option>Netherlands</option>
-            <option>USA</option><option>Canada</option><option>Australia</option>
-            <option value="other">Other</option>
-          </select>
-          <div id="emergHint" style="font-size:0.75rem;color:var(--green);margin-top:5px;font-weight:600;"></div>
-        </div>
-        <div class="field">
-          <label class="t-label">Guide language</label>
-          <select id="modeLanguage" onchange="document.getElementById('langOtherWrap').style.display=this.value==='other'?'block':'none';">
-            <option value="English">🇬🇧 English</option>
-            <option value="French">🇫🇷 French</option>
-            <option value="Spanish">🇪🇸 Spanish</option>
-            <option value="Portuguese">🇵🇹 Portuguese</option>
-            <option value="Polish">🇵🇱 Polish</option>
-            <option value="Arabic">🇸🇦 Arabic</option>
-            <option value="Italian">🇮🇹 Italian</option>
-            <option value="German">🇩🇪 German</option>
-            <option value="Romanian">🇷🇴 Romanian</option>
-            <option value="Filipino">🇵🇭 Filipino</option>
-            <option value="other">Other…</option>
-          </select>
-          <div id="langOtherWrap" style="display:none;margin-top:8px;">
-            <input type="text" id="modeLanguageOther" placeholder="e.g. Dutch, Hindi…">
-          </div>
-        </div>
+        <div class="field"><label class="t-label">Country</label><select id="country"><option value="">Select…</option><option>United Kingdom</option><option>France</option><option>Spain</option><option>Germany</option><option>USA</option><option value="other">Other</option></select></div>
+        <div class="field"><label class="t-label">Guide language</label><select id="guideLang"><option>English</option><option>French</option><option>Spanish</option><option>Portuguese</option><option>German</option><option value="other">Other…</option></select></div>
       </div>
-      <div style="font-size:0.75rem;color:var(--soft);line-height:1.5;margin-top:4px;">🌍 Type in any language — translated into the one you pick.</div>
-    </div>
-  </div>
+      <div style="font-size:0.75rem;color:var(--soft);line-height:1.5;">🌍 Type in any language — your guide is translated into the one you pick.</div>
+    </section>
 
-  <!-- STEP: CHILDREN -->
-  <div class="form-step" data-step="children" style="display:none;">
-    <h2 class="step-h">Your<br>children.</h2>
-    <p class="step-sub">Add each child and their details.</p>
-    <div id="childrenContainer"></div>
-    <button class="btn-add" id="addChildBtn">+ Add another child</button>
-  </div>
+    <!-- CHILDREN HUB -->
+    <section class="screen" data-step="children">
+      <div class="q">Your<br>children.</div>
+      <div class="sub" id="childrenSub">Tap a child to fill in or edit their details.</div>
+      <div id="childrenList"></div>
+      <button class="btn-add" id="addChildBtn" onclick="addChild()"><span style="font-size:1.2rem;">＋</span> Add another child</button>
+      <div class="err-msg" id="childErr">Fill in at least one child's basics to continue.</div>
+    </section>
 
-  <!-- STEP: CAREGIVER -->
-  <div class="form-step" data-step="caregiver" style="display:none;">
-    <h2 class="step-h">Who's this<br>guide for?</h2>
-    <p class="step-sub">The person you're handing over to.</p>
-    <div class="card">
+    <!-- CHILD DETAIL: basics -->
+    <section class="screen" data-step="c-basics">
+      <div class="child-substep" id="cbLabel">Child · Basics</div>
+      <div class="q">Who are we<br>caring for?</div>
+      <div class="err-msg" id="basicsErr">A name is needed for this child.</div>
+      <div class="field"><label class="t-label">Name <span class="t-req">*</span></label><input type="text" id="cName" placeholder="e.g. Mia"></div>
       <div class="row2">
-        <div class="field">
-          <label class="t-label">Caregiver name <span class="t-required">*</span></label>
-          <input type="text" id="caregiverName" placeholder="e.g. Claire">
-        </div>
-        <div class="field">
-          <label class="t-label">Relationship</label>
-          <select id="caregiverRelationship">
-            <option value="">Select…</option>
-            <option>Nanny</option><option>Grandparent</option><option>Partner</option>
-            <option>Babysitter</option><option>Au pair</option><option>Nursery staff</option>
-            <option>Nounou</option><option>Assistante maternelle</option><option>Crèche</option>
-            <option value="other">Other</option>
-          </select>
+        <div class="field"><label class="t-label">Age</label><input type="number" id="cAge" placeholder="e.g. 2"></div>
+        <div class="field"><label class="t-label">&nbsp;</label><select id="cAgeUnit"><option>years</option><option>months</option></select></div>
+      </div>
+      <div class="field"><label class="t-label">Colour &amp; emoji <span class="t-hint">(optional)</span></label>
+        <div class="swatches">
+          <div class="sw sel" style="background:#A9C0DE" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#F0C5CB" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#F7EFD8" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#ECE8F5" onclick="pickSw(this)"></div>
         </div>
       </div>
-      <div id="relOtherWrap" style="display:none;">
-        <div class="field"><label class="t-label">Please specify</label><input type="text" id="caregiverRelationshipOther" placeholder="e.g. Family friend"></div>
+      <div class="emoji-row">
+        <button class="em sel" onclick="pickEm(this)">🧸</button><button class="em" onclick="pickEm(this)">🦊</button>
+        <button class="em" onclick="pickEm(this)">🌟</button><button class="em" onclick="pickEm(this)">🐰</button>
+        <button class="em" onclick="pickEm(this)">🦕</button><button class="em" onclick="pickEm(this)">🌈</button>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- STEP: ROUTINE (+ multi-day) -->
-  <div class="form-step" data-step="routine" style="display:none;">
-    <h2 class="step-h">A typical<br>day.</h2>
-    <p class="step-sub">Tap to quick-add, then set the times.</p>
-    <p class="t-body" style="margin:0 0 12px;">Quick add <span class="t-hint">(based on your children's ages)</span>:</p>
-    <div class="chip-row" id="quickChips"></div>
-    <div id="routineContainer"></div>
-    <button class="btn-add" id="addRoutineBtn">+ Add routine item</button>
-    <div id="multiDaySection" style="display:none;margin-top:18px;">
-      <span class="form-section-label">Multi-day notes</span>
-      <div class="card">
-        <div class="field">
-          <label class="t-label">Day-by-day pattern <span class="t-hint">(optional)</span></label>
-          <div class="textarea-wrap">
-            <textarea id="multiDayNotes" placeholder="e.g. Mon/Wed: nursery 9–3pm. Tue: home all day."></textarea>
-            <button class="voice-btn no-print" onclick="startVoice(this,document.getElementById('multiDayNotes'))">🎤</button>
+    <!-- CHILD DETAIL: care -->
+    <section class="screen" data-step="c-care">
+      <div class="child-substep" id="ccLabel">Child · Daily care</div>
+      <div class="q">Their care<br>needs.</div>
+      <div class="age-badge" id="careAgeBadge">👶 Under 2</div>
+      <div class="field"><label class="t-label">Allergies <span class="t-hint">— tap all that apply</span></label>
+        <div class="chips">
+          <span class="chip" onclick="tog(this)">Peanuts</span><span class="chip" onclick="tog(this)">Dairy</span>
+          <span class="chip" onclick="tog(this)">Egg</span><span class="chip" onclick="tog(this)">Gluten</span><span class="chip" onclick="tog(this)">None</span>
+        </div>
+      </div>
+      <!-- NAPPIES (all ages — older kids may still wear at night) -->
+      <div class="age-group" id="grpNappy">
+        <div class="row2">
+          <div class="field"><label class="t-label">Nappy status</label><select id="cNappyStatus"><option>Full-time nappies</option><option>Bedtime/naps only</option><option>Potty training</option><option>Fully potty trained</option></select></div>
+          <div class="field"><label class="t-label">Nappy size</label><select id="cNappySize"><option>—</option><option>Size 1</option><option>Size 2</option><option>Size 3</option><option>Size 4</option><option>Size 5</option><option>Size 6</option><option>Pull-ups</option></select></div>
+        </div>
+        <div class="field"><label class="t-label">Needs cream?</label><select id="cCream"><option>No</option><option>Yes — at every change</option><option>Yes — if red</option></select></div>
+      </div>
+
+      <!-- MILK (Under 5) — multi-select for combo-fed -->
+      <div class="age-group" id="grpMilk">
+        <div class="field"><label class="t-label">Milk <span class="t-hint">— tap all that apply (combo feeding is fine)</span></label>
+          <div class="chips">
+            <span class="chip" onclick="tog(this)">🤱 Breastmilk</span><span class="chip" onclick="tog(this)">🍼 Formula</span>
+            <span class="chip" onclick="tog(this)">🐄 Cow's milk</span><span class="chip" onclick="tog(this)">🌱 Plant milk</span>
           </div>
         </div>
-        <div class="field" style="margin-bottom:0">
-          <label class="t-label">Overnight routine <span class="t-hint">(optional)</span></label>
-          <div class="textarea-wrap">
-            <textarea id="overnightNotes" placeholder="e.g. May wake once around 2am — offer water, back to sleep within 10 mins."></textarea>
-            <button class="voice-btn no-print" onclick="startVoice(this,document.getElementById('overnightNotes'))">🎤</button>
-          </div>
-        </div>
+        <div class="field"><label class="t-label">Bottle / amounts <span class="t-hint">(ml or oz)</span></label><input type="text" id="cBottle" placeholder="e.g. 180ml formula daytime, cow's milk at bedtime"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- STEP: EMERGENCY -->
-  <div class="form-step" data-step="emergency" style="display:none;">
-    <h2 class="step-h">In case of<br>emergency.</h2>
-    <p class="step-sub">Who should the carer call?</p>
-    <div id="contactsContainer"></div>
-    <button class="btn-add" id="addContactBtn">+ Add contact</button>
-  </div>
-
-  <!-- STEP: EXTRA -->
-  <div class="form-step" data-step="extra" style="display:none;">
-    <h2 class="step-h">Anything<br>else?</h2>
-    <p class="step-sub">Optional notes and a sign-off.</p>
-    <div class="card">
-      <div class="field">
-        <label class="t-label">Special instructions <span class="t-hint">(optional)</span></label>
-        <div class="textarea-wrap">
-          <textarea id="extra" placeholder="Anything else worth knowing"></textarea>
-          <button class="voice-btn no-print" onclick="startVoice(this,document.getElementById('extra'))">🎤</button>
-        </div>
+      <!-- FOOD STAGE (Under 5) -->
+      <div class="age-group" id="grpFood">
+        <div class="field" style="margin-bottom:0"><label class="t-label">Food type <span class="t-hint">(eating stage)</span></label><select id="cFoodType"><option>Purées</option><option>Finger foods</option><option>Eats most things</option></select></div>
       </div>
-      <div class="field" style="margin-bottom:0">
-        <label class="t-label">Sign-off <span class="t-hint">(optional)</span></label>
-        <input type="text" id="signOff" placeholder="e.g. The whole family">
+
+      <!-- NURSERY / PRESCHOOL (3–5) -->
+      <div class="age-group" id="grpNursery" style="display:none;">
+        <div class="field" style="margin-bottom:0"><label class="t-label">Nursery / preschool <span class="t-hint">(drop-off, pick-up, settling)</span></label><textarea id="cPreschool" placeholder="e.g. Nursery drop-off 9am, pick-up 3pm. Needs comforter at the door. Key worker is Sam."></textarea></div>
       </div>
-    </div>
+
+      <!-- SCHOOL (5+) -->
+      <div class="age-group" id="grpSchool" style="display:none;">
+        <div class="field" style="margin-bottom:0"><label class="t-label">School, activities &amp; homework</label><textarea id="cSchool" placeholder="e.g. Homework before screen time, football pick-up at 5pm, reading book in bag"></textarea></div>
+      </div>
+    </section>
+
+    <!-- CHILD DETAIL: personality -->
+    <section class="screen" data-step="c-personality">
+      <div class="child-substep" id="cpLabel">Child · Personality</div>
+      <div class="q">What makes<br>them, them.</div>
+      <div class="field"><label class="t-label">Personality, likes &amp; comfort items</label><textarea id="cLikes" placeholder="e.g. Loves the blue rabbit (doudou), hates loud noises, needs their dummy to sleep"></textarea></div>
+      <div class="field"><label class="t-label">Screen time &amp; independence rules</label><textarea id="cScreen" placeholder="e.g. No devices after 6pm, can play in garden unsupervised"></textarea></div>
+      <div class="field" style="margin-bottom:0"><label class="t-label">What to do if upset <span class="t-hint">(practical steps — not their likes!)</span></label><textarea id="cUpset" placeholder="e.g. Give space first, then offer the rabbit. Singing works better than talking."></textarea></div>
+    </section>
+
+    <!-- CAREGIVER -->
+    <section class="screen" data-step="caregiver">
+      <div class="q">Who's this<br>guide for?</div>
+      <div class="sub">The person you're handing over to.</div>
+      <div class="err-msg" id="cgErr">A caregiver name is needed to continue.</div>
+      <div class="field"><label class="t-label">Caregiver name <span class="t-req">*</span></label><input type="text" id="cgName" placeholder="e.g. Claire"></div>
+      <div class="field" style="margin-bottom:0"><label class="t-label">Relationship</label><select id="cgRel"><option value="">Select…</option><option>Nanny</option><option>Grandparent</option><option>Partner</option><option>Babysitter</option><option>Au pair</option><option>Nursery staff</option><option value="other">Other</option></select></div>
+    </section>
+
+    <!-- ROUTINE -->
+    <section class="screen" data-step="routine">
+      <div class="q">A typical<br>day.</div>
+      <div class="sub">Tap to add an item, then set the time.</div>
+      <div class="field"><label class="t-label">Quick add <span class="t-hint">(based on your children's ages)</span></label>
+        <div class="chips" id="routineChips"></div>
+      </div>
+      <div id="routineList"></div>
+      <button class="btn-add-sm" onclick="addRoutineRow('Custom','')">+ Add a custom item</button>
+    </section>
+
+    <!-- EMERGENCY -->
+    <section class="screen" data-step="emergency">
+      <div class="q">In case of<br>emergency.</div>
+      <div class="sub">Who should the carer call?</div>
+      <div id="contactsList"></div>
+      <button class="btn-add-sm" onclick="addContactRow()">+ Add contact</button>
+    </section>
+
+    <!-- FINISH -->
+    <section class="screen" data-step="finish">
+      <div class="q">Almost<br>done.</div>
+      <div class="sub">Last details, then we build your guide.</div>
+      <div class="field"><label class="t-label">Special instructions <span class="t-hint">(optional)</span></label><textarea id="extraNotes" placeholder="Anything else worth knowing"></textarea></div>
+      <div class="field"><label class="t-label">Sign-off <span class="t-hint">(optional)</span></label><input type="text" id="signOff" placeholder="e.g. The whole family"></div>
+      <div class="field" style="margin-bottom:0"><label class="t-label">Beta code <span class="t-hint">(generate for free)</span></label><input type="text" id="betaCode" placeholder="e.g. BETAFREE" style="font-weight:700;letter-spacing:0.05em;"></div>
+    </section>
+
+    <!-- GENERATING -->
+    <section class="screen done" data-step="generating">
+      <div class="spinner"></div>
+      <h2>Getting everything<br>out of your head…</h2>
+      <p>Making it personal takes a moment.</p>
+    </section>
+
+    <!-- DONE -->
+    <section class="screen done" data-step="done">
+      <div class="check">✓</div>
+      <h2>Guide ready</h2>
+      <p id="doneMsg">Your Held guide is set. Print it or share a link.</p>
+      <button class="btn-primary" style="max-width:280px" onclick="restart()">Start over</button>
+    </section>
+
   </div>
 
-  <!-- STEP: ACCESS + GENERATE -->
-  <div class="form-step" data-step="access" style="display:none;">
-    <h2 class="step-h">Almost<br>done.</h2>
-    <p class="step-sub">Add your code, then we build your guide.</p>
-    <div class="field">
-      <label class="t-label">Beta code <span class="t-hint">(enter to generate for free)</span></label>
-      <div style="font-size:0.72rem;color:var(--soft);margin-bottom:8px;line-height:1.5;">🔒 Saved on this device so you never have to retype it — sent to AI only to write your guide, never used to train models, never sold.</div>
-      <input type="text" id="accessCode" placeholder="e.g. BETAFREE" style="font-weight:700;letter-spacing:0.05em;">
-    </div>
+  <div class="foot" id="foot" style="display:none;">
+    <button class="btn-primary" id="nextBtn" onclick="advance()">Continue</button>
+    <button class="btn-skip" id="skipBtn" onclick="advance(true)">Skip this step</button>
   </div>
-
-  </div><!-- /step-body -->
-
-  <!-- STEP FOOTER -->
-  <div class="step-foot no-print">
-    <button class="btn-primary" id="stepNextBtn">Continue</button>
-    <button class="btn-step-skip" id="stepSkipBtn">Skip this step</button>
-  </div>
-  <!-- keep original generate button id for existing handler; hidden, triggered by controller -->
-  <button id="generateBtn" style="display:none;">Create my guide →</button>
-</div>
-
-<!-- ══ LOADING ══ -->
 <div id="loadingView" class="screen" style="display:none;">
   <div class="loading-screen">
     <div class="spinner"></div>
@@ -983,665 +512,386 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjus
   </div>
 </div>
 
-</div><!-- #app -->
+
+</div>
 
 <script>
+  // ---------- flow definition ----------
+  // main linear flow (child detail screens live OUTSIDE this list; reached from the hub)
+  const FLOW=['intro','format','essentials','children','caregiver','routine','emergency','finish'];
+  const REQUIRED={intro:true, format:true, essentials:false, children:true, caregiver:true, routine:false, emergency:false, finish:true};
+  const LABELS={intro:'Children',format:'Length',essentials:'Essentials',children:'Children',caregiver:'Caregiver',routine:'Routine',emergency:'Emergency',finish:'Finish'};
 
-const STORAGE_KEY='family-guide-last-entry-v4';
-const ALLERGEN_OPTIONS=['Dairy','Eggs','Nuts','Gluten','Soy','None known'];
-const NAPPY_OPTIONS=['Newborn','Size 1','Size 2','Size 3','Size 4','Size 5','Size 6'];
-const KID_IDENTITIES=[
-  {color:'#6FA3CC',dim:'#E6F0F7',emoji:'🦖'},
-  {color:'#C17B8C',dim:'#F5E6E9',emoji:'🐰'},
-  {color:'#CBA135',dim:'#F7EFD8',emoji:'🦁'},
-  {color:'#9B8AC4',dim:'#ECE8F5',emoji:'🐻'},
-  {color:'#5E9C8F',dim:'#E2EFEC',emoji:'🦋'},
-  {color:'#B98A5E',dim:'#F2E7DA',emoji:'🐢'},
-];
-const EMERGENCY_NUMBERS={
-  'United Kingdom':'999 (emergency) · 111 (NHS)',
-  'France':'15 (SAMU) · 17 (Police) · 18 (Fire) · 112',
-  'Spain':'112 · 061 (ambulance)',
-  'Germany':'110 (Police) · 112',
-  'Italy':'112 · 118 (ambulance)',
-  'Portugal':'112',
-  'Belgium':'101 (Police) · 100 (Ambulance) · 112',
-  'Switzerland':'117 (Police) · 144 (Ambulance) · 118 (Fire)',
-  'Netherlands':'112',
-  'USA':'911',
-  'Canada':'911',
-  'Australia':'000',
-};
-const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Quiet time','Lunch','Snack','Goûter','Dinner','Bath','Bedtime','Play','Nursery run','School run','School pick-up','Homework','Screen time','Activity','Other'];
-// baby-only items (Under 3)
-const QUICK_CHIPS_BABY=[
-  {label:'🍼 Feed',type:'Milk/Feed',time:'08:00'},
-  {label:'💤 Nap',type:'Nap',time:'10:00'},
-];
-// meals & core — shown for everyone
-const QUICK_CHIPS_CORE=[
-  {label:'🥣 Breakfast',type:'Breakfast',time:'07:30'},
-  {label:'🍽 Lunch',type:'Lunch',time:'12:00'},
-  {label:'🍎 Snack',type:'Snack',time:'15:00'},
-  {label:'🍫 Goûter',type:'Goûter',time:'16:00'},
-  {label:'🍽 Dinner',type:'Dinner',time:'17:30'},
-  {label:'🛁 Bath',type:'Bath',time:'18:30'},
-  {label:'🌙 Bedtime',type:'Bedtime',time:'19:00'},
-];
-// preschool/nursery age (3–5): UK preschool starts at 3, often within nurseries
-const QUICK_CHIPS_PRESCHOOL=[
-  {label:'🤫 Quiet time',type:'Quiet time',time:'14:00'},
-  {label:'🏫 Nursery / preschool run',type:'Nursery run',time:'08:45'},
-];
-// school-age items (5+)
-const QUICK_CHIPS_CHILD=[
-  {label:'🤫 Quiet time',type:'Quiet time',time:'14:00'},
-  {label:'🎒 School run',type:'School run',time:'08:15'},
-  {label:'📚 Homework',type:'Homework',time:'16:00'},
-  {label:'📱 Screen time',type:'Screen time',time:'17:00'},
-];
-const QUICK_CHIPS_EVE=[
-  {label:'🍽 Dinner',type:'Dinner',time:'17:30'},
-  {label:'🛁 Bath',type:'Bath',time:'18:30'},
-  {label:'🌙 Bedtime',type:'Bedtime',time:'19:00'},
-];
-const FORMAT_RECS={
-  evening:{mode:'landscape',msg:'📋 Short One-Pager pre-selected — perfect for an evening, all the essentials on one page.'},
-  fewdays:{mode:'indepth',msg:'📖 Full Guide pre-selected — more detail means fewer questions at 2am.'},
-  fullday:{mode:null,msg:'Choose a format: Short One-Pager if the carer knows your children well, Full Guide for someone newer.'},
-};
-const ENGLISH_LABELS={
-  schedule:"Today's Schedule",bedtime:'Bedtime Sequence',important:'Important',
-  comfort:'Personality & Comfort',contacts:'Contacts',allChildren:'All children',
-  whenUpset:'If They Get Upset',
-  types:{Bedtime:'Bedtime',Nap:'Nap','Quiet time':'Quiet time','Milk/Feed':'Milk/Feed',Lunch:'Lunch',
-    Snack:'Snack','Goûter':'Goûter',Breakfast:'Breakfast',Dinner:'Dinner',Bath:'Bath',
-    Play:'Play time','Nursery run':'Nursery / preschool run','School run':'School run','School pick-up':'School pick-up',Homework:'Homework','Screen time':'Screen time',Activity:'Activity'},
-};
+  let current='home';
+  let numKids=1;
+  let splitChoice='combined';
+  let formatChosen=false;
 
-let childCount=0,routineCount=0,contactCount=0,selectedMode=null,selectedDuration=null;
+  // children data model
+  let children=[{name:'',age:'',emoji:'🧸',colour:'#A9C0DE',done:false}];
+  let editingChild=null; // index being edited
+  let childSubstep=0;    // 0 basics,1 care,2 personality
 
-// ── UTILS ────────────────────────────────────────────────────
-function getKidIdentity(idx){return KID_IDENTITIES[idx%KID_IDENTITIES.length];}
-function resolveKidIdentity(child,idx){
-  const base=(child.colorIdx!==undefined&&child.colorIdx!==null&&child.colorIdx>=0&&KID_IDENTITIES[child.colorIdx])?KID_IDENTITIES[child.colorIdx]:getKidIdentity(idx);
-  return{color:base.color,dim:base.dim,emoji:child.emoji||base.emoji};
-}
-function formatTime12hr(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12===0?12:h%12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
-function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${msg}</div>`;}
-function clearError(){document.getElementById('errorBox').innerHTML='';}
-function parseInlineBold(text){if(!text)return'';return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
-function cleanProse(text){if(!text)return'';return text.replace(/\b\d+\.\s+/g,'').replace(/^\s*[-•]\s*/gm,'').replace(/\n+/g,' ').replace(/\s{2,}/g,' ').trim();}
-function boldChildNames(text,names){let r=text;names.forEach(n=>{if(!n)return;const re=new RegExp('^('+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—:-])','i');r=r.replace(re,'<strong>$1</strong>');});return r;}
-function iconForLine(line){
-  const l=line.toLowerCase();
-  if(l.includes('nut')||l.includes('allerg')||l.includes('epipen'))return'🥜';
-  if(l.includes('stair')||l.includes('gate'))return'🚪';
-  if(l.includes('medic')||l.includes('inhaler'))return'💊';
-  if(l.includes('screen')||l.includes('tablet'))return'📱';
-  if(l.includes('toilet')||l.includes('potty'))return'🚽';
-  if(l.includes('tooth'))return'🦷';
-  return'⚠️';
-}
-function groupByTime(items){
-  const map=new Map();
-  items.forEach(item=>{const k=item.time||'zzz';if(!map.has(k))map.set(k,[]);map.get(k).push(item);});
-  return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-}
+  const el=s=>document.querySelector(s);
+  const screens=[...document.querySelectorAll('.screen')];
+  const foot=el('#foot'), back=el('#backBtn'), fill=el('#progressFill');
+  const count=el('#stepCount'), pw=el('#progressWrap');
+  const skipBtn=el('#skipBtn'), nextBtn=el('#nextBtn');
 
-// ── VIEW MANAGEMENT ──────────────────────────────────────────
-function showView(id){
-  ['homeView','modeView','formView','loadingView','guideView'].forEach(v=>{
-    const el=document.getElementById(v);
-    if(el)el.style.display=v===id?'block':'none';
-  });
-  window.scrollTo(0,0);
-}
-
-// ── HOME SCREEN ──────────────────────────────────────────────
-function getGreeting(){
-  const h=new Date().getHours();
-  if(h<5)return'Still up?';
-  if(h<12)return'Good morning';
-  if(h<17)return'Good afternoon';
-  return'Good evening';
-}
-function renderHome(){
-  document.getElementById('homeGreeting').textContent=getGreeting();
-  try{
-    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
-    const hasGuide=saved&&saved.children&&saved.children.some(c=>c.name);
-    if(hasGuide){
-      document.getElementById('recentSection').style.display='block';
-      document.getElementById('emptySection').style.display='none';
-      const cards=document.getElementById('recentCards');
-      cards.innerHTML='';
-      saved.children.filter(c=>c.name).forEach((child,i)=>{
-        const id=KID_IDENTITIES[i%KID_IDENTITIES.length];
-        const btn=document.createElement('button');
-        btn.className='rgc';
-        btn.innerHTML=`<div class="rgc-l"><div class="rgc-av" style="background:${id.dim};">${id.emoji}</div><div><div class="rgc-name">${child.name}</div><div class="rgc-meta">Continue where you left off</div></div></div><div class="rgc-arrow">→</div>`;
-        btn.onclick=()=>showView('modeView');
-        cards.appendChild(btn);
-      });
-      const nb=document.createElement('button');
-      nb.className='home-new';nb.textContent='+ New guide';
-      nb.onclick=()=>{if(confirm('Start a fresh guide? Current details will be cleared.')){try{localStorage.removeItem(STORAGE_KEY);}catch(e){}location.reload();}};
-      cards.appendChild(nb);
-    }else{
-      document.getElementById('recentSection').style.display='none';
-      document.getElementById('emptySection').style.display='block';
+  function show(step){
+    current=step;
+    screens.forEach(s=>s.classList.toggle('active',s.dataset.step===step));
+    const inMain=FLOW.includes(step);
+    const inChild=['c-basics','c-care','c-personality'].includes(step);
+    const inFlow=inMain||inChild;
+    foot.style.display=inFlow?'flex':'none';
+    pw.style.display=inMain?'block':'none';
+    count.style.display=inMain?'block':'none';
+    back.classList.toggle('hidden',step==='home'||step==='generating');
+    if(inMain){
+      const i=FLOW.indexOf(step);
+      fill.style.width=((i+1)/FLOW.length*100)+'%';
+      count.textContent=`Step ${i+1} of ${FLOW.length} · ${LABELS[step]}`;
+      skipBtn.style.display=REQUIRED[step]?'none':'block';
+      nextBtn.textContent = step==='finish'?'Create my guide →':'Continue';
     }
-  }catch(e){document.getElementById('emptySection').style.display='block';}
-}
-document.getElementById('heroBtn').addEventListener('click',()=>showView('modeView'));
-
-// ── MODE SELECTION ───────────────────────────────────────────
-document.getElementById('backHomeBtn').addEventListener('click',()=>showView('homeView'));
-document.getElementById('durationCards').addEventListener('click',e=>{
-  const btn=e.target.closest('[data-dur]');if(!btn)return;
-  document.querySelectorAll('[data-dur]').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedDuration=btn.dataset.dur;
-  const rec=FORMAT_RECS[selectedDuration];
-  const banner=document.getElementById('recBanner');
-  banner.textContent=rec.msg;banner.style.display='block';
-  if(rec.mode){
-    document.querySelectorAll('[data-mode]').forEach(b=>b.classList.remove('selected'));
-    const mb=document.querySelector(`[data-mode="${rec.mode}"]`);
-    if(mb)mb.classList.add('selected');
-    selectedMode=rec.mode;
-  }else{document.querySelectorAll('[data-mode]').forEach(b=>b.classList.remove('selected'));selectedMode=null;}
-  checkReady();
-});
-document.getElementById('modeCards').addEventListener('click',e=>{
-  const btn=e.target.closest('[data-mode]');if(!btn)return;
-  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  selectedMode=btn.dataset.mode;
-  checkReady();
-});
-function checkReady(){
-  const ok=!!(selectedMode&&selectedDuration);
-  document.getElementById('continueBtn').disabled=!ok;
-}
-document.getElementById('continueBtn').addEventListener('click',()=>{
-  document.getElementById('multiDaySection').style.display=selectedDuration==='fewdays'?'block':'none';
-  renderQuickChips();
-  showView('formView');
-  initSteps();
-});
-document.getElementById('backModeBtn')?.addEventListener('click',()=>showView('modeView'));
-
-// ── APP-FORMAT STEP CONTROLLER ───────────────────────────────
-const STEP_ORDER=['essentials','children','caregiver','routine','emergency','extra','access'];
-const STEP_REQUIRED={essentials:false,children:true,caregiver:true,routine:false,emergency:false,extra:false,access:false};
-const STEP_LABELS={essentials:'Essentials',children:'Children',caregiver:'Caregiver',routine:'Routine',emergency:'Emergency',extra:'Notes',access:'Finish'};
-let stepIndex=0;
-function initSteps(){
-  // guarantee at least one child card and one contact row exist
-  if(!document.querySelector('[data-child]'))addChild();
-  if(!document.querySelector('[data-contact]'))addContact();
-  stepIndex=0; showStep();
-}
-function showStep(){
-  const steps=document.querySelectorAll('#formView .form-step');
-  const key=STEP_ORDER[stepIndex];
-  steps.forEach(s=>s.style.display=s.dataset.step===key?'block':'none');
-  document.getElementById('stepProgressFill').style.width=((stepIndex+1)/STEP_ORDER.length*100)+'%';
-  document.getElementById('stepCountLabel').textContent=`Step ${stepIndex+1} of ${STEP_ORDER.length} · ${STEP_LABELS[key]}`;
-  document.getElementById('stepSkipBtn').style.display=STEP_REQUIRED[key]?'none':'block';
-  document.getElementById('stepNextBtn').textContent=stepIndex===STEP_ORDER.length-1?'Create my guide →':'Continue';
-  clearError();
-  document.querySelector('#formView .step-body').scrollTop=0;
-}
-function stepValid(key){
-  if(key==='children'){
-    const first=document.querySelector('[data-child] .c-name');
-    if(!first||!first.value.trim()){showError("Please fill in at least one child's name.");return false;}
+    if(inChild){
+      skipBtn.style.display = childSubstep===0 ? 'none':'block'; // basics required
+      nextBtn.textContent = childSubstep===2 ? 'Save child ✓':'Continue';
+    }
+    if(step==='routine'){ buildRoutineChips(); }
+    hideErrors();
+    el('.screens').scrollTop=0;
   }
-  if(key==='caregiver'){
-    const cg=document.getElementById('caregiverName');
-    if(!cg.value.trim()){showError('Please add a caregiver name.');return false;}
-  }
-  return true;
-}
-function stepNext(){
-  const key=STEP_ORDER[stepIndex];
-  if(!stepValid(key))return;
-  if(stepIndex===STEP_ORDER.length-1){ document.getElementById('generateBtn').click(); return; }
-  stepIndex++; showStep();
-}
-function stepSkip(){ if(stepIndex<STEP_ORDER.length-1){stepIndex++;showStep();} }
-function stepBack(){
-  if(stepIndex>0){stepIndex--;showStep();}
-  else showView('modeView');
-}
-document.getElementById('stepNextBtn').addEventListener('click',stepNext);
-document.getElementById('stepSkipBtn').addEventListener('click',stepSkip);
-document.getElementById('stepBackBtn').addEventListener('click',stepBack);
+  function go(step){ show(step); }
+  function hideErrors(){ document.querySelectorAll('.err-msg').forEach(e=>e.classList.remove('show')); document.querySelectorAll('.err').forEach(e=>e.classList.remove('err')); }
 
-// ── QUICK CHIPS ──────────────────────────────────────────────
-function childrenAgeBands(){
-  // inspect entered children and return which age bands are present
-  const cards=document.querySelectorAll('[data-child]');
-  const bands={baby:false,preschool:false,child:false,any:false};
-  cards.forEach(card=>{
-    const v=card.querySelector('.c-age-value');
-    if(!v||!v.value)return;
-    bands.any=true;
-    const months=getChildAge(card);
-    if(months<36)bands.baby=true;         // Under 3
-    else if(months<60)bands.preschool=true; // 3–5 (UK preschool/nursery)
-    else bands.child=true;                 // 5+
-  });
-  return bands;
-}
-function renderQuickChips(){
-  const c=document.getElementById('quickChips');
-  if(selectedDuration==='evening'){
-    c.innerHTML=QUICK_CHIPS_EVE.map(chipBtn).join('');
-    return;
-  }
-  const b=childrenAgeBands();
-  let set=[];
-  if(b.baby)set=set.concat(QUICK_CHIPS_BABY);
-  set=set.concat(QUICK_CHIPS_CORE);
-  if(b.preschool)set=set.concat(QUICK_CHIPS_PRESCHOOL);
-  if(b.child)set=set.concat(QUICK_CHIPS_CHILD);
-  if(!b.any)set=QUICK_CHIPS_BABY.concat(QUICK_CHIPS_CORE); // no ages yet → sensible default
-  // de-dupe by type, keep first occurrence
-  const seen=new Set();
-  set=set.filter(x=>{if(seen.has(x.type))return false;seen.add(x.type);return true;});
-  c.innerHTML=set.map(chipBtn).join('');
-}
-function chipBtn(ch){
-  return `<button type="button" class="quick-chip" onclick="addRoutineItem({type:'${ch.type}',time:'${ch.time}',child:'all',notes:''})">${ch.label}</button>`;
-}
+  // ---------- navigation with validation ----------
+  function advance(skipping){
+    // CHILD DETAIL sub-flow
+    if(['c-basics','c-care','c-personality'].includes(current)){
+      if(current==='c-basics'){
+        const name=el('#cName').value.trim();
+        if(!name){ el('#basicsErr').classList.add('show'); el('#cName').classList.add('err'); return; }
+        children[editingChild].name=name;
+        children[editingChild].age=el('#cAge').value.trim();
+        children[editingChild].ageUnit=el('#cAgeUnit').value;
+        applyAgeBands(editingChild); // adapt care screen to this child's age
+      }
+      const V=id=>{const e=el('#'+id);return e?e.value.trim():'';};
+      if(current==='c-care'){
+        const d=children[editingChild].data||(children[editingChild].data={});
+        d.allergies=[...document.querySelectorAll('[data-step="c-care"] .chip.sel')].map(x=>x.textContent.trim()).join(', ');
+        d.nappyStatus=V('cNappyStatus'); d.nappySize=V('cNappySize'); d.cream=V('cCream');
+        d.milk=[...document.querySelectorAll('#grpMilk .chip.sel')].map(x=>x.textContent.trim()).join(', ');
+        d.milkNotes=''; d.bottle=V('cBottle'); d.foodType=V('cFoodType');
+        d.preschool=V('cPreschool'); d.school=V('cSchool');
+      }
+      if(current==='c-personality'){
+        const d=children[editingChild].data||(children[editingChild].data={});
+        d.likes=V('cLikes'); d.screen=V('cScreen'); d.upset=V('cUpset');
+      }
+      if(childSubstep<2){ childSubstep++; show(['c-basics','c-care','c-personality'][childSubstep]); return; }
+      // finished personality → mark done, back to hub
+      children[editingChild].done=true;
+      renderChildren();
+      show('children');
+      return;
+    }
 
-// ── COUNTRY HINT ─────────────────────────────────────────────
-document.getElementById('countrySelect').addEventListener('change',e=>{
-  const nums=EMERGENCY_NUMBERS[e.target.value]||'';
-  document.getElementById('emergHint').textContent=nums?'📞 Emergency: '+nums:'';
-});
-document.getElementById('caregiverRelationship').addEventListener('change',e=>{
-  document.getElementById('relOtherWrap').style.display=e.target.value==='other'?'block':'none';
-});
+    // MAIN flow validation
+    if(current==='format' && !skipping){
+      if(!formatChosen){ el('#fmtErr').classList.add('show'); return; }
+    }
+    if(current==='children' && !skipping){
+      if(!children.some(c=>c.done)){ el('#childErr').classList.add('show'); return; }
+    }
+    if(current==='caregiver' && !skipping){
+      const n=el('#cgName').value.trim();
+      if(!n){ el('#cgErr').classList.add('show'); el('#cgName').classList.add('err'); return; }
+    }
+    if(current==='finish'){ generate(); return; }
 
-// ── VOICE INPUT ──────────────────────────────────────────────
-function startVoice(btn,textarea){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){alert('Voice input is not supported in this browser. Try Chrome or Safari.');return;}
-  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  if(isStandalone){
-    alert("Voice input doesn't work in the installed app yet — that's an Apple restriction, not a Held bug. Open this page in Safari directly to use the mic, or just type here.");
-    return;
+    const i=FLOW.indexOf(current);
+    if(i>=0 && i<FLOW.length-1) show(FLOW[i+1]);
   }
-  const rec=new SR();rec.continuous=false;rec.interimResults=false;
-  btn.classList.add('recording');btn.textContent='⏹️';
-  let gotResult=false;
-  const safety=setTimeout(()=>{ if(!gotResult){ try{rec.stop();}catch(e){} } },10000);
-  rec.onresult=e=>{gotResult=true;clearTimeout(safety);const t=e.results[0][0].transcript;textarea.value+=(textarea.value?'\n':'')+t;};
-  rec.onend=()=>{clearTimeout(safety);btn.classList.remove('recording');btn.textContent='🎤';};
-  rec.onerror=(e)=>{
-    clearTimeout(safety);btn.classList.remove('recording');btn.textContent='🎤';
-    if(e.error==='not-allowed'||e.error==='service-not-allowed'){alert('Microphone access is blocked. Check Settings → Safari → Microphone, then try again.');}
-    else if(e.error!=='no-speech'&&e.error!=='aborted'){alert('Voice input had a problem — please try again or type instead.');}
+
+  function prev(){
+    if(['c-basics','c-care','c-personality'].includes(current)){
+      if(childSubstep>0){ childSubstep--; show(['c-basics','c-care','c-personality'][childSubstep]); }
+      else show('children');
+      return;
+    }
+    const i=FLOW.indexOf(current);
+    if(i>0) show(FLOW[i-1]);
+    else if(current==='intro') show('home');
+  }
+
+  // ---------- intro: kid count + split ----------
+  function bumpKids(d){
+    numKids=Math.max(1,Math.min(6,numKids+d));
+    el('#kidCount').textContent=numKids;
+    // resize children array
+    while(children.length<numKids) children.push({name:'',age:'',emoji:'🧸',colour:'#A9C0DE',done:false});
+    while(children.length>numKids) children.pop();
+    el('#splitWrap').style.display = numKids>1 ? 'block':'none';
+  }
+  function pickSplit(elm){
+    document.querySelectorAll('[data-split]').forEach(o=>o.classList.remove('sel'));
+    elm.classList.add('sel');
+    splitChoice=elm.dataset.split;
+  }
+
+  // ---------- children hub ----------
+  function renderChildren(){
+    const list=el('#childrenList');
+    list.innerHTML=children.map((c,i)=>{
+      const name=c.name||`Child ${i+1}`;
+      const meta=c.done ? (c.age? `${c.age} · tap to edit`:'tap to edit') : 'not filled in yet';
+      const status=c.done?'<span class="child-status status-done">✓ Done</span>':'<span class="child-status status-todo">To do</span>';
+      return `<div class="child-card">
+        <div class="child-avatar" style="background:${c.colour}">${c.emoji}</div>
+        <div class="child-info"><div class="child-name">${name}</div><div class="child-meta">${meta}</div></div>
+        ${status}
+        <button class="child-edit" onclick="editChild(${i})">${c.done?'Edit':'Fill in'}</button>
+        <button class="child-del" onclick="deleteChild(${i})" aria-label="Remove ${name}">🗑</button>
+      </div>`;
+    }).join('');
+    el('#addChildBtn').style.display = children.length>=6 ? 'none':'flex';
+    el('#childrenSub').textContent = children.some(c=>c.done)
+      ? 'Tap a child to edit, or add another.'
+      : 'Tap a child to fill in their details.';
+  }
+  function deleteChild(i){
+    const c=children[i];
+    const label=c.name||`Child ${i+1}`;
+    if((c.name||c.done) && !confirm(`Remove ${label}? This can't be undone.`))return;
+    children.splice(i,1);
+    if(children.length===0) children.push({name:'',age:'',emoji:'🧸',colour:'#A9C0DE',done:false});
+    numKids=children.length;
+    const kc=el('#kidCount'); if(kc) kc.textContent=numKids;
+    el('#splitWrap').style.display = numKids>1 ? 'block':'none';
+    renderChildren();
+  }
+  function addChild(){
+    if(children.length>=6) return;
+    children.push({name:'',age:'',emoji:'🌟',colour:'#F0C5CB',done:false});
+    numKids=children.length; el('#kidCount').textContent=numKids;
+    renderChildren();
+    editChild(children.length-1);
+  }
+  function editChild(i){
+    editingChild=i; childSubstep=0;
+    const c=children[i];
+    el('#cName').value=c.name||'';
+    el('#cAge').value=c.age||'';
+    const d=c.data||{};
+    const S=(id,v)=>{const e=el('#'+id); if(e) e.value=v||'';};
+    S('cNappyStatus',d.nappyStatus); S('cNappySize',d.nappySize); S('cCream',d.cream);
+    S('cBottle',d.bottle); S('cFoodType',d.foodType);
+    S('cPreschool',d.preschool); S('cSchool',d.school);
+    S('cLikes',d.likes); S('cScreen',d.screen); S('cUpset',d.upset);
+    const label=`Child ${i+1}`+(c.name?` · ${c.name}`:'');
+    el('#cbLabel').textContent=label+' · Basics';
+    el('#ccLabel').textContent=label+' · Daily care';
+    el('#cpLabel').textContent=label+' · Personality';
+    show('c-basics');
+  }
+
+  // ---------- format ----------
+  const REC={
+    evening:{mode:'landscape',msg:'📋 Short One-Pager pre-selected — perfect for an evening.'},
+    fullday:{mode:null,msg:'Pick a format: One-Pager if the carer knows your kids, Full Guide for someone newer.'},
+    fewdays:{mode:'indepth',msg:'📖 Full Detail Guide pre-selected — best for a longer stay.'}
   };
-  rec.start();
-}
-
-// ── ROUTINE ITEMS ────────────────────────────────────────────
-function addRoutineItem(prefill){
-  const idx=routineCount++;
-  const opts=ALL_ROUTINE_TYPES.map(t=>`<option value="${t==='Other'?'other':t}">${t}</option>`).join('');
-  const div=document.createElement('div');
-  div.className='card';div.dataset.routine=idx;div.style.marginBottom='12px';
-  div.innerHTML=`
-    <div class="card-head">
-      <span class="card-title">Routine item</span>
-      <button type="button" class="btn-remove" onclick="this.closest('[data-routine]').remove()">Remove</button>
-    </div>
-    <div class="row3">
-      <div class="field"><label class="t-label">Type</label><select class="r-type">${opts}</select></div>
-      <div class="field"><label class="t-label">Time</label><input type="time" class="r-time"></div>
-      <div class="field"><label class="t-label">For</label><select class="r-child">${getChildOptionsHTML()}</select></div>
-    </div>
-    <div class="field r-other" style="display:none;"><label class="t-label">Specify</label><input type="text" class="r-type-other" placeholder="e.g. Swimming class"></div>
-    <div class="field" style="margin-bottom:0">
-      <label class="t-label">Notes <span class="t-hint">(use **double asterisks** to bold key facts)</span></label>
-      <div class="textarea-wrap">
-        <textarea class="r-notes" placeholder="e.g. Needs **180ml** formula, white noise on"></textarea>
-        <button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button>
-      </div>
-    </div>`;
-  document.getElementById('routineContainer').appendChild(div);
-  if(prefill){
-    const ts=div.querySelector('.r-type');
-    const std=ALL_ROUTINE_TYPES.filter(t=>t!=='Other').includes(prefill.type);
-    ts.value=std?prefill.type:'other';
-    if(!std){div.querySelector('.r-other').style.display='block';div.querySelector('.r-type-other').value=prefill.type||'';}
-    div.querySelector('.r-time').value=prefill.time||'';
-    div.querySelector('.r-child').innerHTML=getChildOptionsHTML(prefill.child);
-    div.querySelector('.r-notes').value=prefill.notes||'';
+  function pickDur(elm){
+    elm.parentNode.querySelectorAll('.tile').forEach(t=>t.classList.remove('sel'));
+    elm.classList.add('sel');
+    const r=REC[elm.dataset.dur];
+    const rm=el('#recMsg'); rm.textContent=r.msg; rm.style.display='block';
+    document.querySelectorAll('[data-mode]').forEach(m=>m.classList.remove('sel'));
+    selectedDuration=elm.dataset.dur;
+    if(r.mode){ document.querySelector(`[data-mode="${r.mode}"]`).classList.add('sel'); formatChosen=true; selectedMode=r.mode; el('#fmtErr').classList.remove('show'); }
   }
-  div.querySelector('.r-type').addEventListener('change',function(){
-    div.querySelector('.r-other').style.display=this.value==='other'?'block':'none';
-  });
-}
-function getChildOptionsHTML(sel){
-  const names=Array.from(document.querySelectorAll('.c-name')).map((inp,i)=>inp.value.trim()||`Child ${i+1}`);
-  let h=`<option value="all"${sel==='all'?' selected':''}>All children</option>`;
-  names.forEach(n=>{h+=`<option value="${n}"${n===sel?' selected':''}>${n}</option>`;});
-  return h;
-}
-function collectRoutineItems(){
-  return Array.from(document.querySelectorAll('[data-routine]')).map(b=>{
-    const ts=b.querySelector('.r-type').value;
-    return{type:ts==='other'?b.querySelector('.r-type-other').value.trim():ts,time:b.querySelector('.r-time').value,child:b.querySelector('.r-child').value,notes:b.querySelector('.r-notes').value.trim()};
-  });
-}
-document.getElementById('addRoutineBtn').addEventListener('click',()=>addRoutineItem());
+  function pickMode(elm){ document.querySelectorAll('[data-mode]').forEach(m=>m.classList.remove('sel')); elm.classList.add('sel'); formatChosen=true; selectedMode=elm.dataset.mode; el('#fmtErr').classList.remove('show'); }
 
-// ── CONTACTS ─────────────────────────────────────────────────
-function addContact(prefill){
-  const idx=contactCount++;
-  const div=document.createElement('div');
-  div.className='card';div.dataset.contact=idx;div.style.marginBottom='12px';
-  div.innerHTML=`<div class="card-head"><span class="card-title">Contact</span><button type="button" class="btn-remove" onclick="this.closest('[data-contact]').remove()">Remove</button></div>
-    <div class="row2">
-      <div class="field"><label class="t-label">Name</label><input type="text" class="ct-name" placeholder="e.g. Mum"></div>
-      <div class="field"><label class="t-label">Phone</label><input type="text" class="ct-phone" placeholder="e.g. 07700 900000"></div>
-    </div>`;
-  document.getElementById('contactsContainer').appendChild(div);
-  if(prefill){if(prefill.name)div.querySelector('.ct-name').value=prefill.name;if(prefill.phone)div.querySelector('.ct-phone').value=prefill.phone;}
-}
-function collectContacts(){
-  return Array.from(document.querySelectorAll('[data-contact]')).map(b=>({name:b.querySelector('.ct-name').value.trim(),phone:b.querySelector('.ct-phone').value.trim()})).filter(c=>c.name||c.phone);
-}
-document.getElementById('addContactBtn').addEventListener('click',()=>addContact());
+  // ---------- age bands ----------
+  // returns child age in YEARS (months → years)
+  function ageYears(c){
+    const n=parseFloat(c.age); if(isNaN(n))return null;
+    return c.ageUnit==='months' ? n/12 : n;
+  }
+  function bandOf(c){
+    const y=ageYears(c);
+    if(y==null) return 'unknown';
+    if(y<3) return 'baby';        // Under 3
+    if(y<5) return 'preschool';   // 3–5 (UK preschool / nursery)
+    return 'child';               // 5+ (school)
+  }
+  function applyAgeBands(i){
+    const c=children[i], band=bandOf(c);
+    const badge=el('#careAgeBadge');
+    const showG=(id,on)=>{ const g=el('#'+id); if(g) g.style.display=on?'block':'none'; };
+    // nappies: ALL ages (older kids may wear at night)
+    showG('grpNappy', true);
+    if(band==='baby'){ badge.textContent='👶 Under 3'; showG('grpMilk',true); showG('grpFood',true); showG('grpNursery',false); showG('grpSchool',false); }
+    else if(band==='preschool'){ badge.textContent='🧒 Age 3–5 · nursery/preschool'; showG('grpMilk',true); showG('grpFood',true); showG('grpNursery',true); showG('grpSchool',false); }
+    else if(band==='child'){ badge.textContent='🧑 Age 5+ · school'; showG('grpMilk',false); showG('grpFood',false); showG('grpNursery',false); showG('grpSchool',true); }
+    else { badge.textContent='Add an age for tailored fields'; showG('grpMilk',true); showG('grpFood',true); showG('grpNursery',false); showG('grpSchool',false); }
+  }
 
-// ── FOOD TYPE ────────────────────────────────────────────────
-function foodTypeOptions(totalMonths){
-  if(totalMonths<6)return'<option>Breast milk / Formula only</option>';
-  if(totalMonths<12)return'<option>Purées only</option><option>Purées + some mashed</option><option>Breast milk / Formula only</option>';
-  if(totalMonths<36)return'<option>Purées</option><option>Mashed</option><option>Soft finger foods</option><option>Mix of mashed + finger foods</option><option>Normal family food (soft)</option>';
-  return'<option>Normal family food</option><option>Soft foods preferred</option><option>Special diet</option><option>Everything</option>';
-}
+  // ---------- routine builder ----------
+  const ROUTINE_BASE=[
+    {emoji:'🥣',name:'Breakfast',time:'07:30'},
+    {emoji:'🍽',name:'Lunch',time:'12:00'},
+    {emoji:'🍎',name:'Snack',time:'15:00'},
+    {emoji:'🍽',name:'Dinner',time:'17:30'},
+    {emoji:'🛁',name:'Bath',time:'18:30'},
+    {emoji:'🌙',name:'Bedtime',time:'19:00'}
+  ];
+  const ROUTINE_BABY=[{emoji:'🍼',name:'Feed',time:'08:00'},{emoji:'💤',name:'Nap',time:'10:00'}];
+  const ROUTINE_PRESCHOOL=[{emoji:'💤',name:'Nap',time:'13:00'},{emoji:'🤫',name:'Quiet time',time:'14:00'},{emoji:'🏫',name:'Nursery / preschool run',time:'08:45'},{emoji:'🏫',name:'Nursery pick-up',time:'15:00'}];
+  const ROUTINE_CHILD=[{emoji:'🤫',name:'Quiet time',time:'14:00'},{emoji:'🎒',name:'School run',time:'08:15'},{emoji:'🎒',name:'School pick-up',time:'15:15'},{emoji:'📚',name:'Homework',time:'16:00'},{emoji:'📱',name:'Screen time',time:'17:00'}];
 
-// ── CHILD CARDS ───────────────────────────────────────────────
-function childBlockHTML(idx){
-  const allergenChips=ALLERGEN_OPTIONS.map(opt=>`<label class="chip"><input type="checkbox" name="allergen-${idx}" value="${opt}"><span>${opt}</span></label>`).join('');
-  return`<div class="card" data-child="${idx}" style="margin-bottom:12px;">
-    <div class="card-head">
-      <span class="card-title">Child ${idx+1}</span>
-      <button type="button" class="btn-remove" onclick="removeChild(${idx})">🗑 Remove</button>
-    </div>
-    <div class="field">
-      <label class="t-label">Colour & emoji <span class="t-hint">(optional)</span></label>
-      <div class="swatch-row">${KID_IDENTITIES.map((k,ci)=>`<button type="button" class="swatch-btn" data-idx="${ci}" style="background:${k.color};" onclick="selectSwatch(${idx},${ci})"></button>`).join('')}</div>
-      <input type="hidden" class="c-color-idx" value="-1">
-      <input type="text" class="c-emoji" placeholder="🦁 or leave blank" style="max-width:160px;margin-top:6px;">
-    </div>
-    <div class="row2">
-      <div class="field"><label class="t-label">Name <span class="t-required">*</span></label><input type="text" class="c-name" placeholder="e.g. Mia"></div>
-      <div class="row2" style="margin:0">
-        <div class="field"><label class="t-label">Age</label><input type="number" class="c-age-value" min="0" placeholder="e.g. 2"></div>
-        <div class="field"><label class="t-label">&nbsp;</label><select class="c-age-unit"><option>years</option><option>months</option></select></div>
-      </div>
-    </div>
-    <div class="field"><label class="t-label">Allergies <span class="t-hint">— tap all that apply</span></label><div class="chips">${allergenChips}</div></div>
-    <div class="field"><label class="t-label">Other allergies / medical notes <span class="t-hint">(optional)</span></label><div class="textarea-wrap"><textarea class="c-allergy-notes" placeholder="e.g. Carries EpiPen, mild asthma"></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-    <div class="nappy-fields">
-      <div class="row3">
-        <div class="field"><label class="t-label">Nappy status</label><select class="c-nappy-status"><option>Full-time nappies</option><option>Bedtime/naps only</option><option>Potty training</option><option>Fully potty trained</option><option>No nappies</option></select></div>
-        <div class="field"><label class="t-label">Nappy size</label><select class="c-nappy"><option>—</option>${NAPPY_OPTIONS.map(o=>`<option>${o}</option>`).join('')}<option>Pull-ups</option></select></div>
-        <div class="field"><label class="t-label">Needs cream?</label><select class="c-cream"><option>No</option><option>Yes</option></select></div>
-      </div>
-      <div class="field"><label class="t-label">Cream notes <span class="t-hint">(optional)</span></label><input type="text" class="c-cream-notes" placeholder="e.g. Sudocrem at every change"></div>
-    </div>
-    <div class="baby-fields">
-      <div class="field"><label class="t-label">Milk <span class="t-hint">— tap all that apply (combo feeding is fine)</span></label>
-        <div class="milk-chips">
-          <label class="milk-chip"><input type="checkbox" class="c-milk-opt" value="Breastmilk">🤱 Breastmilk</label>
-          <label class="milk-chip"><input type="checkbox" class="c-milk-opt" value="Formula">🍼 Formula</label>
-          <label class="milk-chip"><input type="checkbox" class="c-milk-opt" value="Cow's milk">🐄 Cow's milk</label>
-          <label class="milk-chip"><input type="checkbox" class="c-milk-opt" value="Plant milk">🌱 Plant milk</label>
-        </div>
-      </div>
-      <div class="field"><label class="t-label">Milk notes <span class="t-hint">(optional)</span></label><input type="text" class="c-milk-notes" placeholder="e.g. Formula in the day, cow's milk at bedtime"></div>
-      <div class="field">
-        <label class="t-label">Bottle amount <span class="t-hint">(per feed)</span></label>
-        <div class="amount-row">
-          <input type="number" class="c-bottle-amount" min="0" placeholder="e.g. 180">
-          <div class="unit-toggle">
-            <button type="button" class="unit-btn active" onclick="setUnit(this,'ml',${idx})">ml</button>
-            <button type="button" class="unit-btn" onclick="setUnit(this,'oz',${idx})">oz</button>
-          </div>
-        </div>
-        <input type="hidden" class="c-bottle-unit" value="ml">
-      </div>
-      <p class="t-hint" style="margin:-4px 0 12px;">Add a "Milk/Feed" routine item for exact feed times.</p>
-      <div class="field"><label class="t-label">Food type <span class="t-hint">(eating stage)</span></label><select class="c-food-type">${foodTypeOptions(6)}</select></div>
-    </div>
-    <div class="field preschool-fields" style="display:none;"><label class="t-label">Nursery / preschool notes <span class="t-hint">(3–5)</span></label><div class="textarea-wrap"><textarea class="c-preschool" placeholder="e.g. Nursery drop-off 9am, needs comforter for nap, settling routine at the door"></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-    <div class="field older-fields" style="display:none;"><label class="t-label">School, activities &amp; homework <span class="t-hint">(5+)</span></label><div class="textarea-wrap"><textarea class="c-school" placeholder="e.g. Homework before screen time, football pick-up at 5pm"></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-    <div class="bottle-override-wrap" style="display:none;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.82rem;font-weight:700;margin-bottom:10px;color:var(--ink);">
-        <input type="checkbox" class="c-still-bottle"> Still drinks from a bottle
-      </label>
-      <div class="bottle-override-detail" style="display:none;">
-        <div class="field"><label class="t-label">Bottle amount</label>
-          <div class="amount-row"><input type="number" class="c-bottle-amount" min="0" placeholder="e.g. 200">
-            <div class="unit-toggle"><button type="button" class="unit-btn active" onclick="setUnit(this,'ml',${idx})">ml</button><button type="button" class="unit-btn" onclick="setUnit(this,'oz',${idx})">oz</button></div>
-          </div><input type="hidden" class="c-bottle-unit" value="ml">
-        </div>
-      </div>
-    </div>
-    <div class="field"><label class="t-label">Screen time & independence rules</label><div class="textarea-wrap"><textarea class="c-independence" placeholder="e.g. No devices after 6pm, can play in garden unsupervised"></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-    <div class="field"><label class="t-label">Personality, likes & comfort items</label><div class="textarea-wrap"><textarea class="c-likes" placeholder="e.g. Loves the blue rabbit (doudou), hates loud noises, needs their dummy/tétine to sleep"></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-    <div class="field" style="margin-bottom:0"><label class="t-label">What to do if upset <span class="t-hint">(practical steps — not the same as their likes!)</span></label><div class="textarea-wrap"><textarea class="c-behaviour" placeholder="e.g. Give space first, then offer the rabbit. Singing works better than talking."></textarea><button type="button" class="voice-btn no-print" onclick="startVoice(this,this.previousElementSibling)">🎤</button></div></div>
-  </div>`;
-}
+  let routineItems=[]; // added rows
 
-function setUnit(btn,unit,childIdx){
-  const wrap=btn.closest('.bottle-amount-wrap,.amount-row')?.parentElement||btn.closest('.card');
-  if(!wrap)return;
-  btn.closest('.unit-toggle').querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const hidden=btn.closest('.field')?.querySelector('.c-bottle-unit');
-  if(hidden)hidden.value=unit;
-}
-function selectSwatch(childIdx,colorIdx){
-  const card=document.querySelector(`[data-child="${childIdx}"]`);
-  if(!card)return;
-  card.querySelector('.c-color-idx').value=colorIdx;
-  card.querySelectorAll('.swatch-btn').forEach(b=>b.classList.remove('selected'));
-  const btn=card.querySelector(`.swatch-btn[data-idx="${colorIdx}"]`);
-  if(btn)btn.classList.add('selected');
-}
-function getChildAge(card){
-  const unit=card.querySelector('.c-age-unit').value;
-  const val=parseFloat(card.querySelector('.c-age-value').value)||0;
-  return unit==='years'?val*12:val;
-}
-// Age bands: Under 5 (60mo) = "young" (milk + food shown). 5+ = school shown.
-// Nappies are ALWAYS shown (some older children still wear them at night).
-function isYoungChild(card){
-  return getChildAge(card)<60||!card.querySelector('.c-age-value').value;
-}
-function updateAgeFields(card){
-  const totalMonths=getChildAge(card);
-  const young=isYoungChild(card);
-  const hasAge=card.querySelector('.c-age-value').value;
-  const isOld=totalMonths>=60&&hasAge;                       // 5+
-  const isPreschool=hasAge&&totalMonths>=36&&totalMonths<60; // 3–5
-  card.querySelectorAll('.baby-fields').forEach(el=>el.style.display=young?'block':'none');
-  card.querySelectorAll('.preschool-fields').forEach(el=>el.style.display=isPreschool?'block':'none');
-  card.querySelectorAll('.older-fields').forEach(el=>el.style.display=isOld?'block':'none');
-  card.querySelectorAll('.bottle-override-wrap').forEach(el=>el.style.display=isOld?'block':'none');
-  const foodSel=card.querySelector('.c-food-type');
-  if(foodSel)foodSel.innerHTML=foodTypeOptions(totalMonths);
-  // refresh routine chips if children's ages changed
-  if(typeof renderQuickChips==='function' && document.getElementById('quickChips'))renderQuickChips();
-}
-function addChild(prefill){
-  const idx=childCount++;
-  const div=document.createElement('div');
-  div.innerHTML=childBlockHTML(idx);
-  const card=div.firstElementChild;
-  document.getElementById('childrenContainer').appendChild(card);
-  updateRemoveButtons();
-  if(prefill)applyChildData(idx,prefill);
-  updateAgeFields(card);
-}
-function removeChild(idx){
-  const b=document.querySelector(`[data-child="${idx}"]`);
-  if(!b)return;
-  const nameEl=b.querySelector('.c-name');
-  const hasData=nameEl&&nameEl.value.trim();
-  const label=hasData?nameEl.value.trim():'this child';
-  if(hasData && !confirm(`Remove ${label}? This can't be undone.`))return;
-  const blocks=document.querySelectorAll('[data-child]');
-  b.remove();
-  // never leave the form with zero children — add a fresh blank one
-  if(blocks.length<=1)addChild();
-  updateRemoveButtons();
-}
-function updateRemoveButtons(){
-  // Remove is always available now (even for a single child — it resets to blank).
-  document.querySelectorAll('[data-child] .btn-remove').forEach(btn=>btn.style.display='inline-flex');
-}
-document.getElementById('childrenContainer').addEventListener('input',e=>{if(e.target.classList.contains('c-age-value'))updateAgeFields(e.target.closest('[data-child]'));});
-document.getElementById('childrenContainer').addEventListener('change',e=>{
-  if(e.target.classList.contains('c-age-unit'))updateAgeFields(e.target.closest('[data-child]'));
-  if(e.target.classList.contains('c-still-bottle')){const w=e.target.closest('.bottle-override-wrap');if(w)w.querySelector('.bottle-override-detail').style.display=e.target.checked?'block':'none';}
-});
-document.getElementById('addChildBtn').addEventListener('click',()=>addChild());
-
-function collectChildren(){
-  return Array.from(document.querySelectorAll('[data-child]')).map(b=>{
-    const allergens=Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(c=>c.value);
-    const young=isYoungChild(b);
-    const isOld=!young;
-    const bottleEl=b.querySelector('.amount-row .c-bottle-amount');
-    const bottleUnit=b.querySelector('.amount-row .c-bottle-unit');
-    return{
-      name:b.querySelector('.c-name').value.trim(),
-      colorIdx:parseInt(b.querySelector('.c-color-idx').value,10),
-      emoji:b.querySelector('.c-emoji').value.trim(),
-      age:b.querySelector('.c-age-value').value.trim()+' '+b.querySelector('.c-age-unit').value,
-      allergens:allergens.join(', '),
-      allergyNotes:b.querySelector('.c-allergy-notes').value.trim(),
-      foodType:b.querySelector('.c-food-type')?b.querySelector('.c-food-type').value:'',
-      nappyStatus:b.querySelector('.c-nappy-status').value,
-      nappy:b.querySelector('.c-nappy').value,
-      cream:b.querySelector('.c-cream').value,
-      creamNotes:b.querySelector('.c-cream-notes').value.trim(),
-      milk:young?Array.from(b.querySelectorAll('.c-milk-opt:checked')).map(c=>c.value).join(', '):'',
-      milkNotes:young?b.querySelector('.c-milk-notes').value.trim():'',
-      bottleAmount:bottleEl?bottleEl.value.trim():'',
-      bottleUnit:bottleUnit?bottleUnit.value:'ml',
-      preschool:(b.querySelector('.c-preschool')?b.querySelector('.c-preschool').value.trim():''),
-      school:isOld?(b.querySelector('.c-school')?b.querySelector('.c-school').value.trim():''):'',
-      independence:b.querySelector('.c-independence').value.trim(),
-      likes:b.querySelector('.c-likes').value.trim(),
-      behaviour:b.querySelector('.c-behaviour').value.trim(),
+  function youngestBand(){
+    // choose chip set based on the range of children's ages present
+    const bands=children.filter(c=>c.done).map(bandOf);
+    return {
+      hasBaby: bands.includes('baby'),
+      hasPreschool: bands.includes('preschool'),
+      hasChild: bands.includes('child')
     };
-  });
-}
-function applyChildData(idx,data){
-  const b=document.querySelector(`[data-child="${idx}"]`);
-  if(!b||!data)return;
-  if(data.name)b.querySelector('.c-name').value=data.name;
-  if(data.colorIdx!==undefined&&data.colorIdx>=0)selectSwatch(idx,data.colorIdx);
-  if(data.emoji)b.querySelector('.c-emoji').value=data.emoji;
-  if(data.age){const p=data.age.split(' ');b.querySelector('.c-age-value').value=p[0]||'';if(p[1])b.querySelector('.c-age-unit').value=p[1];}
-  if(data.allergens)data.allergens.split(', ').forEach(v=>{const cb=b.querySelector(`input[value="${v}"]`);if(cb)cb.checked=true;});
-  if(data.allergyNotes)b.querySelector('.c-allergy-notes').value=data.allergyNotes;
-  ['nappyStatus','nappy','cream','creamNotes','milkNotes','preschool','school','independence','likes','behaviour'].forEach(f=>{
-    if(data[f]){const el=b.querySelector(`.c-${f.replace(/([A-Z])/g,'-$1').toLowerCase()}`)||b.querySelector(`.c-${f}`);if(el)el.value=data[f];}
-  });
-  // milk is now multi-select — restore checked chips
-  if(data.milk){data.milk.split(', ').forEach(v=>{const cb=b.querySelector(`.c-milk-opt[value="${v}"]`);if(cb)cb.checked=true;});}
-  updateAgeFields(b);
-}
+  }
+  function buildRoutineChips(){
+    const b=youngestBand();
+    let set=[...ROUTINE_BASE];
+    if(b.hasBaby) set=[...ROUTINE_BABY,...set];
+    if(b.hasPreschool) set=[...set,...ROUTINE_PRESCHOOL];
+    if(b.hasChild) set=[...set,...ROUTINE_CHILD];
+    // de-dupe by name, keep first
+    const seen=new Set(); set=set.filter(x=>{ if(seen.has(x.name))return false; seen.add(x.name); return true; });
+    const c=el('#routineChips');
+    c.innerHTML=set.map(x=>`<span class="chip" onclick='addRoutineRow(${JSON.stringify(x.name)},${JSON.stringify(x.time)},${JSON.stringify(x.emoji)})'>${x.emoji} ${x.name}</span>`).join('');
+  }
+  function addRoutineRow(name,time,emoji){
+    routineItems.push({name,time:time||'',emoji:emoji||'🕐'});
+    renderRoutine();
+  }
+  function renderRoutine(){
+    const list=el('#routineList');
+    list.innerHTML=routineItems.map((r,i)=>`<div class="r-row">
+      <span class="r-emoji">${r.emoji}</span>
+      <span class="r-name">${r.name}</span>
+      <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value">
+      <button class="r-del" onclick="delRoutine(${i})">×</button>
+    </div>`).join('');
+  }
+  function delRoutine(i){ routineItems.splice(i,1); renderRoutine(); }
 
-// ── SAVE / LOAD ──────────────────────────────────────────────
-async function saveEntry(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}catch(e){}}
-async function loadSavedEntry(){
-  try{
-    const saved=localStorage.getItem(STORAGE_KEY);
-    if(!saved)return;
-    const data=JSON.parse(saved);
-    if(data.children&&data.children.length)data.children.forEach(c=>addChild(c));else addChild();
-    if(data.routineItems&&data.routineItems.length)data.routineItems.forEach(r=>addRoutineItem(r));
-    if(data.contacts&&data.contacts.length)data.contacts.forEach(c=>addContact(c));
-    ['importantNote','caregiverName','extra','signOff'].forEach(id=>{const el=document.getElementById(id);if(el&&data[id])el.value=data[id];});
-    if(data.caregiverRelationship)document.getElementById('caregiverRelationship').value=data.caregiverRelationship;
-    if(data.languageSelect)document.getElementById('modeLanguage').value=data.languageSelect;
-    if(data.country)document.getElementById('countrySelect').value=data.country;
-    if(data.multiDayNotes)document.getElementById('multiDayNotes').value=data.multiDayNotes;
-    if(data.overnightNotes)document.getElementById('overnightNotes').value=data.overnightNotes;
-    if(data.mode){selectedMode=data.mode;const b=document.querySelector(`[data-mode="${data.mode}"]`);if(b){document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');}}
-    if(data.duration){selectedDuration=data.duration;const b=document.querySelector(`[data-dur="${data.duration}"]`);if(b){document.querySelectorAll('[data-dur]').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');if(FORMAT_RECS[data.duration]){const rec=FORMAT_RECS[data.duration];document.getElementById('recBanner').textContent=rec.msg;document.getElementById('recBanner').style.display='block';}}}
-    checkReady();
-    document.getElementById('countrySelect').dispatchEvent(new Event('change'));
-    if(data.routineItems)renderQuickChips();
-    return true;
-  }catch(e){return false;}
-}
+  function pickSw(elm){ elm.parentNode.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].colour=elm.style.background; }
+  function pickEm(elm){ elm.parentNode.querySelectorAll('.em').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].emoji=elm.textContent; }
+  function tog(elm){ elm.classList.toggle('sel'); }
 
-// ── VALIDATE ─────────────────────────────────────────────────
-function validateAndBuildFormData(){
-  if(!selectedMode||!selectedDuration)return{valid:false,error:'Please go back and choose duration and format.'};
-  const children=collectChildren();
-  if(!children.length||!children[0].name)return{valid:false,error:"Please fill in at least one child's name."};
-  const relSelect=document.getElementById('caregiverRelationship').value;
-  const relationship=relSelect==='other'?document.getElementById('caregiverRelationshipOther').value.trim():relSelect;
-  const langSelect=document.getElementById('modeLanguage').value;
-  const language=langSelect==='other'?document.getElementById('modeLanguageOther').value.trim():langSelect;
-  const formData={
-    children,routineItems:collectRoutineItems(),contacts:collectContacts(),
-    importantNote:document.getElementById('importantNote').value.trim(),
-    caregiverName:document.getElementById('caregiverName').value.trim(),
-    caregiverRelationship:relSelect,caregiverRelationshipOther:document.getElementById('caregiverRelationshipOther').value.trim(),
-    mode:selectedMode,duration:selectedDuration,
-    languageSelect:langSelect,languageOther:document.getElementById('modeLanguageOther').value.trim(),
-    extra:document.getElementById('extra').value.trim(),
-    signOff:document.getElementById('signOff').value.trim(),
-    country:document.getElementById('countrySelect').value,
-    multiDayNotes:document.getElementById('multiDayNotes').value.trim(),
-    overnightNotes:document.getElementById('overnightNotes').value.trim(),
-  };
-  if(!formData.caregiverName)return{valid:false,error:'Please fill in who this guide is for.'};
-  return{valid:true,children,formData,relationship,language};
-}
+  // ── BRIDGE: collect v6 step data into the shape the engine expects ──
+  // selectedMode/selectedDuration declared by engine below
 
-// ── ACCESS CODE / GENERATE ────────────────────────────────────
-document.getElementById('accessCode').addEventListener('input',e=>{
-  const btn=document.getElementById('generateBtn');
-  btn.textContent=e.target.value.trim()?'Create my guide (free with code) →':'Create my guide →';
-});
+  function collectChildrenData(){
+    return children.filter(c=>c.done||c.name).map((c,i)=>{
+      const d=c.data||{};
+      const id=KID_IDENTITIES[i%KID_IDENTITIES.length];
+      return {
+        name:c.name||`Child ${i+1}`,
+        age:c.age||'', ageUnit:c.ageUnit||'years',
+        emoji:c.emoji||id.emoji, color:c.colour||id.color,
+        allergies:d.allergies||'',
+        nappyStatus:d.nappyStatus||'', nappy:d.nappySize||'',
+        cream:d.cream||'', creamNotes:'',
+        milk:d.milk||'', milkNotes:d.milkNotes||'',
+        bottleAmount:d.bottle||'', bottleUnit:'ml',
+        foodType:d.foodType||'',
+        preschool:d.preschool||'',
+        school:d.school||'',
+        likes:d.likes||'', independence:d.screen||'', behaviour:d.upset||''
+      };
+    });
+  }
+  function collectRoutineData(){
+    return routineItems.map(r=>({type:r.name,time:r.time||'',child:'all',notes:r.notes||''}));
+  }
+  function collectContactsData(){
+    return contacts.filter(x=>x.name||x.phone).map(x=>({name:x.name,phone:x.phone,relationship:x.rel||''}));
+  }
 
-document.getElementById('generateBtn').addEventListener('click',async()=>{
-  clearError();
-  const code=document.getElementById('accessCode').value.trim();
-  if(code){await performGeneration({accessCode:code});return;}
-  const v=validateAndBuildFormData();
-  if(!v.valid){showError(v.error);return;}
-  await saveEntry(v.formData);
-  const btn=document.getElementById('generateBtn');
-  btn.disabled=true;btn.textContent='Redirecting…';
-  try{
-    const res=await fetch('/api/create-checkout',{method:'POST'});
-    const data=await res.json();
-    if(data.url)window.location.href=data.url;
-    else{showError('Could not start checkout: '+(data.error||'unknown error'));btn.disabled=false;btn.textContent='Create my guide →';}
-  }catch(e){showError('Could not start checkout: '+e.message);btn.disabled=false;btn.textContent='Create my guide →';}
-});
+  async function generate(){
+    const kids=collectChildrenData();
+    if(!kids.length){ show('children'); alert("Please fill in at least one child."); return; }
+    const cg=el('#cgName')?el('#cgName').value.trim():'';
+    if(!cg){ show('caregiver'); alert('Please add a caregiver name.'); return; }
 
-// ── GENERATE API CALL ─────────────────────────────────────────
+    const formData={
+      children:kids,
+      routineItems:collectRoutineData(),
+      contacts:collectContactsData(),
+      importantNote:el('#importantNote')?el('#importantNote').value.trim():'',
+      caregiverName:cg,
+      caregiverRelationship:el('#cgRel')?el('#cgRel').value:'',
+      caregiverRelationshipOther:'',
+      mode:selectedMode||'indepth',
+      duration:selectedDuration||'fullday',
+      languageSelect:el('#guideLang')?el('#guideLang').value:'English',
+      languageOther:'',
+      extra:el('#extraNotes')?el('#extraNotes').value.trim():'',
+      signOff:el('#signOff')?el('#signOff').value.trim():'',
+      country:el('#country')?el('#country').value:'',
+      multiDayNotes:'', overnightNotes:''
+    };
+    const relationship=formData.caregiverRelationship;
+    const language=formData.languageSelect;
+    const code=el('#betaCode')?el('#betaCode').value.trim().toUpperCase():'';
+
+    // hand off to the real engine
+    window.__held={children:kids,formData,relationship,language};
+    show('generating');
+    try{
+      await performGeneration(code?{accessCode:code}:{});
+    }catch(e){
+      show('finish');
+      alert('Something went wrong generating your guide. '+(e&&e.message?e.message:''));
+    }
+  }
+
+  function restart(){ location.reload(); }
+  function viewExample(e){ e.preventDefault(); alert('→ Sample guide opens here — with a working ✕ close button so you can get back.'); }
+
+
+  // ── SHIMS: map engine calls onto the v6 step system ──
+  function validateAndBuildFormData(){
+    const h=window.__held;
+    if(!h) return {valid:false,error:'Missing form data.'};
+    return {valid:true, children:h.children, formData:h.formData,
+            relationship:h.relationship, language:h.language};
+  }
+  async function saveEntry(data){ try{localStorage.setItem('held-last-entry',JSON.stringify(data));}catch(e){} }
+  function showView(id){
+    if(id==='loadingView'){ show('generating'); return; }
+    if(id==='guideView'){ showGuideScreen(); return; }
+    if(id==='formView'){ show('finish'); return; }
+  }
+  function showGuideScreen(){
+    // hide all step screens, reveal the engine's guide view
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+    const gv=document.getElementById('guideView');
+    if(gv){ gv.style.display='block'; }
+    const foot=document.getElementById('foot'); if(foot) foot.style.display='none';
+    const pw=document.getElementById('progressWrap'); if(pw) pw.style.display='none';
+    const sc=document.getElementById('stepCount'); if(sc) sc.style.display='none';
+    window.scrollTo(0,0);
+  }
+  function hideGuideScreen(){ const gv=document.getElementById('guideView'); if(gv) gv.style.display='none'; }
+
+
 async function performGeneration(authPayload){
   clearError();
   const v=validateAndBuildFormData();
@@ -1665,10 +915,9 @@ async function performGeneration(authPayload){
     const lines=[`Child ${i+1}: ${c.name}, age ${c.age}`];
     if(c.foodType)lines.push(`  Food type: ${c.foodType}`);
     lines.push(`  Allergies: ${[c.allergens,c.allergyNotes].filter(Boolean).join(' — ')||'None noted'}`);
-    if(c.nappyStatus&&c.nappyStatus!=='No nappies'&&c.nappyStatus!=='Fully potty trained')lines.push(`  Nappies: ${c.nappyStatus}${c.nappy&&c.nappy!=='—'?' size '+c.nappy:''}${c.cream==='Yes'?' needs cream'+(c.creamNotes?' ('+c.creamNotes+')':''):''}` );
+    if(c.nappyStatus)lines.push(`  Nappies: ${c.nappyStatus}${c.nappy?' size '+c.nappy:''}${c.cream==='Yes'?' needs cream'+(c.creamNotes?' ('+c.creamNotes+')':''):''}` );
     if(c.milk||c.milkNotes)lines.push(`  Milk: ${[c.milk,c.milkNotes].filter(Boolean).join(' — ')}`);
     if(c.bottleAmount)lines.push(`  Bottle amount: ${c.bottleAmount}${c.bottleUnit} per feed`);
-    if(c.preschool)lines.push(`  Nursery/preschool: ${c.preschool}`);
     if(c.school)lines.push(`  School/activities: ${c.school}`);
     if(c.independence)lines.push(`  Screen time & independence: ${c.independence}`);
     lines.push(`  PERSONALITY, LIKES & COMFORT ITEMS (use ONLY for comfort section — never as crisis advice): ${c.likes||'not specified'}`);
@@ -1726,7 +975,6 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
   }catch(err){
     clearInterval(interval);
     showView('formView');
-    if(typeof STEP_ORDER!=='undefined'){stepIndex=STEP_ORDER.length-1;showStep();}
     const isNet=err&&(err.message==='Load failed'||err.message==='Failed to fetch'||err.message==='NetworkError');
     if(err&&err.isPaymentRequired){
       showError('💛 Everything you\'ve entered is saved. Add a code or pay to create this guide — nothing to re-type.');
@@ -1736,59 +984,6 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
   }
 }
 
-// ── PRINT / PDF ───────────────────────────────────────────────
-function setPrintOrientation(mode){
-  let s=document.getElementById('dynamicPageStyle');
-  if(!s){s=document.createElement('style');s.id='dynamicPageStyle';document.head.appendChild(s);}
-  s.textContent=mode==='landscape'?'@media print{@page{size:A4 landscape;margin:12mm;}}':'@media print{@page{size:A4;margin:14mm;}}';
-}
-document.getElementById('downloadPdfBtn').addEventListener('click',()=>{
-  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  if(isStandalone){
-    alert("PDF download doesn't work reliably in the installed app (an Apple limitation) — tap 'Prefer to print?' below instead, then choose 'Save to Files' or 'Save as PDF' from the share sheet. It gives you the same PDF.");
-    return;
-  }
-  const btn=document.getElementById('downloadPdfBtn');
-  const resetBtn=()=>{btn.textContent='⬇ Download PDF';btn.disabled=false;};
-
-  if(typeof html2pdf==='undefined'){
-    alert("The PDF tool didn't load (often a connection or ad-blocker issue). Please check your connection and try again, or tap 'Prefer to print?' below — it works even without it.");
-    return;
-  }
-
-  const el=document.getElementById('guideContent');
-  const childName=document.querySelector('.c-name')?document.querySelector('.c-name').value.trim():'family';
-  btn.textContent='Generating…';btn.disabled=true;
-
-  try{
-    html2pdf().set({margin:[8,8,8,8],filename:`mml-${childName.toLowerCase().replace(/\s+/g,'-')}.pdf`,image:{type:'jpeg',quality:0.97},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:'mm',format:'a4',orientation:selectedMode==='landscape'?'landscape':'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header']}})
-      .from(el).outputPdf('blob').then(blob=>{
-        const url=URL.createObjectURL(blob);
-        const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-        if(isIOS){
-          window.open(url,'_self');
-        } else {
-          const a=document.createElement('a');
-          a.href=url;a.download=`mml-${childName.toLowerCase().replace(/\s+/g,'-')}.pdf`;
-          document.body.appendChild(a);a.click();a.remove();
-        }
-        setTimeout(()=>URL.revokeObjectURL(url),30000);
-        resetBtn();
-      }).catch(err=>{
-        console.error('PDF generation failed:',err);
-        alert("PDF generation failed: "+(err&&err.message?err.message:'unknown error')+"\n\nPlease try 'Prefer to print?' below instead — it works reliably.");
-        resetBtn();
-      });
-  }catch(err){
-    console.error('PDF generation threw synchronously:',err);
-    alert("PDF generation failed: "+(err&&err.message?err.message:'unknown error')+"\n\nPlease try 'Prefer to print?' below instead — it works reliably.");
-    resetBtn();
-  }
-});
-document.getElementById('editBtn').addEventListener('click',()=>{showView('formView');if(typeof initSteps==='function')initSteps();showError('✏️ Make your changes, then continue to the last step to rebuild your guide.');});
-document.getElementById('startOverBtn').addEventListener('click',()=>{if(confirm('Clear everything and start from scratch?')){try{localStorage.removeItem(STORAGE_KEY);}catch(e){}location.reload();}});
-
-// ── GUIDE RENDERERS ───────────────────────────────────────────
 function renderGuideIndepth(aiData,children,formData){
   const kidId={};children.forEach((c,i)=>{kidId[c.name]=resolveKidIdentity(c,i);});
   const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
@@ -1939,37 +1134,151 @@ function renderGuideLandscape(aiData,children,formData){
   document.getElementById('guideContent').innerHTML=html;
 }
 
-// ── INIT ─────────────────────────────────────────────────────
-async function init(){
-  renderHome();
-  showView('homeView');
-  await loadSavedEntry();
-  const params=new URLSearchParams(window.location.search);
-  const sessionId=params.get('session_id');
-  if(sessionId){
-    history.replaceState({},'',window.location.pathname);
-    document.getElementById('loadingText').textContent='Payment confirmed — creating your guide…';
-    await performGeneration({sessionId});
+function setPrintOrientation(mode){
+  let s=document.getElementById('dynamicPageStyle');
+  if(!s){s=document.createElement('style');s.id='dynamicPageStyle';document.head.appendChild(s);}
+  s.textContent=mode==='landscape'?'@media print{@page{size:A4 landscape;margin:12mm;}}':'@media print{@page{size:A4;margin:14mm;}}';
+}
+
+function iconForLine(line){
+  const l=line.toLowerCase();
+  if(l.includes('nut')||l.includes('allerg')||l.includes('epipen'))return'🥜';
+  if(l.includes('stair')||l.includes('gate'))return'🚪';
+  if(l.includes('medic')||l.includes('inhaler'))return'💊';
+  if(l.includes('screen')||l.includes('tablet'))return'📱';
+  if(l.includes('toilet')||l.includes('potty'))return'🚽';
+  if(l.includes('tooth'))return'🦷';
+  return'⚠️';
+}
+
+function groupByTime(items){
+  const map=new Map();
+  items.forEach(item=>{const k=item.time||'zzz';if(!map.has(k))map.set(k,[]);map.get(k).push(item);});
+  return Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
+}
+
+function formatTime12hr(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12===0?12:h%12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+
+function parseInlineBold(text){if(!text)return'';return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+
+function cleanProse(text){if(!text)return'';return text.replace(/\b\d+\.\s+/g,'').replace(/^\s*[-•]\s*/gm,'').replace(/\n+/g,' ').replace(/\s{2,}/g,' ').trim();}
+
+function boldChildNames(text,names){let r=text;names.forEach(n=>{if(!n)return;const re=new RegExp('^('+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—:-])','i');r=r.replace(re,'<strong>$1</strong>');});return r;}
+
+function resolveKidIdentity(child,idx){
+  const base=(child.colorIdx!==undefined&&child.colorIdx!==null&&child.colorIdx>=0&&KID_IDENTITIES[child.colorIdx])?KID_IDENTITIES[child.colorIdx]:getKidIdentity(idx);
+  return{color:base.color,dim:base.dim,emoji:child.emoji||base.emoji};
+}
+
+function getKidIdentity(idx){return KID_IDENTITIES[idx%KID_IDENTITIES.length];}
+
+function startVoice(btn,textarea){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Voice input is not supported in this browser. Try Chrome or Safari.');return;}
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if(isStandalone){
+    alert("Voice input doesn't work in the installed app yet — that's an Apple restriction, not a Held bug. Open this page in Safari directly to use the mic, or just type here.");
+    return;
   }
+  const rec=new SR();rec.continuous=false;rec.interimResults=false;
+  btn.classList.add('recording');btn.textContent='⏹️';
+  let gotResult=false;
+  const safety=setTimeout(()=>{ if(!gotResult){ try{rec.stop();}catch(e){} } },10000);
+  rec.onresult=e=>{gotResult=true;clearTimeout(safety);const t=e.results[0][0].transcript;textarea.value+=(textarea.value?'\n':'')+t;};
+  rec.onend=()=>{clearTimeout(safety);btn.classList.remove('recording');btn.textContent='🎤';};
+  rec.onerror=(e)=>{
+    clearTimeout(safety);btn.classList.remove('recording');btn.textContent='🎤';
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){alert('Microphone access is blocked. Check Settings → Safari → Microphone, then try again.');}
+    else if(e.error!=='no-speech'&&e.error!=='aborted'){alert('Voice input had a problem — please try again or type instead.');}
+  };
+  rec.start();
 }
 
-// SW
-if('serviceWorker' in navigator){
-  let refreshedOnce=false;
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(refreshedOnce)return;
-    refreshedOnce=true;
-    window.location.reload();
-  });
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/sw.js?v=held-v8').then(reg=>{
-      reg.update().catch(()=>{});
-    }).catch(()=>{});
-  });
-}
+function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${msg}</div>`;}
 
-init();
+function clearError(){document.getElementById('errorBox').innerHTML='';}
 
+const KID_IDENTITIES=[
+  {color:'#6FA3CC',dim:'#E6F0F7',emoji:'🦖'},
+  {color:'#C17B8C',dim:'#F5E6E9',emoji:'🐰'},
+  {color:'#CBA135',dim:'#F7EFD8',emoji:'🦁'},
+  {color:'#9B8AC4',dim:'#ECE8F5',emoji:'🐻'},
+  {color:'#5E9C8F',dim:'#E2EFEC',emoji:'🦋'},
+  {color:'#B98A5E',dim:'#F2E7DA',emoji:'🐢'},
+];
+
+const EMERGENCY_NUMBERS={
+  'United Kingdom':'999 (emergency) · 111 (NHS)',
+  'France':'15 (SAMU) · 17 (Police) · 18 (Fire) · 112',
+  'Spain':'112 · 061 (ambulance)',
+  'Germany':'110 (Police) · 112',
+  'Italy':'112 · 118 (ambulance)',
+  'Portugal':'112',
+  'Belgium':'101 (Police) · 100 (Ambulance) · 112',
+  'Switzerland':'117 (Police) · 144 (Ambulance) · 118 (Fire)',
+  'Netherlands':'112',
+  'USA':'911',
+  'Canada':'911',
+  'Australia':'000',
+};
+
+const ENGLISH_LABELS={
+  schedule:"Today's Schedule",bedtime:'Bedtime Sequence',important:'Important',
+  comfort:'Personality & Comfort',contacts:'Contacts',allChildren:'All children',
+  whenUpset:'If They Get Upset',
+  types:{Bedtime:'Bedtime',Nap:'Nap','Milk/Feed':'Milk/Feed',Lunch:'Lunch',
+    Snack:'Snack','Goûter':'Goûter',Breakfast:'Breakfast',Dinner:'Dinner',Bath:'Bath',
+    Play:'Play time','School pick-up':'School pick-up',Activity:'Activity'},
+};
+
+let childCount=0,routineCount=0,contactCount=0,selectedMode=null,selectedDuration=null;
+
+const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter','Dinner','Bath','Bedtime','Play','School pick-up','Activity','Other'];
+
+  // ---------- emergency contacts ----------
+  let contacts=[{name:'',phone:'',rel:''}];
+  function addContactRow(){ contacts.push({name:'',phone:'',rel:''}); renderContacts(); }
+  function delContact(i){ contacts.splice(i,1); if(!contacts.length)contacts.push({name:'',phone:'',rel:''}); renderContacts(); }
+  function renderContacts(){
+    const l=el('#contactsList'); if(!l)return;
+    l.innerHTML=contacts.map((c,i)=>`<div class="card" style="margin-bottom:10px;">
+      <div class="row2">
+        <div class="field" style="margin-bottom:8px"><label class="t-label">Name</label>
+          <input type="text" value="${c.name||''}" placeholder="e.g. Mum" oninput="contacts[${i}].name=this.value"></div>
+        <div class="field" style="margin-bottom:8px"><label class="t-label">Phone</label>
+          <input type="text" value="${c.phone||''}" placeholder="e.g. 07700 900000" oninput="contacts[${i}].phone=this.value"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div class="field" style="flex:1;margin-bottom:0"><label class="t-label">Relationship</label>
+          <input type="text" value="${c.rel||''}" placeholder="e.g. Grandma" oninput="contacts[${i}].rel=this.value"></div>
+        ${contacts.length>1?`<button class="child-del" onclick="delContact(${i})">🗑</button>`:''}
+      </div>
+    </div>`).join('');
+  }
+
+
+  // ── guide view buttons ──
+  document.addEventListener('click',e=>{
+    const t=e.target;
+    if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
+    if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} location.reload(); } }
+    if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
+  });
+  function doDownloadPdf(){
+    if(typeof html2pdf==='undefined'){ window.print(); return; }
+    const kids=(window.__held&&window.__held.children)||[];
+    const nm=(kids[0]&&kids[0].name)||'guide';
+    const mode=(window.__held&&window.__held.formData.mode)||'indepth';
+    html2pdf().set({margin:[8,8,8,8],filename:`held-${nm.toLowerCase().replace(/\s+/g,'-')}.pdf`,
+      image:{type:'jpeg',quality:0.97},html2canvas:{scale:2,useCORS:true,logging:false},
+      jsPDF:{unit:'mm',format:'a4',orientation:mode==='landscape'?'landscape':'portrait'},
+      pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header']}
+    }).from(document.getElementById('guideContent')).save();
+  }
+
+  renderChildren();
+  renderContacts();
+  show('home');
 </script>
 </body>
 </html>
