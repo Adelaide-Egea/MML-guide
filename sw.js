@@ -1,6 +1,6 @@
 // Held service worker — version is auto-bumped by bump.py on every deploy.
 // Do NOT hand-edit CACHE_VERSION; run `python3 bump.py` instead.
-const CACHE_VERSION = 'held-v12';   // AUTO-BUMP-LINE
+const CACHE_VERSION = 'held-v17';   // AUTO-BUMP-LINE
 const CORE = ['/', '/index.html', '/manifest.json'];
 
 // Install: pre-cache core shell, activate immediately.
