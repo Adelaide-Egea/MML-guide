@@ -1,74 +1,53 @@
-// Held — service worker
-// CACHE_VERSION is stamped automatically whenever this file changes —
-// no manual step needed. Most content edits to index.html don't even
-// require this, since navigation requests below always go to the
-// network first anyway (see the fetch handler).
-const CACHE_VERSION = '2026-07-21T14:55-auto';
-const CACHE_NAME = `held-${CACHE_VERSION}`;
+// Held service worker — version is auto-bumped by bump.py on every deploy.
+// Do NOT hand-edit CACHE_VERSION; run `python3 bump.py` instead.
+const CACHE_VERSION = 'held-v8';   // AUTO-BUMP-LINE
+const CORE = ['/', '/index.html', '/manifest.json'];
 
-const PRECACHE_URLS = [
-  '/',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-];
+// Install: pre-cache core shell, activate immediately.
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_VERSION).then((c) => c.addAll(CORE)).catch(() => {}));
+});
 
-// Install: cache the shell, then activate immediately (don't wait for
-// old tabs to close).
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+// Activate: delete every old cache, take control at once.
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
-// Activate: delete every cache that isn't this version, then take
-// control of all open tabs right away.
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((names) => Promise.all(
-        names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))
-      ))
-      .then(() => self.clients.claim())
-  );
-});
+// Fetch: network-first for navigations (always try fresh HTML), cache fallback offline.
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const isNav = req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').includes('text/html');
 
-// Fetch strategy:
-// - Page navigations (the HTML itself) → NETWORK FIRST. This guarantees
-//   a new deploy is what people see the moment they're online, and only
-//   falls back to the cached shell if they're offline.
-// - Everything else (icons, manifest, fonts) → cache first, refresh in
-//   the background (stale-while-revalidate), since those change rarely.
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  if (request.method !== 'GET') return;
-
-  const isNavigation = request.mode === 'navigate' ||
-    (request.headers.get('accept') || '').includes('text/html');
-
-  if (isNavigation) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          return response;
+  if (isNav) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
         })
-        .catch(() => caches.match(request).then((r) => r || caches.match('/')))
+        .catch(() => caches.match(req).then((r) => r || caches.match('/index.html')))
     );
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const network = fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    })
+  // Other assets: cache-first, then network, and cache what we fetch.
+  e.respondWith(
+    caches.match(req).then(
+      (cached) =>
+        cached ||
+        fetch(req).then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+    )
   );
 });
