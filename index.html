@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v12">
+  <meta name="app-version" content="held-v17">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — step by step</title>
@@ -161,16 +161,17 @@
   .btn-skip{background:none;border:none;color:var(--softer);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:inherit;padding:5px;}
   .btn-skip:active{opacity:.6;}
 
-  .home{padding:20px 26px;}
-  .home .install{display:flex;align-items:center;gap:11px;background:var(--green-dim);border:1px solid var(--line);border-radius:14px;padding:11px 15px;margin:28px 0 0;}
+  .home{padding:32px 28px 28px;}
+  .home.active{display:flex;flex-direction:column;}
+  .home .install{display:flex;align-items:center;gap:12px;background:var(--green-dim);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:auto 0 0;}
   .home .install .ico{font-size:1.2rem;}
   .home .install strong{font-size:0.8rem;font-weight:700;color:var(--green);display:block;}
   .home .install span{font-size:0.72rem;color:var(--soft);}
-  .home .greeting{font-size:0.85rem;color:var(--soft);font-weight:600;margin-bottom:10px;}
-  .home h1{font-family:'Fraunces',serif;font-size:2.6rem;font-weight:600;line-height:1.05;letter-spacing:-0.02em;margin-bottom:14px;color:var(--ink);}
-  .home .hsub{font-size:0.95rem;color:var(--soft);line-height:1.5;margin-bottom:28px;}
-  .home .perm{font-size:0.78rem;color:var(--softer);text-align:center;margin-top:14px;}
-  .sample-link{display:inline-block;color:var(--green);font-weight:700;font-size:0.85rem;text-decoration:none;margin-top:20px;}
+  .home .greeting{font-size:0.88rem;color:var(--soft);font-weight:600;margin-bottom:18px;letter-spacing:0.01em;}
+  .home h1{font-family:'Fraunces',serif;font-size:2.9rem;font-weight:600;line-height:1.08;letter-spacing:-0.02em;margin-bottom:22px;color:var(--ink);}
+  .home .hsub{font-size:1rem;color:var(--soft);line-height:1.65;margin-bottom:40px;max-width:19em;}
+  .home .perm{font-size:0.76rem;color:var(--softer);text-align:center;margin-top:22px;line-height:1.5;}
+  .sample-link{display:inline-block;color:var(--green);font-weight:700;font-size:0.88rem;text-decoration:none;margin-top:24px;align-self:center;}
 
   .done{justify-content:center;align-items:center;text-align:center;padding:20px 30px;}
   .done .check{width:74px;height:74px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;margin-bottom:22px;font-size:34px;color:var(--on-green);}
@@ -225,6 +226,20 @@
   border-top:1px solid var(--line);
 }
 .guide-credit strong{ color:var(--green); font-weight:800; }
+.sample-banner{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--green-dim); border:1.5px solid var(--green);
+  border-radius:14px; padding:12px 14px; margin-bottom:16px;
+  font-size:0.82rem; color:var(--ink); line-height:1.4;
+}
+.sample-banner strong{ color:var(--green); }
+.sample-close{
+  width:34px; height:34px; flex-shrink:0; border:none; border-radius:50%;
+  background:var(--card); color:var(--ink); font-size:1rem; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow); font-family:'Manrope',sans-serif;
+}
+.sample-close:active{ transform:scale(.9); background:var(--berry-dim); color:var(--berry); }
 .guide-actions{ display:flex; flex-direction:column; gap:9px; margin-top:18px; }
 .guide-actions .btn-primary{ padding:16px; font-size:1rem; }
 .btn-guide-2nd{
@@ -245,22 +260,45 @@
 .guide-duration{ display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; margin-bottom: 14px; letter-spacing: 0.05em; }
 .guide-intro{ font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.65; max-width: 340px; margin: 0 auto; }
 .guide-body{ padding: 24px 24px 32px; }
+/* section headings — give each block real breathing room */
+.g-section{
+  font-family: 'Fraunces', serif;
+  font-size: 1.12rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 34px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--line);
+  letter-spacing: -0.01em;
+}
+.g-section:first-child{ margin-top: 0; }
+.important-list + .g-section,
+.comfort-grid + .g-section{ margin-top: 36px; }
 .kid-tag{ display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
-.sched-row{ padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sched-row{ padding: 14px 0; border-bottom: 1px solid var(--line);
+  display: grid; grid-template-columns: 78px 1fr; column-gap: 12px; align-items: start; }
 .sched-row:last-child{ border-bottom: none; }
-.sched-head{ display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-.sched-time{ font-weight: 800; font-size: 0.82rem; color: var(--green); min-width: 64px; }
-.sched-title{ font-weight: 600; font-size: 0.88rem; }
-.sched-body{ padding-left: 74px; }
-.sched-note{ font-size: 0.83rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
+/* time sits in column 1, everything else in column 2 — so every row lines up */
+.sched-head{ display: contents; }
+.sched-time{ grid-column: 1; font-weight: 800; font-size: 0.82rem; color: var(--green);
+  white-space: nowrap; padding-top: 1px; }
+.sched-title{ grid-column: 2; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+.sched-body{ grid-column: 2; padding-left: 0; }
+.sched-note{ font-size: 0.85rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
 .bed-step{ display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
 .bed-step:last-child{ margin-bottom: 0; }
 .bed-dot{ width: 26px; height: 26px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .bed-text{ font-size: 0.86rem; line-height: 1.6; padding-top: 3px; }
 .important-list{ background: var(--berry-dim); border-radius: 16px; padding: 16px 18px; }
-.comfort-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.comfort-grid{ grid-template-columns: 1fr; }
-.comfort-card{ border-radius: 16px; padding: 14px 16px; }
+.comfort-grid{ display: grid; grid-template-columns: 1fr; gap: 14px; }
+.comfort-card{ border-radius: 16px; padding: 18px 18px; }
+.contacts-grid{ display: grid; gap: 10px; }
+.plain-sec{ margin-bottom: 4px; }
+.plain-sec p{ font-size: 0.9rem; line-height: 1.65; color: var(--ink); margin: 0; }
+.plain-sec ul{ margin: 0; padding-left: 20px; }
+.plain-sec li{ font-size: 0.9rem; line-height: 1.65; color: var(--ink); margin-bottom: 6px; }
+.bed-step{ margin-bottom: 14px !important; }
+.important-list{ margin-bottom: 4px; }
 .comfort-card-name{ font-weight: 700; font-size: 0.87rem; margin-bottom: 8px; }
 
 /* ── READABLE ON PHONE: stack the one-pager columns ── */
@@ -541,6 +579,10 @@
 
 <!-- ══ GUIDE ══ -->
 <div id="guideView" class="screen" style="display:none;">
+  <div id="sampleBanner" class="sample-banner no-print" style="display:none;">
+    <span><strong>Sample guide</strong> — this is an example, not your family.</span>
+    <button class="sample-close" onclick="closeSample()" aria-label="Close sample">✕</button>
+  </div>
   <div id="successMoment" class="success-moment">
     <div class="success-check"><span>✓</span></div>
     <div class="success-h">Your guide<br>is ready.</div>
@@ -922,7 +964,77 @@
   }
 
   function restart(){ location.reload(); }
-  function viewExample(e){ e.preventDefault(); alert('→ Sample guide opens here — with a working ✕ close button so you can get back.'); }
+  function viewExample(e){
+    e.preventDefault();
+    // Build a realistic sample and render it through the real guide engine,
+    // so the preview is exactly what a finished guide looks like.
+    const sampleKids=[
+      {name:'Mia',age:'3',ageUnit:'years',emoji:'🦊',color:'#6FA3CC',
+       allergies:'Peanuts',nappyStatus:'Bedtime/naps only',nappy:'Size 5',cream:'No',creamNotes:'',
+       milk:'Cow\u2019s milk',milkNotes:'',bottleAmount:'',bottleUnit:'ml',foodType:'Eats most things',
+       preschool:'Nursery 9am\u20133pm. Needs her rabbit at drop-off.',school:'',
+       likes:'Loves pretend play and drawing.',independence:'No screens after 6pm.',
+       behaviour:'Give her space first, then offer the rabbit.'},
+      {name:'Theo',age:'6',ageUnit:'years',emoji:'🌟',color:'#C17B8C',
+       allergies:'',nappyStatus:'Fully potty trained',nappy:'',cream:'No',creamNotes:'',
+       milk:'',milkNotes:'',bottleAmount:'',bottleUnit:'ml',foodType:'',
+       preschool:'',school:'Reading book in the bag. Homework before screen time.',
+       likes:'Football and Lego.',independence:'Can play in the garden alone.',
+       behaviour:'Talk it through \u2014 he likes to explain what happened.'}
+    ];
+    const sampleForm={
+      children:sampleKids,
+      routineItems:[
+        {type:'Breakfast',time:'07:30',child:'all',notes:'Porridge with banana'},
+        {type:'School run',time:'08:15',child:'Theo',notes:''},
+        {type:'Nursery run',time:'08:45',child:'Mia',notes:'Rabbit goes in the bag'},
+        {type:'Lunch',time:'12:00',child:'all',notes:''},
+        {type:'Quiet time',time:'13:30',child:'Mia',notes:'Story then rest'},
+        {type:'Homework',time:'16:00',child:'Theo',notes:'20 minutes, then free time'},
+        {type:'Dinner',time:'17:30',child:'all',notes:''},
+        {type:'Bath',time:'18:30',child:'all',notes:''},
+        {type:'Bedtime',time:'19:00',child:'all',notes:'Two books, lights out by 7:30'}
+      ],
+      contacts:[{name:'Mum',phone:'07700 900000',relationship:'Mother'}],
+      importantNote:'Stairgate always closed. Mia is allergic to peanuts \u2014 EpiPen in the hall drawer.',
+      caregiverName:'Claire',caregiverRelationship:'Nanny',caregiverRelationshipOther:'',
+      mode:'indepth',duration:'fullday',languageSelect:'English',languageOther:'',
+      extra:'',signOff:'The Family',country:'United Kingdom',multiDayNotes:'',overnightNotes:''
+    };
+    const sampleAi={
+      intro:'Mia and Theo are easy company once the day has a shape. Mia leads her own play; Theo likes to know the plan.',
+      childSections:[
+        {childName:'Mia',comfort:'Mia loves pretend play and drawing. Her rabbit is her comfort item and should stay within reach, especially at nursery drop-off and bedtime.',
+         whenUpset:'Give her space for a moment, then offer the rabbit. Singing works better than talking.'},
+        {childName:'Theo',comfort:'Theo is into football and Lego, and is happy playing independently in the garden.',
+         whenUpset:'Talk it through \u2014 he likes to explain what happened before he settles.'}
+      ],
+      sections:[{label:'Good to know',content:'Homework happens before any screen time. Both children eat well but Mia takes her time.'}],
+      labels:{schedule:'Today\u2019s Schedule',bedtime:'Bedtime',important:'Important',comfort:'Comfort',
+              whenUpset:'If upset',contacts:'Contacts',allChildren:'All children',types:{}},
+      translatedImportant:[],translatedRoutineNotes:[],translatedBedtimeNotes:[]
+    };
+    window.__held={children:sampleKids,formData:sampleForm,relationship:'Nanny',language:'English'};
+    window.__isSample=true;
+    try{
+      renderGuideIndepth(sampleAi,sampleKids,sampleForm,'Nanny');
+      showGuideScreen();
+      document.getElementById('sampleBanner').style.display='flex';
+      const sm=document.getElementById('successMoment'); if(sm) sm.style.display='none';
+      const ga=document.querySelector('.guide-actions'); if(ga) ga.style.display='none';
+    }catch(err){
+      alert('Could not load the sample right now.');
+    }
+  }
+  function closeSample(){
+    window.__isSample=false; window.__held=null;
+    document.getElementById('sampleBanner').style.display='none';
+    const sm=document.getElementById('successMoment'); if(sm) sm.style.display='';
+    const ga=document.querySelector('.guide-actions'); if(ga) ga.style.display='';
+    document.getElementById('guideContent').innerHTML='';
+    hideGuideScreen();
+    show('home');
+  }
 
 
   // ── SHIMS: map engine calls onto the v6 step system ──
@@ -1079,32 +1191,30 @@ function renderGuideIndepth(aiData,children,formData){
     <div class="guide-intro">${aiData.intro||''}</div>
   </div><div class="guide-body">`;
 
-  if(schedItems.length){
-    html+=`<div class="g-section">⏰ ${labels.schedule}</div>`;
-    const indexed=schedItems.map((item,i)=>({...item,notes:schedT?schedT[i]:item.notes}));
-    groupByTime(indexed).forEach(([time,items])=>{
-      const tl=time==='zzz'?'Time not set':formatTime12hr(time);
-      const title=typeLabels[items[0].type]||items[0].type;
-      html+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${tl}</span><span class="sched-title">${title}</span></div><div class="sched-body">`;
-      items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${who}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
-      html+=`</div></div>`;
-    });
-  }
-  if(bedItems.length){
-    html+=`<div class="g-section">🌙 ${labels.bedtime}</div>`;
-    bedItems.forEach((item,i)=>{
-      const id=item.child==='all'||item.child==='unspecified'?null:kidId[item.child];
-      const bg=id?id.color:'var(--green)';const avatar=id?id.emoji:'🌙';
-      const note=bedT?bedT[i]:item.notes;
-      const timeStr=item.time?`<span style="font-size:0.8rem;font-weight:800;color:var(--soft);margin-right:6px;">${formatTime12hr(item.time)}</span>`:'';
-      const text=note?parseInlineBold(note):(item.child==='all'?labels.bedtime:`${item.child}'s bedtime`);
-      html+=`<div class="bed-step"><div class="bed-dot" style="background:${bg};">${avatar}</div><div class="bed-text">${timeStr}${text}</div></div>`;
-    });
-  }
+  // IMPORTANT FIRST — the carer must see this before anything else
   if(impLines.length){
     html+=`<div class="g-section">⚠️ ${labels.important}</div><div class="important-list">`;
     impLines.forEach((line,i)=>{const shown=impT?impT[i]:line;html+=`<div class="important-item"><span>${iconForLine(line)}</span><span>${parseInlineBold(shown)}</span></div>`;});
     html+=`</div>`;
+  }
+
+  // Bedtime is only its own section when it's a genuine multi-step sequence.
+  // A single bedtime is just another point in the day — keep it in the timeline.
+  // One timeline. Every routine item is treated the same — bedtime included.
+  const timelineItems = [
+    ...schedItems.map((item,i)=>({...item,notes:schedT?schedT[i]:item.notes})),
+    ...bedItems.map((item,i)=>({...item,notes:bedT?bedT[i]:item.notes}))
+  ].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+
+  if(timelineItems.length){
+    html+=`<div class="g-section">⏰ ${labels.schedule}</div>`;
+    groupByTime(timelineItems).forEach(([time,items])=>{
+      const tl=time==='zzz'?'Time not set':formatTime12hr(time);
+      const title=typeLabels[items[0].type]||items[0].type;
+      html+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${tl}</span><span class="sched-title">${routineEmoji(items[0].type)} ${title}</span></div><div class="sched-body">`;
+      items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${who}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
+      html+=`</div></div>`;
+    });
   }
   if(aiData.childSections&&aiData.childSections.length){
     html+=`<div class="g-section">💛 ${labels.comfort}</div><div class="comfort-grid">`;
@@ -1164,6 +1274,7 @@ function renderGuideLandscape(aiData,children,formData){
   html+=`<div class="guide-for" style="margin-bottom:6px;">Guide for ${formData.caregiverName}</div>`;
   if(aiData.intro)html+=`<div class="guide-intro" style="font-size:0.84rem;max-width:none;margin:0 0 14px;text-align:left;">${aiData.intro}</div>`;
   if(impLines.length){
+    html+=`<div class="g-section" style="margin-top:0;">⚠️ ${labels.important}</div>`;
     html+=`<div class="important-list" style="margin-bottom:14px;padding:10px 14px;">`;
     impLines.forEach((line,i)=>{const shown=impT?impT[i]:line;html+=`<div class="important-item">${iconForLine(line)} ${parseInlineBold(shown)}</div>`;});
     html+=`</div>`;
@@ -1207,6 +1318,13 @@ function setPrintOrientation(mode){
   s.textContent=mode==='landscape'?'@media print{@page{size:A4 landscape;margin:12mm;}}':'@media print{@page{size:A4;margin:14mm;}}';
 }
 
+function routineEmoji(type){
+  const map={Breakfast:'🥣','Milk/Feed':'🍼',Nap:'💤','Quiet time':'🤫',Lunch:'🍽',
+    Snack:'🍎','Goûter':'🍫',Dinner:'🍽',Bath:'🛁',Bedtime:'🌙',Play:'🧸',
+    'Nursery run':'🏫','School run':'🎒','School pick-up':'🎒',Homework:'📚',
+    'Screen time':'📱',Activity:'⭐',Other:'🕐'};
+  return map[type]||'🕐';
+}
 function iconForLine(line){
   const l=line.toLowerCase();
   if(l.includes('nut')||l.includes('allerg')||l.includes('epipen'))return'🥜';
