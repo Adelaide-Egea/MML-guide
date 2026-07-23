@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v17">
+  <meta name="app-version" content="held-v20">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -745,7 +745,7 @@
   function renderChildren(){
     const list=el('#childrenList');
     list.innerHTML=children.map((c,i)=>{
-      const name=c.name||`Child ${i+1}`;
+      const name=esc(c.name||`Child ${i+1}`);
       const meta=c.done ? (c.age? `${c.age} · tap to edit`:'tap to edit') : 'not filled in yet';
       const status=c.done?'<span class="child-status status-done">✓ Done</span>':'<span class="child-status status-todo">To do</span>';
       return `<div class="child-card">
@@ -763,6 +763,7 @@
   }
   function deleteChild(i){
     const c=children[i];
+    if(!c)return;
     const label=c.name||`Child ${i+1}`;
     if((c.name||c.done) && !confirm(`Remove ${label}? This can't be undone.`))return;
     children.splice(i,1);
@@ -780,8 +781,9 @@
     editChild(children.length-1);
   }
   function editChild(i){
-    editingChild=i; childSubstep=0;
     const c=children[i];
+    if(!c)return;
+    editingChild=i; childSubstep=0;
     el('#cName').value=c.name||'';
     el('#cAge').value=c.age||'';
     const d=c.data||{};
@@ -817,7 +819,8 @@
   // ---------- age bands ----------
   // returns child age in YEARS (months → years)
   function ageYears(c){
-    const n=parseFloat(c.age); if(isNaN(n))return null;
+    const n=parseFloat(c.age);
+    if(isNaN(n)||n<0||n>40)return null;      // nonsense age -> treat as unknown
     return c.ageUnit==='months' ? n/12 : n;
   }
   function bandOf(c){
@@ -885,12 +888,12 @@
     const showWho=named.length>1;
     list.innerHTML=routineItems.map((r,i)=>{
       const opts=['<option value="all">👨‍👩‍👧 All children</option>']
-        .concat(named.map(c=>`<option value="${c.name}"${r.child===c.name?' selected':''}>${c.emoji} ${c.name}</option>`))
+        .concat(named.map(c=>`<option value="${esc(c.name)}"${r.child===c.name?' selected':''}>${esc(c.emoji)} ${esc(c.name)}</option>`))
         .join('');
       return `<div class="r-card">
       <div class="r-top">
         <span class="r-emoji">${r.emoji}</span>
-        <span class="r-name">${r.name}</span>
+        <span class="r-name">${esc(r.name)}</span>
         <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value">
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
@@ -900,7 +903,7 @@
              oninput="routineItems[${i}].notes=this.value">
     </div>`;}).join('');
   }
-  function delRoutine(i){ routineItems.splice(i,1); renderRoutine(); }
+  function delRoutine(i){ if(i<0||i>=routineItems.length)return; routineItems.splice(i,1); renderRoutine(); }
 
   function pickSw(elm){ elm.parentNode.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].colour=elm.style.background; }
   function pickEm(elm){ elm.parentNode.querySelectorAll('.em').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].emoji=elm.textContent; }
@@ -1159,8 +1162,7 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
     try{parsed=JSON.parse(cleaned);}
     catch(e){const m=cleaned.match(/\{[\s\S]*\}/);if(m)parsed=JSON.parse(m[0]);else throw new Error('Could not parse guide: '+e.message);}
     setPrintOrientation(formData.mode);
-    if(formData.mode==='landscape')renderGuideLandscape(parsed,children,formData);
-    else renderGuideIndepth(parsed,children,formData);
+    renderGuideSafely(parsed,children,formData,relationship);
     showView('guideView');
   }catch(err){
     clearInterval(interval);
@@ -1178,7 +1180,7 @@ function renderGuideIndepth(aiData,children,formData){
   const kidId={};children.forEach((c,i)=>{kidId[c.name]=resolveKidIdentity(c,i);});
   const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
   const typeLabels=labels.types||ENGLISH_LABELS.types;
-  function kidTag(name){const id=kidId[name];if(!id)return`<span class="kid-tag" style="background:var(--green);">${name}</span>`;return`<span class="kid-tag" style="background:${id.color};">${id.emoji} ${name}</span>`;}
+  function kidTag(name){const id=kidId[name];if(!id)return`<span class="kid-tag" style="background:var(--green);">${esc(name)}</span>`;return`<span class="kid-tag" style="background:${id.color};">${esc(id.emoji)} ${esc(name)}</span>`;}
   const routineItems=formData.routineItems||[];
   const schedItems=routineItems.filter(r=>r.type!=='Bedtime');
   const bedItems=routineItems.filter(r=>r.type==='Bedtime').sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
@@ -1213,8 +1215,8 @@ function renderGuideIndepth(aiData,children,formData){
   // A single bedtime is just another point in the day — keep it in the timeline.
   // One timeline. Every routine item is treated the same — bedtime included.
   const timelineItems = [
-    ...schedItems.map((item,i)=>({...item,notes:schedT?schedT[i]:item.notes})),
-    ...bedItems.map((item,i)=>({...item,notes:bedT?bedT[i]:item.notes}))
+    ...schedItems.map((item,i)=>({...item,notes:(schedT&&schedT[i])||item.notes})),
+    ...bedItems.map((item,i)=>({...item,notes:(bedT&&bedT[i])||item.notes}))
   ].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
 
   if(timelineItems.length){
@@ -1223,16 +1225,19 @@ function renderGuideIndepth(aiData,children,formData){
       const tl=time==='zzz'?'Time not set':formatTime12hr(time);
       const title=typeLabels[items[0].type]||items[0].type;
       html+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${tl}</span><span class="sched-title">${routineEmoji(items[0].type)} ${title}</span></div><div class="sched-body">`;
-      items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${who}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
+      items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${esc(who)}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
       html+=`</div></div>`;
     });
   }
-  if(aiData.childSections&&aiData.childSections.length){
+  // Loop over the REAL children (not the AI's list) so a child is never dropped,
+  // and fall back to the parent's own words if the AI returned nothing.
+  const comfortBlocks=children.map((c,i)=>({c,id:kidId[c.name]||getKidIdentity(i),cs:findChildSection(aiData,c)}))
+                              .filter(x=>x.cs.comfort||x.cs.whenUpset);
+  if(comfortBlocks.length){
     html+=`<div class="g-section">💛 ${labels.comfort}</div><div class="comfort-grid">`;
-    aiData.childSections.forEach(cs=>{
-      const id=kidId[cs.childName]||getKidIdentity(0);
+    comfortBlocks.forEach(({c,id,cs})=>{
       html+=`<div class="comfort-card" style="background:${id.dim};">
-        <div class="comfort-card-name">${id.emoji} ${cs.childName}</div>`;
+        <div class="comfort-card-name">${esc(id.emoji)} ${esc(c.name)}</div>`;
       if(cs.comfort){html+=`<div class="comfort-micro">Likes & personality</div><div class="comfort-text">${parseInlineBold(cs.comfort)}</div>`;}
       if(cs.whenUpset){html+=`<div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">${parseInlineBold(cleanProse(cs.whenUpset))}</div></div>`;}
       html+=`</div>`;
@@ -1240,7 +1245,7 @@ function renderGuideIndepth(aiData,children,formData){
     html+=`</div>`;
   }
   const childNames=children.map(c=>c.name);
-  if(aiData.sections&&aiData.sections.length){
+  if(Array.isArray(aiData.sections)&&aiData.sections.length){
     aiData.sections.forEach(sec=>{
       const lines=(sec.content||'').split('\n').map(l=>l.trim()).filter(Boolean);
       html+=`<div class="g-section">${sec.label}</div><div class="plain-sec">`;
@@ -1251,7 +1256,7 @@ function renderGuideIndepth(aiData,children,formData){
   }
   if(contacts.length||emergNums){
     html+=`<div class="g-section">📞 ${labels.contacts}</div><div class="contacts-grid">`;
-    contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${c.name||'Contact'}</div><div class="contact-line">${c.phone||''}</div></div>`;});
+    contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${esc(c.name||'Contact')}</div><div class="contact-line">${esc(c.phone||'')}</div></div>`;});
     if(emergNums)html+=`<div class="contact-card" style="border-color:var(--berry);background:var(--berry-dim);"><div class="contact-name" style="color:var(--berry);">🚨 Emergency (${formData.country})</div><div class="contact-line">${emergNums}</div></div>`;
     html+=`</div>`;
   }
@@ -1269,7 +1274,7 @@ function renderGuideLandscape(aiData,children,formData){
   const routineItems=formData.routineItems||[];
   const schedItems=routineItems.filter(r=>r.type!=='Bedtime');
   const bedItems=routineItems.filter(r=>r.type==='Bedtime');
-  const schedT=Array.isArray(aiData.translatedRoutineNotes)?aiData.translatedRoutineNotes:null;
+  const schedT=Array.isArray(aiData.translatedRoutineNotes)&&aiData.translatedRoutineNotes.length===schedItems.length?aiData.translatedRoutineNotes:null;
   const bedT=Array.isArray(aiData.translatedBedtimeNotes)?aiData.translatedBedtimeNotes:null;
   const impLines=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
   const impT=Array.isArray(aiData.translatedImportant)&&aiData.translatedImportant.length===impLines.length?aiData.translatedImportant:null;
@@ -1277,7 +1282,7 @@ function renderGuideLandscape(aiData,children,formData){
   const contacts=formData.contacts||[];
   const signOff=formData.signOff||'the family';
   const dBadge={evening:'🌙 Evening',fullday:'☀️ Full day',fewdays:'📅 Extended stay'}[formData.duration]||'';
-  const sorted=[...schedItems.map((item,i)=>({...item,notes:schedT?schedT[i]:item.notes})),...bedItems.map((item,i)=>({...item,notes:bedT?bedT[i]:item.notes}))].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const sorted=[...schedItems.map((item,i)=>({...item,notes:(schedT&&schedT[i])||item.notes})),...bedItems.map((item,i)=>({...item,notes:(bedT&&bedT[i])||item.notes}))].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   const numCols=children.length>=2?3:2;
 
   let html=`<div style="padding:22px 24px;">`;
@@ -1297,24 +1302,24 @@ function renderGuideLandscape(aiData,children,formData){
     const title=typeLabels[item.type]||item.type;
     const who=item.child==='all'?'':item.child;
     const id=who?kidId[who]:null;
-    const tag=id?`<span class="kid-tag" style="background:${id.color};font-size:0.62rem;padding:1px 7px;">${id.emoji} ${who}</span>`:'';
+    const tag=id?`<span class="kid-tag" style="background:${id.color};font-size:0.62rem;padding:1px 7px;">${esc(id.emoji)} ${esc(who)}</span>`:'';
     const note=item.notes?parseInlineBold(item.notes):'';
     html+=`<div class="sched-row" style="padding:6px 0;font-size:0.8rem;"><div class="sched-head" style="margin-bottom:2px;"><span class="sched-time" style="font-size:0.72rem;min-width:52px;">${tl}</span>${tag}<span>${title}</span></div>${note?`<div style="font-size:0.72rem;color:var(--soft);padding-left:52px;">${note}</div>`:''}</div>`;
   });
   html+=`</div>`;
   children.forEach(c=>{
     const id=kidId[c.name];
-    const cs=(aiData.childSections||[]).find(x=>x.childName===c.name);
+    const cs=findChildSection(aiData,c);
     html+=`<div class="kid-col" style="background:${id.dim};border-radius:18px;padding:14px;">
-      <div class="kid-col-name" style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${id.emoji} ${c.name}${c.age?', '+c.age.split(' ')[0]:''}</div>`;
-    if(cs&&cs.comfort)html+=`<div class="comfort-micro">Likes</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort.split(/(?<=[.!?])\s+/).slice(0,2).join(' '))}</div>`;
-    if(cs&&cs.whenUpset)html+=`<div class="comfort-micro">🧸 If upset</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset).split(/(?<=[.!?])\s+/).slice(0,1).join(' '))}</div>`;
+      <div class="kid-col-name" style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${esc(id.emoji)} ${esc(c.name)}${c.age?', '+esc(String(c.age).split(' ')[0]):''}</div>`;
+    if(cs.comfort)html+=`<div class="comfort-micro">Likes</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort)}</div>`;
+    if(cs.whenUpset)html+=`<div class="comfort-micro">🧸 If upset</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset))}</div>`;
     const allergy=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
     if(allergy)html+=`<div class="comfort-micro">Allergies</div><div style="font-size:0.8rem;line-height:1.5;">${allergy}</div>`;
     html+=`</div>`;
   });
   html+=`</div>`;
-  let cParts=contacts.map(c=>`${c.name} ${c.phone}`);
+  let cParts=contacts.map(c=>`${esc(c.name)} ${esc(c.phone)}`);
   if(emergNums)cParts.push(`🚨 ${formData.country}: ${emergNums}`);
   if(cParts.length)html+=`<div style="font-size:0.76rem;color:var(--soft);margin-top:12px;">📞 ${cParts.join(' · ')}</div>`;
   html+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:'Fraunces',serif;font-style:italic;font-size:0.82rem;color:var(--soft);text-align:center;">Your caregiver has everything they need. <strong style="color:var(--green);font-style:normal;">— ${signOff}</strong></div>`;
@@ -1329,6 +1334,83 @@ function setPrintOrientation(mode){
   s.textContent=mode==='landscape'?'@media print{@page{size:A4 landscape;margin:12mm;}}':'@media print{@page{size:A4;margin:14mm;}}';
 }
 
+// Match AI child sections tolerantly (accents, case, spacing) and always
+// fall back to what the parent actually typed, so nothing is ever lost.
+function norm(x){return (x||'').toString().trim().toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function findChildSection(aiData,child){
+  const raw=(aiData&&aiData.childSections);
+  const list=Array.isArray(raw)?raw:[];
+  let cs=list.find(x=>norm(x.childName)===norm(child.name));
+  if(!cs)cs=list.find(x=>norm(x.childName)&&norm(child.name)&&
+    (norm(x.childName).startsWith(norm(child.name))||norm(child.name).startsWith(norm(x.childName))));
+  const comfort=(cs&&cs.comfort&&cs.comfort.trim())||child.likes||'';
+  const whenUpset=(cs&&cs.whenUpset&&cs.whenUpset.trim())||child.behaviour||'';
+  return {comfort,whenUpset};
+}
+
+// ── SAFETY NET ──────────────────────────────────────────────
+// If the AI response is malformed and rendering throws, we still produce a
+// complete guide from the parent's own input. A blank document is never OK.
+function renderGuideSafely(aiData,children,formData,relationship){
+  const mode=(formData&&formData.mode)||'indepth';
+  try{
+    if(mode==='landscape') renderGuideLandscape(aiData,children,formData,relationship);
+    else renderGuideIndepth(aiData,children,formData,relationship);
+    const el=document.getElementById('guideContent');
+    if(el&&el.innerHTML.replace(/\s/g,'').length>120) return;
+    throw new Error('empty render');
+  }catch(err){
+    try{ renderGuideFallback(children,formData); }
+    catch(e2){ /* last resort below */ }
+  }
+}
+function esc(x){return (x==null?'':String(x)).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function renderGuideFallback(children,formData){
+  const f=formData||{}; const kids=children||[];
+  const imp=(f.importantNote||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  let h=`<div class="guide-header"><div class="guide-title">${esc(kids.map(c=>c.name).join(' & ')||'Care guide')}</div>`;
+  h+=`<div class="guide-meta">Guide for ${esc(f.caregiverName||'your caregiver')}</div></div><div class="guide-body">`;
+  if(imp.length){
+    h+=`<div class="g-section">⚠️ Important</div><div class="important-list">`;
+    imp.forEach(l=>h+=`<div class="important-item"><span>⚠️</span><span>${esc(l)}</span></div>`);
+    h+=`</div>`;
+  }
+  const items=(f.routineItems||[]).slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  if(items.length){
+    h+=`<div class="g-section">⏰ Schedule</div>`;
+    items.forEach(it=>{
+      const who=it.child&&it.child!=='all'?esc(it.child):'All children';
+      h+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${esc(it.time||'—')}</span>`+
+         `<span class="sched-title">${esc(it.type||'')}</span></div><div class="sched-body">`+
+         `<div class="sched-note"><span class="kid-tag" style="background:var(--green);">${who}</span>`+
+         `${it.notes?' — '+esc(it.notes):''}</div></div></div>`;
+    });
+  }
+  const blocks=kids.filter(c=>c.likes||c.behaviour||c.allergies||c.school||c.preschool);
+  if(blocks.length){
+    h+=`<div class="g-section">💛 Comfort</div><div class="comfort-grid">`;
+    blocks.forEach(c=>{
+      h+=`<div class="comfort-card"><div class="comfort-card-name">${esc(c.emoji||'')} ${esc(c.name)}</div>`;
+      if(c.allergies)h+=`<div class="comfort-micro">Allergies</div><div class="comfort-text">${esc(c.allergies)}</div>`;
+      if(c.likes)h+=`<div class="comfort-micro">Likes &amp; personality</div><div class="comfort-text">${esc(c.likes)}</div>`;
+      if(c.behaviour)h+=`<div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">${esc(c.behaviour)}</div></div>`;
+      if(c.preschool)h+=`<div class="comfort-micro">Nursery</div><div class="comfort-text">${esc(c.preschool)}</div>`;
+      if(c.school)h+=`<div class="comfort-micro">School</div><div class="comfort-text">${esc(c.school)}</div>`;
+      h+=`</div>`;
+    });
+    h+=`</div>`;
+  }
+  const cts=(f.contacts||[]).filter(c=>c.name||c.phone);
+  if(cts.length){
+    h+=`<div class="g-section">📞 Contacts</div><div class="contacts-grid">`;
+    cts.forEach(c=>h+=`<div class="contact-card"><div class="contact-name">${esc(c.name||'Contact')}</div><div class="contact-line">${esc(c.phone||'')}</div></div>`);
+    h+=`</div>`;
+  }
+  if(f.extra)h+=`<div class="g-section">Notes</div><div class="plain-sec"><p>${esc(f.extra)}</p></div>`;
+  h+=`<div class="guide-footer">THE HELD METHOD · BY MY MENTAL LOAD</div></div>`;
+  document.getElementById('guideContent').innerHTML=h;
+}
 function routineEmoji(type){
   const map={Breakfast:'🥣','Milk/Feed':'🍼',Nap:'💤','Quiet time':'🤫',Lunch:'🍽',
     Snack:'🍎','Goûter':'🍫',Dinner:'🍽',Bath:'🛁',Bedtime:'🌙',Play:'🧸',
@@ -1434,19 +1516,19 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
   // ---------- emergency contacts ----------
   let contacts=[{name:'',phone:'',rel:''}];
   function addContactRow(){ contacts.push({name:'',phone:'',rel:''}); renderContacts(); }
-  function delContact(i){ contacts.splice(i,1); if(!contacts.length)contacts.push({name:'',phone:'',rel:''}); renderContacts(); }
+  function delContact(i){ if(i<0||i>=contacts.length)return; contacts.splice(i,1); if(!contacts.length)contacts.push({name:'',phone:'',rel:''}); renderContacts(); }
   function renderContacts(){
     const l=el('#contactsList'); if(!l)return;
     l.innerHTML=contacts.map((c,i)=>`<div class="card" style="margin-bottom:10px;">
       <div class="row2">
         <div class="field" style="margin-bottom:8px"><label class="t-label">Name</label>
-          <input type="text" value="${c.name||''}" placeholder="e.g. Mum" oninput="contacts[${i}].name=this.value"></div>
+          <input type="text" value="${esc(c.name||'')}" placeholder="e.g. Mum" oninput="contacts[${i}].name=this.value"></div>
         <div class="field" style="margin-bottom:8px"><label class="t-label">Phone</label>
-          <input type="text" value="${c.phone||''}" placeholder="e.g. 07700 900000" oninput="contacts[${i}].phone=this.value"></div>
+          <input type="text" value="${esc(c.phone||'')}" placeholder="e.g. 07700 900000" oninput="contacts[${i}].phone=this.value"></div>
       </div>
       <div style="display:flex;gap:8px;align-items:flex-end;">
         <div class="field" style="flex:1;margin-bottom:0"><label class="t-label">Relationship</label>
-          <input type="text" value="${c.rel||''}" placeholder="e.g. Grandma" oninput="contacts[${i}].rel=this.value"></div>
+          <input type="text" value="${esc(c.rel||'')}" placeholder="e.g. Grandma" oninput="contacts[${i}].rel=this.value"></div>
         ${contacts.length>1?`<button class="child-del" onclick="delContact(${i})">🗑</button>`:''}
       </div>
     </div>`).join('');
