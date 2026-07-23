@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v23">
+  <meta name="app-version" content="held-v24">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -319,13 +319,30 @@
 
 /* ── READABLE ON PHONE: stack the one-pager columns ── */
 @media screen and (max-width: 700px){
-  .ls-grid{ display: block !important; }
-  .ls-grid > div{ margin-bottom: 16px; }
-  .kid-col{ width:100% !important; margin-bottom:12px; }
-  .kid-col-name{ font-size:1rem !important; }
-  .kid-col div[style*="font-size:0.8rem"]{ font-size:0.9rem !important; line-height:1.6 !important; }
-  .sched-row{ font-size:0.9rem !important; }
-  .guide-body{ padding:22px 20px 28px !important; }
+  .guide-body{ padding: 22px 20px 28px; }
+}
+
+/* ── COMPACT ("Short One-Pager") ──────────────────────────────
+   Same structure as the full guide, just tighter so it fits one page. */
+.guide-compact .guide-header{ padding: 22px 24px 18px; }
+.guide-compact .guide-names{ font-size: 1.6rem; }
+.guide-compact .guide-emojis{ font-size: 1.1rem; margin-bottom: 6px; }
+.guide-compact .guide-intro{ font-size: 0.82rem; }
+.guide-compact .guide-body{ padding: 18px 20px 22px; }
+.guide-compact .g-section{ margin: 20px 0 8px; }
+.guide-compact .sched-row{ padding: 8px 0; }
+.guide-compact .comfort-card{ padding: 12px 14px; }
+.guide-compact .comfort-text{ font-size: 0.82rem; line-height: 1.5; }
+.guide-compact .bed-step{ margin-bottom: 8px !important; }
+
+/* ── EXPORT / PRINT: keep the on-screen look ────────────────── */
+@media print{
+  .guide-wrap{ box-shadow: none; border-radius: 0; }
+  .guide-header{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .sched-row, .bed-step, .comfort-card, .contact-card, .important-list{
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .g-section{ break-after: avoid; page-break-after: avoid; }
 }
 /* child card polish (applies everywhere) */
 .comfort-card{ line-height: 1.55; }
@@ -1051,7 +1068,7 @@
     window.__held={children:sampleKids,formData:sampleForm,relationship:'Nanny',language:'English'};
     window.__isSample=true;
     try{
-      renderGuideIndepth(sampleAi,sampleKids,sampleForm,'Nanny');
+      renderGuideSafely(sampleAi,sampleKids,sampleForm,'Nanny');
       showGuideScreen();
       document.getElementById('sampleBanner').style.display='flex';
       const sm=document.getElementById('successMoment'); if(sm) sm.style.display='none';
@@ -1375,8 +1392,11 @@ function findChildSection(aiData,child){
 function renderGuideSafely(aiData,children,formData,relationship){
   const mode=(formData&&formData.mode)||'indepth';
   try{
-    if(mode==='landscape') renderGuideLandscape(aiData,children,formData,relationship);
-    else renderGuideIndepth(aiData,children,formData,relationship);
+    // ONE layout for every format, screen and export — the same one the
+    // sample guide uses. "Short" only changes density, never the structure.
+    renderGuideIndepth(aiData,children,formData,relationship);
+    const wrap=document.getElementById('guideContent');
+    if(wrap) wrap.classList.toggle('guide-compact', mode==='landscape');
     const el=document.getElementById('guideContent');
     if(el&&el.innerHTML.replace(/\s/g,'').length>120) return;
     throw new Error('empty render');
