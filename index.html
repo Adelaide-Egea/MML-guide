@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v22">
+  <meta name="app-version" content="held-v23">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -277,20 +277,16 @@
 .guide-duration{ display: inline-block; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; margin-bottom: 14px; letter-spacing: 0.05em; }
 .guide-intro{ font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.65; max-width: 340px; margin: 0 auto; }
 .guide-body{ padding: 24px 24px 32px; }
-/* section headings — give each block real breathing room */
+/* section headings — v7 style: small, uppercase, green. Quiet and elegant. */
 .g-section{
-  font-family: 'Fraunces', serif;
-  font-size: 1.12rem;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 34px 0 14px;
-  padding-bottom: 8px;
-  border-bottom: 1.5px solid var(--line);
-  letter-spacing: -0.01em;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin: 30px 0 12px;
 }
 .g-section:first-child{ margin-top: 0; }
-.important-list + .g-section,
-.comfort-grid + .g-section{ margin-top: 36px; }
 .kid-tag{ display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
 /* NOTE: plain flex, NOT grid+display:contents — html2canvas (PDF/image export)
    does not support display:contents, which collapsed the text column and
@@ -329,7 +325,7 @@
   .kid-col-name{ font-size:1rem !important; }
   .kid-col div[style*="font-size:0.8rem"]{ font-size:0.9rem !important; line-height:1.6 !important; }
   .sched-row{ font-size:0.9rem !important; }
-  .guide-body{ padding:18px 16px 24px !important; }
+  .guide-body{ padding:22px 20px 28px !important; }
 }
 /* child card polish (applies everywhere) */
 .comfort-card{ line-height: 1.55; }
@@ -354,6 +350,7 @@
 @page{ size: A4; margin: 14mm; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -896,7 +893,15 @@
     routineItems.push({name,time:time||'',emoji:emoji||'🕐',notes:'',child:'all'});
     renderRoutine();
   }
+  function sortRoutine(){
+    // chronological, items without a time go last
+    routineItems.sort((a,b)=>{
+      const at=(a.time||'').trim()||'99:99', bt=(b.time||'').trim()||'99:99';
+      return at.localeCompare(bt);
+    });
+  }
   function renderRoutine(){
+    sortRoutine();
     const list=el('#routineList');
     const named=children.filter(c=>c.name);
     // only show the child picker when there's more than one child
@@ -909,7 +914,7 @@
       <div class="r-top">
         <span class="r-emoji">${r.emoji}</span>
         <span class="r-name">${esc(r.name)}</span>
-        <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value">
+        <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value;renderRoutine();saveDraft();">
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
       ${showWho?`<select class="r-who" onchange="routineItems[${i}].child=this.value">${opts}</select>`:''}
@@ -1221,7 +1226,7 @@ function renderGuideIndepth(aiData,children,formData){
 
   // IMPORTANT FIRST — the carer must see this before anything else
   if(impLines.length){
-    html+=`<div class="g-section">⚠️ ${labels.important}</div><div class="important-list">`;
+    html+=`<div class="g-section">${labels.important}</div><div class="important-list">`;
     impLines.forEach((line,i)=>{const shown=impT?impT[i]:line;html+=`<div class="important-item"><span>${iconForLine(line)}</span><span>${parseInlineBold(shown)}</span></div>`;});
     html+=`</div>`;
   }
@@ -1235,7 +1240,7 @@ function renderGuideIndepth(aiData,children,formData){
   ].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
 
   if(timelineItems.length){
-    html+=`<div class="g-section">⏰ ${labels.schedule}</div>`;
+    html+=`<div class="g-section">${labels.schedule}</div>`;
     groupByTime(timelineItems).forEach(([time,items])=>{
       const tl=time==='zzz'?'Time not set':formatTime12hr(time);
       const title=typeLabels[items[0].type]||items[0].type;
@@ -1249,7 +1254,7 @@ function renderGuideIndepth(aiData,children,formData){
   const comfortBlocks=children.map((c,i)=>({c,id:kidId[c.name]||getKidIdentity(i),cs:findChildSection(aiData,c)}))
                               .filter(x=>x.cs.comfort||x.cs.whenUpset);
   if(comfortBlocks.length){
-    html+=`<div class="g-section">💛 ${labels.comfort}</div><div class="comfort-grid">`;
+    html+=`<div class="g-section">${labels.comfort}</div><div class="comfort-grid">`;
     comfortBlocks.forEach(({c,id,cs})=>{
       html+=`<div class="comfort-card" style="background:${id.dim};">
         <div class="comfort-card-name">${esc(id.emoji)} ${esc(c.name)}</div>`;
@@ -1270,7 +1275,7 @@ function renderGuideIndepth(aiData,children,formData){
     });
   }
   if(contacts.length||emergNums){
-    html+=`<div class="g-section">📞 ${labels.contacts}</div><div class="contacts-grid">`;
+    html+=`<div class="g-section">${labels.contacts}</div><div class="contacts-grid">`;
     contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${esc(c.name||'Contact')}</div><div class="contact-line">${esc(c.phone||'')}</div></div>`;});
     if(emergNums)html+=`<div class="contact-card" style="border-color:var(--berry);background:var(--berry-dim);"><div class="contact-name" style="color:var(--berry);">🚨 Emergency (${formData.country})</div><div class="contact-line">${emergNums}</div></div>`;
     html+=`</div>`;
@@ -1301,11 +1306,11 @@ function renderGuideLandscape(aiData,children,formData){
   const numCols=children.length>=2?3:2;
 
   let html=`<div style="padding:22px 24px;">`;
-  html+=`<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;"><div class="guide-names" style="font-size:1.4rem;">${children.map(c=>c.name).filter(Boolean).join(' & ')}</div>${dBadge?`<span style="font-size:0.72rem;color:var(--green);font-weight:800;letter-spacing:0.06em;">${dBadge}</span>`:''}</div>`;
-  html+=`<div class="guide-for" style="margin-bottom:6px;">Guide for ${formData.caregiverName}</div>`;
-  if(aiData.intro)html+=`<div class="guide-intro" style="font-size:0.84rem;max-width:none;margin:0 0 14px;text-align:left;">${aiData.intro}</div>`;
+  html+=`<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;flex-wrap:wrap;"><div class="guide-names" style="font-size:1.4rem;color:var(--ink);">${esc(children.map(c=>c.name).filter(Boolean).join(' & '))}</div>${dBadge?`<span style="font-size:0.72rem;color:var(--green);font-weight:800;letter-spacing:0.06em;">${dBadge}</span>`:''}</div>`;
+  html+=`<div class="guide-for" style="margin-bottom:8px;color:var(--softer);">Guide for ${esc(formData.caregiverName||'')}</div>`;
+  if(aiData.intro)html+=`<div class="guide-intro" style="font-size:0.84rem;max-width:none;margin:0 0 16px;text-align:left;color:var(--soft);">${aiData.intro}</div>`;
   if(impLines.length){
-    html+=`<div class="g-section" style="margin-top:0;">⚠️ ${labels.important}</div>`;
+    html+=`<div class="g-section" style="margin-top:0;">${labels.important}</div>`;
     html+=`<div class="important-list" style="margin-bottom:14px;padding:10px 14px;">`;
     impLines.forEach((line,i)=>{const shown=impT?impT[i]:line;html+=`<div class="important-item">${iconForLine(line)} ${parseInlineBold(shown)}</div>`;});
     html+=`</div>`;
@@ -1387,13 +1392,13 @@ function renderGuideFallback(children,formData){
   let h=`<div class="guide-header"><div class="guide-title">${esc(kids.map(c=>c.name).join(' & ')||'Care guide')}</div>`;
   h+=`<div class="guide-meta">Guide for ${esc(f.caregiverName||'your caregiver')}</div></div><div class="guide-body">`;
   if(imp.length){
-    h+=`<div class="g-section">⚠️ Important</div><div class="important-list">`;
+    h+=`<div class="g-section">Important</div><div class="important-list">`;
     imp.forEach(l=>h+=`<div class="important-item"><span>⚠️</span><span>${esc(l)}</span></div>`);
     h+=`</div>`;
   }
   const items=(f.routineItems||[]).slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
   if(items.length){
-    h+=`<div class="g-section">⏰ Schedule</div>`;
+    h+=`<div class="g-section">Schedule</div>`;
     items.forEach(it=>{
       const who=it.child&&it.child!=='all'?esc(it.child):'All children';
       h+=`<div class="sched-row"><span class="sched-time">${esc(it.time||'—')}</span>`+
@@ -1404,7 +1409,7 @@ function renderGuideFallback(children,formData){
   }
   const blocks=kids.filter(c=>c.likes||c.behaviour||c.allergies||c.school||c.preschool);
   if(blocks.length){
-    h+=`<div class="g-section">💛 Comfort</div><div class="comfort-grid">`;
+    h+=`<div class="g-section">Comfort</div><div class="comfort-grid">`;
     blocks.forEach(c=>{
       h+=`<div class="comfort-card"><div class="comfort-card-name">${esc(c.emoji||'')} ${esc(c.name)}</div>`;
       if(c.allergies)h+=`<div class="comfort-micro">Allergies</div><div class="comfort-text">${esc(c.allergies)}</div>`;
@@ -1418,7 +1423,7 @@ function renderGuideFallback(children,formData){
   }
   const cts=(f.contacts||[]).filter(c=>c.name||c.phone);
   if(cts.length){
-    h+=`<div class="g-section">📞 Contacts</div><div class="contacts-grid">`;
+    h+=`<div class="g-section">Contacts</div><div class="contacts-grid">`;
     cts.forEach(c=>h+=`<div class="contact-card"><div class="contact-name">${esc(c.name||'Contact')}</div><div class="contact-line">${esc(c.phone||'')}</div></div>`);
     h+=`</div>`;
   }
@@ -1570,12 +1575,28 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
       pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header']}
     }).from(document.getElementById('guideContent')).save();
   }
+  function getH2C(){
+    return window.html2canvas
+        || (window.html2pdf&&window.html2pdf.html2canvas)
+        || (typeof html2canvas!=='undefined'?html2canvas:null);
+  }
+  function loadH2C(){
+    return new Promise((res,rej)=>{
+      const existing=getH2C(); if(existing) return res(existing);
+      const sc=document.createElement('script');
+      sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      sc.onload=()=>{const f=getH2C(); f?res(f):rej(new Error('not found'));};
+      sc.onerror=()=>rej(new Error('load failed'));
+      document.head.appendChild(sc);
+    });
+  }
   async function doSaveImage(){
     const node=document.getElementById('guideContent');
     const kids=(window.__held&&window.__held.children)||[];
     const nm=((kids[0]&&kids[0].name)||'guide').toLowerCase().replace(/\s+/g,'-');
-    const h2c=window.html2canvas||(window.html2pdf&&window.html2pdf.html2canvas);
-    if(!h2c){ alert('Image export unavailable — try Save as PDF.'); return; }
+    let h2c=null;
+    try{ h2c=await loadH2C(); }
+    catch(e){ alert('Image export needs an internet connection. Try Save as PDF instead.'); return; }
     try{
       const canvas=await h2c(node,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
       canvas.toBlob(async blob=>{
