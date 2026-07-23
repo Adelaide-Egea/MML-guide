@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v20">
+  <meta name="app-version" content="held-v22">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -182,6 +182,12 @@
   .home h1{font-family:'Fraunces',serif;font-size:2.9rem;font-weight:600;line-height:1.08;letter-spacing:-0.02em;margin-bottom:22px;color:var(--ink);}
   .home .hsub{font-size:1rem;color:var(--soft);line-height:1.65;margin-bottom:40px;max-width:19em;}
   .home .perm{font-size:0.76rem;color:var(--softer);text-align:center;margin-top:22px;line-height:1.5;}
+  .resume-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--green-dim);border:1px solid var(--green);border-radius:12px;
+    padding:10px 12px;margin-top:16px;font-size:0.78rem;color:var(--ink);}
+  .resume-banner button{background:none;border:none;color:var(--berry);font-weight:700;
+    font-size:0.76rem;cursor:pointer;font-family:'Manrope',sans-serif;white-space:nowrap;padding:4px 6px;}
+  .app-version{font-size:0.66rem;color:var(--softer);text-align:center;margin-top:8px;letter-spacing:0.06em;opacity:.75;}
   .sample-link{display:inline-block;color:var(--green);font-weight:700;font-size:0.88rem;text-decoration:none;margin-top:24px;align-self:center;}
 
   .done{justify-content:center;align-items:center;text-align:center;padding:20px 30px;}
@@ -286,16 +292,19 @@
 .important-list + .g-section,
 .comfort-grid + .g-section{ margin-top: 36px; }
 .kid-tag{ display: inline-flex; align-items: center; gap: 3px; font-weight: 700; font-size: 0.78rem; padding: 2px 9px 2px 7px; border-radius: 100px; color: white; white-space: nowrap; }
+/* NOTE: plain flex, NOT grid+display:contents — html2canvas (PDF/image export)
+   does not support display:contents, which collapsed the text column and
+   wrapped every note one word per line. */
 .sched-row{ padding: 14px 0; border-bottom: 1px solid var(--line);
-  display: grid; grid-template-columns: 78px 1fr; column-gap: 12px; align-items: start; }
+  display: flex; align-items: flex-start; gap: 12px; }
 .sched-row:last-child{ border-bottom: none; }
-/* time sits in column 1, everything else in column 2 — so every row lines up */
-.sched-head{ display: contents; }
-.sched-time{ grid-column: 1; font-weight: 800; font-size: 0.82rem; color: var(--green);
-  white-space: nowrap; padding-top: 1px; }
-.sched-title{ grid-column: 2; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
-.sched-body{ grid-column: 2; padding-left: 0; }
-.sched-note{ font-size: 0.85rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px; }
+.sched-time{ flex: 0 0 72px; width: 72px; font-weight: 800; font-size: 0.82rem;
+  color: var(--green); white-space: nowrap; padding-top: 1px; }
+.sched-main{ flex: 1 1 auto; min-width: 0; }
+.sched-title{ font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; }
+.sched-body{ }
+.sched-note{ font-size: 0.85rem; line-height: 1.55; color: var(--ink); margin-bottom: 3px;
+  overflow-wrap: break-word; }
 .bed-step{ display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
 .bed-step:last-child{ margin-bottom: 0; }
 .bed-dot{ width: 26px; height: 26px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -375,7 +384,12 @@
       <button class="btn-primary" onclick="go('intro')">Create a care guide</button>
       <a href="#" class="sample-link" onclick="viewExample(event)">See a sample guide →</a>
       <div class="install"><span class="ico">📲</span><div><strong>Turn this into an app</strong><span>Tap Share → Add to Home Screen</span></div></div>
+      <div class="resume-banner" id="resumeBanner" style="display:none;">
+        <span>📝 Your details from last time are saved.</span>
+        <button onclick="discardDraft()">Start fresh</button>
+      </div>
       <p class="perm">Handed over with care. Nothing to explain twice.</p>
+      <p class="app-version" id="appVersion"></p>
     </section>
 
     <!-- INTRO: how many children + combined/split -->
@@ -693,6 +707,7 @@
       if(childSubstep<2){ childSubstep++; show(['c-basics','c-care','c-personality'][childSubstep]); return; }
       // finished personality → mark done, back to hub
       children[editingChild].done=true;
+      saveDraft();
       renderChildren();
       show('children');
       return;
@@ -1224,9 +1239,9 @@ function renderGuideIndepth(aiData,children,formData){
     groupByTime(timelineItems).forEach(([time,items])=>{
       const tl=time==='zzz'?'Time not set':formatTime12hr(time);
       const title=typeLabels[items[0].type]||items[0].type;
-      html+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${tl}</span><span class="sched-title">${routineEmoji(items[0].type)} ${title}</span></div><div class="sched-body">`;
+      html+=`<div class="sched-row"><span class="sched-time">${tl}</span><div class="sched-main"><div class="sched-title">${routineEmoji(items[0].type)} ${title}</div><div class="sched-body">`;
       items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${esc(who)}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
-      html+=`</div></div>`;
+      html+=`</div></div></div>`;
     });
   }
   // Loop over the REAL children (not the AI's list) so a child is never dropped,
@@ -1304,7 +1319,7 @@ function renderGuideLandscape(aiData,children,formData){
     const id=who?kidId[who]:null;
     const tag=id?`<span class="kid-tag" style="background:${id.color};font-size:0.62rem;padding:1px 7px;">${esc(id.emoji)} ${esc(who)}</span>`:'';
     const note=item.notes?parseInlineBold(item.notes):'';
-    html+=`<div class="sched-row" style="padding:6px 0;font-size:0.8rem;"><div class="sched-head" style="margin-bottom:2px;"><span class="sched-time" style="font-size:0.72rem;min-width:52px;">${tl}</span>${tag}<span>${title}</span></div>${note?`<div style="font-size:0.72rem;color:var(--soft);padding-left:52px;">${note}</div>`:''}</div>`;
+    html+=`<div class="sched-row" style="padding:7px 0;"><span class="sched-time" style="font-size:0.72rem;flex:0 0 56px;width:56px;">${tl}</span><div class="sched-main"><div class="sched-title" style="font-size:0.8rem;margin-bottom:2px;">${tag}${title}</div>${note?`<div class="sched-note" style="font-size:0.74rem;color:var(--soft);">${note}</div>`:''}</div></div>`;
   });
   html+=`</div>`;
   children.forEach(c=>{
@@ -1381,10 +1396,10 @@ function renderGuideFallback(children,formData){
     h+=`<div class="g-section">⏰ Schedule</div>`;
     items.forEach(it=>{
       const who=it.child&&it.child!=='all'?esc(it.child):'All children';
-      h+=`<div class="sched-row"><div class="sched-head"><span class="sched-time">${esc(it.time||'—')}</span>`+
-         `<span class="sched-title">${esc(it.type||'')}</span></div><div class="sched-body">`+
+      h+=`<div class="sched-row"><span class="sched-time">${esc(it.time||'—')}</span>`+
+         `<div class="sched-main"><div class="sched-title">${esc(it.type||'')}</div><div class="sched-body">`+
          `<div class="sched-note"><span class="kid-tag" style="background:var(--green);">${who}</span>`+
-         `${it.notes?' — '+esc(it.notes):''}</div></div></div>`;
+         `${it.notes?' — '+esc(it.notes):''}</div></div></div></div>`;
     });
   }
   const blocks=kids.filter(c=>c.likes||c.behaviour||c.allergies||c.school||c.preschool);
@@ -1539,7 +1554,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
   document.addEventListener('click',e=>{
     const t=e.target;
     if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
-    if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} location.reload(); } }
+    if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} clearDraft(); location.reload(); } }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
     if(t.id==='saveImgBtn'){ doSaveImage(); }
     if(t.id==='shareBtn'){ doShare(); }
@@ -1590,8 +1605,84 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     catch(e){ window.print(); }
   }
 
+  // Version stamp — read from the <meta> tag that bump.py stamps automatically,
+  // so it's always accurate and never needs hand-editing.
+  (function(){
+    const m=document.querySelector('meta[name="app-version"]');
+    const el=document.getElementById('appVersion');
+    if(el) el.textContent=m&&m.content?m.content.replace(/^held-v/,'Version '):'';
+  })();
+
+
+  // ── SAVE / RESTORE ──────────────────────────────────────────
+  // Everything the parent types is kept on their device so they never
+  // have to start over. Saved on every change, restored on load.
+  const HELD_STORE='held-draft-v1';
+  let _saveTimer=null;
+  function fieldVal(id){const e=document.getElementById(id);return e?e.value:'';}
+  function setField(id,v){const e=document.getElementById(id);if(e&&v!=null)e.value=v;}
+
+  function collectDraft(){
+    return {
+      v:1, savedAt:Date.now(),
+      children, routineItems, contacts, numKids, splitChoice,
+      selectedMode:(typeof selectedMode!=='undefined'?selectedMode:null),
+      selectedDuration:(typeof selectedDuration!=='undefined'?selectedDuration:null),
+      fields:{
+        importantNote:fieldVal('importantNote'), country:fieldVal('country'),
+        guideLang:fieldVal('guideLang'), cgName:fieldVal('cgName'), cgRel:fieldVal('cgRel'),
+        extraNotes:fieldVal('extraNotes'), signOff:fieldVal('signOff'), betaCode:fieldVal('betaCode')
+      }
+    };
+  }
+  function saveDraft(){
+    try{ localStorage.setItem(HELD_STORE, JSON.stringify(collectDraft())); }catch(e){}
+  }
+  function saveDraftSoon(){ clearTimeout(_saveTimer); _saveTimer=setTimeout(saveDraft,400); }
+
+  function restoreDraft(){
+    let d=null;
+    try{ const raw=localStorage.getItem(HELD_STORE); if(raw) d=JSON.parse(raw); }catch(e){ d=null; }
+    if(!d||d.v!==1) return false;
+    try{
+      if(Array.isArray(d.children)&&d.children.length){ children.length=0; d.children.forEach(c=>children.push(c)); }
+      if(Array.isArray(d.routineItems)){ routineItems.length=0; d.routineItems.forEach(r=>routineItems.push(r)); }
+      if(Array.isArray(d.contacts)&&d.contacts.length){ contacts.length=0; d.contacts.forEach(c=>contacts.push(c)); }
+      if(typeof d.numKids==='number') numKids=d.numKids;
+      if(d.splitChoice) splitChoice=d.splitChoice;
+      if(d.selectedMode) selectedMode=d.selectedMode;
+      if(d.selectedDuration) selectedDuration=d.selectedDuration;
+      const f=d.fields||{};
+      Object.keys(f).forEach(k=>setField(k,f[k]));
+      // reflect restored choices in the UI
+      const kc=document.getElementById('kidCount'); if(kc) kc.textContent=numKids;
+      const sw=document.getElementById('splitWrap'); if(sw) sw.style.display=numKids>1?'block':'none';
+      document.querySelectorAll('[data-split]').forEach(o=>o.classList.toggle('sel',o.dataset.split===splitChoice));
+      if(selectedDuration){document.querySelectorAll('[data-dur]').forEach(t=>t.classList.toggle('sel',t.dataset.dur===selectedDuration));}
+      if(selectedMode){document.querySelectorAll('[data-mode]').forEach(m=>m.classList.toggle('sel',m.dataset.mode===selectedMode));formatChosen=true;}
+      renderChildren(); renderContacts(); renderRoutine();
+      return children.some(c=>c.name)||routineItems.length>0;
+    }catch(e){ return false; }
+  }
+  function clearDraft(){ try{localStorage.removeItem(HELD_STORE);}catch(e){} }
+  function discardDraft(){
+    if(!confirm('Clear the saved details and start fresh?'))return;
+    clearDraft(); location.reload();
+  }
+
+  // save on any input/change anywhere in the app
+  document.addEventListener('input', saveDraftSoon, true);
+  document.addEventListener('change', saveDraftSoon, true);
+  window.addEventListener('pagehide', saveDraft);
+  window.addEventListener('beforeunload', saveDraft);
+
   renderChildren();
   renderContacts();
+  // bring back anything from last time
+  if(restoreDraft()){
+    const el=document.getElementById('resumeBanner');
+    if(el) el.style.display='flex';
+  }
   show('home');
 </script>
 </body>
