@@ -109,8 +109,8 @@
   .important textarea:focus{border-color:var(--berry);}
 
   /* colour + emoji */
-  .swatches{display:flex;gap:12px;margin-bottom:6px;}
-  .sw{width:42px;height:42px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s;}
+  .swatches{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px;}
+  .sw{width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s;}
   .sw:active{transform:scale(.9);}
   .sw.sel{border-color:var(--ink);}
   .emoji-row{display:flex;flex-wrap:wrap;gap:9px;}
@@ -148,6 +148,11 @@
   .r-card{padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:9px;box-shadow:var(--shadow);}
   .r-top{display:flex;align-items:center;gap:10px;}
   .r-card .r-emoji{font-size:1.2rem;}
+  .r-emoji-btn{background:var(--card);border:1.5px solid var(--line);border-radius:10px;
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;padding:0;flex-shrink:0;transition:transform .12s,border-color .12s;}
+  .r-emoji-btn:active{transform:scale(0.92);}
+  .r-emoji-btn:hover{border-color:var(--green);}
   .r-card .r-name{flex:1;font-weight:700;font-size:0.9rem;color:var(--ink);}
   .r-card input[type=time]{width:auto;padding:9px 11px;font-size:0.88rem;border-radius:10px;}
   .r-card .r-del{background:none;border:none;color:var(--softer);font-size:1.3rem;cursor:pointer;padding:0 4px;line-height:1;}
@@ -324,16 +329,34 @@
 
 /* ── COMPACT ("Short One-Pager") ──────────────────────────────
    Same structure as the full guide, just tighter so it fits one page. */
-.guide-compact .guide-header{ padding: 22px 24px 18px; }
-.guide-compact .guide-names{ font-size: 1.6rem; }
-.guide-compact .guide-emojis{ font-size: 1.1rem; margin-bottom: 6px; }
-.guide-compact .guide-intro{ font-size: 0.82rem; }
-.guide-compact .guide-body{ padding: 18px 20px 22px; }
-.guide-compact .g-section{ margin: 20px 0 8px; }
-.guide-compact .sched-row{ padding: 8px 0; }
-.guide-compact .comfort-card{ padding: 12px 14px; }
-.guide-compact .comfort-text{ font-size: 0.82rem; line-height: 1.5; }
-.guide-compact .bed-step{ margin-bottom: 8px !important; }
+.guide-compact .guide-header{ padding: 14px 20px 12px; }
+.guide-compact .guide-names{ font-size: 1.3rem; }
+.guide-compact .guide-emojis{ font-size: 1rem; margin-bottom: 4px; }
+.guide-compact .guide-intro{ font-size: 0.74rem; line-height: 1.4; }
+.guide-compact .guide-body{ padding: 14px 18px 16px; }
+.guide-compact .g-section{ margin: 12px 0 6px; font-size: 0.6rem; }
+.guide-compact .sched-row{ padding: 5px 0; }
+.guide-compact .sched-title{ font-size: 0.8rem; margin-bottom: 2px; }
+.guide-compact .sched-note{ font-size: 0.75rem; line-height: 1.4; }
+.guide-compact .comfort-card{ padding: 10px 12px; }
+.guide-compact .comfort-text{ font-size: 0.75rem; line-height: 1.42; }
+.guide-compact .comfort-card-name{ font-size: 0.82rem; margin-bottom: 6px; }
+.guide-compact .plain-sec p, .guide-compact .plain-sec li{ font-size: 0.75rem; line-height: 1.45; }
+.guide-compact .bed-step{ margin-bottom: 6px !important; }
+.guide-compact .bed-text{ font-size: 0.76rem; line-height: 1.45; }
+.guide-compact .guide-closing{ font-size: 0.9rem; margin-top: 14px; padding-top: 12px; }
+.guide-compact .contact-card{ padding: 9px 12px; }
+
+/* Landscape has width to spare — use two columns so it fits ONE page
+   instead of running to four. Screen + export both. */
+@media screen and (min-width: 760px){
+  .guide-compact .comfort-grid{ grid-template-columns: 1fr 1fr; }
+  .guide-compact .contacts-grid{ grid-template-columns: 1fr 1fr 1fr; }
+}
+.guide-compact.pdf-landscape .comfort-grid{ grid-template-columns: 1fr 1fr; }
+.guide-compact.pdf-landscape .contacts-grid{ grid-template-columns: 1fr 1fr 1fr; }
+.guide-compact.pdf-landscape .sched-wrap{ column-count: 2; column-gap: 26px; }
+.guide-compact.pdf-landscape .sched-row{ break-inside: avoid; page-break-inside: avoid; }
 
 /* ── EXPORT / PRINT: keep the on-screen look ────────────────── */
 @media print{
@@ -345,15 +368,33 @@
   .g-section{ break-after: avoid; page-break-after: avoid; }
 }
 /* child card polish (applies everywhere) */
-.comfort-card{ line-height: 1.55; }
-.comfort-card-name{ font-size: 0.95rem; margin-bottom: 10px; letter-spacing: -0.01em; }
+/* IMPORTANT: comfort cards always have a PALE background (id.dim), so their text
+   must always be DARK — never var(--ink), which flips to near-white in dark mode
+   and made "Likes & personality" / "If upset" invisible. */
+.comfort-card{ line-height: 1.55; color: #1A2E1F !important; }
+.comfort-card *{ color: inherit; }
+.comfort-card-name{ font-size: 0.95rem; margin-bottom: 10px; letter-spacing: -0.01em; color: #1A2E1F !important; }
 .comfort-lbl{ font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.65; font-weight: 800; display:block; margin: 10px 0 4px; }
-.comfort-micro{ font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--softer); margin-bottom: 4px; }
-.comfort-text{ font-size: 0.83rem; line-height: 1.55; }
+.comfort-micro{ font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: #5C6F63 !important; margin-bottom: 4px; }
+.comfort-text{ font-size: 0.83rem; line-height: 1.55; color: #1A2E1F !important; }
+.comfort-card .upset-strip{ margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(26,46,31,0.14); }
+.comfort-card strong, .comfort-card b{ color: #1A2E1F !important; font-weight: 700; }
+/* never let a card collapse to an empty box */
+.comfort-card:empty{ display: none; }
 .contact-card{ background: var(--linen); border-radius: 14px; padding: 13px 16px; }
 .guide-closing{ text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 1.1rem; color: var(--soft); line-height: 1.5; }
 .guide-closing strong{ color: var(--green); font-style: normal; font-weight: 700; }
 .guide-footer{ text-align: center; margin-top: 12px; font-size: 0.62rem; color: var(--softer); letter-spacing: 0.08em; text-transform: uppercase; }
+/* ── EDIT MODE ── visible only while editing, never in PDF/print/image ── */
+.edit-banner{ background: var(--green); color: #fff; border-radius: 12px;
+  padding: 11px 14px; font-size: 0.8rem; font-weight: 600; line-height: 1.45;
+  margin-bottom: 12px; text-align: center; }
+.is-editing{ outline: 1.5px dashed rgba(94,156,143,0.75); outline-offset: 3px;
+  border-radius: 6px; cursor: text; }
+.is-editing:focus{ outline: 2px solid var(--green); outline-offset: 3px;
+  background: rgba(94,156,143,0.08); }
+@media print{ .is-editing{ outline: none !important; background: none !important; }
+  .edit-banner{ display: none !important; } }
 .action-row{ display: flex; gap: 10px; margin-top: 20px; }
 .action-row button{ flex: 1; }
 .print-link{ text-align: center; margin-top: 10px; font-size: 0.75rem; color: var(--softer); cursor: pointer; text-decoration: underline; background: none; border: none; width: 100%; font-family: 'Manrope', sans-serif; }
@@ -485,12 +526,29 @@
           <div class="sw" style="background:#F0C5CB" onclick="pickSw(this)"></div>
           <div class="sw" style="background:#F7EFD8" onclick="pickSw(this)"></div>
           <div class="sw" style="background:#ECE8F5" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#CFE3DC" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#D9E8C4" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#FBE0C4" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#C9DCF0" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#F5D6E4" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#C6E6E3" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#E3E0F2" onclick="pickSw(this)"></div>
+          <div class="sw" style="background:#F2EAC4" onclick="pickSw(this)"></div>
         </div>
       </div>
       <div class="emoji-row">
         <button class="em sel" onclick="pickEm(this)">🧸</button><button class="em" onclick="pickEm(this)">🦊</button>
         <button class="em" onclick="pickEm(this)">🌟</button><button class="em" onclick="pickEm(this)">🐰</button>
         <button class="em" onclick="pickEm(this)">🦕</button><button class="em" onclick="pickEm(this)">🌈</button>
+        <button class="em" onclick="pickEm(this)">🦁</button><button class="em" onclick="pickEm(this)">🐻</button>
+        <button class="em" onclick="pickEm(this)">🦋</button><button class="em" onclick="pickEm(this)">🐢</button>
+        <button class="em" onclick="pickEm(this)">🐳</button><button class="em" onclick="pickEm(this)">🦄</button>
+        <button class="em" onclick="pickEm(this)">🐧</button><button class="em" onclick="pickEm(this)">🌙</button>
+        <button class="em" onclick="pickEm(this)">🐝</button><button class="em" onclick="pickEm(this)">🌸</button>
+        <button class="em" onclick="pickEm(this)">🐬</button><button class="em" onclick="pickEm(this)">🍀</button>
+        <button class="em" onclick="pickEm(this)">⭐</button><button class="em" onclick="pickEm(this)">🐨</button>
+        <button class="em" onclick="pickEm(this)">🦉</button><button class="em" onclick="pickEm(this)">🐥</button>
+        <button class="em" onclick="pickEm(this)">🌻</button><button class="em" onclick="pickEm(this)">🦔</button>
       </div>
     </section>
 
@@ -634,6 +692,7 @@
     <button class="btn-guide-2nd" id="saveImgBtn">🖼 Save as image <span style="font-weight:500;opacity:.7;">(for WhatsApp)</span></button>
     <button class="btn-guide-2nd" onclick="window.print()">🖨 Print</button>
     <button class="btn-guide-2nd" id="shareBtn">📤 Share</button>
+    <button class="btn-guide-2nd" id="editTextBtn">📝 Edit the text</button>
     <button class="btn-guide-2nd" id="editBtn">✏️ Edit details</button>
     <button class="btn-guide-2nd" id="startOverBtn" style="color:var(--berry);">🗑 Start over</button>
   </div>
@@ -929,7 +988,8 @@
         .join('');
       return `<div class="r-card">
       <div class="r-top">
-        <span class="r-emoji">${r.emoji}</span>
+        <button class="r-emoji r-emoji-btn" title="Tap to change the icon"
+                onclick="cycleRoutineEmoji(${i})">${r.emoji}</button>
         <span class="r-name">${esc(r.name)}</span>
         <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value;renderRoutine();saveDraft();">
         <button class="r-del" onclick="delRoutine(${i})">×</button>
@@ -941,6 +1001,20 @@
     </div>`;}).join('');
   }
   function delRoutine(i){ if(i<0||i>=routineItems.length)return; routineItems.splice(i,1); renderRoutine(); }
+
+  // Tap the icon on any routine row (custom items included) to cycle through
+  // a set of options. No extra screen, no modal — one tap, one new icon.
+  const ROUTINE_EMOJI_CHOICES=['🕐','⭐','🧸','🎨','📚','🎵','🚗','🏫','🌳','⚽',
+    '🛁','🌙','💤','🍎','🍽','🥣','🍼','🦷','💊','🚽','🧦','📱','🐶','🎒'];
+  function cycleRoutineEmoji(i){
+    if(i<0||i>=routineItems.length)return;
+    const cur=routineItems[i].emoji||'🕐';
+    const at=ROUTINE_EMOJI_CHOICES.indexOf(cur);
+    routineItems[i].emoji=ROUTINE_EMOJI_CHOICES[(at+1)%ROUTINE_EMOJI_CHOICES.length];
+    renderRoutine();
+    saveDraft();
+  }
+  window.cycleRoutineEmoji=cycleRoutineEmoji;
 
   function pickSw(elm){ elm.parentNode.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].colour=elm.style.background; }
   function pickEm(elm){ elm.parentNode.querySelectorAll('.em').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].emoji=elm.textContent; }
@@ -970,7 +1044,7 @@
     });
   }
   function collectRoutineData(){
-    return routineItems.map(r=>({type:r.name,time:r.time||'',child:r.child||'all',notes:r.notes||''}));
+    return routineItems.map(r=>({type:r.name,time:r.time||'',child:r.child||'all',notes:r.notes||'',emoji:r.emoji||''}));
   }
   function collectContactsData(){
     return contacts.filter(x=>x.name||x.phone).map(x=>({name:x.name,phone:x.phone,relationship:x.rel||''}));
@@ -1179,7 +1253,19 @@ RULES — follow every one without exception:
    - "whenUpset": 2-3 sentences. Practical steps ONLY. PROSE — never "1." or "2." or bullets. Start directly with the first action. Never mention what the child likes here.
 3. "sections": Food & Allergies (always if allergies exist, bold allergens with **double asterisks**), Screen time (only if rules given), Other (only if extra info). Max 2-3 sentences each.
 4. No filler. No generic reassurances. Every sentence = one real fact the caregiver needs.
+5. ACCURACY IS ABSOLUTE — never invent, infer or connect facts:
+   - Use ONLY what the parent wrote. Never add advice, causes or cues they did not state.
+   - NEVER link two separate facts unless the parent linked them. If they say the child
+     falls asleep with NO warning, do NOT tell the caregiver to watch for a sleep signal —
+     that reverses their meaning. Contradicting the parent is the worst possible failure.
+   - Negatives stay negative: "doesn't warn", "never", "no signs", "without notice" must
+     survive rewriting and translating intact. Do not soften them into a cue to look for.
+   - A signal listed in a communication/dictionary section applies ONLY where the parent
+     put it. Do not transplant it into the routine, sleep or upset sections.
+   - If something is unclear, restate the parent's words plainly rather than interpreting.
 LANGUAGE: Write entirely in the requested language if not English.
+TRANSLATION ACCURACY: Translate meaning, never "improve" it. Keep every negation and every
+"without warning" exactly as strong in the target language as in the original.
 TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array length exactly.`;
 
   try{
@@ -1257,14 +1343,16 @@ function renderGuideIndepth(aiData,children,formData){
   ].sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
 
   if(timelineItems.length){
-    html+=`<div class="g-section">${labels.schedule}</div>`;
+    html+=`<div class="g-section">${labels.schedule}</div><div class="sched-wrap">`;
     groupByTime(timelineItems).forEach(([time,items])=>{
       const tl=time==='zzz'?'Time not set':formatTime12hr(time);
       const title=typeLabels[items[0].type]||items[0].type;
-      html+=`<div class="sched-row"><span class="sched-time">${tl}</span><div class="sched-main"><div class="sched-title">${routineEmoji(items[0].type)} ${title}</div><div class="sched-body">`;
+      const rowEmoji=(items[0].emoji&&items[0].emoji.trim())||routineEmoji(items[0].type);
+      html+=`<div class="sched-row"><span class="sched-time">${tl}</span><div class="sched-main"><div class="sched-title">${rowEmoji} ${title}</div><div class="sched-body">`;
       items.forEach(item=>{const who=item.child==='all'?labels.allChildren:item.child;const tag=item.child==='all'?`<span class="kid-tag" style="background:var(--green);">${esc(who)}</span>`:kidTag(item.child);html+=`<div class="sched-note">${tag}${item.notes?' — '+parseInlineBold(item.notes):''}</div>`;});
       html+=`</div></div></div>`;
     });
+    html+=`</div>`;
   }
   // Loop over the REAL children (not the AI's list) so a child is never dropped,
   // and fall back to the parent's own words if the AI returned nothing.
@@ -1381,8 +1469,16 @@ function findChildSection(aiData,child){
   let cs=list.find(x=>norm(x.childName)===norm(child.name));
   if(!cs)cs=list.find(x=>norm(x.childName)&&norm(child.name)&&
     (norm(x.childName).startsWith(norm(child.name))||norm(child.name).startsWith(norm(x.childName))));
-  const comfort=(cs&&cs.comfort&&cs.comfort.trim())||child.likes||'';
-  const whenUpset=(cs&&cs.whenUpset&&cs.whenUpset.trim())||child.behaviour||'';
+  // Belt & braces: if the AI returned nothing (or an empty string) for either
+  // field, fall back to the parent's own words. These sections must NEVER be
+  // silently dropped — the parent filled them in, so they get shown.
+  const pick=(aiVal,parentVal)=>{
+    const a=(aiVal||'').trim();
+    if(a) return a;
+    return (parentVal||'').trim();
+  };
+  const comfort=pick(cs&&cs.comfort, child.likes);
+  const whenUpset=pick(cs&&cs.whenUpset, child.behaviour);
   return {comfort,whenUpset};
 }
 
@@ -1522,7 +1618,13 @@ const KID_IDENTITIES=[
   {color:'#CBA135',dim:'#F7EFD8',emoji:'🦁'},
   {color:'#9B8AC4',dim:'#ECE8F5',emoji:'🐻'},
   {color:'#5E9C8F',dim:'#E2EFEC',emoji:'🦋'},
-  {color:'#B98A5E',dim:'#F2E7DA',emoji:'🐢'},
+  {color:'#7FB069',dim:'#EAF3E4',emoji:'🐢'},
+  {color:'#E0A458',dim:'#FBF0E0',emoji:'🦊'},
+  {color:'#8FA9D8',dim:'#EAEFF9',emoji:'🐳'},
+  {color:'#D68FB0',dim:'#FAE9F1',emoji:'🦄'},
+  {color:'#6BB5B0',dim:'#E4F2F1',emoji:'🐧'},
+  {color:'#A8A4D6',dim:'#EFEEF8',emoji:'🌙'},
+  {color:'#C9B458',dim:'#F7F2DC',emoji:'🐝'},
 ];
 
 const EMERGENCY_NUMBERS={
@@ -1580,20 +1682,88 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     const t=e.target;
     if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
     if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} clearDraft(); location.reload(); } }
+    if(t.id==='editTextBtn'){ toggleTextEdit(); }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
     if(t.id==='saveImgBtn'){ doSaveImage(); }
     if(t.id==='shareBtn'){ doShare(); }
   });
+  // ── EDIT THE FINAL TEXT ─────────────────────────────────────
+  // The AI is good but not perfect — it can flip a meaning ("she falls asleep
+  // without warning" -> "watch for the sleep sign"). Rather than regenerate,
+  // let the parent tap straight into the guide and correct it. Edits are kept
+  // on the device, so a reload doesn't lose them.
+  let textEditOn=false;
+  function toggleTextEdit(){
+    const node=document.getElementById('guideContent');
+    const btn=document.getElementById('editTextBtn');
+    if(!node)return;
+    textEditOn=!textEditOn;
+
+    // Only prose blocks are editable — never the structural chrome.
+    const sel='.sched-note,.sched-title,.comfort-text,.comfort-card-name,.bed-text,'+
+              '.plain-sec p,.plain-sec li,.important-list li,.guide-intro,.contact-name,.contact-line';
+    node.querySelectorAll(sel).forEach(elm=>{
+      elm.contentEditable=textEditOn?'true':'false';
+      elm.classList.toggle('is-editing',textEditOn);
+      if(textEditOn)elm.spellcheck=true;
+    });
+
+    node.classList.toggle('editing-mode',textEditOn);
+    if(btn)btn.innerHTML=textEditOn?'✅ Done editing':'📝 Edit the text';
+
+    let banner=document.getElementById('editBanner');
+    if(textEditOn){
+      if(!banner){
+        banner=document.createElement('div');
+        banner.id='editBanner';
+        banner.className='edit-banner no-print';
+        banner.textContent='Tap any text to correct it. Your changes are saved automatically.';
+        node.parentNode.insertBefore(banner,node);
+      }
+      const first=node.querySelector('.is-editing');
+      if(first)first.focus();
+    }else{
+      if(banner)banner.remove();
+      saveGuideEdits();
+    }
+  }
+  function saveGuideEdits(){
+    try{
+      const node=document.getElementById('guideContent');
+      if(node)localStorage.setItem('held-guide-edited',node.innerHTML);
+    }catch(e){}
+  }
+  // Save as they type, so nothing is lost if the app is backgrounded.
+  document.addEventListener('input',(e)=>{
+    if(textEditOn&&e.target.closest&&e.target.closest('#guideContent'))saveGuideEdits();
+  });
+  window.toggleTextEdit=toggleTextEdit;
+
   function doDownloadPdf(){
+    if(textEditOn)toggleTextEdit(); // never export with editing chrome showing
     if(typeof html2pdf==='undefined'){ window.print(); return; }
     const kids=(window.__held&&window.__held.children)||[];
     const nm=(kids[0]&&kids[0].name)||'guide';
     const mode=(window.__held&&window.__held.formData.mode)||'indepth';
-    html2pdf().set({margin:[10,10,10,10],filename:`held-${nm.toLowerCase().replace(/\s+/g,'-')}.pdf`,
-      image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,logging:false},
-      jsPDF:{unit:'mm',format:'a4',orientation:mode==='landscape'?'landscape':'portrait'},
-      pagebreak:{mode:['css','legacy'],avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header']}
-    }).from(document.getElementById('guideContent')).save();
+    const node=document.getElementById('guideContent');
+    const isLandscape = mode==='landscape';
+    // Let the two-column landscape rules kick in during export.
+    const inner=node.querySelector('.guide-compact')||node.firstElementChild;
+    if(isLandscape&&inner)inner.classList.add('pdf-landscape');
+
+    html2pdf().set({margin:[8,8,8,8],filename:`held-${nm.toLowerCase().replace(/\s+/g,'-')}.pdf`,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0,windowWidth:isLandscape?1400:900},
+      jsPDF:{unit:'mm',format:'a4',orientation:isLandscape?'landscape':'portrait'},
+      // 'avoid-all' stops blocks being sliced mid-sentence across pages,
+      // which is what made the old PDFs cut in odd places.
+      pagebreak:{mode:['css','legacy','avoid-all'],
+        avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header','.g-section','.plain-sec li','.contacts-grid']}
+    }).from(node).save().then(()=>{
+      if(inner)inner.classList.remove('pdf-landscape');
+    }).catch(()=>{
+      if(inner)inner.classList.remove('pdf-landscape');
+    });
   }
   function getH2C(){
     return window.html2canvas
@@ -1611,6 +1781,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     });
   }
   async function doSaveImage(){
+    if(textEditOn)toggleTextEdit();
     const node=document.getElementById('guideContent');
     const kids=(window.__held&&window.__held.children)||[];
     const nm=((kids[0]&&kids[0].name)||'guide').toLowerCase().replace(/\s+/g,'-');
@@ -1618,7 +1789,15 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     try{ h2c=await loadH2C(); }
     catch(e){ alert('Image export needs an internet connection. Try Save as PDF instead.'); return; }
     try{
-      const canvas=await h2c(node,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+      const canvas=await h2c(node,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,
+        onclone:(doc)=>{
+          // html2canvas ignores @media print, so strip edit chrome by hand.
+          doc.querySelectorAll('.is-editing').forEach(x=>{
+            x.classList.remove('is-editing');
+            x.style.outline='none'; x.style.background='none';
+          });
+          const b=doc.getElementById('editBanner'); if(b)b.remove();
+        }});
       canvas.toBlob(async blob=>{
         if(!blob){ alert('Could not create the image.'); return; }
         const file=new File([blob],`held-${nm}.png`,{type:'image/png'});
@@ -1636,6 +1815,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     }catch(e){ alert('Could not save the image. Try Save as PDF instead.'); }
   }
   async function doShare(){
+    if(textEditOn)toggleTextEdit();
     const kids=(window.__held&&window.__held.children)||[];
     const nm=(kids[0]&&kids[0].name)||'our little one';
     const txt=document.getElementById('guideContent').innerText.trim();
