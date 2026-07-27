@@ -159,6 +159,18 @@
   .r-card .r-del:active{color:var(--berry);}
   .r-who{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);font-weight:600;}
   .r-who:focus{outline:none;border-color:var(--green);background:var(--card);}
+  .r-qty-row{display:flex;gap:8px;margin-top:9px;}
+  .r-qty{flex:1;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);
+    border-radius:10px;background:var(--linen);color:var(--ink);font-family:inherit;min-width:0;}
+  .r-qty:focus{outline:none;border-color:var(--green);background:var(--card);}
+  .r-qty-unit{width:104px;padding:10px 8px;font-size:0.85rem;border:1.5px solid var(--line);
+    border-radius:10px;background:var(--linen);color:var(--ink);font-family:inherit;}
+  /* flash a newly added routine row so it's never "lost" in the list */
+  @keyframes justAdded{
+    0%{background:var(--green-dim);border-color:var(--green);}
+    100%{background:var(--card);border-color:var(--line);}
+  }
+  .r-card.just-added{animation:justAdded 1.6s ease-out;}
   .r-note{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);}
   .r-note:focus{outline:none;border-color:var(--green);background:var(--card);}
   .r-row{display:flex;align-items:center;gap:10px;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:9px;box-shadow:var(--shadow);}
@@ -399,6 +411,27 @@
 .action-row button{ flex: 1; }
 .print-link{ text-align: center; margin-top: 10px; font-size: 0.75rem; color: var(--softer); cursor: pointer; text-decoration: underline; background: none; border: none; width: 100%; font-family: 'Manrope', sans-serif; }
 /* ── PRINT ── */
+/* The app shell is a fixed, scrolling viewport (body overflow:hidden,
+   .screen position:absolute). That clips everything below the fold, which is
+   why printing produced one page or nothing. Unwind it all for print. */
+@media print{
+  html, body{
+    height: auto !important; overflow: visible !important;
+    display: block !important; background: #fff !important;
+  }
+  .screen{
+    position: static !important; inset: auto !important;
+    height: auto !important; max-height: none !important;
+    overflow: visible !important; padding: 0 !important;
+    animation: none !important; display: none !important;
+  }
+  .screen.active{ display: block !important; }
+  #guideContent, .guide-wrap, .guide-body{
+    overflow: visible !important; height: auto !important;
+    max-height: none !important; box-shadow: none !important;
+  }
+  .guide-header{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 /* keep each block of content together across page/PDF breaks */
 .sched-row, .bed-step, .important-list, .comfort-card, .contact-card, .guide-header{
   break-inside: avoid; page-break-inside: avoid;
@@ -937,7 +970,17 @@
     {emoji:'🍎',name:'Snack',time:'15:00'},
     {emoji:'🍽',name:'Dinner',time:'17:30'},
     {emoji:'🛁',name:'Bath',time:'18:30'},
-    {emoji:'🌙',name:'Bedtime',time:'19:00'}
+    {emoji:'🌙',name:'Bedtime',time:'19:00'},
+    // Daily-life items testers said were missing. Nappy change and teeth have
+    // no meaningful clock time for most families, so they carry no default —
+    // they sort to the end of the list and read as "as needed".
+    {emoji:'🦷',name:'Teeth brushing',time:''},
+    {emoji:'🧷',name:'Nappy change',time:''},
+    {emoji:'🚽',name:'Potty / toilet',time:''},
+    {emoji:'🧸',name:'Playtime',time:''},
+    {emoji:'🌳',name:'Outdoor time',time:''},
+    {emoji:'🎨',name:'Activity',time:''},
+    {emoji:'📖',name:'Story time',time:''}
   ];
   const ROUTINE_BABY=[{emoji:'🍼',name:'Feed',time:'08:00'},{emoji:'💤',name:'Nap',time:'10:00'}];
   const ROUTINE_PRESCHOOL=[{emoji:'💤',name:'Nap',time:'13:00'},{emoji:'🤫',name:'Quiet time',time:'14:00'},{emoji:'🏫',name:'Nursery / preschool run',time:'08:45'},{emoji:'🏫',name:'Nursery pick-up',time:'15:00'}];
@@ -966,8 +1009,22 @@
     c.innerHTML=set.map(x=>`<span class="chip" onclick='addRoutineRow(${JSON.stringify(x.name)},${JSON.stringify(x.time)},${JSON.stringify(x.emoji)})'>${x.emoji} ${x.name}</span>`).join('');
   }
   function addRoutineRow(name,time,emoji){
-    routineItems.push({name,time:time||'',emoji:emoji||'🕐',notes:'',child:'all'});
+    // A schedule only makes sense in time order, so we keep sorting it.
+    // But that meant a tapped chip landed mid-list and felt "random" — you had
+    // to hunt for it. So we tag the new row, then scroll to it and flash it,
+    // and drop the cursor straight into its notes field.
+    const uid='r'+Date.now()+Math.random().toString(36).slice(2,6);
+    routineItems.push({name,time:time||'',emoji:emoji||'🕐',notes:'',child:'all',uid});
     renderRoutine();
+    requestAnimationFrame(()=>{
+      const row=document.querySelector('[data-uid="'+uid+'"]');
+      if(!row)return;
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+      row.classList.add('just-added');
+      setTimeout(()=>row.classList.remove('just-added'),1600);
+      const note=row.querySelector('.r-note');
+      if(note)setTimeout(()=>note.focus({preventScroll:true}),350);
+    });
   }
   function sortRoutine(){
     // chronological, items without a time go last
@@ -986,7 +1043,7 @@
       const opts=['<option value="all">👨‍👩‍👧 All children</option>']
         .concat(named.map(c=>`<option value="${esc(c.name)}"${r.child===c.name?' selected':''}>${esc(c.emoji)} ${esc(c.name)}</option>`))
         .join('');
-      return `<div class="r-card">
+      return `<div class="r-card" data-uid="${r.uid||''}">
       <div class="r-top">
         <button class="r-emoji r-emoji-btn" title="Tap to change the icon"
                 onclick="cycleRoutineEmoji(${i})">${r.emoji}</button>
@@ -995,12 +1052,37 @@
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
       ${showWho?`<select class="r-who" onchange="routineItems[${i}].child=this.value">${opts}</select>`:''}
+      ${isFeedItem(r.name)?`<div class="r-qty-row">
+        <input type="number" inputmode="decimal" min="0" step="5" class="r-qty"
+               value="${esc(r.qty||'')}" placeholder="Amount"
+               oninput="routineItems[${i}].qty=this.value;saveDraft();">
+        <select class="r-qty-unit" onchange="routineItems[${i}].qtyUnit=this.value;saveDraft();">
+          ${QTY_UNITS.map(u=>`<option value="${u}"${(r.qtyUnit||defaultUnit(r.name))===u?' selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>`:''}
       <input type="text" class="r-note" value="${(r.notes||'').replace(/"/g,'&quot;')}"
              placeholder="Add a note (optional) — e.g. half a banana, no milk"
              oninput="routineItems[${i}].notes=this.value">
     </div>`;}).join('');
   }
   function delRoutine(i){ if(i<0||i>=routineItems.length)return; routineItems.splice(i,1); renderRoutine(); }
+
+  // Quantities used to be buried in the free-text note. Feeding rows now get a
+  // proper number + unit, so "how much?" is never ambiguous for the caregiver.
+  const QTY_UNITS=['ml','oz','g','tbsp','tsp','cup','portion','piece'];
+  const FEED_WORDS=['feed','milk','bottle','breakfast','lunch','dinner','snack',
+    'go\u00fbter','gouter','tea','supper','formula','water','drink','meal'];
+  function isFeedItem(name){
+    const n=(name||'').toLowerCase();
+    return FEED_WORDS.some(w=>n.includes(w));
+  }
+  function defaultUnit(name){
+    const n=(name||'').toLowerCase();
+    if(n.includes('milk')||n.includes('bottle')||n.includes('feed')||
+       n.includes('formula')||n.includes('water')||n.includes('drink'))return 'ml';
+    return 'portion';
+  }
+  window.isFeedItem=isFeedItem; window.defaultUnit=defaultUnit;
 
   // Tap the icon on any routine row (custom items included) to cycle through
   // a set of options. No extra screen, no modal — one tap, one new icon.
@@ -1044,7 +1126,16 @@
     });
   }
   function collectRoutineData(){
-    return routineItems.map(r=>({type:r.name,time:r.time||'',child:r.child||'all',notes:r.notes||'',emoji:r.emoji||''}));
+    return routineItems.map(r=>{
+      const qty=(r.qty||'').toString().trim();
+      const unit=r.qtyUnit||defaultUnit(r.name);
+      // Fold the structured amount into the note so it reaches the guide and
+      // the AI, without the parent having to type it into free text.
+      const amount=qty?`${qty}${unit==='portion'||unit==='piece'?' '+unit:unit}`:'';
+      const note=[amount,(r.notes||'').trim()].filter(Boolean).join(' — ');
+      return {type:r.name,time:r.time||'',child:r.child||'all',
+              notes:note,emoji:r.emoji||'',qty:qty,qtyUnit:unit};
+    });
   }
   function collectContactsData(){
     return contacts.filter(x=>x.name||x.phone).map(x=>({name:x.name,phone:x.phone,relationship:x.rel||''}));
@@ -1653,7 +1744,7 @@ const ENGLISH_LABELS={
 
 let childCount=0,routineCount=0,contactCount=0,selectedMode=null,selectedDuration=null;
 
-const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter','Dinner','Bath','Bedtime','Play','School pick-up','Activity','Other'];
+const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter','Dinner','Bath','Bedtime','Play','School pick-up','Activity','Teeth brushing','Nappy change','Potty / toilet','Playtime','Outdoor time','Story time','Quiet time','Other'];
 
   // ---------- emergency contacts ----------
   let contacts=[{name:'',phone:'',rel:''}];
@@ -1739,31 +1830,144 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
   });
   window.toggleTextEdit=toggleTextEdit;
 
-  function doDownloadPdf(){
-    if(textEditOn)toggleTextEdit(); // never export with editing chrome showing
-    if(typeof html2pdf==='undefined'){ window.print(); return; }
-    const kids=(window.__held&&window.__held.children)||[];
-    const nm=(kids[0]&&kids[0].name)||'guide';
-    const mode=(window.__held&&window.__held.formData.mode)||'indepth';
-    const node=document.getElementById('guideContent');
-    const isLandscape = mode==='landscape';
-    // Let the two-column landscape rules kick in during export.
-    const inner=node.querySelector('.guide-compact')||node.firstElementChild;
-    if(isLandscape&&inner)inner.classList.add('pdf-landscape');
-
-    html2pdf().set({margin:[8,8,8,8],filename:`held-${nm.toLowerCase().replace(/\s+/g,'-')}.pdf`,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0,windowWidth:isLandscape?1400:900},
-      jsPDF:{unit:'mm',format:'a4',orientation:isLandscape?'landscape':'portrait'},
-      // 'avoid-all' stops blocks being sliced mid-sentence across pages,
-      // which is what made the old PDFs cut in odd places.
-      pagebreak:{mode:['css','legacy','avoid-all'],
-        avoid:['.sched-row','.bed-step','.important-list','.comfort-card','.contact-card','.guide-header','.g-section','.plain-sec li','.contacts-grid']}
-    }).from(node).save().then(()=>{
-      if(inner)inner.classList.remove('pdf-landscape');
-    }).catch(()=>{
-      if(inner)inner.classList.remove('pdf-landscape');
+  // ── PDF EXPORT ──────────────────────────────────────────────
+  // WHY THIS IS NOT ONE BIG html2canvas CALL:
+  // Safari (and iOS especially) caps a single <canvas> at roughly 16.7 million
+  // pixels. A long in-depth guide at scale 2 blows straight past that, and the
+  // browser silently hands back an EMPTY canvas — which is exactly why the long
+  // guide produced a blank PDF while the short landscape one worked fine.
+  // So we never build one giant canvas. We slice the guide into page-sized
+  // chunks at safe block boundaries and render each page separately. Every
+  // canvas stays small, nothing is ever blank, and pages break in sensible
+  // places instead of mid-sentence.
+  const LIGHT_VARS={
+    '--green':'#335C4A','--green-dim':'#EEF4F1','--green-mid':'#4A7A63',
+    '--sage':'#B7D2C4','--berry':'#D9577E','--berry-dim':'#FCEEF3',
+    '--navy':'#223A5E','--linen':'#FCFAF6','--ink':'#1A2E1F',
+    '--soft':'#7A8E85','--softer':'#A8B8B0','--line':'rgba(26,46,31,0.09)',
+    '--card':'#FFFFFF','--on-green':'#FFFFFF','--shadow':'none'
+  };
+  function getJsPDF(){
+    return (window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||
+           (window.html2pdf&&window.html2pdf.jsPDF)||null;
+  }
+  function nextFrame(){
+    return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  }
+  function fontsReady(){
+    try{ return document.fonts?document.fonts.ready:Promise.resolve(); }
+    catch(e){ return Promise.resolve(); }
+  }
+  function stripEditChrome(doc){
+    doc.querySelectorAll('.is-editing').forEach(x=>{
+      x.classList.remove('is-editing');
+      x.style.outline='none'; x.style.background='none';
     });
+    const b=doc.getElementById('editBanner'); if(b)b.remove();
+  }
+
+  async function exportPagedPdf(sourceNode,opts){
+    const isLandscape=!!opts.isLandscape;
+    const h2c=await loadH2C();
+    const JsPDF=getJsPDF();
+    if(!JsPDF) throw new Error('jsPDF unavailable');
+
+    const M=8;
+    const pageWmm=isLandscape?297:210, pageHmm=isLandscape?210:297;
+    const usableW=pageWmm-M*2, usableH=pageHmm-M*2;
+    const EXPORT_W=isLandscape?1160:800;
+    const pageHpx=Math.floor(EXPORT_W*(usableH/usableW));
+
+    // Offscreen stage, forced to the LIGHT palette so the PDF is always
+    // printable even when the parent is using the app in dark mode.
+    const stage=document.createElement('div');
+    stage.setAttribute('aria-hidden','true');
+    stage.style.cssText='position:fixed;left:-20000px;top:0;z-index:-1;background:#fff;';
+    stage.style.width=EXPORT_W+'px';
+    Object.keys(LIGHT_VARS).forEach(k=>stage.style.setProperty(k,LIGHT_VARS[k]));
+    document.body.appendChild(stage);
+
+    try{
+      // 1. Measure a full clone so we know each block's real height.
+      const measure=document.createElement('div');
+      measure.className=sourceNode.className;
+      measure.classList.toggle('pdf-landscape',isLandscape);
+      measure.innerHTML=sourceNode.innerHTML;
+      measure.style.cssText='width:'+EXPORT_W+'px;background:#fff;border-radius:0;box-shadow:none;overflow:visible;';
+      stage.appendChild(measure);
+      await nextFrame(); await fontsReady(); await nextFrame();
+
+      const header=measure.querySelector('.guide-header');
+      const body=measure.querySelector('.guide-body');
+      const blocks=body?Array.from(body.children):[];
+
+      // 2. Pack blocks into pages without ever splitting one.
+      const headerH=header?header.getBoundingClientRect().height:0;
+      const pages=[]; let cur=[], curH=headerH;
+      blocks.forEach(b=>{
+        const h=b.getBoundingClientRect().height||0;
+        if(cur.length && curH+h>pageHpx){ pages.push(cur); cur=[]; curH=0; }
+        cur.push(b); curH+=h;
+      });
+      if(cur.length)pages.push(cur);
+      if(!pages.length)pages.push([]);
+
+      const pdf=new JsPDF({unit:'mm',format:'a4',
+        orientation:isLandscape?'landscape':'portrait'});
+
+      // 3. Render one modest canvas per page.
+      for(let i=0;i<pages.length;i++){
+        const pageEl=document.createElement('div');
+        pageEl.className=measure.className;
+        pageEl.style.cssText='width:'+EXPORT_W+'px;background:#fff;border-radius:0;box-shadow:none;overflow:visible;';
+        if(i===0&&header)pageEl.appendChild(header.cloneNode(true));
+        const bodyEl=document.createElement('div');
+        bodyEl.className=body?body.className:'guide-body';
+        pages[i].forEach(b=>bodyEl.appendChild(b.cloneNode(true)));
+        pageEl.appendChild(bodyEl);
+        stage.appendChild(pageEl);
+        await nextFrame();
+
+        const canvas=await h2c(pageEl,{scale:2,useCORS:true,logging:false,
+          backgroundColor:'#ffffff',width:EXPORT_W,windowWidth:EXPORT_W,
+          scrollX:0,scrollY:0,onclone:stripEditChrome});
+        if(!canvas||!canvas.width||!canvas.height)throw new Error('blank canvas');
+
+        let w=usableW, h=usableW*(canvas.height/canvas.width);
+        if(h>usableH){ h=usableH; w=usableH*(canvas.width/canvas.height); }
+        if(i>0)pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',
+          M+(usableW-w)/2, M, w, h);
+        stage.removeChild(pageEl);
+      }
+      pdf.save(opts.filename);
+    } finally {
+      stage.remove();
+    }
+  }
+
+  async function doDownloadPdf(){
+    if(textEditOn)toggleTextEdit(); // never export with editing chrome showing
+    const node=document.getElementById('guideContent');
+    if(!node)return;
+    const kids=(window.__held&&window.__held.children)||[];
+    const nm=((kids[0]&&kids[0].name)||'guide').toLowerCase().replace(/\s+/g,'-');
+    const mode=(window.__held&&window.__held.formData&&window.__held.formData.mode)||'indepth';
+    const btn=document.getElementById('downloadPdfBtn');
+    const label=btn?btn.innerHTML:'';
+    if(btn){btn.disabled=true;btn.innerHTML='Building your PDF\u2026';}
+    try{
+      await exportPagedPdf(node,{isLandscape:mode==='landscape',
+        filename:`held-${nm}.pdf`});
+    }catch(err){
+      console.error('PDF export failed:',err);
+      // A blank download is never acceptable — fall back to the print dialogue,
+      // where the parent can still choose "Save as PDF".
+      alert('The PDF could not be built on this device. Opening the print view \u2014 choose "Save as PDF" there.');
+      try{ window.print(); }catch(e){}
+    }finally{
+      if(btn){btn.disabled=false;btn.innerHTML=label;}
+    }
   }
   function getH2C(){
     return window.html2canvas
