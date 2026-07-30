@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v32">
+  <meta name="app-version" content="held-v33">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -165,6 +165,13 @@
     100%{background:var(--card);border-color:var(--line);}
   }
   .r-card.just-added{animation:justAdded 1.6s ease-out;}
+  .fmt-toggle{display:flex;gap:8px;background:var(--green-dim);border-radius:14px;
+    padding:5px;margin:18px 0 6px;}
+  .fmt-opt{flex:1;padding:11px 8px;border:none;border-radius:10px;background:none;
+    font-family:inherit;font-size:0.85rem;font-weight:700;color:var(--soft);
+    cursor:pointer;transition:all .15s;}
+  .fmt-opt.sel{background:var(--card);color:var(--green);
+    box-shadow:0 1px 4px rgba(0,0,0,0.08);}
   .saved-card{background:var(--green-dim);border:1.5px solid var(--sage);
     border-radius:16px;padding:16px;margin-bottom:16px;}
   .saved-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
@@ -479,6 +486,13 @@
     break-inside: auto !important; page-break-inside: auto !important;
     display: block !important;
   }
+  /* .sched-wrap exists only to enable two columns in landscape. In print it is
+     an extra box the fragmenter has to reason about, and WebKit was treating it
+     as a unit — pushing the whole schedule to the next page and leaving a blank
+     half sheet. display:contents removes the box entirely; the rows become
+     direct children of the body and break one by one, as intended. */
+  #printRoot .sched-wrap{ display: contents !important; }
+
   /* RESET: default everything to freely breakable. WebKit was ejecting a whole
      section to the next page and leaving half a blank sheet, because a heading
      with break-after:avoid was bound to a container holding the entire
@@ -806,10 +820,14 @@
   </div>
   <div class="guide-wrap" id="guideContent"></div>
 
+  <div class="fmt-toggle no-print" id="fmtToggle">
+    <button class="fmt-opt" data-fmt="indepth">📖 Full guide</button>
+    <button class="fmt-opt" data-fmt="landscape">📄 One-pager</button>
+  </div>
   <div class="guide-actions no-print">
     <button class="btn-primary" id="downloadPdfBtn">⬇ Save as PDF</button>
     <button class="btn-guide-2nd" id="saveImgBtn">🖼 Save as image <span style="font-weight:500;opacity:.7;">(for WhatsApp)</span></button>
-    <button class="btn-guide-2nd" id="printBtn">🖨 Print</button>
+    <button class="btn-guide-2nd" id="printBtn">🖨 Print <span style="font-weight:500;opacity:.7;">(adds Safari's page headers)</span></button>
     <button class="btn-guide-2nd" id="shareBtn">📤 Share</button>
     <button class="btn-guide-2nd" id="editTextBtn">📝 Edit the text</button>
     <button class="btn-guide-2nd" id="editBtn">✏️ Edit details</button>
@@ -1417,6 +1435,7 @@
   async function saveEntry(data){ try{localStorage.setItem('held-last-entry',JSON.stringify(data));}catch(e){} }
   function showView(id){
     if(id==='loadingView'){ show('generating'); return; }
+    if(id==='guideView'){ setTimeout(()=>{try{markFormat();}catch(e){}},0); }
     if(id==='guideView'){ showGuideScreen(); return; }
     if(id==='formView'){ show('finish'); return; }
   }
@@ -1755,6 +1774,11 @@ function findChildSection(aiData,child){
 // complete guide from the parent's own input. A blank document is never OK.
 function renderGuideSafely(aiData,children,formData,relationship){
   const mode=(formData&&formData.mode)||'indepth';
+  // Keep the generated data so the parent can switch format afterwards without
+  // paying for another generation — the AI output is identical either way,
+  // only the density changes.
+  window.__held=Object.assign(window.__held||{},
+    {aiData,children,formData,relationship});
   try{
     // ONE layout for every format, screen and export — the same one the
     // sample guide uses. "Short" only changes density, never the structure.
@@ -2076,6 +2100,8 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} clearDraft(); location.reload(); } }
     if(t.id==='editTextBtn'){ toggleTextEdit(); }
     if(t.id==='printBtn'){ doPrintGuide(); }
+    const fmtBtn=t.closest&&t.closest('.fmt-opt');
+    if(fmtBtn){ switchFormat(fmtBtn.dataset.fmt); }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
     if(t.id==='saveImgBtn'){ doSaveImage(); }
     if(t.id==='shareBtn'){ doShare(); }
@@ -2367,6 +2393,28 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     setTimeout(cleanup,60000); // belt & braces
   }
   window.doPrintGuide=doPrintGuide;
+
+  // Switch between full guide and one-pager AFTER seeing it. No regeneration,
+  // no API call, no waiting — the parent picks once they can compare.
+  function switchFormat(mode){
+    const h=window.__held;
+    if(!h||!h.aiData||!mode)return;
+    if(h.formData.mode===mode){ markFormat(); return; }
+    if(textEditOn)toggleTextEdit();
+    h.formData.mode=mode;
+    try{ setPrintOrientation(mode); }catch(e){}
+    renderGuideSafely(h.aiData,h.children,h.formData,h.relationship);
+    markFormat();
+    try{ saveDraft&&saveDraft(); }catch(e){}
+    const w=document.getElementById('guideContent');
+    if(w)w.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function markFormat(){
+    const mode=(window.__held&&window.__held.formData&&window.__held.formData.mode)||'indepth';
+    document.querySelectorAll('.fmt-opt').forEach(b=>
+      b.classList.toggle('sel', b.dataset.fmt===mode));
+  }
+  window.switchFormat=switchFormat; window.markFormat=markFormat;
 
   async function doDownloadPdf(){
     if(textEditOn)toggleTextEdit();
