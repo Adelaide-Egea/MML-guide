@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v24">
+  <meta name="app-version" content="held-v32">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -165,6 +165,16 @@
     100%{background:var(--card);border-color:var(--line);}
   }
   .r-card.just-added{animation:justAdded 1.6s ease-out;}
+  .saved-card{background:var(--green-dim);border:1.5px solid var(--sage);
+    border-radius:16px;padding:16px;margin-bottom:16px;}
+  .saved-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+  .saved-emo{font-size:1.5rem;line-height:1.2;flex-shrink:0;}
+  .saved-name{font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:2px;}
+  .saved-meta{font-size:0.78rem;color:var(--soft);line-height:1.4;}
+  .saved-use{width:100%;margin-bottom:8px;}
+  .saved-clear{width:100%;background:none;border:none;color:var(--soft);
+    font-size:0.8rem;font-weight:600;padding:8px;cursor:pointer;
+    font-family:inherit;text-decoration:underline;}
   .r-note{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);}
   .r-note:focus{outline:none;border-color:var(--green);background:var(--card);}
   .r-row{display:flex;align-items:center;gap:10px;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:9px;box-shadow:var(--shadow);}
@@ -469,11 +479,20 @@
     break-inside: auto !important; page-break-inside: auto !important;
     display: block !important;
   }
-  /* Headings stay with their content, but only weakly — no !important, so the
-     engine can overrule rather than eject an entire section. */
+  /* RESET: default everything to freely breakable. WebKit was ejecting a whole
+     section to the next page and leaving half a blank sheet, because a heading
+     with break-after:avoid was bound to a container holding the entire
+     schedule. Start permissive, then protect only small leaf blocks below. */
+  #printRoot, #printRoot *{
+    break-inside: auto; page-break-inside: auto;
+    break-before: auto; page-break-before: auto;
+    break-after: auto; page-break-after: auto;
+  }
+  /* Headings are NOT glued to what follows — that was the blank-page cause.
+     A lone heading at a page foot is a far smaller problem than a blank half
+     page, so we only keep the heading itself intact. */
   #printRoot .g-section{
-    page-break-after: avoid; margin-top: 16px !important;
-    break-inside: avoid !important;
+    margin-top: 16px !important; break-inside: avoid !important;
   }
   /* no single dangling line at the top or bottom of a page */
   #printRoot p, #printRoot .comfort-text, #printRoot .sched-note{
@@ -617,6 +636,7 @@
     <section class="screen" data-step="children">
       <div class="q">Your<br>children.</div>
       <div class="sub" id="childrenSub">Tap a child to fill in or edit their details.</div>
+      <div id="savedProfiles"></div>
       <div id="childrenList"></div>
       <button class="btn-add" id="addChildBtn" onclick="addChild()"><span style="font-size:1.2rem;">＋</span> Add another child</button>
       <div class="err-msg" id="childErr">Fill in at least one child's basics to continue.</div>
@@ -937,7 +957,68 @@
   }
 
   // ---------- children hub ----------
+  // ── SAVED CHILDREN ──────────────────────────────────────────
+  // A child's allergies, milk, personality and comfort barely change month to
+  // month — but the old flow made parents retype all of it every single time.
+  // Profiles are saved once and reused, so a repeat guide is a few taps.
+  const PROFILE_KEY='held-profiles-v1';
+  function saveProfiles(){
+    try{
+      const keep=children.filter(c=>c.name&&c.done).map(c=>({
+        name:c.name,age:c.age,ageUnit:c.ageUnit,emoji:c.emoji,
+        colour:c.colour,colorIdx:c.colorIdx,data:c.data||{}
+      }));
+      if(keep.length)localStorage.setItem(PROFILE_KEY,JSON.stringify({
+        savedAt:Date.now(),children:keep}));
+    }catch(e){}
+  }
+  function loadProfiles(){
+    try{
+      const raw=localStorage.getItem(PROFILE_KEY);
+      if(!raw)return null;
+      const p=JSON.parse(raw);
+      return (p&&Array.isArray(p.children)&&p.children.length)?p:null;
+    }catch(e){ return null; }
+  }
+  function clearProfiles(){
+    if(!confirm('Forget the saved details for your children?'))return;
+    try{ localStorage.removeItem(PROFILE_KEY); }catch(e){}
+    renderSavedProfiles();
+  }
+  function useProfiles(){
+    const p=loadProfiles(); if(!p)return;
+    children=p.children.map(c=>({
+      name:c.name||'',age:c.age||'',ageUnit:c.ageUnit||'years',
+      emoji:c.emoji||'🧸',colour:c.colour||'#A9C0DE',
+      colorIdx:(c.colorIdx==null?null:c.colorIdx),
+      data:Object.assign({},c.data||{}),done:true
+    }));
+    numKids=children.length;
+    const kc=el('#kidCount'); if(kc)kc.textContent=numKids;
+    renderChildren(); renderSavedProfiles(); saveDraft();
+  }
+  window.useProfiles=useProfiles; window.clearProfiles=clearProfiles;
+
+  function renderSavedProfiles(){
+    const box=el('#savedProfiles'); if(!box)return;
+    const p=loadProfiles();
+    // hide once these children are already loaded in
+    const alreadyLoaded=p&&children.length===p.children.length&&
+      children.every((c,i)=>c.done&&c.name===p.children[i].name);
+    if(!p||alreadyLoaded){ box.innerHTML=''; return; }
+    const names=p.children.map(c=>esc(c.name)).join(' & ');
+    const emo=p.children.map(c=>c.emoji||'🧸').join(' ');
+    box.innerHTML=`<div class="saved-card">
+      <div class="saved-top"><span class="saved-emo">${emo}</span>
+        <div><div class="saved-name">${names}</div>
+        <div class="saved-meta">Saved from last time — allergies, milk, personality and comfort</div></div></div>
+      <button class="btn-primary saved-use" onclick="useProfiles()">Use these details</button>
+      <button class="saved-clear" onclick="clearProfiles()">Start fresh instead</button>
+    </div>`;
+  }
+
   function renderChildren(){
+    renderSavedProfiles();
     const list=el('#childrenList');
     list.innerHTML=children.map((c,i)=>{
       const name=esc(c.name||`Child ${i+1}`);
@@ -1242,6 +1323,7 @@
 
     // hand off to the real engine
     window.__held={children:kids,formData,relationship,language};
+    saveProfiles(); // remember these children so next time is a few taps
     show('generating');
     try{
       await performGeneration(code?{accessCode:code}:{});
@@ -2387,12 +2469,24 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     catch(e){ window.print(); }
   }
 
-  // Version stamp — read from the <meta> tag that bump.py stamps automatically,
-  // so it's always accurate and never needs hand-editing.
+  // Version stamp — read the LIVE service worker, not a meta tag.
+  // The meta tag only changes when bump.py runs, which never happens in a
+  // GitHub-web-upload workflow, so it sat at v24 while the app was on v31 and
+  // made it impossible to tell what was actually deployed. sw.js is the one
+  // file that genuinely changes every release, so we read the truth from it.
   (function(){
-    const m=document.querySelector('meta[name="app-version"]');
     const el=document.getElementById('appVersion');
-    if(el) el.textContent=m&&m.content?m.content.replace(/^held-v/,'Version '):'';
+    if(!el)return;
+    const meta=document.querySelector('meta[name="app-version"]');
+    const fallback=meta&&meta.content?meta.content.replace(/^held-v/,''):'?';
+    el.textContent='Version '+fallback;
+    fetch('/sw.js?probe='+Date.now(),{cache:'no-store'})
+      .then(r=>r.ok?r.text():'')
+      .then(t=>{
+        const m=t.match(/held-v(\d+)/);
+        if(m)el.textContent='Version '+m[1];
+      })
+      .catch(()=>{});
   })();
 
 
