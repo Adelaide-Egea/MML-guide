@@ -457,10 +457,23 @@
   #printRoot .plain-sec li{
     break-inside: avoid !important; page-break-inside: avoid !important;
   }
-  /* a heading must never be the last thing on a page */
+  /* Containers MUST be allowed to split, or a heading with `break-after:avoid`
+     drags the whole schedule to the next page and leaves half a blank sheet.
+     Children break individually; the wrapper flows. */
+  #printRoot .sched-wrap,
+  #printRoot .comfort-grid,
+  #printRoot .contacts-grid,
+  #printRoot .plain-sec,
+  #printRoot .guide-body,
+  #printRoot ul{
+    break-inside: auto !important; page-break-inside: auto !important;
+    display: block !important;
+  }
+  /* Headings stay with their content, but only weakly — no !important, so the
+     engine can overrule rather than eject an entire section. */
   #printRoot .g-section{
-    break-after: avoid !important; page-break-after: avoid !important;
-    break-inside: avoid !important; margin-top: 18px !important;
+    page-break-after: avoid; margin-top: 16px !important;
+    break-inside: avoid !important;
   }
   /* no single dangling line at the top or bottom of a page */
   #printRoot p, #printRoot .comfort-text, #printRoot .sched-note{
@@ -477,8 +490,18 @@
   #printRoot .guide-header{ padding: 22px 24px 18px !important; }
   #printRoot .guide-body{ padding: 16px 22px 18px !important; }
   #printRoot .sched-row{ padding: 8px 0 !important; }
-  #printRoot .comfort-card{ padding: 12px 14px !important; margin-bottom: 10px !important; }
+  #printRoot .comfort-card{
+    padding: 12px 14px !important; margin-bottom: 10px !important;
+    /* a tinted card split across a page edge leaves a stripe of colour with no
+       text in it — keep each child's card whole */
+    break-inside: avoid !important; page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+  }
   #printRoot .comfort-grid{ gap: 10px !important; }
+  /* make sure every tinted surface actually prints its colour */
+  #printRoot .contact-card, #printRoot .important-list li, #printRoot .kid-tag{
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+  }
 }
 /* progress overlay while the PDF is being built */
 #pdfOverlay{ display:none; position:fixed; inset:0; z-index:9999;
@@ -487,6 +510,8 @@
 .pdf-overlay-card{ background:var(--card); color:var(--ink); border-radius:18px;
   padding:26px 30px; text-align:center; font-size:0.9rem; font-weight:700;
   box-shadow:0 10px 40px rgba(0,0,0,0.25); max-width:78vw; }
+.pdf-overlay-hint{ margin-top:10px; font-size:0.72rem; font-weight:600;
+  opacity:0.6; }
 .pdf-spin{ width:26px; height:26px; margin:0 auto 12px; border-radius:50%;
   border:3px solid var(--line); border-top-color:var(--green);
   animation:pdfSpin .8s linear infinite; }
@@ -608,20 +633,7 @@
         <div class="field"><label class="t-label">&nbsp;</label><select id="cAgeUnit"><option>years</option><option>months</option></select></div>
       </div>
       <div class="field"><label class="t-label">Colour &amp; emoji <span class="t-hint">(optional)</span></label>
-        <div class="swatches">
-          <div class="sw sel" style="background:#A9C0DE" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#F0C5CB" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#F7EFD8" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#ECE8F5" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#CFE3DC" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#D9E8C4" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#FBE0C4" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#C9DCF0" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#F5D6E4" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#C6E6E3" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#E3E0F2" onclick="pickSw(this)"></div>
-          <div class="sw" style="background:#F2EAC4" onclick="pickSw(this)"></div>
-        </div>
+        <div class="swatches" id="swatchRow"></div>
       </div>
       <div class="emoji-row">
         <button class="em sel" onclick="pickEm(this)">🧸</button><button class="em" onclick="pickEm(this)">🦊</button>
@@ -911,7 +923,10 @@
     numKids=Math.max(1,Math.min(6,numKids+d));
     el('#kidCount').textContent=numKids;
     // resize children array
-    while(children.length<numKids) children.push({name:'',age:'',emoji:'🧸',colour:'#A9C0DE',done:false});
+    while(children.length<numKids){
+      const i=children.length, id=KID_IDENTITIES[i%KID_IDENTITIES.length];
+      children.push({name:'',age:'',emoji:id.emoji,colour:id.color,colorIdx:i%KID_IDENTITIES.length,done:false});
+    }
     while(children.length>numKids) children.pop();
     el('#splitWrap').style.display = numKids>1 ? 'block':'none';
   }
@@ -972,6 +987,11 @@
     S('cBottle',d.bottle); S('cFoodType',d.foodType);
     S('cPreschool',d.preschool); S('cSchool',d.school);
     S('cLikes',d.likes); S('cScreen',d.screen); S('cUpset',d.upset);
+    renderSwatches();
+    // reflect the saved emoji so the picker matches what the guide will show
+    document.querySelectorAll('.em').forEach(b=>{
+      b.classList.toggle('sel', b.textContent===(c.emoji||'🧸'));
+    });
     const label=`Child ${i+1}`+(c.name?` · ${c.name}`:'');
     el('#cbLabel').textContent=label+' · Basics';
     el('#ccLabel').textContent=label+' · Daily care';
@@ -1134,7 +1154,31 @@
   }
   window.cycleRoutineEmoji=cycleRoutineEmoji;
 
-  function pickSw(elm){ elm.parentNode.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].colour=elm.style.background; }
+  // Swatches are generated FROM the guide palette, so what a parent picks is
+  // exactly what the guide renders. Previously pickSw saved `.colour` while the
+  // renderer read `.colorIdx` — so the chosen colour was silently thrown away.
+  function renderSwatches(){
+    const row=el('#swatchRow'); if(!row)return;
+    const sel=(editingChild!=null&&children[editingChild]&&children[editingChild].colorIdx!=null)
+      ? children[editingChild].colorIdx
+      : (editingChild!=null?editingChild%KID_IDENTITIES.length:0);
+    row.innerHTML=KID_IDENTITIES.map((id,i)=>
+      `<div class="sw${i===sel?' sel':''}" data-idx="${i}" title="Colour ${i+1}"
+            style="background:${id.color};" onclick="pickSw(this)"></div>`).join('');
+    if(editingChild!=null&&children[editingChild]&&children[editingChild].colorIdx==null){
+      children[editingChild].colorIdx=sel;
+    }
+  }
+  window.renderSwatches=renderSwatches;
+  function pickSw(elm){
+    elm.parentNode.querySelectorAll('.sw').forEach(s=>s.classList.remove('sel'));
+    elm.classList.add('sel');
+    if(editingChild!=null){
+      const idx=parseInt(elm.dataset.idx,10);
+      children[editingChild].colorIdx=isNaN(idx)?0:idx;
+      children[editingChild].colour=KID_IDENTITIES[children[editingChild].colorIdx].color;
+    }
+  }
   function pickEm(elm){ elm.parentNode.querySelectorAll('.em').forEach(s=>s.classList.remove('sel')); elm.classList.add('sel'); if(editingChild!=null) children[editingChild].emoji=elm.textContent; }
   function tog(elm){ elm.classList.toggle('sel'); }
 
@@ -2077,23 +2121,39 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     return pdf;
   }
 
+  let overlayTimer=null;
   function showBuildOverlay(text){
     let o=document.getElementById('pdfOverlay');
     if(!o){
       o=document.createElement('div');
       o.id='pdfOverlay'; o.className='no-print';
-      o.innerHTML='<div class="pdf-overlay-card"><div class="pdf-spin"></div><div id="pdfOverlayText"></div></div>';
+      o.innerHTML='<div class="pdf-overlay-card"><div class="pdf-spin"></div>'+
+        '<div id="pdfOverlayText"></div>'+
+        '<div class="pdf-overlay-hint">Tap anywhere to cancel</div></div>';
+      // A full-screen overlay that cannot be dismissed traps the parent in a
+      // dead app. It is always tappable, and always self-clears.
+      o.addEventListener('click',hideBuildOverlay);
       document.body.appendChild(o);
     }
     const t=document.getElementById('pdfOverlayText');
     if(t)t.textContent=text||'Building your PDF\u2026';
     o.style.display='flex';
+    if(overlayTimer)clearTimeout(overlayTimer);
+    overlayTimer=setTimeout(hideBuildOverlay,45000); // never stuck forever
     return o;
   }
   function hideBuildOverlay(){
+    if(overlayTimer){clearTimeout(overlayTimer);overlayTimer=null;}
     const o=document.getElementById('pdfOverlay');
     if(o)o.style.display='none';
+    const st=document.getElementById('pdfStage');
+    if(st)st.remove();
   }
+  // Coming back from the iOS print/share sheet must always land on a live app.
+  window.addEventListener('pageshow',hideBuildOverlay);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)setTimeout(hideBuildOverlay,400);
+  });
 
   // ── SHARED PAGE RENDERER ────────────────────────────────────
   // One engine, used by BOTH the PDF and the WhatsApp image. Slices the guide
