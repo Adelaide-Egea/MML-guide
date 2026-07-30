@@ -444,6 +444,41 @@
   #printRoot *{ visibility: visible !important; }
   #printRoot .guide-wrap{ border-radius: 0 !important; box-shadow: none !important;
     overflow: visible !important; }
+
+  /* ── PAGINATION ── stop content being chopped mid-thought.
+     A caregiver reading page 3 should never land on the tail of a sentence
+     that started on page 2. Blocks move whole, or not at all. */
+  #printRoot .comfort-card,
+  #printRoot .sched-row,
+  #printRoot .contact-card,
+  #printRoot .bed-step,
+  #printRoot .important-list,
+  #printRoot .important-list li,
+  #printRoot .plain-sec li{
+    break-inside: avoid !important; page-break-inside: avoid !important;
+  }
+  /* a heading must never be the last thing on a page */
+  #printRoot .g-section{
+    break-after: avoid !important; page-break-after: avoid !important;
+    break-inside: avoid !important; margin-top: 18px !important;
+  }
+  /* no single dangling line at the top or bottom of a page */
+  #printRoot p, #printRoot .comfort-text, #printRoot .sched-note{
+    orphans: 3 !important; widows: 3 !important;
+  }
+  /* keep the sign-off attached to what precedes it, never alone on a last page */
+  #printRoot .guide-closing{
+    break-before: avoid !important; page-break-before: avoid !important;
+    break-inside: avoid !important; margin-top: 18px !important;
+    padding-top: 14px !important;
+  }
+  #printRoot .guide-footer{ break-before: avoid !important; }
+  /* tighten vertical rhythm so the guide needs fewer pages overall */
+  #printRoot .guide-header{ padding: 22px 24px 18px !important; }
+  #printRoot .guide-body{ padding: 16px 22px 18px !important; }
+  #printRoot .sched-row{ padding: 8px 0 !important; }
+  #printRoot .comfort-card{ padding: 12px 14px !important; margin-bottom: 10px !important; }
+  #printRoot .comfort-grid{ gap: 10px !important; }
 }
 /* progress overlay while the PDF is being built */
 #pdfOverlay{ display:none; position:fixed; inset:0; z-index:9999;
@@ -610,7 +645,7 @@
       <div class="q">Their care<br>needs.</div>
       <div class="age-badge" id="careAgeBadge">👶 Under 2</div>
       <div class="field"><label class="t-label">Allergies <span class="t-hint">— tap all that apply</span></label>
-        <div class="chips">
+        <div class="chips" id="grpAllergy">
           <span class="chip" onclick="tog(this)">Peanuts</span><span class="chip" onclick="tog(this)">Dairy</span>
           <span class="chip" onclick="tog(this)">Egg</span><span class="chip" onclick="tog(this)">Gluten</span><span class="chip" onclick="tog(this)">None</span>
         </div>
@@ -819,7 +854,10 @@
       const V=id=>{const e=el('#'+id);return e?e.value.trim():'';};
       if(current==='c-care'){
         const d=children[editingChild].data||(children[editingChild].data={});
-        d.allergies=[...document.querySelectorAll('[data-step="c-care"] .chip.sel')].map(x=>stripEmoji(x.textContent)).join(', ');
+        // SAFETY: scope to the allergy container ONLY. This used to select every
+        // chip in the step, so ticking "Cow's milk" as a MILK TYPE was reported
+        // to the caregiver as an ALLERGY. Never widen this selector.
+        d.allergies=[...document.querySelectorAll('#grpAllergy .chip.sel')].map(x=>stripEmoji(x.textContent)).join(', ');
         d.nappyStatus=V('cNappyStatus'); d.nappySize=V('cNappySize'); d.cream=V('cCream');
         // Store the clean value only. Keeping "🐄 Cow's milk" meant the emoji
         // travelled into the AI prompt and out into the guide text.
@@ -1312,7 +1350,7 @@ async function performGeneration(authPayload){
   const importantLines=(formData.importantNote||'').split('\n').map(l=>l.trim()).filter(Boolean);
   let translationBlock='';
   if(needsTranslation){
-    translationBlock=`\n\nTRANSLATION REQUEST — caregiver reads ${language}. Translate and return in JSON fields, preserving order and count:\nImportant lines (${importantLines.length}): ${JSON.stringify(importantLines)}\nSchedule notes (${schedItems.length}): ${JSON.stringify(schedItems.map(i=>i.notes||''))}\nBedtime notes (${bedItems.length}): ${JSON.stringify(bedItems.map(i=>i.notes||''))}\nAlso translate UI labels into ${language}: "Today's Schedule", "Bedtime Sequence", "Important", "Personality & Comfort", "If They Get Upset", "Contacts", "All children", and types: Bedtime, Nap, Milk/Feed, Lunch, Snack, Goûter, Breakfast, Dinner, Bath.`;
+    translationBlock=`\n\nTRANSLATION REQUEST — caregiver reads ${language}. Translate and return in JSON fields, preserving order and count:\nImportant lines (${importantLines.length}): ${JSON.stringify(importantLines)}\nSchedule notes (${schedItems.length}): ${JSON.stringify(schedItems.map(i=>i.notes||''))}\nBedtime notes (${bedItems.length}): ${JSON.stringify(bedItems.map(i=>i.notes||''))}\nAlso translate every free-text detail the parent wrote, including bottle/milk notes (${JSON.stringify(children.map(c=>c.bottleAmount||''))}) — return these in "translatedBottles" in the same order and count. Section labels in "sections" MUST also be written in ${language}, never English. Do NOT translate UI labels: "Today's Schedule", "Bedtime Sequence", "Important", "Personality & Comfort", "If They Get Upset", "Contacts", "All children", and types: Bedtime, Nap, Milk/Feed, Lunch, Snack, Goûter, Breakfast, Dinner, Bath.`;
   }
   const multiDayBlock=(formData.multiDayNotes||formData.overnightNotes)?`\n\nMulti-day notes: ${formData.multiDayNotes||''}\nOvernight routine: ${formData.overnightNotes||''}`:'';
   const emergBlock=emergNums?`\n\nLocal emergency numbers (${formData.country}): ${emergNums}`:'';
@@ -1323,7 +1361,7 @@ async function performGeneration(authPayload){
   const userPrompt=`Children: ${children.map(c=>c.name).join(', ')}\n\n${childrenText}${routineText}\n\nGuide for: ${formData.caregiverName} (${relationship})\nLanguage: ${language||'English'}\nSpecial instructions: ${formData.extra}${multiDayBlock}${emergBlock}${translationBlock}`;
 
   const systemPrompt=`You are helping reduce parents' mental load. Your job: write a childcare guide a caregiver can scan in 30 seconds and have everything they need. Respond ONLY with valid JSON, no preamble, no markdown fences:
-{"intro":"string","childSections":[{"childName":"string","comfort":"string","whenUpset":"string"}],"sections":[{"label":"string","content":"string"}],"labels":{"schedule":"string","bedtime":"string","important":"string","comfort":"string","whenUpset":"string","contacts":"string","allChildren":"string","types":{"Bedtime":"string","Nap":"string","Milk/Feed":"string","Lunch":"string","Snack":"string","Breakfast":"string","Dinner":"string","Bath":"string"}},"translatedImportant":["string"],"translatedRoutineNotes":["string"],"translatedBedtimeNotes":["string"]}
+{"intro":"string","childSections":[{"childName":"string","comfort":"string","whenUpset":"string"}],"sections":[{"label":"string","content":"string"}],"labels":{"schedule":"string","bedtime":"string","important":"string","comfort":"string","whenUpset":"string","contacts":"string","allChildren":"string","types":{"Bedtime":"string","Nap":"string","Milk/Feed":"string","Lunch":"string","Snack":"string","Breakfast":"string","Dinner":"string","Bath":"string"}},"translatedImportant":["string"],"translatedRoutineNotes":["string"],"translatedBedtimeNotes":["string"],"translatedBottles":["string"]}
 
 DURATION: ${dCtx}
 
@@ -1444,11 +1482,13 @@ function renderGuideIndepth(aiData,children,formData){
   }
   // Loop over the REAL children (not the AI's list) so a child is never dropped,
   // and fall back to the parent's own words if the AI returned nothing.
-  const comfortBlocks=children.map((c,i)=>({c,id:kidId[c.name]||getKidIdentity(i),cs:findChildSection(aiData,c)}))
-                              .filter(x=>x.cs.comfort||x.cs.whenUpset);
+  // keep the ORIGINAL index (ci) — the filter below would otherwise shift it,
+  // and translated bottle notes are matched to children positionally.
+  const comfortBlocks=children.map((c,i)=>({c,ci:i,id:kidId[c.name]||getKidIdentity(i),cs:findChildSection(aiData,c)}))
+                              .filter(x=>x.cs.comfort||x.cs.whenUpset||x.c.milk||x.c.bottleAmount||x.c.allergens||x.c.allergies);
   if(comfortBlocks.length){
     html+=`<div class="g-section">${labels.comfort}</div><div class="comfort-grid">`;
-    comfortBlocks.forEach(({c,id,cs})=>{
+    comfortBlocks.forEach(({c,ci,id,cs})=>{
       html+=`<div class="comfort-card" style="background:${id.dim};">
         <div class="comfort-card-name">${esc(id.emoji)} ${esc(c.name)}</div>`;
       if(cs.comfort){html+=`<div class="comfort-micro">${esc(labels.likesMicro)}</div><div class="comfort-text">${parseInlineBold(cs.comfort)}</div>`;}
@@ -1458,7 +1498,8 @@ function renderGuideIndepth(aiData,children,formData){
       // Safety-critical detail must never depend on a model's summary.
       const gLang=(formData&&formData.languageSelect)||'English';
       const milkTxt=localiseMilk(c.milk,gLang);
-      const bottleTxt=(c.bottleAmount||'').trim();
+      const tb=(aiData&&Array.isArray(aiData.translatedBottles))?aiData.translatedBottles:[];
+      const bottleTxt=((tb[ci]&&tb[ci].trim())||c.bottleAmount||'').trim();
       if(milkTxt||bottleTxt){
         html+=`<div class="upset-strip"><div class="comfort-micro">🍼 ${esc(labels.milkMicro)}</div><div class="comfort-text">${esc([milkTxt,bottleTxt].filter(Boolean).join(' — '))}</div></div>`;
       }
@@ -1779,7 +1820,10 @@ const ENGLISH_LABELS={
   milkMicro:'Milk & bottles', allergyMicro:'Allergies',
   types:{Bedtime:'Bedtime',Nap:'Nap','Milk/Feed':'Milk/Feed',Lunch:'Lunch',
     Snack:'Snack','Goûter':'Goûter',Breakfast:'Breakfast',Dinner:'Dinner',Bath:'Bath',
-    Play:'Play time','School pick-up':'School pick-up',Activity:'Activity'},
+    Play:'Play time','School pick-up':'School pick-up',Activity:'Activity',
+    Feed:'Feed','Quiet time':'Quiet time',Playtime:'Playtime','Outdoor time':'Outdoor time',
+    'Teeth brushing':'Teeth brushing','Nappy change':'Nappy change',
+    'Potty / toilet':'Potty / toilet','Story time':'Story time',Other:'Other'},
 };
 
 // ── UI LABELS ARE NOT AI-TRANSLATED ─────────────────────────
@@ -1792,7 +1836,7 @@ const UI_LABELS={
     comfort:'Personnalité & réconfort',contacts:'Contacts',allChildren:'Tous les enfants',
     whenUpset:'En cas de chagrin',likesMicro:'Goûts & personnalité',
     upsetMicro:'En cas de chagrin',milkMicro:'Lait & biberons',allergyMicro:'Allergies',emergency:'Urgences',
-    types:{Bedtime:'Coucher',Nap:'Sieste','Milk/Feed':'Biberon',Lunch:'Déjeuner',
+    types:{'Feed':'Biberon','Quiet time':'Temps calme','Snack':'Goûter','Play':'Jeu','Playtime':'Jeu','Outdoor time':'Sortie','Teeth brushing':'Brossage des dents','Nappy change':'Change','Potty / toilet':'Pot / toilettes','Story time':'Histoire','Homework':'Devoirs','Screen time':'Écrans','School run':'Départ école','Nursery / preschool run':'Départ crèche','Nursery pick-up':'Sortie crèche','Other':'Autre',Bedtime:'Coucher',Nap:'Sieste','Milk/Feed':'Biberon',Lunch:'Déjeuner',
       Snack:'Goûter','Goûter':'Goûter',Breakfast:'Petit-déjeuner',Dinner:'Dîner',
       Bath:'Bain',Play:'Jeu','School pick-up':'Sortie d\u2019école',Activity:'Activité'}},
   'Spanish':{
@@ -1800,7 +1844,7 @@ const UI_LABELS={
     comfort:'Personalidad y consuelo',contacts:'Contactos',allChildren:'Todos los niños',
     whenUpset:'Si se disgusta',likesMicro:'Gustos y personalidad',
     upsetMicro:'Si se disgusta',milkMicro:'Leche y biberones',allergyMicro:'Alergias',emergency:'Emergencias',
-    types:{Bedtime:'Acostarse',Nap:'Siesta','Milk/Feed':'Biberón',Lunch:'Almuerzo',
+    types:{'Feed':'Toma','Quiet time':'Tiempo tranquilo','Playtime':'Juego','Outdoor time':'Tiempo al aire libre','Teeth brushing':'Cepillado de dientes','Nappy change':'Cambio de pañal','Potty / toilet':'Orinal','Story time':'Cuento','Homework':'Deberes','Screen time':'Pantallas','Other':'Otro',Bedtime:'Acostarse',Nap:'Siesta','Milk/Feed':'Biberón',Lunch:'Almuerzo',
       Snack:'Merienda','Goûter':'Merienda',Breakfast:'Desayuno',Dinner:'Cena',
       Bath:'Baño',Play:'Juego','School pick-up':'Salida del colegio',Activity:'Actividad'}},
   'German':{
@@ -1808,7 +1852,7 @@ const UI_LABELS={
     comfort:'Persönlichkeit & Trost',contacts:'Kontakte',allChildren:'Alle Kinder',
     whenUpset:'Wenn es weint',likesMicro:'Vorlieben & Persönlichkeit',
     upsetMicro:'Wenn es weint',milkMicro:'Milch & Fläschchen',allergyMicro:'Allergien',emergency:'Notruf',
-    types:{Bedtime:'Schlafenszeit',Nap:'Mittagsschlaf','Milk/Feed':'Fläschchen',
+    types:{'Feed':'Fläschchen','Quiet time':'Ruhezeit','Playtime':'Spielzeit','Outdoor time':'Draußen','Teeth brushing':'Zähneputzen','Nappy change':'Windelwechsel','Potty / toilet':'Töpfchen','Story time':'Vorlesen','Homework':'Hausaufgaben','Screen time':'Bildschirmzeit','Other':'Sonstiges',Bedtime:'Schlafenszeit',Nap:'Mittagsschlaf','Milk/Feed':'Fläschchen',
       Lunch:'Mittagessen',Snack:'Snack','Goûter':'Snack',Breakfast:'Frühstück',
       Dinner:'Abendessen',Bath:'Baden',Play:'Spielen','School pick-up':'Schulabholung',
       Activity:'Aktivität'}},
@@ -1817,7 +1861,7 @@ const UI_LABELS={
     comfort:'Personalità e conforto',contacts:'Contatti',allChildren:'Tutti i bambini',
     whenUpset:'Se si agita',likesMicro:'Gusti e personalità',
     upsetMicro:'Se si agita',milkMicro:'Latte e biberon',allergyMicro:'Allergie',emergency:'Emergenze',
-    types:{Bedtime:'Nanna',Nap:'Riposino','Milk/Feed':'Poppata',Lunch:'Pranzo',
+    types:{'Feed':'Poppata','Quiet time':'Tempo tranquillo','Playtime':'Gioco','Outdoor time':'Tempo all’aperto','Teeth brushing':'Lavare i denti','Nappy change':'Cambio pannolino','Potty / toilet':'Vasino','Story time':'Racconto','Homework':'Compiti','Screen time':'Schermi','Other':'Altro',Bedtime:'Nanna',Nap:'Riposino','Milk/Feed':'Poppata',Lunch:'Pranzo',
       Snack:'Merenda','Goûter':'Merenda',Breakfast:'Colazione',Dinner:'Cena',
       Bath:'Bagnetto',Play:'Gioco','School pick-up':'Uscita da scuola',Activity:'Attività'}},
   'Portuguese':{
@@ -1825,7 +1869,7 @@ const UI_LABELS={
     comfort:'Personalidade e conforto',contacts:'Contactos',allChildren:'Todas as crianças',
     whenUpset:'Se ficar aflito',likesMicro:'Gostos e personalidade',
     upsetMicro:'Se ficar aflito',milkMicro:'Leite e biberões',allergyMicro:'Alergias',emergency:'Emergência',
-    types:{Bedtime:'Hora de dormir',Nap:'Sesta','Milk/Feed':'Biberão',Lunch:'Almoço',
+    types:{'Feed':'Biberão','Quiet time':'Tempo calmo','Playtime':'Brincar','Outdoor time':'Ar livre','Teeth brushing':'Lavar os dentes','Nappy change':'Muda de fralda','Potty / toilet':'Bacio','Story time':'História','Homework':'Trabalhos de casa','Screen time':'Ecrãs','Other':'Outro',Bedtime:'Hora de dormir',Nap:'Sesta','Milk/Feed':'Biberão',Lunch:'Almoço',
       Snack:'Lanche','Goûter':'Lanche',Breakfast:'Pequeno-almoço',Dinner:'Jantar',
       Bath:'Banho',Play:'Brincar','School pick-up':'Saída da escola',Activity:'Atividade'}},
   'Dutch':{
@@ -1833,7 +1877,7 @@ const UI_LABELS={
     comfort:'Persoonlijkheid & troost',contacts:'Contacten',allChildren:'Alle kinderen',
     whenUpset:'Bij verdriet',likesMicro:'Voorkeuren & karakter',
     upsetMicro:'Bij verdriet',milkMicro:'Melk & flesjes',allergyMicro:'Allergieën',emergency:'Noodgeval',
-    types:{Bedtime:'Bedtijd',Nap:'Dutje','Milk/Feed':'Flesje',Lunch:'Lunch',
+    types:{'Feed':'Flesje','Quiet time':'Rustmoment','Playtime':'Speeltijd','Outdoor time':'Buiten spelen','Teeth brushing':'Tanden poetsen','Nappy change':'Luier verschonen','Potty / toilet':'Potje','Story time':'Voorlezen','Homework':'Huiswerk','Screen time':'Schermtijd','Other':'Overig',Bedtime:'Bedtijd',Nap:'Dutje','Milk/Feed':'Flesje',Lunch:'Lunch',
       Snack:'Tussendoortje','Goûter':'Tussendoortje',Breakfast:'Ontbijt',
       Dinner:'Avondeten',Bath:'Bad',Play:'Spelen','School pick-up':'Ophalen school',
       Activity:'Activiteit'}}
@@ -1998,26 +2042,39 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     const b=doc.getElementById('editBanner'); if(b)b.remove();
   }
 
-  // Get the jsPDF constructor. Bundled builds don't reliably expose a global,
-  // so as a last resort we borrow the constructor off a real instance that
-  // html2pdf builds for us. This was why export died before it even started.
-  async function resolveJsPDF(){
-    let J=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||
-          (window.html2pdf&&window.html2pdf.jsPDF);
-    if(J)return J;
-    if(typeof html2pdf==='function'){
+  // Get a REAL, EMPTY jsPDF document.
+  // Previous attempt grabbed `instance.constructor` and called `new` on it —
+  // jsPDF 2.x returns an API object whose constructor is not the jsPDF factory,
+  // so the result had no .addImage and export died. Instead we let html2pdf
+  // build a genuine instance for us, then strip its pages and draw our own.
+  async function newPdfDoc(orientation){
+    const opt={jsPDF:{unit:'mm',format:'a4',orientation:orientation},
+               html2canvas:{scale:1,logging:false}};
+    let pdf=null;
+    const J=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+    if(typeof J==='function'){
+      try{
+        const cand=new J({unit:'mm',format:'a4',orientation:orientation});
+        if(cand&&typeof cand.addImage==='function')pdf=cand;
+      }catch(e){}
+    }
+    if(!pdf&&typeof html2pdf==='function'){
       const probe=document.createElement('div');
-      probe.style.cssText='width:20px;height:20px;background:#fff;position:fixed;top:0;left:0;z-index:-1;';
-      probe.textContent='.';
+      probe.style.cssText='width:40px;height:40px;background:#fff;position:fixed;top:0;left:0;z-index:-1;';
       document.body.appendChild(probe);
       try{
-        const pdf=await html2pdf().set({html2canvas:{scale:1,logging:false}})
-          .from(probe).toPdf().get('pdf');
-        if(pdf&&pdf.constructor)return pdf.constructor;
+        pdf=await html2pdf().set(opt).from(probe).toPdf().get('pdf');
       }catch(e){}
       finally{ probe.remove(); }
     }
-    return null;
+    if(!pdf||typeof pdf.addImage!=='function')
+      throw new Error('PDF engine unavailable on this browser');
+    // Remove any page html2pdf already drew, so we start from a clean document.
+    try{
+      let n=pdf.internal&&pdf.internal.getNumberOfPages?pdf.internal.getNumberOfPages():0;
+      while(n>0){ pdf.deletePage(1); n--; }
+    }catch(e){}
+    return pdf;
   }
 
   function showBuildOverlay(text){
@@ -2120,20 +2177,17 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
 
   async function exportPagedPdf(sourceNode,opts){
     const isLandscape=!!opts.isLandscape;
-    const JsPDF=await resolveJsPDF();
-    if(!JsPDF)throw new Error('jsPDF unavailable');
+    const pdf=await newPdfDoc(isLandscape?'landscape':'portrait');
     const M=8;
     const pageWmm=isLandscape?297:210, pageHmm=isLandscape?210:297;
     const usableW=pageWmm-M*2, usableH=pageHmm-M*2;
 
     const canvases=await renderGuidePages(sourceNode,
       {isLandscape,label:'Building your PDF\u2026 page'});
-    const pdf=new JsPDF({unit:'mm',format:'a4',
-      orientation:isLandscape?'landscape':'portrait'});
-    canvases.forEach((canvas,i)=>{
+    canvases.forEach((canvas)=>{
       let w=usableW, h=usableW*(canvas.height/canvas.width);
       if(h>usableH){ h=usableH; w=usableH*(canvas.width/canvas.height); }
-      if(i>0)pdf.addPage();
+      pdf.addPage(); // document starts empty, so every page is added here
       pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',
         M+(usableW-w)/2, M, w, h);
     });
