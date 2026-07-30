@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="app-version" content="held-v33">
+  <meta name="app-version" content="held-v34">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Held — care guides for whoever's looking after your children</title>
@@ -285,6 +285,31 @@
   box-shadow:var(--shadow); font-family:'Manrope',sans-serif;
 }
 .sample-close:active{ transform:scale(.9); background:var(--berry-dim); color:var(--berry); }
+/* ── GUIDE SCREEN CHROME ── */
+.guide-topbar{ position:sticky; top:0; z-index:60; display:flex; align-items:center;
+  justify-content:space-between; gap:8px; padding:10px 4px 12px;
+  background:var(--linen); border-bottom:1px solid var(--line); margin-bottom:14px; }
+.gt-home{ background:var(--card); border:1.5px solid var(--line); border-radius:999px;
+  padding:9px 16px; font-family:inherit; font-size:0.85rem; font-weight:700;
+  color:var(--green); cursor:pointer; }
+.gt-home:active{ transform:scale(0.96); }
+.gt-brand{ font-family:'Fraunces',Georgia,serif; font-size:1rem; font-weight:700;
+  color:var(--green); letter-spacing:-0.01em; }
+.gt-ghost{ width:86px; background:none; border:none; pointer-events:none; }
+.btn-reopen{ width:100%; background:var(--green-dim); border:1.5px solid var(--sage);
+  border-radius:14px; padding:14px; font-family:inherit; font-size:0.92rem;
+  font-weight:700; color:var(--green); cursor:pointer; margin-bottom:10px; }
+
+/* Actions are grouped by intent, not stacked as seven equal choices. */
+.act-label{ font-size:0.66rem; font-weight:800; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--softer); margin:18px 0 2px 2px; }
+.act-label:first-child{ margin-top:4px; }
+.act-quiet-row{ display:flex; gap:8px; margin-top:22px;
+  padding-top:16px; border-top:1px solid var(--line); }
+.act-quiet{ flex:1; background:none; border:none; font-family:inherit;
+  font-size:0.78rem; font-weight:600; color:var(--soft); padding:10px 6px;
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+.act-danger{ color:var(--berry); opacity:0.85; }
 .guide-actions{ display:flex; flex-direction:column; gap:9px; margin-top:18px; }
 .guide-actions .btn-primary{ padding:16px; font-size:1rem; }
 .btn-guide-2nd{
@@ -581,6 +606,8 @@
       <div class="greeting">Good morning</div>
       <h1>You can<br>leave now.</h1>
       <p class="hsub">One guide. Everything they need to know — so you can actually be present.</p>
+      <button class="btn-reopen" id="reopenGuide" style="display:none;"
+              onclick="showView('guideView')">↩ Back to your guide</button>
       <button class="btn-primary" onclick="go('intro')">Create a care guide</button>
       <a href="#" class="sample-link" onclick="viewExample(event)">See a sample guide →</a>
       <div class="install"><span class="ico">📲</span><div><strong>Turn this into an app</strong><span>Tap Share → Add to Home Screen</span></div></div>
@@ -809,6 +836,11 @@
 
 <!-- ══ GUIDE ══ -->
 <div id="guideView" class="screen" style="display:none;">
+  <div class="guide-topbar no-print">
+    <button class="gt-home" id="guideHomeBtn">← Done</button>
+    <span class="gt-brand">Held</span>
+    <button class="gt-ghost" aria-hidden="true" tabindex="-1"></button>
+  </div>
   <div id="sampleBanner" class="sample-banner no-print" style="display:none;">
     <span><strong>Sample guide</strong> — this is an example, not your family.</span>
     <button class="sample-close" onclick="closeSample()" aria-label="Close sample">✕</button>
@@ -825,13 +857,18 @@
     <button class="fmt-opt" data-fmt="landscape">📄 One-pager</button>
   </div>
   <div class="guide-actions no-print">
-    <button class="btn-primary" id="downloadPdfBtn">⬇ Save as PDF</button>
-    <button class="btn-guide-2nd" id="saveImgBtn">🖼 Save as image <span style="font-weight:500;opacity:.7;">(for WhatsApp)</span></button>
-    <button class="btn-guide-2nd" id="printBtn">🖨 Print <span style="font-weight:500;opacity:.7;">(adds Safari's page headers)</span></button>
-    <button class="btn-guide-2nd" id="shareBtn">📤 Share</button>
-    <button class="btn-guide-2nd" id="editTextBtn">📝 Edit the text</button>
-    <button class="btn-guide-2nd" id="editBtn">✏️ Edit details</button>
-    <button class="btn-guide-2nd" id="startOverBtn" style="color:var(--berry);">🗑 Start over</button>
+    <div class="act-label">Send it</div>
+    <button class="btn-primary" id="saveImgBtn">🖼 Send to your caregiver</button>
+    <button class="btn-guide-2nd" id="downloadPdfBtn">⬇ Save as PDF</button>
+
+    <div class="act-label">Change something</div>
+    <button class="btn-guide-2nd" id="editTextBtn">📝 Fix a word or two</button>
+    <button class="btn-guide-2nd" id="editBtn">✏️ Change the details</button>
+
+    <div class="act-quiet-row">
+      <button class="act-quiet" id="shareBtn">Copy as plain text</button>
+      <button class="act-quiet act-danger" id="startOverBtn">Start over</button>
+    </div>
   </div>
 </div>
 
@@ -864,6 +901,8 @@
   function show(step){
     current=step;
     screens.forEach(s=>s.classList.toggle('active',s.dataset.step===step));
+    if(step==='home'){ try{ renderReopen(); }catch(e){} }
+    if(step==='children'){ try{ renderSavedProfiles(); }catch(e){} }
     const inMain=FLOW.includes(step);
     const inChild=['c-basics','c-care','c-personality'].includes(step);
     const inFlow=inMain||inChild;
@@ -1450,6 +1489,30 @@
     const sc=document.getElementById('stepCount'); if(sc) sc.style.display='none';
     window.scrollTo(0,0);
   }
+  // The guide screen used to hide the entire app header, leaving no way back —
+  // a parent who finished a guide was simply stranded. Home is always one tap
+  // away now, and the guide is NOT destroyed: they can return to it.
+  function goHomeFromGuide(){
+    if(textEditOn)toggleTextEdit();
+    hideBuildOverlay();
+    hideGuideScreen();
+    show('home');
+    renderReopen();
+    window.scrollTo(0,0);
+  }
+  window.goHomeFromGuide=goHomeFromGuide;
+
+  // If a guide exists, offer a way straight back to it from home.
+  function renderReopen(){
+    const box=document.getElementById('reopenGuide');
+    if(!box)return;
+    const has=window.__held&&window.__held.aiData&&
+      document.getElementById('guideContent')&&
+      document.getElementById('guideContent').innerHTML.length>120;
+    box.style.display=has?'block':'none';
+  }
+  window.renderReopen=renderReopen;
+
   function hideGuideScreen(){
     const gv=document.getElementById('guideView'); if(gv) gv.style.display='none';
     const hdr=document.querySelector('header'); if(hdr) hdr.style.display='flex';
@@ -2099,7 +2162,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
     if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} clearDraft(); location.reload(); } }
     if(t.id==='editTextBtn'){ toggleTextEdit(); }
-    if(t.id==='printBtn'){ doPrintGuide(); }
+    if(t.id==='guideHomeBtn'){ goHomeFromGuide(); }
     const fmtBtn=t.closest&&t.closest('.fmt-opt');
     if(fmtBtn){ switchFormat(fmtBtn.dataset.fmt); }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
