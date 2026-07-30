@@ -159,12 +159,6 @@
   .r-card .r-del:active{color:var(--berry);}
   .r-who{width:100%;margin-top:9px;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);border-radius:10px;background:var(--linen);color:var(--ink);font-weight:600;}
   .r-who:focus{outline:none;border-color:var(--green);background:var(--card);}
-  .r-qty-row{display:flex;gap:8px;margin-top:9px;}
-  .r-qty{flex:1;padding:10px 12px;font-size:0.85rem;border:1.5px solid var(--line);
-    border-radius:10px;background:var(--linen);color:var(--ink);font-family:inherit;min-width:0;}
-  .r-qty:focus{outline:none;border-color:var(--green);background:var(--card);}
-  .r-qty-unit{width:104px;padding:10px 8px;font-size:0.85rem;border:1.5px solid var(--line);
-    border-radius:10px;background:var(--linen);color:var(--ink);font-family:inherit;}
   /* flash a newly added routine row so it's never "lost" in the list */
   @keyframes justAdded{
     0%{background:var(--green-dim);border-color:var(--green);}
@@ -437,6 +431,31 @@
   break-inside: avoid; page-break-inside: avoid;
 }
 @media print { .no-print{ display: none !important; } }
+/* printRoot: a clean copy of the guide hung straight off <body>, so printing
+   escapes the app shell entirely. Hidden on screen, sole content in print. */
+#printRoot{ display: none; }
+@media print{
+  body > *{ display: none !important; }
+  #printRoot{
+    display: block !important; position: static !important;
+    width: 100% !important; margin: 0 !important; padding: 0 !important;
+    background: #fff !important;
+  }
+  #printRoot *{ visibility: visible !important; }
+  #printRoot .guide-wrap{ border-radius: 0 !important; box-shadow: none !important;
+    overflow: visible !important; }
+}
+/* progress overlay while the PDF is being built */
+#pdfOverlay{ display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(26,46,31,0.55); backdrop-filter:blur(3px);
+  align-items:center; justify-content:center; }
+.pdf-overlay-card{ background:var(--card); color:var(--ink); border-radius:18px;
+  padding:26px 30px; text-align:center; font-size:0.9rem; font-weight:700;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25); max-width:78vw; }
+.pdf-spin{ width:26px; height:26px; margin:0 auto 12px; border-radius:50%;
+  border:3px solid var(--line); border-top-color:var(--green);
+  animation:pdfSpin .8s linear infinite; }
+@keyframes pdfSpin{ to{ transform:rotate(360deg);} }
 .guide-wrap{ border: none; border-radius: 0; box-shadow: none; }
 @page{ size: A4; margin: 14mm; }
 </style>
@@ -723,7 +742,7 @@
   <div class="guide-actions no-print">
     <button class="btn-primary" id="downloadPdfBtn">⬇ Save as PDF</button>
     <button class="btn-guide-2nd" id="saveImgBtn">🖼 Save as image <span style="font-weight:500;opacity:.7;">(for WhatsApp)</span></button>
-    <button class="btn-guide-2nd" onclick="window.print()">🖨 Print</button>
+    <button class="btn-guide-2nd" id="printBtn">🖨 Print</button>
     <button class="btn-guide-2nd" id="shareBtn">📤 Share</button>
     <button class="btn-guide-2nd" id="editTextBtn">📝 Edit the text</button>
     <button class="btn-guide-2nd" id="editBtn">✏️ Edit details</button>
@@ -800,9 +819,11 @@
       const V=id=>{const e=el('#'+id);return e?e.value.trim():'';};
       if(current==='c-care'){
         const d=children[editingChild].data||(children[editingChild].data={});
-        d.allergies=[...document.querySelectorAll('[data-step="c-care"] .chip.sel')].map(x=>x.textContent.trim()).join(', ');
+        d.allergies=[...document.querySelectorAll('[data-step="c-care"] .chip.sel')].map(x=>stripEmoji(x.textContent)).join(', ');
         d.nappyStatus=V('cNappyStatus'); d.nappySize=V('cNappySize'); d.cream=V('cCream');
-        d.milk=[...document.querySelectorAll('#grpMilk .chip.sel')].map(x=>x.textContent.trim()).join(', ');
+        // Store the clean value only. Keeping "🐄 Cow's milk" meant the emoji
+        // travelled into the AI prompt and out into the guide text.
+        d.milk=[...document.querySelectorAll('#grpMilk .chip.sel')].map(x=>stripEmoji(x.textContent)).join(', ');
         d.milkNotes=''; d.bottle=V('cBottle'); d.foodType=V('cFoodType');
         d.preschool=V('cPreschool'); d.school=V('cSchool');
       }
@@ -1052,37 +1073,14 @@
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
       ${showWho?`<select class="r-who" onchange="routineItems[${i}].child=this.value">${opts}</select>`:''}
-      ${isFeedItem(r.name)?`<div class="r-qty-row">
-        <input type="number" inputmode="decimal" min="0" step="5" class="r-qty"
-               value="${esc(r.qty||'')}" placeholder="Amount"
-               oninput="routineItems[${i}].qty=this.value;saveDraft();">
-        <select class="r-qty-unit" onchange="routineItems[${i}].qtyUnit=this.value;saveDraft();">
-          ${QTY_UNITS.map(u=>`<option value="${u}"${(r.qtyUnit||defaultUnit(r.name))===u?' selected':''}>${u}</option>`).join('')}
-        </select>
-      </div>`:''}
       <input type="text" class="r-note" value="${(r.notes||'').replace(/"/g,'&quot;')}"
-             placeholder="Add a note (optional) — e.g. half a banana, no milk"
+             placeholder="Note — e.g. 150ml cow's milk + apple slices"
              oninput="routineItems[${i}].notes=this.value">
     </div>`;}).join('');
   }
   function delRoutine(i){ if(i<0||i>=routineItems.length)return; routineItems.splice(i,1); renderRoutine(); }
 
-  // Quantities used to be buried in the free-text note. Feeding rows now get a
-  // proper number + unit, so "how much?" is never ambiguous for the caregiver.
-  const QTY_UNITS=['ml','oz','g','tbsp','tsp','cup','portion','piece'];
-  const FEED_WORDS=['feed','milk','bottle','breakfast','lunch','dinner','snack',
-    'go\u00fbter','gouter','tea','supper','formula','water','drink','meal'];
-  function isFeedItem(name){
-    const n=(name||'').toLowerCase();
-    return FEED_WORDS.some(w=>n.includes(w));
-  }
-  function defaultUnit(name){
-    const n=(name||'').toLowerCase();
-    if(n.includes('milk')||n.includes('bottle')||n.includes('feed')||
-       n.includes('formula')||n.includes('water')||n.includes('drink'))return 'ml';
-    return 'portion';
-  }
-  window.isFeedItem=isFeedItem; window.defaultUnit=defaultUnit;
+
 
   // Tap the icon on any routine row (custom items included) to cycle through
   // a set of options. No extra screen, no modal — one tap, one new icon.
@@ -1126,16 +1124,8 @@
     });
   }
   function collectRoutineData(){
-    return routineItems.map(r=>{
-      const qty=(r.qty||'').toString().trim();
-      const unit=r.qtyUnit||defaultUnit(r.name);
-      // Fold the structured amount into the note so it reaches the guide and
-      // the AI, without the parent having to type it into free text.
-      const amount=qty?`${qty}${unit==='portion'||unit==='piece'?' '+unit:unit}`:'';
-      const note=[amount,(r.notes||'').trim()].filter(Boolean).join(' — ');
-      return {type:r.name,time:r.time||'',child:r.child||'all',
-              notes:note,emoji:r.emoji||'',qty:qty,qtyUnit:unit};
-    });
+    return routineItems.map(r=>({type:r.name,time:r.time||'',child:r.child||'all',
+      notes:(r.notes||'').trim(),emoji:r.emoji||''}));
   }
   function collectContactsData(){
     return contacts.filter(x=>x.name||x.phone).map(x=>({name:x.name,phone:x.phone,relationship:x.rel||''}));
@@ -1354,6 +1344,13 @@ RULES — follow every one without exception:
    - A signal listed in a communication/dictionary section applies ONLY where the parent
      put it. Do not transplant it into the routine, sleep or upset sections.
    - If something is unclear, restate the parent's words plainly rather than interpreting.
+6. AMOUNTS: parents type quantities inside their normal notes ("150ml of cow's
+   milk", "half a banana", "2 tbsp"). Keep every amount EXACTLY as written —
+   same number, same unit — and place it at the FRONT of the note so a caregiver
+   reads the quantity first: "150ml cow's milk + apple slices". Never round,
+   convert, invent or drop an amount. If no amount was given, do not add one.
+7. UI headings and section titles are handled by the app — do NOT translate or
+   restyle them. Only ever rewrite the parent's own words.
 LANGUAGE: Write entirely in the requested language if not English.
 TRANSLATION ACCURACY: Translate meaning, never "improve" it. Keep every negation and every
 "without warning" exactly as strong in the target language as in the original.
@@ -1392,7 +1389,7 @@ TRANSLATION FIELDS: Only include if TRANSLATION REQUEST present. Match array len
 
 function renderGuideIndepth(aiData,children,formData){
   const kidId={};children.forEach((c,i)=>{kidId[c.name]=resolveKidIdentity(c,i);});
-  const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
+  const labels=resolveLabels(aiData,formData);
   const typeLabels=labels.types||ENGLISH_LABELS.types;
   function kidTag(name){const id=kidId[name];if(!id)return`<span class="kid-tag" style="background:var(--green);">${esc(name)}</span>`;return`<span class="kid-tag" style="background:${id.color};">${esc(id.emoji)} ${esc(name)}</span>`;}
   const routineItems=formData.routineItems||[];
@@ -1454,8 +1451,21 @@ function renderGuideIndepth(aiData,children,formData){
     comfortBlocks.forEach(({c,id,cs})=>{
       html+=`<div class="comfort-card" style="background:${id.dim};">
         <div class="comfort-card-name">${esc(id.emoji)} ${esc(c.name)}</div>`;
-      if(cs.comfort){html+=`<div class="comfort-micro">Likes & personality</div><div class="comfort-text">${parseInlineBold(cs.comfort)}</div>`;}
-      if(cs.whenUpset){html+=`<div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">${parseInlineBold(cleanProse(cs.whenUpset))}</div></div>`;}
+      if(cs.comfort){html+=`<div class="comfort-micro">${esc(labels.likesMicro)}</div><div class="comfort-text">${parseInlineBold(cs.comfort)}</div>`;}
+      if(cs.whenUpset){html+=`<div class="upset-strip"><div class="comfort-micro">🧸 ${esc(labels.upsetMicro)}</div><div class="comfort-text">${parseInlineBold(cleanProse(cs.whenUpset))}</div></div>`;}
+      // Milk and allergies are STRUCTURED facts the parent ticked, so the app
+      // renders them itself rather than hoping the AI mentions them in prose.
+      // Safety-critical detail must never depend on a model's summary.
+      const gLang=(formData&&formData.languageSelect)||'English';
+      const milkTxt=localiseMilk(c.milk,gLang);
+      const bottleTxt=(c.bottleAmount||'').trim();
+      if(milkTxt||bottleTxt){
+        html+=`<div class="upset-strip"><div class="comfort-micro">🍼 ${esc(labels.milkMicro)}</div><div class="comfort-text">${esc([milkTxt,bottleTxt].filter(Boolean).join(' — '))}</div></div>`;
+      }
+      const algTxt=[c.allergens||c.allergies,c.allergyNotes].filter(Boolean).join(' — ').trim();
+      if(algTxt){
+        html+=`<div class="upset-strip"><div class="comfort-micro">⚠️ ${esc(labels.allergyMicro)}</div><div class="comfort-text">${esc(algTxt)}</div></div>`;
+      }
       html+=`</div>`;
     });
     html+=`</div>`;
@@ -1473,7 +1483,7 @@ function renderGuideIndepth(aiData,children,formData){
   if(contacts.length||emergNums){
     html+=`<div class="g-section">${labels.contacts}</div><div class="contacts-grid">`;
     contacts.forEach(c=>{html+=`<div class="contact-card"><div class="contact-name">${esc(c.name||'Contact')}</div><div class="contact-line">${esc(c.phone||'')}</div></div>`;});
-    if(emergNums)html+=`<div class="contact-card" style="border-color:var(--berry);background:var(--berry-dim);"><div class="contact-name" style="color:var(--berry);">🚨 Emergency (${formData.country})</div><div class="contact-line">${emergNums}</div></div>`;
+    if(emergNums)html+=`<div class="contact-card" style="border-color:var(--berry);background:var(--berry-dim);"><div class="contact-name" style="color:var(--berry);">🚨 ${esc(labels.emergency)} (${esc(formData.country)})</div><div class="contact-line">${esc(localiseEmergency(emergNums,(formData&&formData.languageSelect)||'English'))}</div></div>`;
     html+=`</div>`;
   }
   html+=`<div class="guide-closing">Your guide is ready. You can leave now. 🤍<br><strong>— ${signOff}</strong></div>`;
@@ -1485,7 +1495,7 @@ function renderGuideIndepth(aiData,children,formData){
 
 function renderGuideLandscape(aiData,children,formData){
   const kidId={};children.forEach((c,i)=>{kidId[c.name]=resolveKidIdentity(c,i);});
-  const labels=(aiData.labels&&aiData.labels.schedule)?aiData.labels:ENGLISH_LABELS;
+  const labels=resolveLabels(aiData,formData);
   const typeLabels=labels.types||ENGLISH_LABELS.types;
   const routineItems=formData.routineItems||[];
   const schedItems=routineItems.filter(r=>r.type!=='Bedtime');
@@ -1528,8 +1538,8 @@ function renderGuideLandscape(aiData,children,formData){
     const cs=findChildSection(aiData,c);
     html+=`<div class="kid-col" style="background:${id.dim};border-radius:18px;padding:14px;">
       <div class="kid-col-name" style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${esc(id.emoji)} ${esc(c.name)}${c.age?', '+esc(String(c.age).split(' ')[0]):''}</div>`;
-    if(cs.comfort)html+=`<div class="comfort-micro">Likes</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort)}</div>`;
-    if(cs.whenUpset)html+=`<div class="comfort-micro">🧸 If upset</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset))}</div>`;
+    if(cs.comfort)html+=`<div class="comfort-micro">${esc(labels.likesMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort)}</div>`;
+    if(cs.whenUpset)html+=`<div class="comfort-micro">🧸 ${esc(labels.upsetMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset))}</div>`;
     const allergy=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
     if(allergy)html+=`<div class="comfort-micro">Allergies</div><div style="font-size:0.8rem;line-height:1.5;">${allergy}</div>`;
     html+=`</div>`;
@@ -1733,14 +1743,135 @@ const EMERGENCY_NUMBERS={
   'Australia':'000',
 };
 
+// Strip leading emoji/pictographs so chip values are clean data.
+function stripEmoji(t){
+  return (t||'').replace(/[\u2190-\u2BFF\u2600-\u27BF\uFE0F\u200D]|[\uD800-\uDBFF][\uDC00-\uDFFF]/g,'').replace(/\s+/g,' ').trim();
+}
+// Milk types are a fixed list, so they get proper translations too.
+const MILK_TYPES={
+  'French':{"Breastmilk":'Lait maternel',"Formula":'Lait infantile',
+    "Cow's milk":'Lait de vache',"Plant milk":'Lait végétal'},
+  'Spanish':{"Breastmilk":'Leche materna',"Formula":'Leche de fórmula',
+    "Cow's milk":'Leche de vaca',"Plant milk":'Leche vegetal'},
+  'German':{"Breastmilk":'Muttermilch',"Formula":'Säuglingsnahrung',
+    "Cow's milk":'Kuhmilch',"Plant milk":'Pflanzenmilch'},
+  'Italian':{"Breastmilk":'Latte materno',"Formula":'Latte artificiale',
+    "Cow's milk":'Latte vaccino',"Plant milk":'Latte vegetale'},
+  'Portuguese':{"Breastmilk":'Leite materno',"Formula":'Leite de fórmula',
+    "Cow's milk":'Leite de vaca',"Plant milk":'Leite vegetal'},
+  'Dutch':{"Breastmilk":'Moedermelk',"Formula":'Flesvoeding',
+    "Cow's milk":'Koemelk',"Plant milk":'Plantaardige melk'}
+};
+function localiseMilk(val,lang){
+  const map=MILK_TYPES[lang];
+  if(!val)return '';
+  return val.split(',').map(x=>{
+    const k=stripEmoji(x);
+    return (map&&map[k])||k;
+  }).filter(Boolean).join(' + ');
+}
+
 const ENGLISH_LABELS={
   schedule:"Today's Schedule",bedtime:'Bedtime Sequence',important:'Important',
   comfort:'Personality & Comfort',contacts:'Contacts',allChildren:'All children',
   whenUpset:'If They Get Upset',
+  likesMicro:'Likes & personality', upsetMicro:'If upset', milkMicro:'Lait & biberons',allergyMicro:'Allergies',milkMicro:'Leche y biberones',allergyMicro:'Alergias',milkMicro:'Milch & Fläschchen',allergyMicro:'Allergien',milkMicro:'Latte e biberon',allergyMicro:'Allergie',milkMicro:'Leite e biberões',allergyMicro:'Alergias',milkMicro:'Melk & flesjes',allergyMicro:'Allergieën',emergency:'Emergency',
+  milkMicro:'Milk & bottles', allergyMicro:'Allergies',
   types:{Bedtime:'Bedtime',Nap:'Nap','Milk/Feed':'Milk/Feed',Lunch:'Lunch',
     Snack:'Snack','Goûter':'Goûter',Breakfast:'Breakfast',Dinner:'Dinner',Bath:'Bath',
     Play:'Play time','School pick-up':'School pick-up',Activity:'Activity'},
 };
+
+// ── UI LABELS ARE NOT AI-TRANSLATED ─────────────────────────
+// The AI returned "Toutes les enfants" (wrong gender — enfant is masculine).
+// UI chrome is a small fixed set, so it is translated by hand once, here, and
+// is always correct. The AI only ever translates the PARENT'S OWN words.
+const UI_LABELS={
+  'French':{
+    schedule:'Journée type',bedtime:'Rituel du coucher',important:'Important',
+    comfort:'Personnalité & réconfort',contacts:'Contacts',allChildren:'Tous les enfants',
+    whenUpset:'En cas de chagrin',likesMicro:'Goûts & personnalité',
+    upsetMicro:'En cas de chagrin',milkMicro:'Lait & biberons',allergyMicro:'Allergies',emergency:'Urgences',
+    types:{Bedtime:'Coucher',Nap:'Sieste','Milk/Feed':'Biberon',Lunch:'Déjeuner',
+      Snack:'Goûter','Goûter':'Goûter',Breakfast:'Petit-déjeuner',Dinner:'Dîner',
+      Bath:'Bain',Play:'Jeu','School pick-up':'Sortie d\u2019école',Activity:'Activité'}},
+  'Spanish':{
+    schedule:'Horario del día',bedtime:'Rutina de acostarse',important:'Importante',
+    comfort:'Personalidad y consuelo',contacts:'Contactos',allChildren:'Todos los niños',
+    whenUpset:'Si se disgusta',likesMicro:'Gustos y personalidad',
+    upsetMicro:'Si se disgusta',milkMicro:'Leche y biberones',allergyMicro:'Alergias',emergency:'Emergencias',
+    types:{Bedtime:'Acostarse',Nap:'Siesta','Milk/Feed':'Biberón',Lunch:'Almuerzo',
+      Snack:'Merienda','Goûter':'Merienda',Breakfast:'Desayuno',Dinner:'Cena',
+      Bath:'Baño',Play:'Juego','School pick-up':'Salida del colegio',Activity:'Actividad'}},
+  'German':{
+    schedule:'Tagesablauf',bedtime:'Zubettgeh-Ritual',important:'Wichtig',
+    comfort:'Persönlichkeit & Trost',contacts:'Kontakte',allChildren:'Alle Kinder',
+    whenUpset:'Wenn es weint',likesMicro:'Vorlieben & Persönlichkeit',
+    upsetMicro:'Wenn es weint',milkMicro:'Milch & Fläschchen',allergyMicro:'Allergien',emergency:'Notruf',
+    types:{Bedtime:'Schlafenszeit',Nap:'Mittagsschlaf','Milk/Feed':'Fläschchen',
+      Lunch:'Mittagessen',Snack:'Snack','Goûter':'Snack',Breakfast:'Frühstück',
+      Dinner:'Abendessen',Bath:'Baden',Play:'Spielen','School pick-up':'Schulabholung',
+      Activity:'Aktivität'}},
+  'Italian':{
+    schedule:'Giornata tipo',bedtime:'Rituale della nanna',important:'Importante',
+    comfort:'Personalità e conforto',contacts:'Contatti',allChildren:'Tutti i bambini',
+    whenUpset:'Se si agita',likesMicro:'Gusti e personalità',
+    upsetMicro:'Se si agita',milkMicro:'Latte e biberon',allergyMicro:'Allergie',emergency:'Emergenze',
+    types:{Bedtime:'Nanna',Nap:'Riposino','Milk/Feed':'Poppata',Lunch:'Pranzo',
+      Snack:'Merenda','Goûter':'Merenda',Breakfast:'Colazione',Dinner:'Cena',
+      Bath:'Bagnetto',Play:'Gioco','School pick-up':'Uscita da scuola',Activity:'Attività'}},
+  'Portuguese':{
+    schedule:'Rotina do dia',bedtime:'Ritual de dormir',important:'Importante',
+    comfort:'Personalidade e conforto',contacts:'Contactos',allChildren:'Todas as crianças',
+    whenUpset:'Se ficar aflito',likesMicro:'Gostos e personalidade',
+    upsetMicro:'Se ficar aflito',milkMicro:'Leite e biberões',allergyMicro:'Alergias',emergency:'Emergência',
+    types:{Bedtime:'Hora de dormir',Nap:'Sesta','Milk/Feed':'Biberão',Lunch:'Almoço',
+      Snack:'Lanche','Goûter':'Lanche',Breakfast:'Pequeno-almoço',Dinner:'Jantar',
+      Bath:'Banho',Play:'Brincar','School pick-up':'Saída da escola',Activity:'Atividade'}},
+  'Dutch':{
+    schedule:'Dagindeling',bedtime:'Bedtijdritueel',important:'Belangrijk',
+    comfort:'Persoonlijkheid & troost',contacts:'Contacten',allChildren:'Alle kinderen',
+    whenUpset:'Bij verdriet',likesMicro:'Voorkeuren & karakter',
+    upsetMicro:'Bij verdriet',milkMicro:'Melk & flesjes',allergyMicro:'Allergieën',emergency:'Noodgeval',
+    types:{Bedtime:'Bedtijd',Nap:'Dutje','Milk/Feed':'Flesje',Lunch:'Lunch',
+      Snack:'Tussendoortje','Goûter':'Tussendoortje',Breakfast:'Ontbijt',
+      Dinner:'Avondeten',Bath:'Bad',Play:'Spelen','School pick-up':'Ophalen school',
+      Activity:'Activiteit'}}
+};
+// Emergency service names, so "18 (Fire)" doesn't stay English in a French guide.
+const SERVICE_WORDS={
+  'French':{Police:'Police',Fire:'Pompiers',Ambulance:'Ambulance',
+    'Emergency Services':'Secours','Emergency':'Urgences'},
+  'Spanish':{Police:'Policía',Fire:'Bomberos',Ambulance:'Ambulancia',
+    'Emergency Services':'Emergencias','Emergency':'Emergencias'},
+  'German':{Police:'Polizei',Fire:'Feuerwehr',Ambulance:'Rettungsdienst',
+    'Emergency Services':'Notruf','Emergency':'Notruf'},
+  'Italian':{Police:'Polizia',Fire:'Vigili del fuoco',Ambulance:'Ambulanza',
+    'Emergency Services':'Emergenze','Emergency':'Emergenze'},
+  'Portuguese':{Police:'Polícia',Fire:'Bombeiros',Ambulance:'Ambulância',
+    'Emergency Services':'Emergência','Emergency':'Emergência'},
+  'Dutch':{Police:'Politie',Fire:'Brandweer',Ambulance:'Ambulance',
+    'Emergency Services':'Noodhulp','Emergency':'Noodgeval'}
+};
+function localiseEmergency(str,lang){
+  const map=SERVICE_WORDS[lang];
+  if(!map||!str)return str||'';
+  let out=str;
+  Object.keys(map).forEach(en=>{
+    out=out.replace(new RegExp('\\b'+en+'\\b','g'),map[en]);
+  });
+  return out;
+}
+// Curated table first, AI second, English last.
+function resolveLabels(aiData,formData){
+  const lang=(formData&&formData.languageSelect)||'English';
+  const curated=UI_LABELS[lang];
+  const ai=(aiData&&aiData.labels&&aiData.labels.schedule)?aiData.labels:null;
+  const base=Object.assign({},ENGLISH_LABELS,ai||{},curated||{});
+  base.types=Object.assign({},ENGLISH_LABELS.types,
+    (ai&&ai.types)||{},(curated&&curated.types)||{});
+  return base;
+}
 
 let childCount=0,routineCount=0,contactCount=0,selectedMode=null,selectedDuration=null;
 
@@ -1774,6 +1905,7 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     if(t.id==='editBtn'){ hideGuideScreen(); show('children'); }
     if(t.id==='startOverBtn'){ if(confirm('Clear everything and start again?')){ try{localStorage.removeItem('held-last-entry');}catch(x){} clearDraft(); location.reload(); } }
     if(t.id==='editTextBtn'){ toggleTextEdit(); }
+    if(t.id==='printBtn'){ doPrintGuide(); }
     if(t.id==='downloadPdfBtn'){ doDownloadPdf(); }
     if(t.id==='saveImgBtn'){ doSaveImage(); }
     if(t.id==='shareBtn'){ doShare(); }
@@ -1866,32 +1998,78 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     const b=doc.getElementById('editBanner'); if(b)b.remove();
   }
 
-  async function exportPagedPdf(sourceNode,opts){
-    const isLandscape=!!opts.isLandscape;
+  // Get the jsPDF constructor. Bundled builds don't reliably expose a global,
+  // so as a last resort we borrow the constructor off a real instance that
+  // html2pdf builds for us. This was why export died before it even started.
+  async function resolveJsPDF(){
+    let J=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF||
+          (window.html2pdf&&window.html2pdf.jsPDF);
+    if(J)return J;
+    if(typeof html2pdf==='function'){
+      const probe=document.createElement('div');
+      probe.style.cssText='width:20px;height:20px;background:#fff;position:fixed;top:0;left:0;z-index:-1;';
+      probe.textContent='.';
+      document.body.appendChild(probe);
+      try{
+        const pdf=await html2pdf().set({html2canvas:{scale:1,logging:false}})
+          .from(probe).toPdf().get('pdf');
+        if(pdf&&pdf.constructor)return pdf.constructor;
+      }catch(e){}
+      finally{ probe.remove(); }
+    }
+    return null;
+  }
+
+  function showBuildOverlay(text){
+    let o=document.getElementById('pdfOverlay');
+    if(!o){
+      o=document.createElement('div');
+      o.id='pdfOverlay'; o.className='no-print';
+      o.innerHTML='<div class="pdf-overlay-card"><div class="pdf-spin"></div><div id="pdfOverlayText"></div></div>';
+      document.body.appendChild(o);
+    }
+    const t=document.getElementById('pdfOverlayText');
+    if(t)t.textContent=text||'Building your PDF\u2026';
+    o.style.display='flex';
+    return o;
+  }
+  function hideBuildOverlay(){
+    const o=document.getElementById('pdfOverlay');
+    if(o)o.style.display='none';
+  }
+
+  // ── SHARED PAGE RENDERER ────────────────────────────────────
+  // One engine, used by BOTH the PDF and the WhatsApp image. Slices the guide
+  // into page-sized chunks at safe block boundaries and renders each to its own
+  // modest canvas. Never one giant canvas (Safari caps at ~16.7M px and hands
+  // back a blank), and never one endless strip (unreadable in a chat bubble).
+  async function renderGuidePages(sourceNode,opts){
+    const o=opts||{};
+    const isLandscape=!!o.isLandscape;
+    const forceCompact=!!o.forceCompact;
     const h2c=await loadH2C();
-    const JsPDF=getJsPDF();
-    if(!JsPDF) throw new Error('jsPDF unavailable');
+    if(!h2c)throw new Error('html2canvas unavailable');
 
-    const M=8;
-    const pageWmm=isLandscape?297:210, pageHmm=isLandscape?210:297;
-    const usableW=pageWmm-M*2, usableH=pageHmm-M*2;
     const EXPORT_W=isLandscape?1160:800;
-    const pageHpx=Math.floor(EXPORT_W*(usableH/usableW));
+    const ratio=isLandscape?(194/281):(281/194); // A4 usable, minus margins
+    const pageHpx=Math.floor(EXPORT_W*ratio);
 
-    // Offscreen stage, forced to the LIGHT palette so the PDF is always
-    // printable even when the parent is using the app in dark mode.
     const stage=document.createElement('div');
-    stage.setAttribute('aria-hidden','true');
-    stage.style.cssText='position:fixed;left:-20000px;top:0;z-index:-1;background:#fff;';
-    stage.style.width=EXPORT_W+'px';
+    stage.id='pdfStage'; stage.setAttribute('aria-hidden','true');
+    stage.className='no-print';
+    stage.style.cssText='position:fixed;top:0;left:0;z-index:9998;background:#fff;'+
+      'width:'+EXPORT_W+'px;max-width:none;overflow:visible;';
     Object.keys(LIGHT_VARS).forEach(k=>stage.style.setProperty(k,LIGHT_VARS[k]));
     document.body.appendChild(stage);
 
+    const canvases=[];
     try{
-      // 1. Measure a full clone so we know each block's real height.
       const measure=document.createElement('div');
       measure.className=sourceNode.className;
       measure.classList.toggle('pdf-landscape',isLandscape);
+      // The image share always uses the dense layout, so a chat-bubble
+      // screenshot stays legible even if the parent built the long guide.
+      if(forceCompact)measure.classList.add('guide-compact');
       measure.innerHTML=sourceNode.innerHTML;
       measure.style.cssText='width:'+EXPORT_W+'px;background:#fff;border-radius:0;box-shadow:none;overflow:visible;';
       stage.appendChild(measure);
@@ -1900,8 +2078,8 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
       const header=measure.querySelector('.guide-header');
       const body=measure.querySelector('.guide-body');
       const blocks=body?Array.from(body.children):[];
+      if(!blocks.length&&!header)throw new Error('nothing to export');
 
-      // 2. Pack blocks into pages without ever splitting one.
       const headerH=header?header.getBoundingClientRect().height:0;
       const pages=[]; let cur=[], curH=headerH;
       blocks.forEach(b=>{
@@ -1912,14 +2090,13 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
       if(cur.length)pages.push(cur);
       if(!pages.length)pages.push([]);
 
-      const pdf=new JsPDF({unit:'mm',format:'a4',
-        orientation:isLandscape?'landscape':'portrait'});
-
-      // 3. Render one modest canvas per page.
+      measure.style.display='none';
       for(let i=0;i<pages.length;i++){
+        showBuildOverlay((o.label||'Preparing\u2026')+' '+(i+1)+' / '+pages.length);
         const pageEl=document.createElement('div');
         pageEl.className=measure.className;
-        pageEl.style.cssText='width:'+EXPORT_W+'px;background:#fff;border-radius:0;box-shadow:none;overflow:visible;';
+        pageEl.style.cssText='width:'+EXPORT_W+'px;min-height:'+pageHpx+'px;'+
+          'background:#fff;border-radius:0;box-shadow:none;overflow:visible;';
         if(i===0&&header)pageEl.appendChild(header.cloneNode(true));
         const bodyEl=document.createElement('div');
         bodyEl.className=body?body.className:'guide-body';
@@ -1929,25 +2106,74 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
         await nextFrame();
 
         const canvas=await h2c(pageEl,{scale:2,useCORS:true,logging:false,
-          backgroundColor:'#ffffff',width:EXPORT_W,windowWidth:EXPORT_W,
-          scrollX:0,scrollY:0,onclone:stripEditChrome});
-        if(!canvas||!canvas.width||!canvas.height)throw new Error('blank canvas');
-
-        let w=usableW, h=usableW*(canvas.height/canvas.width);
-        if(h>usableH){ h=usableH; w=usableH*(canvas.width/canvas.height); }
-        if(i>0)pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',
-          M+(usableW-w)/2, M, w, h);
+          backgroundColor:'#ffffff',scrollX:0,scrollY:0,
+          windowWidth:EXPORT_W,onclone:stripEditChrome});
+        if(!canvas||!canvas.width||!canvas.height)throw new Error('page '+(i+1)+' rendered blank');
+        canvases.push(canvas);
         stage.removeChild(pageEl);
       }
-      pdf.save(opts.filename);
     } finally {
       stage.remove();
     }
+    return canvases;
   }
 
+  async function exportPagedPdf(sourceNode,opts){
+    const isLandscape=!!opts.isLandscape;
+    const JsPDF=await resolveJsPDF();
+    if(!JsPDF)throw new Error('jsPDF unavailable');
+    const M=8;
+    const pageWmm=isLandscape?297:210, pageHmm=isLandscape?210:297;
+    const usableW=pageWmm-M*2, usableH=pageHmm-M*2;
+
+    const canvases=await renderGuidePages(sourceNode,
+      {isLandscape,label:'Building your PDF\u2026 page'});
+    const pdf=new JsPDF({unit:'mm',format:'a4',
+      orientation:isLandscape?'landscape':'portrait'});
+    canvases.forEach((canvas,i)=>{
+      let w=usableW, h=usableW*(canvas.height/canvas.width);
+      if(h>usableH){ h=usableH; w=usableH*(canvas.width/canvas.height); }
+      if(i>0)pdf.addPage();
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.94),'JPEG',
+        M+(usableW-w)/2, M, w, h);
+    });
+    pdf.save(opts.filename);
+  }
+
+  // ── NATIVE PRINT ────────────────────────────────────────────
+  // The app shell (body overflow:hidden, .screen position:absolute) clips
+  // everything below the fold, so printing the live DOM produced a blank page.
+  // We copy the guide into a plain container attached straight to <body>, and
+  // print CSS hides everything except that. Native print also gives REAL text
+  // rather than an image, so it is the most reliable route on iPhone.
+  function doPrintGuide(){
+    if(textEditOn)toggleTextEdit();
+    const src=document.getElementById('guideContent');
+    if(!src){ window.print(); return; }
+    let root=document.getElementById('printRoot');
+    if(root)root.remove();
+    root=document.createElement('div');
+    root.id='printRoot';
+    const wrap=document.createElement('div');
+    wrap.className=src.className;
+    wrap.innerHTML=src.innerHTML;
+    Object.keys(LIGHT_VARS).forEach(k=>root.style.setProperty(k,LIGHT_VARS[k]));
+    root.appendChild(wrap);
+    document.body.appendChild(root);
+    const cleanup=()=>{ const r=document.getElementById('printRoot'); if(r)r.remove(); };
+    if(window.matchMedia){
+      const mq=window.matchMedia('print');
+      const onChange=(e)=>{ if(!e.matches){ cleanup(); if(mq.removeEventListener)mq.removeEventListener('change',onChange); } };
+      if(mq.addEventListener)mq.addEventListener('change',onChange);
+    }
+    window.addEventListener('afterprint',cleanup,{once:true});
+    setTimeout(()=>{ try{ window.print(); }catch(e){ cleanup(); } },60);
+    setTimeout(cleanup,60000); // belt & braces
+  }
+  window.doPrintGuide=doPrintGuide;
+
   async function doDownloadPdf(){
-    if(textEditOn)toggleTextEdit(); // never export with editing chrome showing
+    if(textEditOn)toggleTextEdit();
     const node=document.getElementById('guideContent');
     if(!node)return;
     const kids=(window.__held&&window.__held.children)||[];
@@ -1956,15 +2182,20 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
     const btn=document.getElementById('downloadPdfBtn');
     const label=btn?btn.innerHTML:'';
     if(btn){btn.disabled=true;btn.innerHTML='Building your PDF\u2026';}
+    showBuildOverlay('Building your PDF\u2026');
     try{
       await exportPagedPdf(node,{isLandscape:mode==='landscape',
         filename:`held-${nm}.pdf`});
+      hideBuildOverlay();
     }catch(err){
+      hideBuildOverlay();
+      const msg=(err&&err.message)?err.message:String(err);
+      window.__heldPdfError=msg;
       console.error('PDF export failed:',err);
-      // A blank download is never acceptable — fall back to the print dialogue,
-      // where the parent can still choose "Save as PDF".
-      alert('The PDF could not be built on this device. Opening the print view \u2014 choose "Save as PDF" there.');
-      try{ window.print(); }catch(e){}
+      // Never leave the parent with nothing: go straight to the native print
+      // sheet, where iPhone offers "Save as PDF" / Save to Files.
+      alert('Direct download did not work here ('+msg+').\n\nOpening the print sheet instead \u2014 on iPhone, tap the share icon there and choose "Save to Files" to get your PDF.');
+      doPrintGuide();
     }finally{
       if(btn){btn.disabled=false;btn.innerHTML=label;}
     }
@@ -1984,40 +2215,52 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
       document.head.appendChild(sc);
     });
   }
+  // ── WHATSAPP IMAGE ──────────────────────────────────────────
+  // Was: the whole guide rendered as ONE endless PNG. In a chat bubble that
+  // previews as an unreadable sliver, and on a long guide it blew the canvas
+  // limit outright. Now: proper page-shaped cards, always in the dense layout,
+  // sent as a small set the recipient can swipe. Same engine as the PDF.
   async function doSaveImage(){
     if(textEditOn)toggleTextEdit();
     const node=document.getElementById('guideContent');
+    if(!node)return;
     const kids=(window.__held&&window.__held.children)||[];
     const nm=((kids[0]&&kids[0].name)||'guide').toLowerCase().replace(/\s+/g,'-');
-    let h2c=null;
-    try{ h2c=await loadH2C(); }
-    catch(e){ alert('Image export needs an internet connection. Try Save as PDF instead.'); return; }
+    const btn=document.getElementById('saveImgBtn');
+    const label=btn?btn.innerHTML:'';
+    if(btn)btn.disabled=true;
+    showBuildOverlay('Preparing image\u2026');
     try{
-      const canvas=await h2c(node,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,
-        onclone:(doc)=>{
-          // html2canvas ignores @media print, so strip edit chrome by hand.
-          doc.querySelectorAll('.is-editing').forEach(x=>{
-            x.classList.remove('is-editing');
-            x.style.outline='none'; x.style.background='none';
-          });
-          const b=doc.getElementById('editBanner'); if(b)b.remove();
-        }});
-      canvas.toBlob(async blob=>{
-        if(!blob){ alert('Could not create the image.'); return; }
-        const file=new File([blob],`held-${nm}.png`,{type:'image/png'});
-        // try native share first (lets you send straight to WhatsApp)
-        if(navigator.canShare&&navigator.canShare({files:[file]})){
-          try{ await navigator.share({files:[file],title:'Held care guide'}); return; }
-          catch(e){ if(e&&e.name==='AbortError')return; }
-        }
-        const url=URL.createObjectURL(blob);
+      const canvases=await renderGuidePages(node,
+        {isLandscape:false,forceCompact:true,label:'Preparing image\u2026 page'});
+      const blobs=await Promise.all(canvases.map(c=>new Promise(res=>{
+        c.toBlob(b=>res(b),'image/png');
+      })));
+      const files=blobs.filter(Boolean).map((b,i)=>new File([b],
+        canvases.length>1?`held-${nm}-${i+1}.png`:`held-${nm}.png`,{type:'image/png'}));
+      if(!files.length)throw new Error('no image produced');
+      hideBuildOverlay();
+
+      if(navigator.canShare&&navigator.canShare({files})){
+        try{ await navigator.share({files,title:'Held care guide'}); return; }
+        catch(e){ if(e&&e.name==='AbortError')return; }
+      }
+      files.forEach((f,i)=>{
+        const url=URL.createObjectURL(f);
         const a=document.createElement('a');
-        a.href=url; a.download=`held-${nm}.png`;
+        a.href=url; a.download=f.name;
         document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url),1500);
-      },'image/png');
-    }catch(e){ alert('Could not save the image. Try Save as PDF instead.'); }
+        setTimeout(()=>URL.revokeObjectURL(url),2000+i*300);
+      });
+    }catch(e){
+      hideBuildOverlay();
+      console.error('Image export failed:',e);
+      alert('Could not create the image ('+((e&&e.message)||e)+'). Try Print instead.');
+    }finally{
+      if(btn){btn.disabled=false;btn.innerHTML=label;}
+    }
   }
+
   async function doShare(){
     if(textEditOn)toggleTextEdit();
     const kids=(window.__held&&window.__held.children)||[];
