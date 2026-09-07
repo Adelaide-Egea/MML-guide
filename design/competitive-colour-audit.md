@@ -313,3 +313,76 @@ crowded at the dark end by Hearth `#003648`, Thumbtack `#07344A` and Skylight `#
 it genuinely mid-tone rather than letting it drift darker. On type, either commit to the serif
 properly by taking it down into body text, or drop it — a display-only serif over a geometric
 sans is precisely what the three nearest competitors already ship.
+
+---
+
+## Part 4 — What was verified, and what it costs to act on
+
+The numbers above were re-measured independently before anything was decided, because the
+recommendation turns on them. CIEDE2000, against the shipped tokens:
+
+| Shipped | Nearest in category | ΔE | Reading |
+|---|---|---|---|
+| Card `#FAF6F0` | Hearth `#FBF7F3` | **1.0** | the same colour |
+| Card `#FAF6F0` | Tinybeans `#FAF6F3`, Skylight `#FBF7F4` | **1.5** | the same colour |
+| Card `#FAF6F0` | Jam `#F8F4F1` | **1.6** | the same colour |
+| Raspberry `#D9577E` | Kinedu `#DB4D7B` | **1.8** | the same colour |
+| Ground `#EFE7DA` | Hearth `#F4EBE3` | **2.8** | indistinguishable |
+| Lisette blue `#4D6C82` | Skylight `#2178AF` | 9.1 | distinct |
+| Jeannette petrol `#377177` | Ohai `#003648` | 20.7 | distinct |
+
+So the accents the founder chose are the safe part of the palette. The collisions are all in the
+neutrals — which is also the part the manifest specified loosely, as "warm ground, light card",
+rather than by name.
+
+Ranked by how much of the screen each one occupies, which is the only ranking that matters here:
+
+1. **The card is the worst.** It is the largest surface in the product and it is within ΔE 1.6 of
+   four separate apps.
+2. **The ground is second**, at ΔE 2.8 from one.
+3. **Raspberry is third and not urgent.** It is a completion colour, no completion state exists in
+   the product yet, and it currently paints nothing.
+
+### Why the ground cannot move on its own
+
+Every accent was solved to *exactly* its 4.5:1 target on `#EFE7DA` — Lisette blue clears by
+0.02, petrol by 0.01. There is no headroom, so darkening the ground by any amount fails all of
+them at once. A search over 1,164 warm grounds in the uncrowded L\* 83–88 band returned nothing
+that both clears the category by ΔE 8 and keeps the accents untouched: the two constraints are
+mutually exclusive. A deeper ground therefore costs a second, larger correction to colours the
+founder named:
+
+| | Manifest | Shipped | On a `#E0D2BC` ground |
+|---|---|---|---|
+| Lisette blue | `#52738A` | `#4D6C82` (ΔE 2.6) | `#445F73` (ΔE 7.3) |
+| Jeannette petrol | `#377278` | `#377177` (ΔE 0.4) | `#306369` (ΔE 5.3) |
+| Ink muted | `#7C7468` | `#6E675D` (ΔE 5.2) | `#615B52` (ΔE 9.7) |
+
+ΔE 2.6 is invisible side by side. ΔE 7.3 is not.
+
+### The three options, all built and photographed
+
+**A — ship as is.** The founder's palette exactly. Distinctive blue, category-standard neutrals.
+Currently the default.
+
+**B — remove the white card.** `--surface` becomes `#EFE7DA`, separation carried by
+`--hairline: #D3C6AE` and no shadow. This deletes the worst collision outright and costs nothing:
+every contrast pair is already verified against that value, because it is the ground. It does not
+address the ground itself.
+
+**C — deepen the ground.** `--paper: #E0D2BC`, `--surface: #EFE7DA` — the manifest's ground
+becomes the card, and a putty ground sits beneath it. Lands in the empty L\* band, keeps the whole
+palette warm, and looks more expensive. Costs the accent drift in the table above.
+
+**Recommendation: C.** It is the only one that actually answers the question that was asked, the
+drift is small in absolute terms, and every colour in it is still recognisably the founder's. But
+the palette is a brand decision and this one is not close enough to make unilaterally — B is a
+free improvement that could be taken on its own if C is unwanted.
+
+### Raspberry
+
+Nothing near `#D9577E` clears Kinedu: ΔE 12 in that region of the wheel is already a visibly
+different colour, and the closest candidates that separate cleanly (`#B66E6F`, `#A76E7B`) are
+dusty roses that lose the celebratory quality the completion colour exists for. It is a real
+either/or rather than a correction. Since raspberry paints nothing today, it is left at the
+manifest value and should be settled when the first completion state is designed.
