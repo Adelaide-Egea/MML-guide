@@ -1,6 +1,6 @@
 'use client';
 
-import { type RoutineItem, ROUTINE_KINDS } from '@mml/core';
+import { type RoutineItem, routineKindsFor } from '@mml/core';
 import { TopBar } from '../../components/Chrome.tsx';
 import { newId } from '../../lib/ids.ts';
 import { useActions, useAppState } from '../../lib/store.ts';
@@ -119,65 +119,86 @@ export default function HouseholdPage() {
           </p>
         )}
 
-        {[...household.routine]
-          .sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'))
-          .map((item) => (
-            <div key={item.id} className="card stack-tight">
-              <div className="row">
-                <input
-                  className="input"
-                  type="time"
-                  value={item.time ?? ''}
-                  onChange={(e) =>
-                    actions.upsertRoutine({ ...item, time: e.target.value || null })
-                  }
-                  aria-label="Time"
-                  style={{ maxWidth: 140 }}
-                />
-                <select
-                  className="select grow"
-                  value={item.kind}
-                  onChange={(e) =>
-                    actions.upsertRoutine({ ...item, kind: e.target.value as RoutineItem['kind'] })
-                  }
-                  aria-label="What happens"
-                >
-                  {ROUTINE_KINDS.map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <select
-                className="select"
-                value={item.appliesTo}
-                onChange={(e) => actions.upsertRoutine({ ...item, appliesTo: e.target.value })}
-                aria-label="Who this applies to"
-              >
-                <option value="all">Everyone</option>
-                {household.subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </option>
-                ))}
-              </select>
-              <input
-                className="input"
-                value={item.notes}
-                onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
-                placeholder="Anything worth adding"
-                aria-label="Notes"
-              />
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => actions.removeRoutine(item.id)}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+        {household.routine.length > 0 && (
+          <div className="card rows">
+            {[...household.routine]
+              .sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'))
+              .map((item) => {
+                const kinds = routineKindsFor(household, item.appliesTo, item.kind);
+                return (
+                  <div key={item.id} className="rows-item stack-tight">
+                    <div className="row">
+                      <input
+                        className="input"
+                        type="time"
+                        value={item.time ?? ''}
+                        onChange={(e) =>
+                          actions.upsertRoutine({ ...item, time: e.target.value || null })
+                        }
+                        aria-label="Time"
+                        style={{ maxWidth: 128 }}
+                      />
+                      <select
+                        className="select grow"
+                        value={item.kind}
+                        onChange={(e) =>
+                          actions.upsertRoutine({
+                            ...item,
+                            kind: e.target.value as RoutineItem['kind'],
+                          })
+                        }
+                        aria-label="What happens"
+                      >
+                        {kinds.map((kind) => (
+                          <option key={kind} value={kind}>
+                            {kind}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="row">
+                      <select
+                        className="select grow"
+                        value={item.appliesTo}
+                        onChange={(e) => {
+                          // Moving a row to the flat has to move its kind too, or the
+                          // list keeps offering nappies for an apartment.
+                          const appliesTo = e.target.value;
+                          const next = routineKindsFor(household, appliesTo);
+                          const kind = next.includes(item.kind) ? item.kind : (next[0] ?? item.kind);
+                          actions.upsertRoutine({ ...item, appliesTo, kind });
+                        }}
+                        aria-label="Who this applies to"
+                      >
+                        <option value="all">Everyone</option>
+                        {household.subjects.map((subject) => (
+                          <option key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => actions.removeRoutine(item.id)}
+                        aria-label={`Remove ${item.kind}`}
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <input
+                      className="input"
+                      value={item.notes}
+                      onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
+                      placeholder="Anything worth adding"
+                      aria-label="Notes"
+                    />
+                  </div>
+                );
+              })}
+          </div>
+        )}
       </section>
     </main>
   );

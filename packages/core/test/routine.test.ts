@@ -8,7 +8,14 @@ import {
   presetsFor,
   routineFor,
 } from '../src/routine.ts';
-import { ROUTINE_KINDS, ROUTINE_KINDS_FOR, type RoutineItem } from '../src/household.ts';
+import {
+  type Household,
+  ROUTINE_KINDS,
+  ROUTINE_KINDS_FOR,
+  type RoutineItem,
+  routineKindsFor,
+} from '../src/household.ts';
+import { type CareSubject, EMPTY_SAFETY } from '../src/subject.ts';
 
 test('a subject is only offered presets meant for its kind', () => {
   assert.deepEqual(
@@ -89,4 +96,52 @@ test('routineFor selects one subject’s items', () => {
     routineFor(routine, 'sub_rio').map((i) => i.id),
     ['a'],
   );
+});
+
+// ── Narrowing the kind picker ────────────────────────────────────────────────
+
+const flat: CareSubject = {
+  id: 'sub_flat',
+  kind: 'place',
+  name: 'The flat',
+  descriptor: '',
+  identity: { colourToken: 'id-indigo', symbol: '■' },
+  safety: EMPTY_SAFETY,
+  entries: [],
+};
+
+const baby: CareSubject = { ...flat, id: 'sub_lea', kind: 'child', name: 'Léa' };
+
+const household: Household = {
+  id: 'hh',
+  name: '',
+  country: '',
+  subjects: [baby, flat],
+  contacts: [],
+  routine: [],
+};
+
+test('a routine row on a flat is not offered nappies', () => {
+  // Reported from the preview: choosing the apartment still offered "Breakfast,
+  // change nappy" — the picker ignored who the row was about.
+  const kinds = routineKindsFor(household, 'sub_flat');
+  assert.ok(!kinds.includes('Nappy'));
+  assert.ok(!kinds.includes('Breakfast'));
+  assert.ok(kinds.includes('Bins'));
+});
+
+test('everyone gets the union of what the household actually contains', () => {
+  const kinds = routineKindsFor(household, 'all');
+  assert.ok(kinds.includes('Nappy'));
+  assert.ok(kinds.includes('Bins'));
+  // No pet in this household, so no walks to offer.
+  assert.ok(!kinds.includes('Walk'));
+});
+
+test('narrowing never blanks a row that already holds an unusual kind', () => {
+  assert.ok(routineKindsFor(household, 'sub_flat', 'Medication').includes('Medication'));
+});
+
+test('an empty household still offers something to pick', () => {
+  assert.deepEqual(routineKindsFor({ ...household, subjects: [] }, 'all'), ROUTINE_KINDS);
 });

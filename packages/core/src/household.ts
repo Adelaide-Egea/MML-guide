@@ -104,6 +104,30 @@ export const ROUTINE_KINDS_FOR: Record<SubjectKind, readonly RoutineKind[]> = {
   place: ['Bins', 'Plants', 'Post', 'Laundry', 'Other'],
 };
 
+/** The kinds worth offering for a routine row, given who it applies to.
+ *
+ *  A row pointed at the flat offering "Nappy" was the reported bug. `all` is
+ *  deliberately wide rather than empty: a household with a baby and a dog genuinely
+ *  can have an everyone-item of almost any kind, and narrowing that would trade one
+ *  wrong list for another. `current` is always kept in the list so that changing who
+ *  a row applies to can never blank the control or silently drop what was written.
+ */
+export function routineKindsFor(
+  household: Household,
+  appliesTo: string,
+  current?: RoutineKind,
+): readonly RoutineKind[] {
+  const subject = household.subjects.find((s) => s.id === appliesTo);
+  const allowed = new Set<RoutineKind>(
+    subject
+      ? ROUTINE_KINDS_FOR[subject.kind]
+      : household.subjects.flatMap((s) => ROUTINE_KINDS_FOR[s.kind]),
+  );
+  if (allowed.size === 0) return ROUTINE_KINDS;
+  if (current) allowed.add(current);
+  return ROUTINE_KINDS.filter((k) => allowed.has(k));
+}
+
 export interface RoutineItem {
   readonly id: string;
   /** 24-hour `HH:MM`, or null when the item has no fixed time. */
