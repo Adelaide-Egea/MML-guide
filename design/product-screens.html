@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Product screens</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1560px; background: #efe9df; color: var(--ink);
+    font-family: var(--font-ui); -webkit-font-smoothing: antialiased;
+    padding: 52px 60px 60px;
+  }
+  .display { font-family: var(--font-display); font-variation-settings: "SOFT" 40, "WONK" 1; }
+  h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.022em; }
+  .sub { color: var(--ink-muted); font-size: 19px; margin-top: 9px; max-width: 900px; line-height: 1.5; }
+  .row { display: flex; gap: 54px; margin-top: 44px; }
+  .col { width: 400px; }
+  .cap { margin-top: 22px; }
+  .cap b { display: block; font-size: 17px; font-weight: 600; }
+  .cap span { display: block; margin-top: 6px; font-size: 15px; color: var(--ink-muted); line-height: 1.5; }
+
+  /* ── Device ──────────────────────────────────────────────── */
+  .phone {
+    width: 400px; height: 830px; border-radius: 46px; background: #100e0b;
+    padding: 9px; box-shadow: 0 3px 8px rgba(31,27,22,.13), 0 24px 60px rgba(31,27,22,.19);
+  }
+  .screen { width: 100%; height: 100%; border-radius: 38px; background: var(--paper); overflow: hidden;
+            display: flex; flex-direction: column; }
+  .statusbar { display: flex; justify-content: space-between; align-items: center;
+               padding: 15px 26px 6px; font-size: 14px; font-weight: 600; letter-spacing: .01em; }
+  .statusbar .dots { display: flex; gap: 4px; align-items: center; }
+  .statusbar i { display: block; width: 4px; border-radius: 1px; background: var(--ink); }
+  .batt { width: 23px; height: 12px; border: 1.5px solid var(--ink); border-radius: 3.5px; position: relative; }
+  .batt::after { content: ""; position: absolute; inset: 1.5px; right: 7px; background: var(--ink); border-radius: 1.5px; }
+
+  .body { flex: 1; overflow: hidden; padding: 0 18px; }
+
+  /* ── App header ──────────────────────────────────────────── */
+  .apphead { display: flex; align-items: center; gap: 10px; padding: 8px 4px 11px; }
+  .apphead svg { width: 25px; height: 25px; color: var(--brand); }
+  .apphead .who { flex: 1; }
+  .apphead h2 { font-family: var(--font-display); font-variation-settings: "SOFT" 40, "WONK" 1;
+                font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+  .apphead p { font-size: 13.5px; color: var(--ink-muted); margin-top: 2px; }
+  .pdf { font-size: 12.5px; font-weight: 600; color: var(--brand); border: 1px solid var(--brand);
+         border-radius: 999px; padding: 6px 11px; white-space: nowrap; }
+
+  /* ── Subject tabs ────────────────────────────────────────── */
+  .tabs { display: flex; gap: 7px; padding-bottom: 11px; }
+  .tab { font-size: 13.5px; font-weight: 500; padding: 8px 13px; border-radius: 999px;
+         background: var(--surface); border: 1px solid var(--hairline); color: var(--ink-muted);
+         display: flex; align-items: center; gap: 7px; }
+  .tab .d { width: 8px; height: 8px; border-radius: 50%; }
+  .tab.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  /* ── Cards ───────────────────────────────────────────────── */
+  .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+          padding: 13px 15px; margin-bottom: 9px; box-shadow: 0 1px 2px rgba(31,27,22,.03); }
+  .critical { border: 1px solid #eec9c6; border-left: 4px solid var(--critical); background: #fffaf9; }
+  .critical .hd { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700;
+                  letter-spacing: .07em; text-transform: uppercase; color: var(--critical); }
+  .critical .txt { margin-top: 7px; font-size: 16px; line-height: 1.42; font-weight: 500; }
+  .verified { margin-top: 9px; padding-top: 8px; border-top: 1px solid #f2e0de;
+              font-size: 12.5px; color: var(--ink-muted); display: flex; align-items: center; gap: 6px; }
+
+  .ask { display: flex; align-items: center; gap: 10px; background: var(--surface);
+         border: 1.5px solid var(--brand); border-radius: 999px; padding: 12px 17px; margin-bottom: 13px;
+         box-shadow: 0 2px 10px rgba(20,86,78,.08); }
+  .ask svg { width: 19px; height: 19px; color: var(--brand); flex: none; }
+  .ask span { font-size: 15.5px; color: var(--ink-muted); }
+
+  .sectitle { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+              color: var(--ink-muted); margin: 2px 4px 7px; }
+
+  .media { display: flex; gap: 13px; align-items: center; }
+  .thumb { width: 68px; height: 68px; border-radius: 10px; flex: none; overflow: hidden;
+           position: relative; background: var(--surface-sunk); }
+  .thumb svg { width: 100%; height: 100%; display: block; }
+  .badge { position: absolute; right: 5px; bottom: 5px; background: rgba(16,14,11,.82); color: #fff;
+           font-size: 10.5px; font-weight: 600; border-radius: 5px; padding: 2px 5px; letter-spacing: .01em; }
+  .play { position: absolute; inset: 0; display: grid; place-items: center; }
+  .play span { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.94);
+               display: grid; place-items: center; box-shadow: 0 1px 5px rgba(0,0,0,.28); }
+  .play span::after { content: ""; border-left: 10px solid var(--ink); border-top: 6.5px solid transparent;
+                      border-bottom: 6.5px solid transparent; margin-left: 3px; }
+  .media .t { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .media .s { font-size: 13.5px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4; }
+
+  .rt { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--hairline); }
+  .rt:last-child { border-bottom: 0; padding-bottom: 0; }
+  .rt .tm { font-size: 14px; font-weight: 700; width: 46px; flex: none; font-variant-numeric: tabular-nums; }
+  .rt .wt { font-size: 14.5px; line-height: 1.4; }
+  .rt .wt em { font-style: normal; color: var(--ink-muted); }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+          border-radius: 999px; padding: 2px 8px; }
+
+  /* ── Chat ────────────────────────────────────────────────── */
+  .chat { display: flex; flex-direction: column; gap: 9px; padding-top: 2px; }
+  .q { align-self: flex-end; max-width: 82%; background: var(--ink); color: var(--paper);
+       border-radius: 18px 18px 5px 18px; padding: 11px 15px; font-size: 15.5px; line-height: 1.42; }
+  .a { align-self: flex-start; max-width: 90%; background: var(--surface); border: 1px solid var(--hairline);
+       border-radius: 18px 18px 18px 5px; padding: 13px 15px; font-size: 15.5px; line-height: 1.48;
+       box-shadow: 0 1px 2px rgba(31,27,22,.03); }
+  .a .src { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--hairline);
+            display: flex; align-items: center; gap: 9px; }
+  .a .src .mini { width: 40px; height: 40px; border-radius: 7px; overflow: hidden; flex: none; background: var(--surface-sunk); }
+  .a .src .mini svg { width: 100%; height: 100%; display: block; }
+  .a .src .lbl { font-size: 12.5px; color: var(--ink-muted); line-height: 1.35; }
+  .a .src .lbl b { display: block; color: var(--brand); font-size: 13px; font-weight: 600; }
+  .a.nofact { background: var(--amber-tint); border-color: #ecd8ae; }
+  .btn { display: block; margin-top: 11px; text-align: center; background: var(--brand); color: #fff;
+         border-radius: 10px; padding: 11px; font-size: 15px; font-weight: 600; }
+
+  /* The text is one span rather than bare nodes: as flex children, each text run and
+     each <b> becomes its own item and the gap opens up inside sentences. */
+  .langbar { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-muted);
+             background: var(--brand-tint); border-radius: 8px; padding: 8px 11px; margin-bottom: 13px; }
+  .langbar svg { flex: none; }
+  .langbar b { color: var(--brand); font-weight: 600; }
+
+  /* ── Composer (parent side) ──────────────────────────────── */
+  .compose { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius);
+             padding: 15px 16px; }
+  .compose .ta { font-size: 16.5px; line-height: 1.45; }
+  .compose .cursor { display: inline-block; width: 2px; height: 18px; background: var(--brand);
+                     vertical-align: -3px; margin-left: 1px; }
+  .attach { display: flex; gap: 9px; margin-top: 14px; }
+  .attach div { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+                font-size: 13.5px; font-weight: 600; color: var(--ink-muted);
+                border: 1px dashed var(--hairline-strong); border-radius: 9px; padding: 10px 0; }
+  .attach svg { width: 16px; height: 16px; }
+  .attached { display: flex; gap: 9px; margin-top: 11px; align-items: center; }
+  .attached .mini { width: 54px; height: 54px; border-radius: 8px; overflow: hidden; background: var(--surface-sunk); }
+  .attached .mini svg { width: 100%; height: 100%; display: block; }
+  .attached .cap2 { font-size: 13px; color: var(--ink-muted); line-height: 1.4; }
+  .toast { margin-top: 13px; background: var(--brand-tint); border-radius: 10px; padding: 12px 14px;
+           font-size: 14px; line-height: 1.45; color: #0d3f39; }
+  .toast b { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1 class="display">One guide, whoever you are leaving in charge</h1>
+<p class="sub">The same engine behind the children, the dog and the house. The printed one-pager stays; the app is what the printed page could never do — answer a question at 2am, in the reader's own language, using only what you actually wrote.</p>
+
+<div class="row">
+
+  <!-- ══════════════ SCREEN 1 ══════════════ -->
+  <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="statusbar">
+        <span>21:34</span>
+        <div class="dots">
+          <i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i><i style="height:14px"></i>
+          <span style="margin-left:6px"></span><div class="batt"></div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="apphead">
+          <svg viewBox="0 0 48 48" fill="none"><rect x="9.75" y="5.75" width="28.5" height="36.5" rx="5.25" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M25.5 4 H33.5 V27.5 L29.5 23.5 L25.5 27.5 Z" fill="currentColor"/></svg>
+          <div class="who">
+            <h2>Chez les Martin</h2>
+            <p>Mamie · Mon 3 – Sun 9 Nov</p>
+          </div>
+          <div class="pdf">PDF</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab on"><span class="d" style="background:#5fbfaf"></span><span class="d" style="background:#e8927a;margin-left:-4px"></span>Léa &amp; Noah</div>
+          <div class="tab"><span class="d" style="background:#a8452a"></span>Rio</div>
+          <div class="tab"><span class="d" style="background:#44622b"></span>The house</div>
+        </div>
+
+        <div class="card critical">
+          <div class="hd">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z"/></svg>
+            Allergy — Léa
+          </div>
+          <div class="txt">Peanut and sesame. EpiPen is in the green pouch, kitchen drawer left of the sink.</div>
+          <div class="verified">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--brand)"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            Written by Claire, word for word. Never rewritten.
+          </div>
+        </div>
+
+        <div class="ask">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>
+          <span>Ask anything — in any language</span>
+        </div>
+
+        <div class="sectitle">Shown, not described</div>
+
+        <div class="card">
+          <div class="media">
+            <div class="thumb">
+              <svg viewBox="0 0 78 78"><rect width="78" height="78" fill="#e8dfcd"/><rect x="10" y="12" width="58" height="54" rx="3" fill="#c9a87c"/><rect x="13" y="15" width="25" height="48" rx="2" fill="#efe3cd"/><rect x="40" y="15" width="25" height="48" rx="2" fill="#efe3cd"/><rect x="16" y="19" width="19" height="7" rx="1.5" fill="#7fa8b8"/><rect x="16" y="28" width="19" height="7" rx="1.5" fill="#d08f74"/><rect x="16" y="37" width="19" height="7" rx="1.5" fill="#9db87f"/><rect x="43" y="19" width="19" height="7" rx="1.5" fill="#c4a3c9"/><rect x="43" y="28" width="19" height="7" rx="1.5" fill="#e0c37a"/><circle cx="37" cy="39" r="1.6" fill="#6b5436"/><circle cx="41" cy="39" r="1.6" fill="#6b5436"/></svg>
+              <div class="badge">3 photos</div>
+            </div>
+            <div>
+              <div class="t">Getting dressed</div>
+              <div class="s">Everything is in this cupboard. Top shelf is Léa, middle is Noah.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media">
+            <div class="thumb">
+              <svg viewBox="0 0 78 78"><rect width="78" height="78" fill="#dfe6e4"/><rect x="8" y="30" width="62" height="28" rx="5" fill="#8fb3ab"/><rect x="8" y="30" width="62" height="10" rx="5" fill="#a8c7c0"/><rect x="14" y="20" width="50" height="14" rx="6" fill="#f1ece1"/><circle cx="39" cy="27" r="4.5" fill="#e8cdb0"/><rect x="24" y="44" width="30" height="9" rx="4.5" fill="#f1ece1"/><text x="39" y="51.5" font-family="Inter,sans-serif" font-size="7.5" font-weight="700" fill="#4a5f59" text-anchor="middle">2.5 TOG</text></svg>
+              <div class="badge">2 photos</div>
+            </div>
+            <div>
+              <div class="t">Which sleeping bag</div>
+              <div class="s">Below 18°C, the grey one — with a photo of the label.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="media">
+            <div class="thumb">
+              <svg viewBox="0 0 78 78"><rect width="78" height="78" fill="#e4ded2"/><rect x="6" y="34" width="66" height="24" rx="4" fill="#b9a888"/><rect x="6" y="30" width="66" height="12" rx="4" fill="#f4f0e6"/><rect x="12" y="22" width="24" height="13" rx="5" fill="#fdfbf6"/><rect x="42" y="22" width="24" height="13" rx="5" fill="#fdfbf6"/><rect x="6" y="42" width="66" height="8" fill="#cbd8d3"/></svg>
+              <div class="play"><span></span></div>
+              <div class="badge">0:47</div>
+            </div>
+            <div>
+              <div class="t">How I make the beds</div>
+              <div class="s">Easier to watch than to explain. Filmed by Claire.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sectitle" style="margin-top:11px">Tonight</div>
+        <div class="card" style="padding-top:6px;padding-bottom:12px">
+          <div class="rt"><span class="tm">19:45</span><span class="wt">Noah's inhaler <span class="pill" style="background:var(--critical-tint);color:var(--critical)">2 puffs</span></span></div>
+          <div class="rt"><span class="tm">20:00</span><span class="wt">Bed — <em>Léa needs the landing light on</em></span></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap">
+      <b>One guide, three subjects</b>
+      <span>Children, the dog, the house — same structure, same app, no separate product. Safety-critical text is fenced off: it is shown exactly as it was typed and a language model is structurally forbidden from touching it.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCREEN 2 ══════════════ -->
+  <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="statusbar">
+        <span>07:12</span>
+        <div class="dots">
+          <i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i><i style="height:14px"></i>
+          <span style="margin-left:6px"></span><div class="batt"></div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="apphead">
+          <svg viewBox="0 0 48 48" fill="none"><rect x="9.75" y="5.75" width="28.5" height="36.5" rx="5.25" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M25.5 4 H33.5 V27.5 L29.5 23.5 L25.5 27.5 Z" fill="currentColor"/></svg>
+          <div class="who">
+            <h2>Perguntar ao guia</h2>
+            <p>Maria · limpeza, terças e sextas</p>
+          </div>
+        </div>
+
+        <div class="langbar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--brand)"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8 8 0 0 1 18.9 8zM12 4c.83 1.2 1.48 2.53 1.91 4h-3.82c.43-1.47 1.08-2.8 1.91-4zM4.26 14a7.8 7.8 0 0 1 0-4h3.38a16.5 16.5 0 0 0 0 4H4.26zm.84 2h2.95c.3 1.26.76 2.46 1.38 3.56A8 8 0 0 1 5.1 16zm2.95-8H5.1a8 8 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.05 8zM12 20c-.83-1.2-1.48-2.53-1.91-4h3.82c-.43 1.47-1.08 2.8-1.91 4zm2.34-6H9.66a14.6 14.6 0 0 1 0-4h4.68a14.6 14.6 0 0 1 0 4zm.23 5.56c.62-1.1 1.08-2.3 1.38-3.56h2.95a8 8 0 0 1-4.33 3.56zM16.36 14a16.5 16.5 0 0 0 0-4h3.38a7.8 7.8 0 0 1 0 4h-3.38z"/></svg>
+          <span>Claire escreveu em <b>francês</b> · está a ler em <b>português</b></span>
+        </div>
+
+        <div class="chat">
+          <div class="q">Onde estão os produtos de limpeza extra?</div>
+          <div class="a">
+            Na cave, à direita das escadas. A chave está debaixo do lava-loiça.
+            <div class="src">
+              <div class="mini">
+                <svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#e0dbcf"/><rect x="7" y="8" width="26" height="26" rx="2" fill="#b9ab8e"/><rect x="9" y="11" width="22" height="6" fill="#f2ece0"/><rect x="9" y="19" width="22" height="6" fill="#f2ece0"/><rect x="11" y="12" width="4" height="4" rx="1" fill="#7fa8b8"/><rect x="17" y="12" width="4" height="4" rx="1" fill="#d08f74"/><rect x="11" y="20" width="4" height="4" rx="1" fill="#9db87f"/></svg>
+              </div>
+              <div class="lbl"><b>A casa → Arrumação</b>Escrito por Claire, 12 de outubro</div>
+            </div>
+          </div>
+
+          <div class="q">A que horas devo dar de comer ao Rio?</div>
+          <div class="a">
+            Duas vezes por dia, 08:00 e 18:00. Uma chávena cheia na taça azul.
+            <div class="src">
+              <div class="mini">
+                <svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#ece3d4"/><ellipse cx="20" cy="26" rx="13" ry="7" fill="#6d94b5"/><ellipse cx="20" cy="24" rx="10" ry="5" fill="#b98f5e"/><circle cx="15" cy="14" r="3" fill="#8a6a45"/><circle cx="25" cy="14" r="3" fill="#8a6a45"/><circle cx="20" cy="17" r="4.5" fill="#a67c4e"/></svg>
+              </div>
+              <div class="lbl"><b>Rio → Refeições</b>Escrito por Claire, 2 de novembro</div>
+            </div>
+          </div>
+
+          <div class="q">Posso usar a máquina de lavar para as cortinas?</div>
+          <div class="a nofact">
+            <b>Isso não está no guia.</b> Não vou adivinhar.
+            <div class="btn">Perguntar à Claire</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap">
+      <b>It answers only from what you wrote</b>
+      <span>Retrieval, not invention. Every answer cites the section and the date you wrote it, translated into whatever language the reader is comfortable in. When the guide doesn't cover it, it says so and offers to ask you — which is the whole reason it can be trusted with the other answers.</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ SCREEN 3 ══════════════ -->
+  <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="statusbar">
+        <span>13:05</span>
+        <div class="dots">
+          <i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i><i style="height:14px"></i>
+          <span style="margin-left:6px"></span><div class="batt"></div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="apphead">
+          <svg viewBox="0 0 48 48" fill="none"><rect x="9.75" y="5.75" width="28.5" height="36.5" rx="5.25" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M25.5 4 H33.5 V27.5 L29.5 23.5 L25.5 27.5 Z" fill="currentColor"/></svg>
+          <div class="who">
+            <h2>Add to the guide</h2>
+            <p>Claire · takes about twenty seconds</p>
+          </div>
+        </div>
+
+        <div class="compose">
+          <div class="ta">Noah's swimming things live in the blue bag on the hook by the front door — not upstairs.<span class="cursor"></span></div>
+          <div class="attach">
+            <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg>Photo</div>
+            <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>Video</div>
+            <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>Speak</div>
+          </div>
+          <div class="attached">
+            <div class="mini">
+              <svg viewBox="0 0 54 54"><rect width="54" height="54" fill="#e3ded1"/><rect x="0" y="34" width="54" height="20" fill="#cdc3ad"/><rect x="6" y="6" width="42" height="5" rx="2.5" fill="#9c8d72"/><circle cx="17" cy="14" r="3" fill="#7d6f57"/><circle cx="37" cy="14" r="3" fill="#7d6f57"/><path d="M12 17h10l3 18H9l3-18z" fill="#4a7fb5"/><path d="M32 17h10l3 18H29l3-18z" fill="#c9743f"/></svg>
+            </div>
+            <div class="cap2">1 photo attached<br>The hook by the front door</div>
+          </div>
+          <div class="toast">
+            Filed under <b>Noah → Out of the house</b>. Mamie and Maria will see it next time they open the guide.
+          </div>
+        </div>
+
+        <div class="sectitle" style="margin-top:20px">Added this month</div>
+        <div class="card" style="padding-top:8px;padding-bottom:10px">
+          <div class="rt"><span class="tm" style="width:60px;font-weight:600;color:var(--ink-muted);font-size:13px">2 Nov</span><span class="wt">Rio's feeding times <em>— photo</em></span></div>
+          <div class="rt"><span class="tm" style="width:60px;font-weight:600;color:var(--ink-muted);font-size:13px">28 Oct</span><span class="wt">How I make the beds <em>— video</em></span></div>
+          <div class="rt"><span class="tm" style="width:60px;font-weight:600;color:var(--ink-muted);font-size:13px">21 Oct</span><span class="wt">Léa will only eat the orange bowl</span></div>
+        </div>
+
+        <div class="card" style="background:var(--surface-sunk);border-style:dashed">
+          <div class="media">
+            <div class="thumb" style="background:var(--surface);display:grid;place-items:center">
+              <svg viewBox="0 0 24 24" fill="var(--ink-muted)" style="width:30px;height:30px"><path d="M19 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-1 10H9v-2h9v2zm0-4H9V6h9v2zM4 6H2v14a2 2 0 0 0 2 2h14v-2H4V6z"/></svg>
+            </div>
+            <div>
+              <div class="t">Print the one-pager</div>
+              <div class="s">The fridge-door version: allergies, numbers, tonight's routine. One side of A4.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap">
+      <b>Built up over time, not written in one sitting</b>
+      <span>The guide gets better every time something goes slightly wrong. Add the thing you had to explain again, attach the photo or the forty-second video, and it is there for the next person — the new nanny, the grandparent, the cleaner — without you having to remember to say it.</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
