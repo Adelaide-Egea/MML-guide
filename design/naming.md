@@ -1,109 +1,131 @@
-# Naming — revised shortlist
+# Naming — coined round
 
-Supersedes the shortlist in `docs/strategy/04-naming.md`. Two things changed: Relais
-is withdrawn, and the product brief widened from a childcare handover to a handover
-of anything you leave in someone else's care.
+Supersedes both `docs/strategy/04-naming.md` and the Meanwhile/Carnet/Understudy
+shortlist. Three rounds have now been run. This one changed method, not just
+candidates, because the first two rounds were solving the wrong problem.
 
-## Relais is withdrawn, and the objection was correct
+## Where the first two rounds went wrong
 
-Relay is a chain of roughly 1,000 outlets in France, in 400 stations and metro
-stations and around twenty airports, owned by Lagardère Travel Retail. Under a 2010
-decree, concessions on public transport land may operate as *débits de tabac
-spéciaux*, and Relay stores use it — they are licensed tobacco retailers as well as
-newsagents.
+Round one proposed **Relais**. Relay is a chain of roughly 1,000 outlets in France
+— 400 stations and metro stations, twenty airports — and under the 2010 decree on
+transport concessions they are licensed tobacco retailers, reinforced by *relais
+colis* parcel points. The objection was correct and the name is withdrawn.
 
-So the association is not a stray personal one. For a French audience, *relais* in a
-retail context means the station kiosk, reinforced by *relais colis* parcel pickup
-points. Neither is what a premium product about someone's children wants to evoke. I
-should have caught this; a name has to be checked against the country it is being
-sold into, not only against a dictionary.
+Round two proposed **Meanwhile**. It is a good English word and a bad brand, for a
+reason that only shows up when you say it to a French speaker: there is no French
+equivalent, the `wh` cluster does not exist in French phonology, and the word cannot
+be spelled from hearing it. A name that half your market cannot pronounce or type
+into a search box is not a name, it is a liability.
 
-## What the name now has to carry
+Both failures share a cause. I was choosing **words that mean something**, and a word
+that means something means something *in a particular language*, carries whatever
+that language has already attached to it, and is usually already owned by someone.
 
-The brief moved. It is no longer a childcare product with other uses bolted on — it
-is one guide engine with several kinds of recipient: the grandparent, the nanny, the
-cleaner, the dog sitter, the neighbour watering the plants. That rules out anything
-that says *child*, *nanny*, *sitter*, *baby* or *nursery*, because those names would
-have to be abandoned the first time someone uses it for the dog.
+## The brief, restated
 
-It also has to carry the thing that actually differentiates the product, which is
-that the guide **answers back**. A caregiver asks a question and gets an answer drawn
-only from what the parent wrote, in their own language. That is not a document.
+- Does not have to mean anything.
+- Must not already exist.
+- Must be simple to say.
+- Must be simple to find.
+- Implicit from the two failures: must work identically in English and French.
 
-| | Meanwhile | Carnet | Understudy |
-| --- | --- | --- | --- |
-| What it names | the occasion | the artefact | the person |
-| Says nothing about children | yes | yes | yes |
-| Ownable as a mark | yes | **weak in France** | yes |
-| Works in French | poorly | natively | as theatre jargon only |
-| Length for an app icon | 9 | 6 | 10 |
-| `.house` domain | free | free | free |
+That is a specification for a **coined** name, and it can be screened mechanically
+rather than argued about.
 
-## Why Carnet slipped from first to second
+## Screening method
 
-It is the warmest and most immediately meaningful of the three, and in French it
-needs no explanation at all. Two findings weakened it.
+**Phonetic rule.** A candidate only qualifies if an English speaker and a French
+speaker, seeing it for the first time, say it the same way — and if either of them,
+hearing it, spells it the same way. That rules out a lot of letters:
 
-**The category is already occupied by the word.** *Carnet de Bord* is a live French
-app for *assistants familiaux* doing very nearly this job: per-child logs, PDF
-transmission sheets, GDPR, hosted in France, and — for what it is worth — built on
-Supabase. Its own marketing copy promises to reduce your *charge mentale*. Launching
-"Carnet" into French childcare software means launching next to it.
-
-**In France the word already belongs to a government document.** The *carnet de
-santé* is the official child health record every French parent is handed at birth.
-That gives instant comprehension and the wrong expectation: people will assume a
-health record, and a common noun attached to an official document is close to
-unregistrable for this category.
-
-Neither is fatal in the UK, where *carnet* is an elegant borrowed word with none of
-that baggage. But a name that is strong in one market and unownable in the other is
-not a name that scales, and France is the market where the pitch is easiest.
-
-## Recommendation: Meanwhile
-
-Beyond being registrable and available, there is a product reason. *Carnet* names a
-notebook, and the entire advance here is that this is not a notebook — it answers
-questions, in another language, at 2am. Naming it after the paper artefact sells the
-product as the thing it is replacing.
-
-*Meanwhile* names the occasion instead: the stretch of time when you are not there
-and someone else is holding it. That covers the child, the dog and the flat with no
-strain, it stays true whether the handover is four hours or a fortnight, and it is
-the same word whether the recipient is a grandparent or a cleaner. It is warm without
-being cute, and it is not a word anyone else in this category is using.
-
-Its weakness is real and worth stating: it does not translate into French. The French
-product would run under the English name, which is common enough for software but
-means the French pitch leans on the tagline rather than the name.
-
-## Registration, checked
-
-Queried against RDAP, which is the registry record rather than DNS:
-
-| Domain | |
+| Excluded | Why |
 | --- | --- |
-| `meanwhile.house` | available |
-| `meanwhile.guide` | available |
-| `carnet.house` | available |
-| `understudy.house` | available |
-| `meanwhilehq.com`, `meanwhileapp.com` | taken |
-| every `tend.*` checked | taken — the reason Tend was dropped |
+| `u` | English /uː/, French /y/ — different sound entirely |
+| `ou` `au` `ai` `ei` | English reads them as diphthongs, French as single vowels |
+| `c` `g` | Hard or soft depending on the following letter, in both languages |
+| `h` `j` `w` `x` `y` | Absent, silent or differently valued in French |
+| `th` `ch` `ph` | No French equivalent for the English values |
 
-`.house` reads deliberately rather than as a fallback, and it suits a product about
-someone else's home. None of this is a trademark search; that is worth paying a
-professional for once the name is chosen, in Class 9 and Class 42, in the UK and the
-EU.
+What survives is `o` (safest — /o/ in both), `a`, `e` and `i`, with `m n l r v s t p
+k b d f`. Every name below is built only from those.
 
-## The decision I need from you
+**Existence test.** Domain availability turned out to be useless. I checked 69
+invented five- and six-letter strings against the `.com` registry and **69 of 69 were
+already registered** — the pronounceable space was exhausted by squatters years ago.
+Stripe, Notion and Vercel all bought their `.com` after choosing the name. So the
+test that actually matters is whether a *business* is using the word:
 
-Pick the territory, not the spelling — the design system, the tokens and the code all
-avoid product names, so switching costs nothing until we register something.
+1. App Store search for an exact or leading-token match, via the iTunes API. 108
+   candidates screened, 59 came back with no app of that name.
+2. Company and trademark search on the survivors, to catch businesses without an app.
 
-1. **Meanwhile** — my recommendation. Ownable, distinctive, names the occasion, poor
-   in French.
-2. **Carnet** — warmer and instantly understood, weak to own in France, and it
-   undersells the interactive part.
-3. **Understudy** — the most distinctive of the three and flattering to the caregiver,
-   which helps adoption on the side of the user who did not choose the product. Long,
-   and English-only.
+## Shortlist
+
+Six survived both. Ranked.
+
+### 1. Marela — recommended
+
+`ma-RE-la`. Three even syllables, no ambiguous letter, spells itself from hearing in
+both languages. Warm without being sweet, and reads as a person's name without being
+a common one — which matters, because the caregiver is going to *ask it questions*.
+"Ask Marela where the sleeping bags are" is a sentence that works.
+
+No app, no company and no trademark surfaced in any register searched.
+
+### 2. Nolera
+
+`no-LE-ra`. Calmer and more clinical than Marela, slightly more premium, entirely
+ownable. The only holder found anywhere is a Japanese company registered in July 2026
+in Hokkaido with no products and no web presence.
+
+### 3. Nemba
+
+`NEM-ba`. The phonetically bulletproof one: the `mb` cluster closes the first
+syllable, so the `e` is /ɛ/ in both languages with no room for drift. Two syllables,
+five letters, best of the six on an app icon. Blunter and less warm than Marela.
+
+Two one-person consultancies use it, in England and Canada. Neither holds a
+trademark; the software classes are clear.
+
+### 4. Tanela
+
+`ta-NE-la`. Softest of the six. A Lithuanian metal fabricator and a dormant Panama
+holding company hold the word; neither is remotely adjacent and neither has search
+presence worth competing with.
+
+### 5. Tovela
+
+`to-VE-la`. Pleasant, slightly less distinctive. One micro-business uses it, and only
+because it is the founder's surname.
+
+### 6. Kembo
+
+`KEM-bo`. Short and punchy, same locked-vowel property as Nemba. Clear on the App
+Store. Reads more like a product than a person, which cuts against the "ask it a
+question" positioning.
+
+## Rejected in this round, and why
+
+| Name | Reason |
+| --- | --- |
+| Nella | An AI bedtime-story app for children, plus an AI finance assistant. Direct adjacency. |
+| Aluna | Live US trademarks in Class 9 software, plus a respiratory-health app. |
+| Venna | Two textile brands, a Brazilian social app, and a luxury *cannabis* brand. |
+| Valma | Registered UK trademark for household **cleaning products** — the worst possible adjacency for a household app. |
+| Orla, Otava, Nerola, Velva, Nimbo | Live apps under the exact name. |
+| Nadela, Aveno | Too close to Nadella and Aveeno. |
+| Nelva | A Belarusian womenswear brand with 120 stores. Software classes clear, but it owns the search results. |
+
+## What to expect on domains
+
+None of the six has a free `.com`; nothing sayable does. The realistic options are
+`.house`, `.care` or `.app` at registration price, or buying the `.com` from its
+current holder. That is a purchase decision, not a naming constraint, and it should
+not drive the choice of name.
+
+## The decision I need
+
+Pick one of the six. The code carries no product name — `packages/core` is
+deliberately name-free and the prototype now renders its name from a single constant
+— so applying the choice is a one-line change plus the manifest, and nothing else in
+the build is waiting on it.
