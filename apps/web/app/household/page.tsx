@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { type RoutineItem, routineKindsFor } from '@mml/core';
 import { TopBar } from '../../components/Chrome.tsx';
 import { newId } from '../../lib/ids.ts';
@@ -8,6 +9,7 @@ import { useActions, useAppState } from '../../lib/store.ts';
 export default function HouseholdPage() {
   const { household } = useAppState();
   const actions = useActions();
+  const householdKinds = routineKindsFor(household, 'all');
 
   return (
     <main className="shell">
@@ -85,6 +87,13 @@ export default function HouseholdPage() {
         ))}
       </section>
 
+      {/* The whole day, read rather than edited.
+      
+          Every row here already has an owner, and that owner has a page where the
+          presets and the right vocabulary for them live. Repeating a full editor
+          here produced three stacked controls per row and a picker that offered
+          nappies for a flat. So this is the overview — the view a caregiver gets,
+          shown to the parent — and each row is a way into the page that owns it. */}
       <section className="stack">
         <div className="spread">
           <h2 className="eyebrow">A typical day</h2>
@@ -95,20 +104,19 @@ export default function HouseholdPage() {
               actions.upsertRoutine({
                 id: newId('r'),
                 time: '08:00',
-                kind: 'Breakfast',
+                kind: householdKinds[0] ?? 'Other',
                 appliesTo: 'all',
                 notes: '',
               })
             }
           >
-            + Add
+            + Add for everyone
           </button>
         </div>
 
         <p className="muted">
-          Everyone&rsquo;s day in one timeline, which is how a caregiver reads it. Each person and
-          animal also has their own routine on their page, with presets — this is the same list
-          seen whole, and the place to put things that apply to the household rather than to one
+          Everyone in one timeline, which is how a caregiver reads it. Tap a row to change it on
+          the page it belongs to. Add here only what applies to the household rather than to one
           of them.
         </p>
 
@@ -124,82 +132,79 @@ export default function HouseholdPage() {
             {[...household.routine]
               .sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'))
               .map((item) => {
-                const kinds = routineKindsFor(household, item.appliesTo, item.kind);
+                const who = household.subjects.find((s) => s.id === item.appliesTo);
+                if (!who) return <SharedRow key={item.id} item={item} />;
                 return (
-                  <div key={item.id} className="rows-item stack-tight">
-                    <div className="row">
-                      <input
-                        className="input"
-                        type="time"
-                        value={item.time ?? ''}
-                        onChange={(e) =>
-                          actions.upsertRoutine({ ...item, time: e.target.value || null })
-                        }
-                        aria-label="Time"
-                        style={{ maxWidth: 128 }}
-                      />
-                      <select
-                        className="select grow"
-                        value={item.kind}
-                        onChange={(e) =>
-                          actions.upsertRoutine({
-                            ...item,
-                            kind: e.target.value as RoutineItem['kind'],
-                          })
-                        }
-                        aria-label="What happens"
-                      >
-                        {kinds.map((kind) => (
-                          <option key={kind} value={kind}>
-                            {kind}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="row">
-                      <select
-                        className="select grow"
-                        value={item.appliesTo}
-                        onChange={(e) => {
-                          // Moving a row to the flat has to move its kind too, or the
-                          // list keeps offering nappies for an apartment.
-                          const appliesTo = e.target.value;
-                          const next = routineKindsFor(household, appliesTo);
-                          const kind = next.includes(item.kind) ? item.kind : (next[0] ?? item.kind);
-                          actions.upsertRoutine({ ...item, appliesTo, kind });
-                        }}
-                        aria-label="Who this applies to"
-                      >
-                        <option value="all">Everyone</option>
-                        {household.subjects.map((subject) => (
-                          <option key={subject.id} value={subject.id}>
-                            {subject.name}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        className="icon-btn"
-                        onClick={() => actions.removeRoutine(item.id)}
-                        aria-label={`Remove ${item.kind}`}
-                        title="Remove"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <input
-                      className="input"
-                      value={item.notes}
-                      onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
-                      placeholder="Anything worth adding"
-                      aria-label="Notes"
-                    />
-                  </div>
+                  <Link
+                    key={item.id}
+                    href={`/subjects/${who.id}`}
+                    className="rows-item routine-item card-link"
+                  >
+                    <span className="routine-time">{item.time ?? '—'}</span>
+                    <span>
+                      <strong>{item.kind}</strong>
+                      <span className="muted"> · {who.name}</span>
+                      {item.notes && <span className="routine-note">{item.notes}</span>}
+                    </span>
+                  </Link>
                 );
               })}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+/** A routine item that belongs to nobody in particular — bin night, the shared
+ *  breakfast. It has no subject page to live on, so it stays editable here. */
+function SharedRow({ item }: { item: RoutineItem }) {
+  const { household } = useAppState();
+  const actions = useActions();
+  const kinds = routineKindsFor(household, 'all', item.kind);
+
+  return (
+    <div className="rows-item stack-tight">
+      <div className="row">
+        <input
+          className="input"
+          type="time"
+          value={item.time ?? ''}
+          onChange={(e) => actions.upsertRoutine({ ...item, time: e.target.value || null })}
+          aria-label="Time"
+          style={{ maxWidth: 128 }}
+        />
+        <select
+          className="select grow"
+          value={item.kind}
+          onChange={(e) =>
+            actions.upsertRoutine({ ...item, kind: e.target.value as RoutineItem['kind'] })
+          }
+          aria-label="What happens"
+        >
+          {kinds.map((kind) => (
+            <option key={kind} value={kind}>
+              {kind}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => actions.removeRoutine(item.id)}
+          aria-label={`Remove ${item.kind}`}
+          title="Remove"
+        >
+          ×
+        </button>
+      </div>
+      <input
+        className="input"
+        value={item.notes}
+        onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
+        placeholder="Everyone — anything worth adding"
+        aria-label="Notes"
+      />
+    </div>
   );
 }

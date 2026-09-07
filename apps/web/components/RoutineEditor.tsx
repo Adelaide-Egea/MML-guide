@@ -55,7 +55,7 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
   return (
     <section className="stack">
       <div className="spread">
-        <h2 className="eyebrow">Their day</h2>
+        <h2 className="eyebrow">{subject.kind === 'place' ? 'Its week' : 'Their day'}</h2>
         <div className="row">
           {/* Offered whether or not the day is already started. Reusing a preset on
               a child who has one item recorded is the normal case, not an edge one,
@@ -82,39 +82,29 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
         <div className="card stack-tight">
           <span className="hint">A starting point. Everything is editable afterwards.</span>
           {offered.map((preset) => (
-            <div
-              key={preset.id}
-              className="row"
-              style={{ borderTop: '1px solid var(--hairline)', padding: 'var(--space-2) 0' }}
-            >
+            <div key={preset.id} className="row preset-row">
               <button
                 type="button"
-                className="grow"
+                className="grow preset-pick"
                 onClick={() => {
                   actions.applyPreset(preset, subject.id);
                   setShowPresets(false);
                 }}
-                style={{
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  background: 'transparent',
-                  border: 0,
-                  padding: 'var(--space-2) 0',
-                }}
               >
                 <strong>{preset.label}</strong>
-                <span className="muted" style={{ display: 'block' }}>
+                <span className="muted">
                   {preset.hint} · {preset.items.length} items
                 </span>
               </button>
               {preset.custom && (
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="icon-btn"
                   onClick={() => actions.removePreset(preset.id)}
                   aria-label={`Delete the ${preset.label} preset`}
+                  title="Delete this preset"
                 >
-                  Delete
+                  ×
                 </button>
               )}
             </div>
@@ -128,17 +118,9 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
       {/* One card with hairline-separated rows rather than a card per item. A day is
           a list, and eight stacked cards read as eight separate decisions. */}
       {items.length > 0 && (
-        <div className="card stack-tight">
-          {items.map((item, i) => (
-            <div
-              key={item.id}
-              className="stack-tight"
-              style={
-                i === 0
-                  ? undefined
-                  : { borderTop: '1px solid var(--hairline)', paddingTop: 'var(--space-3)' }
-              }
-            >
+        <div className="card rows">
+          {items.map((item) => (
+            <div key={item.id} className="rows-item stack-tight">
               <div className="row">
                 <input
                   className="input"
@@ -146,7 +128,7 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
                   value={item.time ?? ''}
                   onChange={(e) => actions.upsertRoutine({ ...item, time: e.target.value || null })}
                   aria-label="Time"
-                  style={{ maxWidth: 140 }}
+                  style={{ maxWidth: 128 }}
                 />
                 <select
                   className="select grow"
@@ -164,11 +146,12 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
                 </select>
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="icon-btn"
                   onClick={() => actions.removeRoutine(item.id)}
                   aria-label={`Remove ${item.kind}`}
+                  title="Remove"
                 >
-                  ✕
+                  ×
                 </button>
               </div>
               <input
