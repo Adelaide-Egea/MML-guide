@@ -21,11 +21,14 @@ type Focus = 'all' | string;
 
 export default function GuidePage() {
   const { id } = useParams<{ id: string }>();
-  const { household, handovers } = useAppState();
+  const { households, household: active, handovers } = useAppState();
   const [focus, setFocus] = useState<Focus>('all');
   const [acknowledged, setAcknowledged] = useState(false);
 
   const handover = handovers.find((h) => h.id === id);
+  // A guide names the household it belongs to, so a link to one opens correctly
+  // whichever household happens to be selected.
+  const household = households.find((h) => h.id === handover?.householdId) ?? active;
 
   // Acknowledgement is per guide and per device: it means "this caregiver, on this
   // phone, has seen the allergies". It is deliberately not synced or shared, because

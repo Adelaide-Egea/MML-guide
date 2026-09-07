@@ -11,6 +11,7 @@ import {
   prepare,
   subjectsFor,
 } from '@mml/core';
+import { Breathing } from '../../../../components/Breathing.tsx';
 import { TopBar } from '../../../../components/Chrome.tsx';
 import { MediaThumb } from '../../../../components/MediaField.tsx';
 import { useAppState } from '../../../../lib/store.ts';
@@ -25,12 +26,13 @@ type Shown =
 
 export default function AskPage() {
   const { id } = useParams<{ id: string }>();
-  const { household, handovers } = useAppState();
+  const { households, household: active, handovers } = useAppState();
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState<Shown | null>(null);
 
   const handover = handovers.find((h) => h.id === id);
+  const household = households.find((h) => h.id === handover?.householdId) ?? active;
   if (!handover) {
     return (
       <main className="shell">
@@ -114,7 +116,20 @@ export default function AskPage() {
         </button>
       </form>
 
-      {shown && (
+      {/* The one genuine wait left in the product, and the only place this belongs.
+          It is mounted while the request is in flight and unmounted when it lands,
+          so it can never run longer than the thing it is standing in for. */}
+      {busy && (
+        <Breathing
+          lines={[
+            'Looking through what was written down…',
+            'Only what is actually in the guide…',
+            'Nearly there…',
+          ]}
+        />
+      )}
+
+      {!busy && shown && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <p className="muted">“{shown.question}”</p>
           {shown.kind === 'answer' ? (
