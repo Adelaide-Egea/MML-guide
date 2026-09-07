@@ -250,7 +250,7 @@ allergy, medication or emergency information without explicit confirmation.**
 
 ## DECISIONS I NEED TO MAKE
 
-Nine, in `11-decisions-required.md`. Only one blocks work starting today.
+Ten, in `11-decisions-required.md`. Only one blocks work starting today.
 
 | | Decision | My recommendation | Blocks |
 |---|---|---|---|
@@ -262,7 +262,8 @@ Nine, in `11-decisions-required.md`. Only one blocks work starting today.
 | **D6** | France first, or the UK first? | **France first.** Note `.fr` needs an EU presence post-Brexit | Nothing structural |
 | **D7** | Whether the `trips` exposure is reportable to the ICO/CNIL | I'll fix it, pull the access logs, and bring you the facts. Only you can decide to notify | Nothing |
 | **D8** | **Access** — Supabase, Vercel, Anthropic, the Readied repo | — | **Everything. This is the only live blocker** |
-| **D9** | Approve the direction and the order | One app with one household; Handover rebuilt first | Everything after Phase −1 |
+| **D9** | How close should the animated children's universe sit? | **Separate brand and entity, one written commercial relationship.** The audience link is real and worth more at arm's length | Nothing here |
+| **D10** | Approve the direction and the order | One engine with many recipients; the childcare brief first, the cleaner brief second | Everything after Phase −1 |
 
 Everything not on that list, I will decide and do: the stack, the schema, the component library, the
 token architecture, the test strategy, CI, the security fixes, the bug fixes, the accessibility and
