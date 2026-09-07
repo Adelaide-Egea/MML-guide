@@ -17,8 +17,8 @@ PUBLIC = WEB / "public"
 # Next serves apple-icon.png from app/ by convention, not from public/.
 APP = WEB / "app"
 
-BRAND = (77, 108, 130, 255)  # --brand, the manifest's Lisette blue
-PAPER = (239, 231, 218, 255)  # --paper, the manifest's Ground
+BRAND = (68, 95, 114, 255)  # --brand, the manifest's Lisette blue
+PAPER = (239, 231, 218, 255)  # --surface, the manifest's Ground
 
 # The quadratic arc from the mark, in the 48-unit viewBox it was drawn in.
 P0, P1, P2 = (12.0, 31.0), (24.0, 11.0), (36.0, 31.0)

@@ -53,7 +53,9 @@ const PAIRS = [
   ['--ink-muted', '--surface', 4.5],
   ['--brand', '--paper', 4.5],
   ['--brand', '--surface', 4.5],
-  ['--amber', '--paper', 4.5],
+  // A 1px rule and nothing else, so 3:1 non-text contrast is its real bar against
+  // the ground. It is still held to 4.5:1 against its own tint, below.
+  ['--amber', '--paper', 3],
   ['--critical', '--paper', 4.5],
   ['--critical', '--critical-tint', 4.5],
   ['--ink', '--surface-sunk', 4.5],
@@ -67,11 +69,13 @@ const PAIRS = [
   ['--id-olive', '--paper', 4.5],
   ['--id-forest', '--paper', 4.5],
   ['--hairline-strong', '--paper', 1.5],
-  // Raspberry is the manifest's completion colour and is kept at its exact value.
-  // 3:1 is the correct bar for it because it is only ever a large filled shape or a
-  // boundary, never small text and never behind white type. The test encodes that
-  // restriction so a future use as a text colour fails here rather than in review.
-  ['--done', '--paper', 3],
+  // Raspberry is the manifest's completion colour and is kept at its exact value —
+  // the one colour the deeper ground did not force to move. 3:1 is the correct bar
+  // for it because it is only ever a large filled shape or a boundary, never small
+  // text and never behind white type, and it is measured against the card rather
+  // than the ground because a completion state sits on a card. The test encodes
+  // that restriction so a future use as text fails here rather than in review.
+  ['--done', '--surface', 3],
 ];
 
 for (const theme of [
