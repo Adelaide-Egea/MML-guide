@@ -1421,7 +1421,8 @@
       await performGeneration(code?{accessCode:code}:{});
     }catch(e){
       show('finish');
-      alert('Something went wrong generating your guide. '+(e&&e.message?e.message:''));
+      console.error('guide generation failed',e);
+      alert(e&&e.userFacing?e.message:'Something went wrong creating your guide. Everything you typed is saved.');
     }
   }
 
@@ -1610,7 +1611,18 @@ async function performGeneration(authPayload){
     });
     clearInterval(interval);
     if(response.status===402){const d=await response.json().catch(()=>({}));const e=new Error(d.error||'Payment required.');e.isPaymentRequired=true;throw e;}
-    if(!response.ok){const t=await response.text().catch(()=>'');throw new Error('Request failed ('+response.status+'): '+t.slice(0,200));}
+    if(!response.ok){
+      // The body goes to the console, never to the parent. An upstream failure
+      // returns an HTML error page, and splicing it into the message is how
+      // someone ends up reading a doctype after typing in their child's allergies.
+      const detail=await response.text().catch(()=>'');
+      console.error('generate failed',response.status,detail.slice(0,500));
+      const e=new Error(response.status>=500
+        ? 'The guide service is busy right now.'
+        : 'The guide could not be created just now.');
+      e.userFacing=true;
+      throw e;
+    }
     const result=await response.json();
     const textBlock=result.content.find(b=>b.type==='text');
     if(!textBlock)throw new Error('No text content in API response');
@@ -1628,7 +1640,9 @@ async function performGeneration(authPayload){
     if(err&&err.isPaymentRequired){
       showError('💛 Everything you\'ve entered is saved. Add a code or pay to create this guide — nothing to re-type.');
     } else {
-      showError(isNet?'⚡ Connection issue — tap Create again to retry.':'Something went wrong: '+(err&&err.message?err.message:'unknown error')+'. Please try again.');
+      console.error('guide generation failed',err);
+      const msg=err&&err.userFacing?err.message:'Something went wrong creating your guide.';
+      showError(isNet?'⚡ Connection issue — tap Create again to retry.':msg+' Everything you typed is saved — tap Create again to retry.');
     }
   }
 }
