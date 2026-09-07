@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "test": "npm run typecheck && npm run test:legacy && npm run test:core && npm run test:contrast",
     "test:legacy": "node --test test/*.test.js",
     "test:core": "node --experimental-strip-types --test packages/*/test/*.test.ts",
     "test:contrast": "node --test design/contrast.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p apps/web",
+    "build": "npm run build --workspace @mml/web",
+    "dev": "npm run dev --workspace @mml/web"
   },
   "devDependencies": {
     "@types/node": "^22.18.12",
