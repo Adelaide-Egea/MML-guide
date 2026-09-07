@@ -176,6 +176,41 @@ test('an unnamed critical question answers for every subject that has such facts
 
   assert.ok(prepared.answer.verbatim?.includes('Arachide'));
   assert.ok(prepared.answer.verbatim?.includes('Dr Meunier'));
+  // With several subjects the text has to say whose facts are whose.
+  assert.ok(prepared.answer.verbatim?.includes('Léa'));
+  assert.ok(prepared.answer.verbatim?.includes('Rio'));
+  assert.equal(prepared.answer.subjectName, undefined);
+});
+
+test('a single-subject answer does not repeat the name inside the fact', () => {
+  const prepared = prepare(subjects, 'Léa allergies?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.equal(prepared.answer.subjectName, 'Léa');
+  assert.equal(prepared.answer.verbatim, lea.safety.allergies);
+});
+
+test('a question hitting one subject’s own safety words answers about only them', () => {
+  // "sésame" appears in Léa's allergies and nowhere else. Returning the dog's vet
+  // alongside it is not safer, it is noise in the one box that must never be
+  // skimmed.
+  const prepared = prepare(subjects, 'je peux lui donner du sésame ?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.ok(prepared.answer.verbatim?.includes('sésame'));
+  assert.ok(!prepared.answer.verbatim?.includes('Dr Meunier'));
+  assert.equal(prepared.answer.subjectName, 'Léa');
+});
+
+test('narrowing never drops a subject the question actually names', () => {
+  const prepared = prepare(subjects, 'Rio — urgence ?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.ok(prepared.answer.verbatim?.includes('Dr Meunier'));
+  assert.ok(!prepared.answer.verbatim?.includes('Arachide'));
 });
 
 // ── Refusal ──────────────────────────────────────────────────────────────────
