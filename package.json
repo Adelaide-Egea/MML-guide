@@ -7,9 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "npm run typecheck && npm run test:legacy && npm run test:core",
+    "test": "npm run typecheck && npm run test:legacy && npm run test:core && npm run test:contrast",
     "test:legacy": "node --test test/*.test.js",
     "test:core": "node --experimental-strip-types --test packages/*/test/*.test.ts",
+    "test:contrast": "node --test design/contrast.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

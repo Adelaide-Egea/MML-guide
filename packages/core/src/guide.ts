@@ -1,30 +1,34 @@
 // The guide document.
 //
-// The document is built entirely from facts first. A language model may afterwards
-// improve the prose of blocks that are marked as enrichable, but it can never be
-// the origin of a fact and it can never touch a critical block. That rule is
-// enforced by `assertSafeToRender`, not by convention — the previous
-// implementation lost a child's allergies to a field-name typo precisely because
-// the safety path depended on everything downstream being written correctly.
+// Built entirely from facts first. A language model may afterwards improve the prose
+// of blocks marked enrichable, but it can never be the origin of a fact and it can
+// never touch a critical block. That rule is enforced by `assertSafeToRender`, not
+// by convention — the prototype lost a child's allergies to a field-name typo
+// precisely because the safety path depended on everything downstream being written
+// correctly.
 //
-// Practically this means the product still works with the AI switched off, which
-// is also what makes the free tier cost pennies and the whole thing survivable if
-// a model provider has an outage.
+// Practically this means the product still works with the AI switched off, which is
+// also what makes the free tier cost pennies and the whole thing survivable when a
+// model provider has an outage.
 
 import {
-  type Child,
-  type Handover,
-  type Household,
-  type RoutineItem,
+  type CareSubject,
+  type Media,
   allergyText,
-  childrenIn,
-  describeAge,
+  emergencyText,
   hasSafetyCritical,
   hasText,
   medicalText,
+  subjectLabel,
+} from './subject.ts';
+import {
+  type Handover,
+  type Household,
+  type RoutineItem,
+  subjectsFor,
 } from './household.ts';
 
-/** Where the text in a block came from.
+/** Where a block's text came from.
  *
  *  `facts` — copied verbatim from what the parent entered. Never rewritten.
  *  `model` — prose a model produced from those facts. Always replaceable.
@@ -32,8 +36,8 @@ import {
 export type BlockSource = 'facts' | 'model';
 
 /** Critical blocks are the ones a caregiver must not miss and must not receive in
- *  paraphrase: allergies, medication, emergency contacts, and whatever the parent
- *  flagged as important.
+ *  paraphrase: allergies, medication, emergency instructions, household contacts,
+ *  and whatever the parent flagged as important.
  */
 export interface GuideBlock {
   readonly id: string;
@@ -41,9 +45,13 @@ export interface GuideBlock {
   readonly body: string;
   readonly source: BlockSource;
   readonly critical: boolean;
-  /** Whether a model is permitted to rewrite `body`. Always false when critical. */
+  /** Whether a model may rewrite `body`. Always false when critical. */
   readonly enrichable: boolean;
-  readonly childId?: string;
+  /** Photos and video travel with the block. A picture of the cupboard is often the
+   *  entire answer, and separating media from the text it belongs to is how it ends
+   *  up unseen at the bottom of a screen. */
+  readonly media: readonly Media[];
+  readonly subjectId?: string;
 }
 
 export interface GuideDocument {
@@ -60,7 +68,7 @@ function factBlock(
   id: string,
   heading: string,
   body: string,
-  options: { critical?: boolean; childId?: string } = {},
+  options: { critical?: boolean; subjectId?: string; media?: readonly Media[] } = {},
 ): GuideBlock {
   const critical = options.critical ?? false;
   return {
@@ -69,15 +77,16 @@ function factBlock(
     body,
     source: 'facts',
     critical,
-    // A critical block is never enrichable. This is the single most important
-    // line in the package.
+    // A critical block is never enrichable. This is the single most important line
+    // in the package.
     enrichable: !critical,
-    ...(options.childId ? { childId: options.childId } : {}),
+    media: options.media ?? [],
+    ...(options.subjectId ? { subjectId: options.subjectId } : {}),
   };
 }
 
-const DURATION_SCOPE: Record<Handover['duration'], readonly string[]> = {
-  evening: ['Dinner', 'Bath', 'Bedtime', 'Medication', 'Snack'],
+const DURATION_SCOPE: Record<Handover['duration'], readonly RoutineItem['kind'][]> = {
+  evening: ['Dinner', 'Bath', 'Bedtime', 'Medication', 'Snack', 'Feed', 'Walk'],
   fullday: [],
   fewdays: [],
 };
@@ -88,9 +97,15 @@ const DURATION_SCOPE: Record<Handover['duration'], readonly string[]> = {
 export function scopeRoutine(
   routine: readonly RoutineItem[],
   duration: Handover['duration'],
+  subjects?: readonly CareSubject[],
 ): readonly RoutineItem[] {
   const kinds = DURATION_SCOPE[duration];
-  const scoped = kinds.length ? routine.filter((item) => kinds.includes(item.kind)) : routine;
+  let scoped = kinds.length ? routine.filter((item) => kinds.includes(item.kind)) : routine;
+
+  if (subjects) {
+    const ids = new Set(subjects.map((s) => s.id));
+    scoped = scoped.filter((item) => item.appliesTo === 'all' || ids.has(item.appliesTo));
+  }
 
   return [...scoped].sort((a, b) => {
     if (a.time === b.time) return 0;
@@ -100,23 +115,19 @@ export function scopeRoutine(
   });
 }
 
-function childLabel(child: Child): string {
-  const age = describeAge(child.age);
-  return age ? `${child.name} (${age})` : child.name;
-}
-
-/** Builds the complete guide from facts alone. No network, no model, no clock
- *  beyond the timestamp — which makes it trivially testable and means an AI
- *  outage degrades the product rather than breaking it.
+/** Builds the complete guide from facts alone. No network, no model, no clock beyond
+ *  the timestamp — which makes it trivially testable and means an AI outage degrades
+ *  the product rather than breaking it.
  */
 export function buildGuide(
   household: Household,
   handover: Handover,
   now: Date = new Date(),
 ): GuideDocument {
+  const subjects = subjectsFor(household, handover);
   const blocks: GuideBlock[] = [];
 
-  // Critical content leads. A caregiver skimming for ten seconds must hit the
+  // Critical content leads. A caregiver skimming for ten seconds must reach the
   // things that could hurt someone before anything else.
   for (const note of handover.importantNotes.filter(hasText)) {
     blocks.push(
@@ -124,23 +135,33 @@ export function buildGuide(
     );
   }
 
-  for (const child of household.children) {
-    const allergies = allergyText(child);
+  for (const subject of subjects) {
+    const allergies = allergyText(subject);
     if (allergies) {
       blocks.push(
-        factBlock(`allergy:${child.id}`, `${child.name} — allergies`, allergies, {
+        factBlock(`allergy:${subject.id}`, `${subject.name} — allergies`, allergies, {
           critical: true,
-          childId: child.id,
+          subjectId: subject.id,
         }),
       );
     }
 
-    const medical = medicalText(child);
+    const medical = medicalText(subject);
     if (medical) {
       blocks.push(
-        factBlock(`medical:${child.id}`, `${child.name} — medication`, medical, {
+        factBlock(`medical:${subject.id}`, `${subject.name} — medication`, medical, {
           critical: true,
-          childId: child.id,
+          subjectId: subject.id,
+        }),
+      );
+    }
+
+    const emergency = emergencyText(subject);
+    if (emergency) {
+      blocks.push(
+        factBlock(`emergency:${subject.id}`, `${subject.name} — in an emergency`, emergency, {
+          critical: true,
+          subjectId: subject.id,
         }),
       );
     }
@@ -152,43 +173,23 @@ export function buildGuide(
       factBlock(
         'contacts',
         'Who to call',
-        contacts.map((c) => `${c.name}${c.relationship ? ` (${c.relationship})` : ''} — ${c.phone}`).join('\n'),
+        contacts
+          .map((c) => `${c.name}${c.relationship ? ` (${c.relationship})` : ''} — ${c.phone}`)
+          .join('\n'),
         { critical: true },
       ),
     );
   }
 
-  // Everything below here is helpful rather than safety-critical, so a model may
-  // improve the wording.
-  for (const child of household.children) {
-    if (hasText(child.likes)) {
+  // Everything below is helpful rather than safety-critical, so a model may improve
+  // the wording. One block per entry, in the order the parent arranged them.
+  for (const subject of subjects) {
+    for (const entry of subject.entries) {
+      if (!hasText(entry.body) && entry.media.length === 0) continue;
       blocks.push(
-        factBlock(`comfort:${child.id}`, `${childLabel(child)} — comfort`, child.likes.trim(), {
-          childId: child.id,
-        }),
-      );
-    }
-    if (hasText(child.whenUpset)) {
-      blocks.push(
-        factBlock(`upset:${child.id}`, `${child.name} — if they get upset`, child.whenUpset.trim(), {
-          childId: child.id,
-        }),
-      );
-    }
-    if (hasText(child.food) || hasText(child.milk)) {
-      blocks.push(
-        factBlock(
-          `food:${child.id}`,
-          `${child.name} — food`,
-          [child.food, child.milk].filter(hasText).map((s) => s.trim()).join('\n'),
-          { childId: child.id },
-        ),
-      );
-    }
-    if (hasText(child.screenTime)) {
-      blocks.push(
-        factBlock(`screen:${child.id}`, `${child.name} — screens`, child.screenTime.trim(), {
-          childId: child.id,
+        factBlock(`entry:${entry.id}`, `${subjectLabel(subject)} — ${entry.title}`, entry.body.trim(), {
+          subjectId: subject.id,
+          media: entry.media,
         }),
       );
     }
@@ -204,7 +205,7 @@ export function buildGuide(
     caregiverName: handover.caregiverName,
     language: handover.language,
     blocks,
-    routine: scopeRoutine(household.routine, handover.duration),
+    routine: scopeRoutine(household.routine, handover.duration, subjects),
     generatedAt: now.toISOString(),
   };
 }
@@ -218,9 +219,9 @@ export interface Enrichment {
 
 /** Applies model output to the document.
  *
- *  Enrichments that name a critical block, an unknown block or a non-enrichable
- *  block are discarded rather than throwing: a model returning something odd must
- *  degrade the prose, never lose a fact or fail the guide.
+ *  Enrichments naming a critical block, an unknown block or a non-enrichable block
+ *  are discarded rather than throwing: a model returning something odd must degrade
+ *  the prose, never lose a fact or fail the guide.
  */
 export function applyEnrichments(
   document: GuideDocument,
@@ -256,11 +257,15 @@ export class UnsafeGuideError extends Error {
 /** Call before rendering or sending. Throws rather than shipping a guide that has
  *  lost or paraphrased something safety-critical.
  *
- *  Failing loudly here is deliberate. The allergy bug was silent for the life of
- *  the product because the guide still looked right; a guide that refuses to
- *  render is recoverable, and one that quietly omits an allergy is not.
+ *  Failing loudly is deliberate. The allergy bug was silent for the life of the
+ *  prototype because the guide still looked right; a guide that refuses to render is
+ *  recoverable, and one that quietly omits an allergy is not.
  */
-export function assertSafeToRender(document: GuideDocument, household: Household): void {
+export function assertSafeToRender(
+  document: GuideDocument,
+  household: Household,
+  handover?: Handover,
+): void {
   for (const block of document.blocks) {
     if (block.critical && block.source !== 'facts') {
       throw new UnsafeGuideError(
@@ -272,26 +277,36 @@ export function assertSafeToRender(document: GuideDocument, household: Household
     }
   }
 
-  for (const child of household.children) {
-    if (!hasSafetyCritical(child)) continue;
+  // Only subjects this caregiver is responsible for are checked. Requiring the
+  // cleaner's guide to carry a child's allergies would defeat the scoping.
+  const subjects = handover ? subjectsFor(household, handover) : household.subjects;
 
-    const allergies = allergyText(child);
-    if (allergies) {
-      const rendered = document.blocks.find((b) => b.id === `allergy:${child.id}`);
+  for (const subject of subjects) {
+    if (!hasSafetyCritical(subject)) continue;
+
+    for (const [prefix, value] of [
+      ['allergy', allergyText(subject)],
+      ['medical', medicalText(subject)],
+      ['emergency', emergencyText(subject)],
+    ] as const) {
+      if (!value) continue;
+      const rendered = document.blocks.find((b) => b.id === `${prefix}:${subject.id}`);
       if (!rendered) {
-        throw new UnsafeGuideError(`${child.name} has recorded allergies but the guide omits them.`);
-      }
-      if (!rendered.body.includes(allergies)) {
         throw new UnsafeGuideError(
-          `${child.name}'s allergies were altered between the household and the guide.`,
+          `${subject.name} has recorded ${prefix} information but the guide omits it.`,
+        );
+      }
+      if (!rendered.body.includes(value)) {
+        throw new UnsafeGuideError(
+          `${subject.name}'s ${prefix} information was altered between the household and the guide.`,
         );
       }
     }
   }
 }
 
-/** Convenience wrapper: build, enrich, verify. The only entry point a surface
- *  should need, so no caller can forget the assertion.
+/** Convenience wrapper: build, enrich, verify. The only entry point a surface should
+ *  need, so no caller can forget the assertion.
  */
 export function buildVerifiedGuide(
   household: Household,
@@ -301,7 +316,7 @@ export function buildVerifiedGuide(
 ): GuideDocument {
   const base = buildGuide(household, handover, now);
   const { document } = applyEnrichments(base, enrichments);
-  assertSafeToRender(document, household);
+  assertSafeToRender(document, household, handover);
   return document;
 }
 
@@ -309,4 +324,6 @@ export function criticalBlocks(document: GuideDocument): readonly GuideBlock[] {
   return document.blocks.filter((b) => b.critical);
 }
 
-export { childrenIn };
+export function guideMedia(document: GuideDocument): readonly Media[] {
+  return document.blocks.flatMap((b) => b.media);
+}

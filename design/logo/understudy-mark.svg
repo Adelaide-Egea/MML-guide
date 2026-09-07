@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Understudy">
+  <!-- One figure stepping into the place of another, carrying what they were told. -->
+  <circle cx="18" cy="24" r="11.25" stroke="currentColor" stroke-width="3.5" stroke-dasharray="4.5 4.6"/>
+  <circle cx="31" cy="24" r="11.25" stroke="currentColor" stroke-width="3.5"/>
+</svg>
