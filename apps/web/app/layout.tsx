@@ -46,7 +46,10 @@ try {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${ui.variable}`}>
+    // The theme script sets data-theme before React hydrates, which is the whole
+    // point of it — the alternative is a flash of the wrong theme. React sees that
+    // as a mismatch on this element only.
+    <html lang="en" className={`${display.variable} ${ui.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <style>{`:root{

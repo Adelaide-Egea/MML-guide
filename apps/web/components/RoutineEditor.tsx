@@ -57,7 +57,10 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
       <div className="spread">
         <h2 className="eyebrow">Their day</h2>
         <div className="row">
-          {items.length === 0 && offered.length > 0 && (
+          {/* Offered whether or not the day is already started. Reusing a preset on
+              a child who has one item recorded is the normal case, not an edge one,
+              and hiding it until the list is empty made it unreachable. */}
+          {offered.length > 0 && (
             <button type="button" className="btn btn-quiet" onClick={() => setShowPresets((v) => !v)}>
               Use a preset
             </button>
@@ -77,10 +80,7 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
 
       {showPresets && (
         <div className="card stack-tight">
-          <span className="hint">
-            A starting point — everything is editable afterwards, and nothing here is a
-            recommendation about how to raise anyone.
-          </span>
+          <span className="hint">A starting point. Everything is editable afterwards.</span>
           {offered.map((preset) => (
             <div
               key={preset.id}
@@ -125,49 +125,63 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
         </div>
       )}
 
-      {items.map((item) => (
-        <div key={item.id} className="card stack-tight">
-          <div className="row">
-            <input
-              className="input"
-              type="time"
-              value={item.time ?? ''}
-              onChange={(e) => actions.upsertRoutine({ ...item, time: e.target.value || null })}
-              aria-label="Time"
-              style={{ maxWidth: 120 }}
-            />
-            <select
-              className="select grow"
-              value={item.kind}
-              onChange={(e) =>
-                actions.upsertRoutine({ ...item, kind: e.target.value as RoutineKind })
+      {/* One card with hairline-separated rows rather than a card per item. A day is
+          a list, and eight stacked cards read as eight separate decisions. */}
+      {items.length > 0 && (
+        <div className="card stack-tight">
+          {items.map((item, i) => (
+            <div
+              key={item.id}
+              className="stack-tight"
+              style={
+                i === 0
+                  ? undefined
+                  : { borderTop: '1px solid var(--hairline)', paddingTop: 'var(--space-3)' }
               }
-              aria-label="What happens"
             >
-              {kindsFor(item).map((kind) => (
-                <option key={kind} value={kind}>
-                  {kind}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={() => actions.removeRoutine(item.id)}
-              aria-label={`Remove ${item.kind}`}
-            >
-              ✕
-            </button>
-          </div>
-          <input
-            className="input"
-            value={item.notes}
-            onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
-            placeholder="Anything worth adding"
-            aria-label="Notes"
-          />
+              <div className="row">
+                <input
+                  className="input"
+                  type="time"
+                  value={item.time ?? ''}
+                  onChange={(e) => actions.upsertRoutine({ ...item, time: e.target.value || null })}
+                  aria-label="Time"
+                  style={{ maxWidth: 140 }}
+                />
+                <select
+                  className="select grow"
+                  value={item.kind}
+                  onChange={(e) =>
+                    actions.upsertRoutine({ ...item, kind: e.target.value as RoutineKind })
+                  }
+                  aria-label="What happens"
+                >
+                  {kindsFor(item).map((kind) => (
+                    <option key={kind} value={kind}>
+                      {kind}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => actions.removeRoutine(item.id)}
+                  aria-label={`Remove ${item.kind}`}
+                >
+                  ✕
+                </button>
+              </div>
+              <input
+                className="input"
+                value={item.notes}
+                onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
+                placeholder="Anything worth adding"
+                aria-label={`Notes for ${item.kind}`}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
 
       {items.length > 0 && (
         <div className="row">

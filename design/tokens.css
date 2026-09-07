@@ -73,6 +73,9 @@
      deuteranopia and protanopia. All six clear 4.5:1 on the ground and behind white
      text, so they may carry a label and not only decoration. */
   --id-petrol: #377177;
+  /* The one colour here that is louder than the rest of the palette, and it stays
+     that way: muting it toward the beige collapses it against --id-petrol under
+     deuteranopia. Its saturation is doing accessibility work, not decoration. */
   --id-indigo: #4a5a9c;
   --id-plum: #7a3c6e;
   --id-clay: #a2522d;
