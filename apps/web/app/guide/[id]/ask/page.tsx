@@ -52,7 +52,7 @@ export default function AskPage() {
       // The routing decision happens here, before any network call. A
       // safety-critical question is answered from the parent's own words and there
       // is no code path from it to a language model.
-      const prepared: Prepared = prepare(subjects, asked, language);
+      const prepared: Prepared = prepare(subjects, asked, language, household.routine);
 
       if (prepared.route !== 'model') {
         setShown({ question: asked, kind: 'answer', answer: prepared.answer });
