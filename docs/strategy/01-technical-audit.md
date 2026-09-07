@@ -298,6 +298,14 @@ lines.push(`  Allergies: ${[c.allergens, c.allergyNotes].filter(Boolean).join(' 
 rule 3 instructs the model to write a "Food & Allergies" section *"always if allergies exist"* — so
 it correctly omits it, having been told none exist.
 
+Verified by replicating the exact data flow for a child with a recorded peanut allergy:
+
+```
+parent entered      : "Peanuts"
+SENT TO THE MODEL   : "Allergies: None noted"
+SHOWN IN THE GUIDE  : "Peanuts"
+```
+
 The damage is partly contained because the renderer falls back to `c.allergens || c.allergies` and
 prints the allergy in the child's comfort card. So the guide does display the allergy — but the
 model's narrative sections are written in ignorance of it, and any AI advice about food is generated
