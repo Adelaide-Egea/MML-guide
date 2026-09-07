@@ -44,6 +44,24 @@ export type RoutineKind =
   | 'Medication'
   | 'Other';
 
+/** Exported as a value so a surface can render the list without redeclaring it and
+ *  drifting from the type, the way `ENTRY_TOPICS` does for entries. */
+export const ROUTINE_KINDS: readonly RoutineKind[] = [
+  'Breakfast',
+  'Snack',
+  'Lunch',
+  'Dinner',
+  'Feed',
+  'Nap',
+  'Bath',
+  'Bedtime',
+  'School',
+  'Walk',
+  'Activity',
+  'Medication',
+  'Other',
+];
+
 export interface RoutineItem {
   readonly id: string;
   /** 24-hour `HH:MM`, or null when the item has no fixed time. */
