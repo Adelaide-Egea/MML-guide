@@ -375,9 +375,30 @@ becomes the card, and a putty ground sits beneath it. Lands in the empty L\* ban
 palette warm, and looks more expensive. Costs the accent drift in the table above.
 
 **Recommendation: C.** It is the only one that actually answers the question that was asked, the
-drift is small in absolute terms, and every colour in it is still recognisably the founder's. But
-the palette is a brand decision and this one is not close enough to make unilaterally — B is a
-free improvement that could be taken on its own if C is unwanted.
+drift is small in absolute terms, and every colour in it is still recognisably the founder's.
+
+**Shipped: C.** Approved on the strength of the brief — "I really want to make sure I'm not using
+something similar to other house apps" — which A does not satisfy on the two largest surfaces in
+the product. As-built values, all verified by `design/contrast.mjs`:
+
+| Token | Manifest | Shipped | Moved | On the ground |
+|---|---|---|---|---|
+| `--paper` | "warm ground" | `#E0D2BC` | — | — |
+| `--surface` | "light card" | `#EFE7DA` | — | 1.21:1 |
+| `--ink` | `#2C2721` | `#2C2721` | 0% | 9.94:1 |
+| `--ink-muted` | `#7C7468` | `#615B52` | −9.6% | 4.51:1 |
+| `--brand` | `#52738A` | `#445F72` | −7.4% | 4.52:1 |
+| `--petrol` | `#377278` | `#306369` | −4.4% | 4.53:1 |
+| `--critical` | `#B3312F` | `#A92E2C` | −2.4% | 4.53:1 |
+| `--amber` | `#C99A3E` | `#7E5F23` | −19.9% | 3.98:1 |
+| `--done` | `#D9577E` | `#D9577E` | 0% | 3.05:1 on the card |
+
+Two notes on the bottom two rows. Amber is a 1px rule and nothing else, so 3:1 non-text contrast
+is its honest bar against the ground; it is held to 4.5:1 against its own tint anyway, in case it
+is ever asked to carry a word. Raspberry is the only colour the deeper ground did not force to
+move, and its bar is measured against the card rather than the ground because a completion state
+sits on a card — which is also the restriction the contrast test now encodes, so a future use of
+it as text fails there rather than in review.
 
 ### Raspberry
 
