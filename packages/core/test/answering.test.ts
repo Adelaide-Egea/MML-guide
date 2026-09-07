@@ -274,6 +274,19 @@ test('an invented citation degrades to a refusal rather than throwing at the car
   assert.equal(answer.kind, 'refusal');
 });
 
+test('the refusal sentinel never reaches the caregiver as prose', () => {
+  // A model that says NOT_IN_GUIDE *and* cites something would otherwise pass
+  // verification and put the sentinel itself on the screen.
+  const prepared = prepare(subjects, 'où sont les produits de nettoyage ?', 'pt');
+  const answer = acceptModelAnswer(
+    prepared,
+    { body: 'NOT_IN_GUIDE', citedEntryIds: ['house-storage'] },
+    'pt',
+  );
+  assert.equal(answer.kind, 'refusal');
+  assert.equal(answer.citations.length, 0);
+});
+
 test('a well-formed model answer is accepted and keeps its provenance', () => {
   const prepared = prepare(subjects, 'où sont les produits de nettoyage ?', 'pt');
   const answer = acceptModelAnswer(
