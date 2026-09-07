@@ -16,8 +16,11 @@ import {
   type Handover,
   type Household,
   type RoutineItem,
+  type RoutinePreset,
   type SubjectKind,
   EMPTY_SAFETY,
+  instantiatePreset,
+  presetFromRoutine,
 } from '@mml/core';
 import { useCallback, useSyncExternalStore } from 'react';
 import { newId } from './ids.ts';
@@ -27,16 +30,19 @@ const KEY = 'household-v1';
 export interface AppState {
   readonly household: Household;
   readonly handovers: readonly Handover[];
+  /** Only the parent's own presets. The built-in ones live in core and are not
+   *  copied into storage, so improving them does not require a migration. */
+  readonly presets: readonly RoutinePreset[];
 }
 
 /** Identity tokens, paired with a symbol so colour is never the only signal. */
 export const IDENTITIES: readonly { token: string; symbol: string }[] = [
-  { token: '--id-teal', symbol: '●' },
+  { token: '--id-petrol', symbol: '●' },
   { token: '--id-clay', symbol: '▲' },
   { token: '--id-indigo', symbol: '■' },
-  { token: '--id-ochre', symbol: '◆' },
+  { token: '--id-olive', symbol: '◆' },
   { token: '--id-plum', symbol: '★' },
-  { token: '--id-moss', symbol: '✚' },
+  { token: '--id-forest', symbol: '✚' },
 ];
 
 export const KIND_LABEL: Record<SubjectKind, string> = {
@@ -62,6 +68,7 @@ function emptyState(): AppState {
       routine: [],
     },
     handovers: [],
+    presets: [],
   };
 }
 
@@ -74,7 +81,10 @@ function read(): AppState {
   if (state) return state;
   try {
     const raw = localStorage.getItem(KEY);
-    state = raw ? (JSON.parse(raw) as AppState) : emptyState();
+    // Stored households predate `presets`, and a missing array would crash the
+    // first render rather than degrade. Filling gaps on read is cheaper than a
+    // versioned migration for as long as the shape only grows.
+    state = raw ? { ...emptyState(), ...(JSON.parse(raw) as Partial<AppState>) } : emptyState();
   } catch {
     // A corrupt blob is recoverable by starting over; a crash on boot is not.
     state = emptyState();
@@ -104,6 +114,7 @@ function subscribe(listener: () => void): () => void {
 const SERVER_STATE: AppState = {
   household: { id: 'ssr', name: '', country: '', subjects: [], contacts: [], routine: [] },
   handovers: [],
+  presets: [],
 };
 
 export function useAppState(): AppState {
@@ -252,6 +263,47 @@ export function useActions() {
         update((s) => ({
           ...s,
           household: { ...s.household, routine: s.household.routine.filter((r) => r.id !== id) },
+        }));
+      },
+
+      // ── Presets ────────────────────────────────────────────────────────────
+      applyPreset(preset: RoutinePreset, subjectId: string) {
+        update((s) => ({
+          ...s,
+          household: {
+            ...s.household,
+            routine: [
+              ...s.household.routine,
+              ...instantiatePreset(preset, subjectId, () => newId('r')),
+            ],
+          },
+        }));
+      },
+
+      savePreset(label: string, kind: SubjectKind, subjectId: string) {
+        update((s) => ({
+          ...s,
+          presets: [
+            ...s.presets,
+            presetFromRoutine(label, kind, s.household.routine, subjectId, newId('preset')),
+          ],
+        }));
+      },
+
+      removePreset(id: string) {
+        update((s) => ({ ...s, presets: s.presets.filter((p) => p.id !== id) }));
+      },
+
+      /** Removes every routine item belonging to one subject. Applying a preset on
+       *  top of an existing routine is usually a mistake rather than an intent, so
+       *  the interface offers this next to it. */
+      clearRoutine(subjectId: string) {
+        update((s) => ({
+          ...s,
+          household: {
+            ...s.household,
+            routine: s.household.routine.filter((r) => r.appliesTo !== subjectId),
+          },
         }));
       },
 

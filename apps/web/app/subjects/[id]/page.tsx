@@ -11,6 +11,7 @@ import {
 } from '@mml/core';
 import { Badge, TopBar } from '../../../components/Chrome.tsx';
 import { MediaField, MediaThumb } from '../../../components/MediaField.tsx';
+import { RoutineEditor } from '../../../components/RoutineEditor.tsx';
 import { newId } from '../../../lib/ids.ts';
 import { KIND_LABEL, useActions, useAppState } from '../../../lib/store.ts';
 
@@ -162,6 +163,10 @@ export default function SubjectPage() {
           />
         </div>
       </section>
+
+      <div style={{ marginBottom: 'var(--space-5)' }}>
+        <RoutineEditor subject={subject} />
+      </div>
 
       <section className="stack">
         <div className="spread">

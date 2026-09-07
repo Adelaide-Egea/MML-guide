@@ -45,10 +45,10 @@ function placeholder(label: string, colour: string): Promise<Blob | null> {
 export function loadSample(): AppState {
   // Fire and forget: the guide renders immediately and the images appear when they
   // are ready, which is the same behaviour as a real upload finishing.
-  void placeholder('Sleeping bags — top shelf', '#14564e').then(
+  void placeholder('Sleeping bags — top shelf', '#4d6c82').then(
     (b) => b && putBlob('sample/togs', b),
   );
-  void placeholder('Bin day: Tuesday', '#7a5b0f').then((b) => b && putBlob('sample/bins', b));
+  void placeholder('Bin day: Tuesday', '#a2522d').then((b) => b && putBlob('sample/bins', b));
 
   const handover: Handover = {
     id: 'ho_sample',
@@ -74,7 +74,7 @@ export function loadSample(): AppState {
           kind: 'child',
           name: 'Léa',
           descriptor: '3 years',
-          identity: { colourToken: '--id-teal', symbol: '●' },
+          identity: { colourToken: '--id-petrol', symbol: '●' },
           safety: {
             allergies: 'Kiwi — her throat itches and her lips swell. No kiwi in anything.',
             medication: 'Nothing daily.',
@@ -201,8 +201,25 @@ export function loadSample(): AppState {
         { id: 'r5', time: '18:00', kind: 'Walk', appliesTo: 'sub_pom', notes: 'The long one.' },
         { id: 'r6', time: '18:30', kind: 'Bath', appliesTo: 'sub_lea', notes: '' },
         { id: 'r7', time: '19:15', kind: 'Bedtime', appliesTo: 'sub_lea', notes: '' },
+        { id: 'r8', time: null, kind: 'Bins', appliesTo: 'sub_flat', notes: 'Tuesday night.' },
       ],
     },
     handovers: [handover],
+    // One saved preset, so the sample shows that a routine you have already built
+    // can be reused rather than retyped for the next child.
+    presets: [
+      {
+        id: 'preset_sample',
+        label: 'Our evenings',
+        hint: 'Saved from your household',
+        appliesToKind: 'child',
+        custom: true,
+        items: [
+          { time: '18:00', kind: 'Dinner', notes: 'Orange bowl.' },
+          { time: '18:30', kind: 'Bath', notes: '' },
+          { time: '19:15', kind: 'Bedtime', notes: 'One story. Only one.' },
+        ],
+      },
+    ],
   };
 }
