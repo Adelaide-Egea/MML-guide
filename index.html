@@ -1323,6 +1323,18 @@
   // ── BRIDGE: collect v6 step data into the shape the engine expects ──
   // selectedMode/selectedDuration declared by engine below
 
+  // Single source of truth for a child's allergy text. The collector writes
+  // `allergies`; earlier code read `allergens`/`allergyNotes`, which are never
+  // populated, so the model was told "None noted" while the guide displayed the
+  // real allergy. Every read goes through here now.
+  function childAllergyText(c){
+    if(!c) return '';
+    return [c.allergens,c.allergies,c.allergyNotes]
+      .filter(v=>typeof v==='string'&&v.trim())
+      .map(v=>v.trim())
+      .join(' — ');
+  }
+
   function collectChildrenData(){
     return children.filter(c=>c.done||c.name).map((c,i)=>{
       const d=c.data||{};
@@ -1541,7 +1553,7 @@ async function performGeneration(authPayload){
   const childrenText=children.map((c,i)=>{
     const lines=[`Child ${i+1}: ${c.name}, age ${c.age}`];
     if(c.foodType)lines.push(`  Food type: ${c.foodType}`);
-    lines.push(`  Allergies: ${[c.allergens,c.allergyNotes].filter(Boolean).join(' — ')||'None noted'}`);
+    lines.push(`  Allergies: ${childAllergyText(c)||'None noted'}`);
     if(c.nappyStatus)lines.push(`  Nappies: ${c.nappyStatus}${c.nappy?' size '+c.nappy:''}${c.cream==='Yes'?' needs cream'+(c.creamNotes?' ('+c.creamNotes+')':''):''}` );
     if(c.milk||c.milkNotes)lines.push(`  Milk: ${[c.milk,c.milkNotes].filter(Boolean).join(' — ')}`);
     if(c.bottleAmount)lines.push(`  Bottle amount: ${c.bottleAmount}${c.bottleUnit} per feed`);
@@ -1693,7 +1705,7 @@ function renderGuideIndepth(aiData,children,formData){
   // keep the ORIGINAL index (ci) — the filter below would otherwise shift it,
   // and translated bottle notes are matched to children positionally.
   const comfortBlocks=children.map((c,i)=>({c,ci:i,id:kidId[c.name]||getKidIdentity(i),cs:findChildSection(aiData,c)}))
-                              .filter(x=>x.cs.comfort||x.cs.whenUpset||x.c.milk||x.c.bottleAmount||x.c.allergens||x.c.allergies);
+                              .filter(x=>x.cs.comfort||x.cs.whenUpset||x.c.milk||x.c.bottleAmount||childAllergyText(x.c));
   if(comfortBlocks.length){
     html+=`<div class="g-section">${labels.comfort}</div><div class="comfort-grid">`;
     comfortBlocks.forEach(({c,ci,id,cs})=>{
@@ -1711,7 +1723,7 @@ function renderGuideIndepth(aiData,children,formData){
       if(milkTxt||bottleTxt){
         html+=`<div class="upset-strip"><div class="comfort-micro">🍼 ${esc(labels.milkMicro)}</div><div class="comfort-text">${esc([milkTxt,bottleTxt].filter(Boolean).join(' — '))}</div></div>`;
       }
-      const algTxt=[c.allergens||c.allergies,c.allergyNotes].filter(Boolean).join(' — ').trim();
+      const algTxt=childAllergyText(c);
       if(algTxt){
         html+=`<div class="upset-strip"><div class="comfort-micro">⚠️ ${esc(labels.allergyMicro)}</div><div class="comfort-text">${esc(algTxt)}</div></div>`;
       }
@@ -1789,7 +1801,7 @@ function renderGuideLandscape(aiData,children,formData){
       <div class="kid-col-name" style="font-weight:800;font-size:0.87rem;color:${id.color};margin-bottom:10px;">${esc(id.emoji)} ${esc(c.name)}${c.age?', '+esc(String(c.age).split(' ')[0]):''}</div>`;
     if(cs.comfort)html+=`<div class="comfort-micro">${esc(labels.likesMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort)}</div>`;
     if(cs.whenUpset)html+=`<div class="comfort-micro">🧸 ${esc(labels.upsetMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset))}</div>`;
-    const allergy=[c.allergens,c.allergyNotes].filter(Boolean).join(' — ');
+    const allergy=childAllergyText(c);
     if(allergy)html+=`<div class="comfort-micro">Allergies</div><div style="font-size:0.8rem;line-height:1.5;">${allergy}</div>`;
     html+=`</div>`;
   });
@@ -1878,12 +1890,13 @@ function renderGuideFallback(children,formData){
          `${it.notes?' — '+esc(it.notes):''}</div></div></div></div>`;
     });
   }
-  const blocks=kids.filter(c=>c.likes||c.behaviour||c.allergies||c.school||c.preschool);
+  const blocks=kids.filter(c=>c.likes||c.behaviour||childAllergyText(c)||c.school||c.preschool);
   if(blocks.length){
     h+=`<div class="g-section">Comfort</div><div class="comfort-grid">`;
     blocks.forEach(c=>{
       h+=`<div class="comfort-card"><div class="comfort-card-name">${esc(c.emoji||'')} ${esc(c.name)}</div>`;
-      if(c.allergies)h+=`<div class="comfort-micro">Allergies</div><div class="comfort-text">${esc(c.allergies)}</div>`;
+      const algTxt=childAllergyText(c);
+      if(algTxt)h+=`<div class="comfort-micro">Allergies</div><div class="comfort-text">${esc(algTxt)}</div>`;
       if(c.likes)h+=`<div class="comfort-micro">Likes &amp; personality</div><div class="comfort-text">${esc(c.likes)}</div>`;
       if(c.behaviour)h+=`<div class="upset-strip"><div class="comfort-micro">🧸 If upset</div><div class="comfort-text">${esc(c.behaviour)}</div></div>`;
       if(c.preschool)h+=`<div class="comfort-micro">Nursery</div><div class="comfort-text">${esc(c.preschool)}</div>`;
