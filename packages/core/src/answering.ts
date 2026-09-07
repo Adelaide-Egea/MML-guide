@@ -104,29 +104,38 @@ function mentionsCriticalVocabulary(question: string): boolean {
   return CRITICAL_VOCABULARY.some((word) => haystack.includes(word));
 }
 
-/** Also treat a question as critical when it overlaps the actual words of a
- *  subject's safety fields. A parent who wrote "no kiwi, it makes her throat
- *  itch" has created a critical term — "kiwi" — that no fixed vocabulary knows
- *  about, and "can she have kiwi?" must not be answered by a model.
- */
-function overlapsSafetyText(question: string, subjects: readonly CareSubject[]): boolean {
-  const asked = new Set(terms(question));
-  if (asked.size === 0) return false;
+function safetyText(subject: CareSubject): string {
+  return [allergyText(subject), medicalText(subject), emergencyText(subject)]
+    .filter(hasText)
+    .join(' ');
+}
 
-  for (const subject of subjects) {
-    const safety = [allergyText(subject), medicalText(subject), emergencyText(subject)]
-      .filter(hasText)
-      .join(' ');
-    if (!safety) continue;
-    for (const term of terms(safety)) {
-      if (asked.has(term)) return true;
-    }
-  }
-  return false;
+/** Subjects whose safety fields actually use a word from the question.
+ *
+ *  A parent who wrote "no kiwi, it makes her throat itch" has created a critical
+ *  term — "kiwi" — that no fixed vocabulary knows about, and "can she have kiwi?"
+ *  must not be answered by a model. Returning *which* subjects matched, rather than
+ *  a boolean, is also what lets the answer stay narrow: a question about kiwi should
+ *  not surface the boiler cut-off.
+ */
+function subjectsMatchingSafetyText(
+  question: string,
+  subjects: readonly CareSubject[],
+): readonly CareSubject[] {
+  const asked = new Set(terms(question));
+  if (asked.size === 0) return [];
+
+  return subjects.filter((subject) => {
+    const safety = safetyText(subject);
+    if (!safety) return false;
+    return terms(safety).some((term) => asked.has(term));
+  });
 }
 
 export function touchesSafetyCritical(question: string, subjects: readonly CareSubject[]): boolean {
-  return mentionsCriticalVocabulary(question) || overlapsSafetyText(question, subjects);
+  return (
+    mentionsCriticalVocabulary(question) || subjectsMatchingSafetyText(question, subjects).length > 0
+  );
 }
 
 // ── Retrieval ────────────────────────────────────────────────────────────────
@@ -260,25 +269,38 @@ export function prepare(
   if (touchesSafetyCritical(question, subjects)) {
     const asked = new Set(terms(question));
 
-    // Prefer the subject the question names; otherwise every subject with
-    // safety-critical content, because "is anyone allergic to anything?" is a
-    // question that must not be answered about only one child.
+    // Narrowest defensible pool, in order.
+    //
+    // A named subject wins outright. Failing that, the subjects whose own safety
+    // text the question actually hit: "can she eat kiwi?" is about the child with
+    // kiwi in her allergies, and answering it with the boiler cut-off teaches the
+    // caregiver to skim the one box that must never be skimmed.
+    //
+    // Only when neither applies — "is anyone allergic to anything?", which matches
+    // generic vocabulary and nobody's specific words — does it fall back to
+    // everyone. That question must not be answered about only one child.
     const named = subjects.filter((s) => terms(s.name).some((t) => asked.has(t)));
-    const pool = named.length ? named : subjects;
+    const matched = subjectsMatchingSafetyText(question, subjects);
+    const pool = named.length ? named : matched.length ? matched : subjects;
 
-    const parts: string[] = [];
+    const answered: { subject: CareSubject; facts: string }[] = [];
     let language = readerLanguage;
     for (const subject of pool) {
+      // Every safety field of a chosen subject, not just the field that matched.
+      // Someone asking about an allergy needs to see the medication as well.
       const facts = [allergyText(subject), medicalText(subject), emergencyText(subject)]
         .filter(hasText)
         .join('\n');
       if (!facts) continue;
-      parts.push(`${subject.name}\n${facts}`);
+      answered.push({ subject, facts });
       const entryLanguage = subject.entries[0]?.language;
       if (entryLanguage) language = entryLanguage;
     }
 
-    if (parts.length === 0) return { route: 'refusal', answer: refusal(readerLanguage) };
+    const only = answered.length === 1 ? answered[0] : undefined;
+    if (!only && answered.length === 0) {
+      return { route: 'refusal', answer: refusal(readerLanguage) };
+    }
 
     return {
       route: 'critical',
@@ -287,9 +309,14 @@ export function prepare(
         body: 'SAFETY_CRITICAL',
         language: readerLanguage,
         citations: [],
-        verbatim: parts.join('\n\n'),
+        // Whose facts these are has to be unambiguous when there are several. With
+        // one, `subjectName` carries it and repeating it inside the verbatim text
+        // would put a word in front of the fact that the parent did not write.
+        verbatim: only
+          ? only.facts
+          : answered.map(({ subject, facts }) => `${subject.name}\n${facts}`).join('\n\n'),
         verbatimLanguage: language,
-        ...(pool.length === 1 && pool[0] ? { subjectName: pool[0].name } : {}),
+        ...(only ? { subjectName: only.subject.name } : {}),
       },
     };
   }
