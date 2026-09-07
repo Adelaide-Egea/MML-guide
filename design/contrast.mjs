@@ -57,13 +57,21 @@ const PAIRS = [
   ['--critical', '--paper', 4.5],
   ['--critical', '--critical-tint', 4.5],
   ['--ink', '--surface-sunk', 4.5],
-  ['--id-teal', '--paper', 4.5],
-  ['--id-clay', '--paper', 4.5],
+  ['--amber', '--amber-tint', 4.5],
+  ['--ink', '--brand-tint', 4.5],
+  ['--petrol', '--paper', 4.5],
+  ['--id-petrol', '--paper', 4.5],
   ['--id-indigo', '--paper', 4.5],
-  ['--id-ochre', '--paper', 4.5],
   ['--id-plum', '--paper', 4.5],
-  ['--id-moss', '--paper', 4.5],
+  ['--id-clay', '--paper', 4.5],
+  ['--id-olive', '--paper', 4.5],
+  ['--id-forest', '--paper', 4.5],
   ['--hairline-strong', '--paper', 1.5],
+  // Raspberry is the manifest's completion colour and is kept at its exact value.
+  // 3:1 is the correct bar for it because it is only ever a large filled shape or a
+  // boundary, never small text and never behind white type. The test encodes that
+  // restriction so a future use as a text colour fails here rather than in review.
+  ['--done', '--paper', 3],
 ];
 
 for (const theme of [
@@ -94,7 +102,7 @@ test('white text is legible on every filled brand surface', () => {
  *  the mitigation — the mitigation is that a colour never travels without a symbol.
  */
 test('identity colours stay distinguishable under deuteranopia and protanopia', () => {
-  const ids = ['--id-teal', '--id-clay', '--id-indigo', '--id-ochre', '--id-plum', '--id-moss'];
+  const ids = ['--id-petrol', '--id-indigo', '--id-plum', '--id-clay', '--id-olive', '--id-forest'];
 
   const toLinear = (hex) =>
     [1, 3, 5].map((i) => {
