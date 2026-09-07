@@ -1064,7 +1064,7 @@
       children.every((c,i)=>c.done&&c.name===p.children[i].name);
     if(!p||alreadyLoaded){ box.innerHTML=''; return; }
     const names=p.children.map(c=>esc(c.name)).join(' & ');
-    const emo=p.children.map(c=>c.emoji||'🧸').join(' ');
+    const emo=p.children.map(c=>esc(c.emoji||'🧸')).join(' ');
     box.innerHTML=`<div class="saved-card">
       <div class="saved-top"><span class="saved-emo">${emo}</span>
         <div><div class="saved-name">${names}</div>
@@ -1079,10 +1079,10 @@
     const list=el('#childrenList');
     list.innerHTML=children.map((c,i)=>{
       const name=esc(c.name||`Child ${i+1}`);
-      const meta=c.done ? (c.age? `${c.age} · tap to edit`:'tap to edit') : 'not filled in yet';
+      const meta=c.done ? (c.age? `${esc(c.age)} · tap to edit`:'tap to edit') : 'not filled in yet';
       const status=c.done?'<span class="child-status status-done">✓ Done</span>':'<span class="child-status status-todo">To do</span>';
       return `<div class="child-card">
-        <div class="child-avatar" style="background:${c.colour}">${c.emoji}</div>
+        <div class="child-avatar" style="background:${esc(c.colour)}">${esc(c.emoji)}</div>
         <div class="child-info"><div class="child-name">${name}</div><div class="child-meta">${meta}</div></div>
         ${status}
         <button class="child-edit" onclick="editChild(${i})">${c.done?'Edit':'Fill in'}</button>
@@ -1263,13 +1263,13 @@
       return `<div class="r-card" data-uid="${r.uid||''}">
       <div class="r-top">
         <button class="r-emoji r-emoji-btn" title="Tap to change the icon"
-                onclick="cycleRoutineEmoji(${i})">${r.emoji}</button>
+                onclick="cycleRoutineEmoji(${i})">${esc(r.emoji)}</button>
         <span class="r-name">${esc(r.name)}</span>
-        <input type="time" value="${r.time}" onchange="routineItems[${i}].time=this.value;renderRoutine();saveDraft();">
+        <input type="time" value="${esc(r.time)}" onchange="routineItems[${i}].time=this.value;renderRoutine();saveDraft();">
         <button class="r-del" onclick="delRoutine(${i})">×</button>
       </div>
       ${showWho?`<select class="r-who" onchange="routineItems[${i}].child=this.value">${opts}</select>`:''}
-      <input type="text" class="r-note" value="${(r.notes||'').replace(/"/g,'&quot;')}"
+      <input type="text" class="r-note" value="${esc(r.notes||'')}"
              placeholder="Note — e.g. 150ml cow's milk + apple slices"
              oninput="routineItems[${i}].notes=this.value">
     </div>`;}).join('');
@@ -1767,7 +1767,7 @@ function renderGuideLandscape(aiData,children,formData){
     if(cs.comfort)html+=`<div class="comfort-micro">${esc(labels.likesMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cs.comfort)}</div>`;
     if(cs.whenUpset)html+=`<div class="comfort-micro">🧸 ${esc(labels.upsetMicro)}</div><div style="font-size:0.8rem;line-height:1.5;margin-bottom:8px;">${parseInlineBold(cleanProse(cs.whenUpset))}</div>`;
     const allergy=childAllergyText(c);
-    if(allergy)html+=`<div class="comfort-micro">Allergies</div><div style="font-size:0.8rem;line-height:1.5;">${allergy}</div>`;
+    if(allergy)html+=`<div class="comfort-micro">Allergies</div><div style="font-size:0.8rem;line-height:1.5;">${esc(allergy)}</div>`;
     html+=`</div>`;
   });
   html+=`</div>`;
@@ -1906,7 +1906,11 @@ function groupByTime(items){
 
 function formatTime12hr(t){if(!t)return'';const[h,m]=t.split(':').map(Number);return`${h%12===0?12:h%12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
 
-function parseInlineBold(text){if(!text)return'';return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
+// Escape before converting the bold markers, never after: this text is written by
+// the model from the parent's own words and is injected with innerHTML, so raw
+// markup reaching the caregiver's browser must be impossible. The ** markers are
+// untouched by esc(), so the transform still works.
+function parseInlineBold(text){if(!text)return'';return esc(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');}
 
 function cleanProse(text){if(!text)return'';return text.replace(/\b\d+\.\s+/g,'').replace(/^\s*[-•]\s*/gm,'').replace(/\n+/g,' ').replace(/\s{2,}/g,' ').trim();}
 
@@ -1941,7 +1945,8 @@ function startVoice(btn,textarea){
   rec.start();
 }
 
-function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${msg}</div>`;}
+// Error text can carry a server response body, so it is escaped rather than trusted.
+function showError(msg){document.getElementById('errorBox').innerHTML=`<div class="error-box">${esc(msg)}</div>`;}
 
 function clearError(){document.getElementById('errorBox').innerHTML='';}
 
