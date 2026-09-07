@@ -158,6 +158,63 @@ select {
   color: inherit;
 }
 
+/* A list of like things is one card with hairlines, not a card per item. Eight
+   stacked cards read as eight separate decisions; a day is a single list. */
+.rows {
+  padding: 0;
+}
+
+.rows-item {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.rows-item:first-child {
+  border-top: 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+/* Destructive actions in a list are marks, not full-width red buttons. The red
+   button repeated down a page reads as a warning about the page. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--surface-sunk);
+  color: var(--critical);
+}
+
+.preset-row {
+  border-top: 1px solid var(--hairline);
+  padding: var(--space-1) 0;
+}
+
+.preset-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+}
+
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
 
 .btn {
@@ -286,6 +343,14 @@ select {
   font-weight: 600;
 }
 
+.chip .mark {
+  color: var(--mark, inherit);
+}
+
+.chip[aria-pressed="true"] .mark {
+  color: #fff;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -315,6 +380,45 @@ select {
   white-space: pre-wrap;
   font-weight: 600;
   font-size: var(--text-read);
+}
+
+/* The guide's safety banner.
+   
+   A full red-tinted block the height of a screen was the loudest thing in the
+   product and therefore the first thing skipped. This keeps the card surface of
+   everything around it and spends its emphasis on one red rule and one red dot,
+   which is enough to be unmistakable and little enough to be read. */
+.safety {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--critical);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.safety-eyebrow {
+  color: var(--critical);
+}
+
+.safety-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--critical);
+  flex: none;
+}
+
+.safety-collapsed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
 }
 
 .notice {
@@ -368,8 +472,38 @@ select {
 
 .routine-time {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--brand);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.routine-note {
+  display: block;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  margin-top: 2px;
+}
+
+/* A heading inside a hairline list belongs to the list, not to a row. */
+.rows-head {
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.rows .routine-item {
+  padding: var(--space-3) var(--space-4);
+}
+
+/* A row that is both — one hairline between neighbours, not two. */
+.rows-item.routine-item {
+  border-bottom: 0;
+}
+
+a.routine-item {
+  text-decoration: none;
+  color: inherit;
+}
+
+.print-only {
+  display: none;
 }
 
 /* ── Ask ──────────────────────────────────────────────────────────────────── */
@@ -394,11 +528,18 @@ select {
   .no-print {
     display: none !important;
   }
+  .print-only {
+    display: flex;
+  }
   body {
     background: #fff;
   }
-  .card {
+  .card,
+  .safety {
     box-shadow: none;
+  }
+  .no-break,
+  .safety {
     break-inside: avoid;
   }
 }
