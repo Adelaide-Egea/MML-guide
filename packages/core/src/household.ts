@@ -16,6 +16,7 @@
 import {
   type CareSubject,
   type Issue,
+  type SubjectKind,
   hasText,
   validateSubject,
 } from './subject.ts';
@@ -35,13 +36,20 @@ export type RoutineKind =
   | 'Lunch'
   | 'Dinner'
   | 'Feed'
+  | 'Bottle'
+  | 'Nappy'
   | 'Nap'
   | 'Bath'
   | 'Bedtime'
   | 'School'
   | 'Walk'
+  | 'Litter'
   | 'Activity'
   | 'Medication'
+  | 'Bins'
+  | 'Plants'
+  | 'Post'
+  | 'Laundry'
   | 'Other';
 
 /** Exported as a value so a surface can render the list without redeclaring it and
@@ -52,15 +60,49 @@ export const ROUTINE_KINDS: readonly RoutineKind[] = [
   'Lunch',
   'Dinner',
   'Feed',
+  'Bottle',
+  'Nappy',
   'Nap',
   'Bath',
   'Bedtime',
   'School',
   'Walk',
+  'Litter',
   'Activity',
   'Medication',
+  'Bins',
+  'Plants',
+  'Post',
+  'Laundry',
   'Other',
 ];
+
+/** Which kinds are worth offering for each sort of subject.
+ *
+ *  Not a restriction — 'Other' and the full list stay reachable — but a picker that
+ *  offers "Nappy" for a flat and "Bins" for a baby is a picker the parent has to
+ *  read rather than scan, and the whole point of a routine is that it is faster
+ *  than writing prose.
+ */
+export const ROUTINE_KINDS_FOR: Record<SubjectKind, readonly RoutineKind[]> = {
+  child: [
+    'Breakfast',
+    'Snack',
+    'Lunch',
+    'Dinner',
+    'Bottle',
+    'Nappy',
+    'Nap',
+    'Bath',
+    'Bedtime',
+    'School',
+    'Activity',
+    'Medication',
+    'Other',
+  ],
+  pet: ['Feed', 'Walk', 'Litter', 'Medication', 'Activity', 'Other'],
+  place: ['Bins', 'Plants', 'Post', 'Laundry', 'Other'],
+};
 
 export interface RoutineItem {
   readonly id: string;
