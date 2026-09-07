@@ -105,6 +105,13 @@ export default function HouseholdPage() {
           </button>
         </div>
 
+        <p className="muted">
+          Everyone&rsquo;s day in one timeline, which is how a caregiver reads it. Each person and
+          animal also has their own routine on their page, with presets — this is the same list
+          seen whole, and the place to put things that apply to the household rather than to one
+          of them.
+        </p>
+
         {household.routine.length === 0 && (
           <p className="muted">
             Optional. An evening sitter is only shown the evening, so adding the school run costs

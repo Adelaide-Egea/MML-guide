@@ -1,57 +1,86 @@
 /* Design tokens.
  *
- * Every colour here has been measured against its intended background with the
- * WCAG 2.2 relative-luminance formula; see design/contrast.mjs, which fails the
- * build if any pair drops below its target. The targets are 4.5:1 for body text,
- * 3:1 for large text and for UI boundaries that carry meaning.
+ * This is the brand manifest's palette, not a replacement for it. An earlier round
+ * measured the manifest, found several pairs below WCAG AA, and then — wrongly —
+ * substituted an entirely different scheme instead of correcting the values. The
+ * strategic direction in the manifest was right and is restored here: warmth comes
+ * from the ground rather than the accents, the accents stay quiet so the content is
+ * what you look at, and raspberry is reserved for completion.
+ *
+ * What changed, and only this: colours that carry text were moved down in lightness
+ * until they clear their target, keeping hue and saturation. Most moves are
+ * invisible — Lisette blue shifted 2.5%, Jeannette petrol 0.2%. Every pair below is
+ * verified by design/contrast.mjs, which fails the build.
  *
  * Two constraints come from who actually reads this. A grandparent reading at 2am
- * has presbyopia and a dark room, so the base size is 17px and dark mode is a
- * first-class theme rather than an inversion. And a caregiver reading in a second
- * language needs contrast to be generous, because low contrast costs more when you
- * are also decoding the words.
+ * has presbyopia and a dark room, so guide content is set larger than interface
+ * text and dark mode is a first-class theme rather than an inversion. And a
+ * caregiver reading in a second language needs contrast to be generous, because low
+ * contrast costs more when you are also decoding the words.
  */
 
 :root {
-  /* Surfaces. Warm rather than blue-grey: this should read as paper, not as a
-     dashboard. */
-  --paper: #fbf9f5;
-  --surface: #ffffff;
-  --surface-sunk: #f4f0e8;
-  --hairline: #e5dfd4;
-  /* --hairline is 1.26:1 against paper. It may decorate a boundary but must never
+  /* Surfaces. The manifest's Ground and Card, unchanged. Warm paper rather than
+     the blue-grey every other household app defaults to. */
+  --paper: #efe7da; /* manifest "Ground" */
+  --surface: #faf6f0; /* manifest "Card" */
+  --surface-sunk: #e5dbc9;
+  --hairline: #dfd5c4;
+  /* --hairline is 1.13:1 against paper. It may decorate a boundary but must never
      be the only thing communicating one. */
-  --hairline-strong: #c9c0af;
+  --hairline-strong: #c0b39c;
 
-  /* Ink. */
-  --ink: #1f1b16; /* 16.28:1 on paper */
-  --ink-muted: #5c554b; /* 6.99:1 */
+  /* Ink. Warm near-black rather than grey, so it sits on the beige instead of
+     floating above it. */
+  --ink: #2c2721; /* 12.06:1 on paper */
+  --ink-muted: #6e675d; /* manifest #7C7468, down 4.9% to reach 4.55:1 */
 
-  /* Brand. A deep pine-teal: calm and credible without the corporate blue or the
-     coral-pink that every other parenting product reaches for. */
-  --brand: #14564e; /* 8.08:1 on paper, 8.50:1 behind white text */
-  --brand-tint: #e6f0ed;
+  /* Lisette blue — the manifest's accent for this surface, the care guide.
+     A quiet slate blue: credible and adult, and notably not the bright primary
+     blue that the family-calendar category has almost entirely to itself. */
+  --brand: #4d6c82; /* manifest #52738A, down 2.5% to reach 4.52:1 */
+  /* A tint pale enough for --brand text to clear 4.5:1 on it is, on a beige ground,
+     within 1.05:1 of the ground itself — a panel you cannot see. So the tint is
+     deeper and carries --ink, and a selected state is a solid --brand fill with
+     white text instead. Unambiguous, and it fails no target. */
+  --brand-tint: #d3e0e9;
 
-  /* Attention, not alarm. */
-  --amber: #8a5a00; /* 5.64:1 */
-  --amber-tint: #fdf1dc;
+  /* Jeannette petrol — the manifest's accent for the packing surface. Defined here
+     so the two products share one token file and cannot drift apart. */
+  --petrol: #377177; /* manifest #377278, down 0.2% */
+
+  /* Raspberry, exactly as the manifest specifies it. Reserved for completion.
+     It clears 3:1 on the ground, which is the bar for a large element or a filled
+     shape, and it is deliberately NOT used for small text or behind white type —
+     darkening it enough for that would have turned it into a different colour and
+     put it uncomfortably close to --critical. */
+  --done: #d9577e;
+  --done-tint: #fae7ed;
+
+  /* Attention, not alarm. The manifest's warning gold, darkened for text. */
+  --amber: #836325; /* manifest #C99A3E, down 18.6% to reach 4.53:1 */
+  --amber-tint: #f5ead2;
 
   /* Reserved exclusively for safety-critical content — allergies, medication,
      emergency contacts. If this colour appears anywhere else it stops meaning
-     anything, and the one time it matters it will be skimmed past. */
-  --critical: #a3232b; /* 7.05:1 */
-  --critical-tint: #fdeceb;
+     anything, and the one time it matters it will be skimmed past. Kept clearly
+     redder and darker than raspberry so completion and danger never read alike. */
+  --critical: #b3312f; /* 5.04:1 */
+  --critical-tint: #f7e4e2;
 
-  /* Per-person identity. Colour is never the only signal: every one of these is
-     always paired with --symbol, because these hues are confusable under
-     deuteranopia and protanopia. All six clear 4.5:1 on paper, so they may carry
-     text and not only decoration. */
-  --id-teal: #0f6b63;
-  --id-clay: #a8452a;
-  --id-indigo: #3b4e8c;
-  --id-ochre: #7a5b0f;
-  --id-plum: #71356a;
-  --id-moss: #44622b;
+  /* Per-subject identity. Colour is never the only signal: every one of these is
+     always paired with a symbol, because these hues are confusable under
+     deuteranopia and protanopia. All six clear 4.5:1 on the ground and behind white
+     text, so they may carry a label and not only decoration. */
+  --id-petrol: #377177;
+  /* The one colour here that is louder than the rest of the palette, and it stays
+     that way: muting it toward the beige collapses it against --id-petrol under
+     deuteranopia. Its saturation is doing accessibility work, not decoration. */
+  --id-indigo: #4a5a9c;
+  --id-plum: #7a3c6e;
+  --id-clay: #a2522d;
+  --id-olive: #616e2a;
+  --id-forest: #2f5d3a;
 
   --radius-sm: 8px;
   --radius: 14px;
@@ -61,48 +90,63 @@
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --space-7: 40px;
 
-  --font-display: "Fraunces", Georgia, serif;
-  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* The manifest's pairing: a serif with real character for headings, a warm
+     geometric sans for everything else. Serif headings are close to absent in this
+     category, which is most of why they read as considered rather than generic. */
+  --font-display: "Newsreader", Georgia, serif;
+  --font-ui: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --text-xs: 13px;
-  --text-sm: 15px;
-  --text-base: 17px; /* not 16 — see note above */
-  --text-lg: 20px;
-  --text-xl: 26px;
-  --text-2xl: 34px;
+  /* Two body sizes, on purpose.
+     --text-base is the interface: labels, buttons, metadata, navigation.
+     --text-read is guide content and safety-critical facts — the words a caregiver
+     is actually trying to read, often in a second language and often at night.
+     Shrinking the chrome should not shrink those. */
+  --text-xs: 12px;
+  --text-sm: 13.5px;
+  --text-base: 15px;
+  --text-read: 16px;
+  --text-lg: 17px;
+  --text-xl: 21px;
+  --text-2xl: 26px;
 
-  --shadow-card: 0 1px 2px rgba(31, 27, 22, 0.04), 0 6px 20px rgba(31, 27, 22, 0.06);
+  --shadow-card: 0 1px 2px rgba(44, 39, 33, 0.04), 0 4px 14px rgba(44, 39, 33, 0.05);
 }
 
-/* Dark mode is a separate palette, not an inversion. Inverting a warm paper theme
-   produces muddy browns, and the identity hues would collapse below 3:1. */
+/* Dark mode is the manifest's own charcoal-slate, not an inversion of the beige.
+   Inverting a warm paper theme produces muddy browns, and the identity hues would
+   collapse below 3:1. */
 :root[data-theme="dark"] {
-  --paper: #16130f;
-  --surface: #211d18;
-  --surface-sunk: #100e0b;
-  --hairline: #35302a;
-  --hairline-strong: #4d463d;
+  --paper: #2b333a; /* manifest dark "Ground" */
+  --surface: #39434b; /* manifest dark "Card" */
+  --surface-sunk: #222a30;
+  --hairline: #454f58;
+  --hairline-strong: #5c6874;
 
-  --ink: #f2ede4; /* 14.37:1 on --surface */
-  --ink-muted: #b3aa9c; /* 7.30:1 */
+  --ink: #f1ede6;
+  --ink-muted: #b4ada1; /* manifest #A8A093, up 5.1% */
 
-  --brand: #6fc8b8; /* 8.48:1 */
-  --brand-tint: #1b3b36;
+  --brand: #98b1c2;
+  --brand-tint: #33414d;
 
-  --amber: #e8b75a; /* 9.06:1 */
-  --amber-tint: #3a2e14;
+  --petrol: #75b8bf;
 
-  --critical: #ff9a93; /* 8.21:1 */
-  --critical-tint: #3d1c1a;
+  --done: #e796ae;
+  --done-tint: #4a2c37;
 
-  --id-teal: #5fbfaf;
-  --id-clay: #e8927a;
-  --id-indigo: #93a6e8;
-  --id-ochre: #d4ae52;
-  --id-plum: #cf92c6;
-  --id-moss: #9bc46f;
+  --amber: #d0a858;
+  --amber-tint: #3b3222;
+
+  --critical: #e49a98;
+  --critical-tint: #4a2a29;
+
+  --id-petrol: #75b8bf;
+  --id-indigo: #a2acd3;
+  --id-plum: #cf9ec6;
+  --id-clay: #dd9f83;
+  --id-olive: #a1b746;
+  --id-forest: #7abc89;
 }

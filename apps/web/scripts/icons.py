@@ -17,8 +17,8 @@ PUBLIC = WEB / "public"
 # Next serves apple-icon.png from app/ by convention, not from public/.
 APP = WEB / "app"
 
-GREEN = (20, 86, 78, 255)
-CREAM = (251, 249, 245, 255)
+BRAND = (77, 108, 130, 255)  # --brand, the manifest's Lisette blue
+PAPER = (239, 231, 218, 255)  # --paper, the manifest's Ground
 
 # The quadratic arc from the mark, in the 48-unit viewBox it was drawn in.
 P0, P1, P2 = (12.0, 31.0), (24.0, 11.0), (36.0, 31.0)
@@ -41,7 +41,7 @@ def curve(steps: int):
 
 def render(size: int, fill: float) -> bytes:
     s = size * SS
-    img = Image.new("RGBA", (s, s), GREEN)
+    img = Image.new("RGBA", (s, s), BRAND)
     draw = ImageDraw.Draw(img)
 
     scale = fill * s / (BBOX[2] - BBOX[0])
@@ -53,7 +53,7 @@ def render(size: int, fill: float) -> bytes:
     # Stamping a disc along the curve gives a seamless round-capped stroke.
     # ImageDraw.line's mitre joints leave visible notches on an arc this tight.
     def disc(x, y, r):
-        draw.ellipse([x - r, y - r, x + r, y + r], fill=CREAM)
+        draw.ellipse([x - r, y - r, x + r, y + r], fill=PAPER)
 
     for point in curve(600):
         disc(*to(point), STROKE * scale / 2)

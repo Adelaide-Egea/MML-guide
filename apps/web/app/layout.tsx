@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
+import { Figtree, Newsreader } from 'next/font/google';
 import './globals.css';
 
-// Fraunces for the brand and headings only; Inter for everything a caregiver
-// actually reads. Loaded through next/font so they are self-hosted and there is no
-// render-blocking request to a third party.
-const display = Fraunces({
+// The brand manifest's pairing. Newsreader for headings only; Figtree for
+// everything a caregiver actually reads. Loaded through next/font so they are
+// self-hosted and there is no render-blocking request to a third party.
+const display = Newsreader({
   subsets: ['latin'],
-  weight: ['600'],
+  weight: ['500', '600'],
   variable: '--font-display-loaded',
   display: 'swap',
 });
 
-const ui = Inter({
+const ui = Figtree({
   subsets: ['latin'],
   variable: '--font-ui-loaded',
   display: 'swap',
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fbf9f5' },
-    { media: '(prefers-color-scheme: dark)', color: '#16130f' },
+    { media: '(prefers-color-scheme: light)', color: '#efe7da' },
+    { media: '(prefers-color-scheme: dark)', color: '#2b333a' },
   ],
 };
 
@@ -46,7 +46,10 @@ try {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${ui.variable}`}>
+    // The theme script sets data-theme before React hydrates, which is the whole
+    // point of it — the alternative is a flash of the wrong theme. React sees that
+    // as a mismatch on this element only.
+    <html lang="en" className={`${display.variable} ${ui.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <style>{`:root{
