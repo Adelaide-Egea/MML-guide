@@ -21,7 +21,7 @@ body {
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: var(--text-base);
-  line-height: 1.55;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -165,8 +165,9 @@ select {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  /* 48px floor. A thumb is about 9mm and a tired one is less accurate. */
-  min-height: 48px;
+  /* 44px floor — the platform minimum. A thumb is about 9mm and a tired one is less
+     accurate, so this does not go lower even though the type did. */
+  min-height: 44px;
   padding: 0 var(--space-5);
   border-radius: var(--radius);
   border: 1px solid transparent;
@@ -233,8 +234,8 @@ select {
 .textarea,
 .select {
   width: 100%;
-  min-height: 48px;
-  padding: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
   background: var(--surface);
   border: 1px solid var(--hairline-strong);
   border-radius: var(--radius-sm);
@@ -275,10 +276,13 @@ select {
   cursor: pointer;
 }
 
+/* Selection is a solid fill rather than a tint. On a beige ground any tint pale
+   enough to carry brand-coloured text is within 1.05:1 of the ground, which is a
+   selected state you cannot see. */
 .chip[aria-pressed="true"] {
-  background: var(--brand-tint);
+  background: var(--brand);
   border-color: var(--brand);
-  color: var(--brand);
+  color: #fff;
   font-weight: 600;
 }
 
@@ -304,9 +308,13 @@ select {
   color: var(--critical);
 }
 
+/* Guide content is set a size larger than the interface around it. The chrome can
+   afford to be compact; the words a caregiver is decoding in a second language at
+   2am cannot. */
 .critical-body {
   white-space: pre-wrap;
   font-weight: 600;
+  font-size: var(--text-read);
 }
 
 .notice {
@@ -321,6 +329,7 @@ select {
 
 .block-body {
   white-space: pre-wrap;
+  font-size: var(--text-read);
 }
 
 .media-grid {
