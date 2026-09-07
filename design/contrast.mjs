@@ -94,8 +94,19 @@ for (const theme of [
   });
 }
 
-test('white text is legible on every filled brand surface', () => {
-  for (const token of ['--brand', '--critical', '--amber']) {
+test('label text is legible on every filled brand surface', () => {
+  for (const theme of [
+    { name: 'light', tokens: light },
+    { name: 'dark', tokens: dark },
+  ]) {
+    // Dark mode's brand is a pale slate, so the label that sits on it is not white.
+    const label = theme.tokens['--on-brand'];
+    assert.ok(label, `${theme.name}: --on-brand not defined`);
+    const r = ratio(label, theme.tokens['--brand']);
+    assert.ok(r >= 4.5, `${theme.name}: --on-brand on --brand is ${r.toFixed(2)}:1`);
+  }
+  // Filled criticals and ambers are only ever drawn in the light theme.
+  for (const token of ['--critical', '--amber']) {
     const r = ratio('#FFFFFF', light[token]);
     assert.ok(r >= 4.5, `white on ${token} (${light[token]}) is ${r.toFixed(2)}:1`);
   }

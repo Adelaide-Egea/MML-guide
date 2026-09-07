@@ -57,6 +57,9 @@
      deeper and carries --ink, and a selected state is a solid --brand fill with
      white text instead. Unambiguous, and it fails no target. */
   --brand-tint: #c9dae5;
+  /* Text on a filled brand surface. It is a token rather than white because dark
+     mode's brand is a pale slate, and white on it is unreadable. */
+  --on-brand: #ffffff;
 
   /* Jeannette petrol — the manifest's accent for the packing surface. Defined here
      so the two products share one token file and cannot drift apart. */
@@ -150,6 +153,7 @@
 
   --brand: #98b1c2;
   --brand-tint: #33414d;
+  --on-brand: #1d242a;
 
   --petrol: #75b8bf;
 

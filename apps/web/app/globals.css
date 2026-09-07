@@ -229,7 +229,7 @@ select {
   border-radius: var(--radius);
   border: 1px solid transparent;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -339,7 +339,7 @@ select {
 .chip[aria-pressed="true"] {
   background: var(--brand);
   border-color: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   font-weight: 600;
 }
 
@@ -348,7 +348,7 @@ select {
 }
 
 .chip[aria-pressed="true"] .mark {
-  color: #fff;
+  color: var(--on-brand);
 }
 
 .chips {
