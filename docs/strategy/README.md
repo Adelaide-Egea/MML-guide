@@ -20,6 +20,8 @@ modified, no data was deleted, no database was migrated, and no product was rena
 | 9 | [`09-roadmap-and-backlog.md`](./09-roadmap-and-backlog.md) | Phases −1 to 13, and the P0–P3 backlog. |
 | 10 | [`10-user-journey.md`](./10-user-journey.md) | Discovery to retention, with a 25-item friction inventory. |
 | 11 | [`11-decisions-required.md`](./11-decisions-required.md) | **The only things I need from you.** |
+| 12 | [`12-animated-universe-fit.md`](./12-animated-universe-fit.md) | Strategic fit assessment for the animated children's universe concept. |
+| 13 | [`13-original-vision-reconciled.md`](./13-original-vision-reconciled.md) | The original MML feature list assessed, and the interactive-guide proposal. |
 
 ## Mapping to the requested outputs
 

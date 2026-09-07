@@ -163,7 +163,7 @@ word describing the product. The same objection applies with more force to "My M
 household subscription across the whole ecosystem, no per-app pricing:
 
 - **£24 / year** (the default), **£49 lifetime**, £3.49/month de-emphasised
-- **Free tier: 2 care guides in total** — an absolute lifetime count, not a monthly rate
+- **Free tier: one recipient type, paid covers all of them** — see the note below
 - Sharing, export, editing and re-sending always free; both parents always free; no time-limited trial
 - **£3.99 one-off guide** for the genuinely occasional parent, credited against an upgrade
 
@@ -173,6 +173,12 @@ guides *per month*. Both numbers were wrong. £39 was benchmarked against Cozi �
 year** (Handoff $19.99, Handover $24.99, Gosling $29.99, Pebbi £19.99). Pricing above all of them
 while doing less than the incumbent was indefensible. And three free guides a month against a real
 usage rate of **six to twelve a year** meant nobody would ever have reached the paywall.
+
+**A further revision, prompted by your original feature list** (`13` §13.5). I had proposed a free
+allowance of two guides in total. A cleaner boundary is **one recipient type free, all recipient
+types paid** — brief your babysitter for nothing, and the moment you also want to brief a cleaner or
+an au pair, you upgrade. It needs no counting, it explains itself in one sentence, and it never says
+no at the moment of need, which a guide-count limit eventually would.
 
 **What I need from you:** yes, or different numbers. And explicit confirmation of the "never
 paywalled" list in `07` §7.3 — I intend to enforce it in code, which makes it hard to quietly erode
@@ -243,7 +249,55 @@ fix.
 
 ---
 
-### D9 — Approve the direction, and the order
+### D9 — The animated children's universe: how close should it sit?
+
+**Why I need you.** Whether to bind two ventures together is a business decision, and
+it is partly a family one. Full analysis in `12-animated-universe-fit.md`.
+
+**My recommendation: separate brand, separate entity, one written commercial
+relationship.** Category 3 on your scale — strategically adjacent, better kept
+separate — ranked 4 out of 5.
+
+There is one real connection and it is valuable: an animation channel with a parent
+audience solves this project's hardest problem, which is that no paid acquisition
+channel is affordable at £24/year ARPU (`07` §7.5). But that connection is commercial,
+not structural, and it is **worth more when the brands are separate** — a beloved
+independent children's brand recommending a household tool is an endorsement, while a
+company recommending its own other product is an advertisement.
+
+The decisive argument against binding them is asymmetric risk. This project's core
+asset is trust with children's safety data. A children's YouTube presence carries a far
+larger trust surface — platform moderation, audience-designation compliance,
+safeguarding, and the live public argument about AI-generated content for toddlers —
+most of it outside your control. Linking them lets the smaller, riskier venture damage
+the larger, more defensible one, and buys almost nothing in return.
+
+**Two things your husband should know before he models any revenue**, because neither
+appears in the concept brief:
+
+- Made for Kids disables personalised ads by law. Independent 2026 figures put kids
+  content at roughly **$0.70 CPM against $5–15 for general audiences**. It also
+  disables channel memberships, merchandise shelves, comments and the notification bell
+  — the exact mechanisms a "universe → community → IP → products" strategy depends on.
+  **The plan should be rebuilt with YouTube ad revenue at approximately zero**, with the
+  channel as discovery and the business in sponsorship and IP.
+- YouTube's July 2026 inauthentic-content policy demonetises, by name, *"videos where
+  characters are put in the same situation over and over again with the same outcome"*
+  and AI content that gives the impression of mass production. The brief's repeatable
+  five-beat formula at volume is close to that description, and enforcement is at
+  **channel** level. Survivable, but only if craft and variation are production
+  constraints from the first upload.
+
+**What I need from you:** agreement that the two stay separate customer-facing, and
+that the household data is firewalled at company level rather than by policy. If you
+want them linked more closely than this, tell me and I will plan for it — but I would
+want that decision made deliberately.
+
+**Blocks:** nothing in this project.
+
+---
+
+### D10 — Approve the direction, and the order
 
 **Why I need you.** The rest is execution.
 
