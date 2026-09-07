@@ -1,9 +1,19 @@
 {
-  "name": "held",
+  "name": "mml",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "npm run typecheck && npm run test:legacy && npm run test:core",
+    "test:legacy": "node --test test/*.test.js",
+    "test:core": "node --experimental-strip-types --test packages/*/test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.12",
+    "typescript": "^5.9.3"
   }
 }
