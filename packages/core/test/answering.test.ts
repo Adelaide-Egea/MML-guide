@@ -176,6 +176,41 @@ test('an unnamed critical question answers for every subject that has such facts
 
   assert.ok(prepared.answer.verbatim?.includes('Arachide'));
   assert.ok(prepared.answer.verbatim?.includes('Dr Meunier'));
+  // With several subjects the text has to say whose facts are whose.
+  assert.ok(prepared.answer.verbatim?.includes('Léa'));
+  assert.ok(prepared.answer.verbatim?.includes('Rio'));
+  assert.equal(prepared.answer.subjectName, undefined);
+});
+
+test('a single-subject answer does not repeat the name inside the fact', () => {
+  const prepared = prepare(subjects, 'Léa allergies?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.equal(prepared.answer.subjectName, 'Léa');
+  assert.equal(prepared.answer.verbatim, lea.safety.allergies);
+});
+
+test('a question hitting one subject’s own safety words answers about only them', () => {
+  // "sésame" appears in Léa's allergies and nowhere else. Returning the dog's vet
+  // alongside it is not safer, it is noise in the one box that must never be
+  // skimmed.
+  const prepared = prepare(subjects, 'je peux lui donner du sésame ?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.ok(prepared.answer.verbatim?.includes('sésame'));
+  assert.ok(!prepared.answer.verbatim?.includes('Dr Meunier'));
+  assert.equal(prepared.answer.subjectName, 'Léa');
+});
+
+test('narrowing never drops a subject the question actually names', () => {
+  const prepared = prepare(subjects, 'Rio — urgence ?', 'en');
+  assert.equal(prepared.route, 'critical');
+  if (prepared.route !== 'critical') return;
+
+  assert.ok(prepared.answer.verbatim?.includes('Dr Meunier'));
+  assert.ok(!prepared.answer.verbatim?.includes('Arachide'));
 });
 
 // ── Refusal ──────────────────────────────────────────────────────────────────
@@ -237,6 +272,19 @@ test('an invented citation degrades to a refusal rather than throwing at the car
     'pt',
   );
   assert.equal(answer.kind, 'refusal');
+});
+
+test('the refusal sentinel never reaches the caregiver as prose', () => {
+  // A model that says NOT_IN_GUIDE *and* cites something would otherwise pass
+  // verification and put the sentinel itself on the screen.
+  const prepared = prepare(subjects, 'où sont les produits de nettoyage ?', 'pt');
+  const answer = acceptModelAnswer(
+    prepared,
+    { body: 'NOT_IN_GUIDE', citedEntryIds: ['house-storage'] },
+    'pt',
+  );
+  assert.equal(answer.kind, 'refusal');
+  assert.equal(answer.citations.length, 0);
 });
 
 test('a well-formed model answer is accepted and keeps its provenance', () => {
