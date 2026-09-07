@@ -33,6 +33,11 @@ export interface AppState {
   /** Only the parent's own presets. The built-in ones live in core and are not
    *  copied into storage, so improving them does not require a migration. */
   readonly presets: readonly RoutinePreset[];
+  /** True while the demo household is loaded. Someone who taps "look around first"
+   *  has to be able to get back out to their own empty household, and without a
+   *  marker the app cannot tell a sample apart from a real one that happens to have
+   *  three subjects in it. */
+  readonly sample: boolean;
 }
 
 /** Identity tokens, paired with a symbol so colour is never the only signal. */
@@ -69,6 +74,7 @@ function emptyState(): AppState {
     },
     handovers: [],
     presets: [],
+    sample: false,
   };
 }
 
@@ -115,6 +121,7 @@ const SERVER_STATE: AppState = {
   household: { id: 'ssr', name: '', country: '', subjects: [], contacts: [], routine: [] },
   handovers: [],
   presets: [],
+  sample: false,
 };
 
 export function useAppState(): AppState {
@@ -326,6 +333,12 @@ export function useActions() {
 
       replaceAll(next: AppState) {
         update(() => next);
+      },
+
+      /** Back to an empty household. Only reachable from the sample, where nothing
+       *  is being thrown away. */
+      reset() {
+        update(() => emptyState());
       },
     }),
     [update],

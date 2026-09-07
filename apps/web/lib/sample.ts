@@ -221,5 +221,6 @@ export function loadSample(): AppState {
         ],
       },
     ],
+    sample: true,
   };
 }

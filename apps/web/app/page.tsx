@@ -10,7 +10,7 @@ import { loadSample } from '../lib/sample.ts';
 const KINDS: readonly SubjectKind[] = ['child', 'pet', 'place'];
 
 export default function Home() {
-  const { household, handovers } = useAppState();
+  const { household, handovers, sample } = useAppState();
   const actions = useActions();
   const [adding, setAdding] = useState<SubjectKind | null>(null);
   const [name, setName] = useState('');
@@ -28,6 +28,21 @@ export default function Home() {
   return (
     <main className="shell">
       <TopBar title="Your household" />
+
+      {/* Loading the sample used to be one-way: it filled the household, which hid
+          the link that put it there, and left no route back to the empty state. */}
+      {sample && (
+        <div className="row notice no-print" style={{ marginBottom: 'var(--space-5)' }}>
+          <span className="grow">You are looking around a sample household.</span>
+          <button
+            type="button"
+            className="btn btn-inline btn-secondary"
+            onClick={() => actions.reset()}
+          >
+            Start mine
+          </button>
+        </div>
+      )}
 
       {empty && (
         <div className="stack" style={{ marginBottom: 'var(--space-6)' }}>
