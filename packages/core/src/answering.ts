@@ -389,6 +389,13 @@ export function acceptModelAnswer(
 ): Answer {
   if (prepared.route !== 'model') return prepared.answer;
 
+  // The model is told to say NOT_IN_GUIDE when the entries do not cover the
+  // question. Usually it returns no citations with it and verification turns that
+  // into a refusal anyway, but a model that cites something alongside it would put
+  // the sentinel itself on the caregiver's screen. Recognise it here instead of
+  // relying on that accident.
+  if (model.body.trim() === refusal(readerLanguage).body) return refusal(readerLanguage);
+
   const byId = new Map(prepared.candidates.map((c) => [c.entry.id, c]));
   const citations: Citation[] = [];
   for (const id of model.citedEntryIds) {
