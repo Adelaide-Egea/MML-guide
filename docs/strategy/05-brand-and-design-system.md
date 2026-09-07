@@ -109,11 +109,26 @@ Two independently named apps with no masterbrand means:
 - Two trademark registrations *and* two domain portfolios *and* two privacy policies *and* two App
   Store listings — for a solo founder, this is the tail wagging the dog.
 
-**Recommendation: an endorsed-brand architecture.** One masterbrand that owns the account, the trust,
-the privacy relationship and the subscription; named surfaces beneath it that carry the emotional
-weight and the marketing story. The lockup is `[Surface name]` with `by [Masterbrand]` set quietly
-beneath — which is, notably, exactly what both current apps already do ("Held — My Mental Load",
-"Readied · My Mental Load"). The instinct is already there in the code.
+**Recommendation: a branded house.** One masterbrand that owns the account, the trust, the privacy
+relationship, the subscription **and the marketing story**, with the surfaces named *functionally*
+beneath it — the care guide, the packing list — rather than each carrying a brand name of its own.
+
+An earlier draft of this section recommended the softer **endorsed-brand** model (`[Surface name]` set
+above `by [Masterbrand]`, which is what both current apps already do). The naming research in `04`
+§4.1 pushed me further, on three grounds that were not available when I wrote it:
+
+- **Aaker's Brand Relationship Spectrum makes the branded house the default**, with independent names
+  requiring positive justification in the form of *incompatible positioning*. Two apps sold to the
+  same parents, solving adjacent problems in the same household, have none. They fail the test on the
+  framework's own terms, and there is no successful precedent for a small consumer company running
+  multiple human-named apps as separate brands.
+- **The `-ette` suffix is a system-level liability, not a per-name one.** In English it carries three
+  senses — small/lesser (kitchenette), imitation (leatherette), and diminishing-feminine (usherette,
+  bachelorette). A single such name is stored as a whole word and is invisible; a *family* of them
+  makes the morpheme salient and activates the diminutive reading. Answer.AI uses precisely this
+  suffix for its libraries to signal "a small helper for the real thing".
+- **A feminine-coded parenting brand measurably fails to reach fathers.** This turns 11.5's fifth
+  bullet from an intuition into a finding, and it is set out with sources in `04` §4.1.
 
 The unresolved part is *which* masterbrand, which is 11.5.
 
@@ -141,21 +156,50 @@ There are further problems:
   never changes.
 - **It gendered-codes the brand.** "Mental load" is, in practice, a phrase used by and about mothers.
   If a stated goal is redistributing work between two parents, the masterbrand should not signal that
-  this is the mother's app for managing her problem.
+  this is the mother's app for managing her problem. In France the term is additionally *politically*
+  loaded — feminist vocabulary with a named author and a specific argument attached — so adopting it
+  as a brand recruits you into that argument and narrows the audience further.
 - **"Charge mentale" does not carry over cleanly** as a product name in French; it is a diagnostic
-  term there too.
+  term there too, and *charge* carries "burden" more heavily than English "load".
+
+**Three findings from the naming research strengthen this considerably**, and they are set out with
+sources in `04` §4.5:
+
+- **The descriptiveness objection is probably fatal, not merely weakening.** EUIPO's own guidance
+  applies Art. 7(1)(c) where a sign *"is immediately perceived by the relevant public as providing
+  information about the goods and services applied for"*, and adds that this cannot be overcome by
+  showing you are the only trader using it. "MY MENTAL LOAD" for software that manages the mental load
+  is close to a paradigm refusal.
+- **At least three competitors already use the term as their brand** — *Mental Load* (an AI household
+  companion), *Mental Loadless* (shipping iOS app, FR+EN, €3.99/mo), *Tribe Family*'s "Mental Load
+  Score", *The Mental Load Project*. These are not collisions; they are rivals.
+- **MOLO is a near-homophone in the home market** — London-based, VC-backed, positioned as *"makes the
+  invisible load visible, manageable, and shared"*, trademarked *The Modern Load™*.
+
+And `03` §3.6 supplies the behavioural evidence that the voice rule was right all along: guilt-adjacent
+framing triggers **moral licensing** and increases rather than relieves guilt in this audience. The
+contradiction is therefore not a matter of taste; the masterbrand is doing measurable harm to the
+register that works.
 
 The brief is explicit that MML stays and that renaming it is not the objective of this project. I am
 respecting that — **nothing in the roadmap depends on renaming it, and I am not proposing a rename
 as a task.** But the brief also says to flag an exceptionally strong strategic reason if research
-reveals one, and I think the conflict between the masterbrand and the brand's own governing voice
-rule is exactly that. It is a genuine product-owner decision and it appears in `10` as **D2**, framed
-with three options rather than a demand.
+reveals one, and this is it. It is a genuine product-owner decision and it appears in
+`11-decisions-required.md` as **D2**, framed with three options rather than a demand.
 
-The narrow version of the decision, which is much easier: **whatever the legal entity is called, the
-words "My Mental Load" do not have to appear in the product.** "MML" as an initialism is nearly inert
-— it names nothing and burdens nobody. Keeping MML as the corporate and legal identity while never
-expanding the acronym in the interface resolves most of the tension at zero cost.
+**One correction to an earlier draft of this section.** I previously offered a "narrow version" of the
+decision — keep MML as the legal identity and simply never expand the acronym in the product, on the
+grounds that three letters name nothing and burden nobody. **I now think that is the weakest of the
+three options**, for two reasons the research surfaced: bare "MML" collides with MML Capital Partners
+(a London private equity firm, founded 1988, €2.7bn AUM, with French offices) and with Music Macro
+Language; and more importantly, an acronym standing for a phrase you have decided not to say aloud
+keeps the descriptive baggage for anyone who looks it up while forfeiting all the searchability that
+made the phrase attractive in the first place.
+
+**The better resolution** is to choose a masterbrand that embodies permission rather than diagnosis,
+and to run "mental load" / *charge mentale* as **category vocabulary** — in SEO copy, App Store
+keywords and press, where naming the problem is precisely how people find you. The category term is
+how people search; the brand name is how they feel. Candidates are in `04` §4.6.
 
 ### 11.6 The colour palette — direction right, values need work
 
@@ -427,7 +471,9 @@ Same ink, same ground, same spacing, same type, same components, same voice. Dif
 different iconography motif, different tempo of copy. A person who has used one should find the
 other immediately familiar and still know which one they are in.
 
-The masterbrand endorsement (`[Surface] by [Masterbrand]`) is set in the interface face at small
-size, low emphasis, and appears once per screen at most — in the header on the surface's landing
-view, and in the footer of every generated document. Never twice on one screen, which both current
-apps do.
+Under the branded-house recommendation in 11.4, the lockup is `[Masterbrand]` with the surface named
+functionally beside it — *Relay · Care guides*, *Relay · Packing* — rather than the endorsement form
+(`[Surface] by [Masterbrand]`) that both current apps use. The masterbrand carries the weight; the
+surface name is a label, set in the interface face at small size and low emphasis. It appears once per
+screen at most: in the header on the surface's landing view, and in the footer of every generated
+document. Never twice on one screen, which both current apps do.

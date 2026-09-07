@@ -340,9 +340,14 @@ help.
 
 Weekly review of activation, retention and conversion against the Phase 9 dashboards. Decide from
 evidence rather than opinion: whether a third surface is warranted; whether native apps are needed
-for acquisition; whether the French market deserves dedicated investment. **Colour Keeper's fate is
-decided here, from data, unless it turns out to be a design-system feature rather than a product —
-in which case it lands in Phase 1.**
+for acquisition; whether Germany is worth a third language (`03` §3.5 argues the structural gap there
+is as large as France's, but it is a stricter regulatory read). **Colour Keeper's fate is decided
+here, from data, unless it turns out to be a design-system feature rather than a product — in which
+case it lands in Phase 1.**
+
+*Note:* whether France leads the launch is no longer a Phase 13 question. The market research
+concluded it should, and it is now **D6** in `11-decisions-required.md` — it changes which language
+gets the content and copy investment first, from Phase 12 onward.
 
 ---
 
@@ -396,10 +401,18 @@ never calendar ingestion); referral mechanics; a partner/nanny-agency channel.
 
 ### P3 — future opportunity, unvalidated
 
-School and nursery handover packs; a `cahier de liaison` equivalent for the French market; medical
-and emergency profile export in a standard format; multi-household support for separated parents —
-which is a real and under-served need and may be larger than it looks; B2B licensing to nanny
-agencies or au pair platforms; anything Colour Keeper turns out to be.
+School and nursery handover packs — the German *Notfallkarte Kita* is a better content specification
+than anything the English-language competitors have built, and is worth stealing from; medical and
+emergency profile export in a standard format; multi-household support for separated parents — a real
+and under-served need that may be larger than it looks, and the segment WeFam is already serving in
+French; B2B licensing to nanny agencies or au pair platforms; anything Colour Keeper turns out to be.
+
+*Removed from this list:* "a `cahier de liaison` equivalent for the French market". The research
+established that the *cahier de liaison* and *cahier de transmission* both run **inward** — school or
+childminder reporting to the parent. Building one would be entering the crowded, well-funded B2B
+category (Kidizz, Poppin's, Famly) rather than the empty parent-outbound one. The *cahier* is
+valuable to us as a **frame for the pitch**, not as a product to build: *le cahier de transmission,
+mais dans l'autre sens*.
 
 ### Explicitly not doing
 
