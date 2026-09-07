@@ -13,17 +13,19 @@
 //           supabase/backup-<timestamp>.json, runs the migration, then re-runs the
 //           exposure check and fails loudly if the table is still readable.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const API = 'https://api.supabase.com';
 const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'jgqemguvrslzrbedjirq';
-const TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
+const TOKEN = process.env.SUPABASE_ACCESS_TOKEN || process.env.Supabase_api;
 
 if (!TOKEN) {
-  console.error('SUPABASE_ACCESS_TOKEN is not set. See supabase/FIX-FROM-YOUR-PHONE.md.');
+  console.error(
+    'SUPABASE_ACCESS_TOKEN is not set (also accepts Supabase_api). See supabase/FIX-FROM-YOUR-PHONE.md.',
+  );
   process.exit(2);
 }
 
@@ -88,10 +90,14 @@ async function exposure() {
   const rows = await sql(`
     set local role anon;
     select
-      (select count(*) from public.trips) as anon_readable_trips;
+      (select count(*) from public.trips) as anon_readable_trips,
+      (select count(*) from public.events) as anon_readable_events;
   `);
   const first = Array.isArray(rows) ? rows[rows.length - 1] : rows;
-  return Number(first?.anon_readable_trips ?? first?.[0]?.anon_readable_trips ?? 0);
+  return {
+    trips: Number(first?.anon_readable_trips ?? first?.[0]?.anon_readable_trips ?? 0),
+    events: Number(first?.anon_readable_events ?? first?.[0]?.anon_readable_events ?? 0),
+  };
 }
 
 async function tableExists(name) {
@@ -119,12 +125,13 @@ async function check() {
   const total = await sql('select count(*)::int as n from public.trips;');
   const n = (Array.isArray(total) ? total[0] : total)?.n ?? 0;
   const readable = await exposure();
-  console.log(`\nRows in trips              : ${n}`);
-  console.log(`Rows readable by anon      : ${readable}`);
+  console.log(`\nRows in trips                    : ${n}`);
+  console.log(`Rows readable by anon (trips)    : ${readable.trips}`);
+  console.log(`Rows readable by anon (events)   : ${readable.events}`);
   console.log(
-    readable > 0
-      ? `\nEXPOSED. ${readable} rows of children's names, ages and notes are readable by anyone\nholding the publishable key, which is in the deployed page source. Run --apply.`
-      : '\nNot exposed. anon cannot read the table.',
+    readable.trips > 0 || readable.events > 0
+      ? `\nEXPOSED. anon can still read ${readable.trips} trips / ${readable.events} events.\nRun --apply.`
+      : '\nNot exposed. anon cannot read trips or events.',
   );
 }
 
@@ -139,7 +146,9 @@ async function apply() {
   }
 
   const before = await exposure();
-  console.log(`\nRows readable by anon, before: ${before}`);
+  console.log(
+    `\nRows readable by anon, before: trips=${before.trips} events=${before.events}`,
+  );
 
   // Back up before touching policies. The migration adds a not-null column with a
   // generated default, which is not something to do to live data unrehearsed.
@@ -155,18 +164,24 @@ async function apply() {
   writeFileSync(path, JSON.stringify(backup, null, 2));
   console.log(`Backup written to ${path}`);
 
-  console.log('\nApplying 0001_lock_down_trips.sql...');
-  const migration = readFileSync(join(HERE, 'migrations', '0001_lock_down_trips.sql'), 'utf8');
-  await sql(migration);
-  console.log('Applied.');
+  const migrations = readdirSync(join(HERE, 'migrations'))
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+  for (const file of migrations) {
+    console.log(`\nApplying ${file}...`);
+    await sql(readFileSync(join(HERE, 'migrations', file), 'utf8'));
+    console.log('Applied.');
+  }
 
   const after = await exposure();
-  console.log(`\nRows readable by anon, after: ${after}`);
-  if (after > 0) {
-    console.error('\nFAILED — the table is still readable by anon. Do not consider this closed.');
+  console.log(
+    `\nRows readable by anon, after: trips=${after.trips} events=${after.events}`,
+  );
+  if (after.trips > 0 || after.events > 0) {
+    console.error('\nFAILED — anon can still read data. Do not consider this closed.');
     process.exit(1);
   }
-  console.log('\nClosed. anon can no longer read the table.');
+  console.log('\nClosed. anon can no longer read trips or events.');
 
   const advisors = await api(`/v1/projects/${PROJECT_REF}/advisors/security`);
   const errors = (advisors?.lints || []).filter((l) => l.level === 'ERROR');

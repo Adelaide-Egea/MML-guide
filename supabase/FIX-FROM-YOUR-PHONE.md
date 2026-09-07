@@ -5,16 +5,16 @@ everything else.
 
 ## Where this stands
 
-The project (`jgqemguvrslzrbedjirq`) is paused, so **nothing is being leaked right
-now** — the hostname does not resolve and there is no database accepting queries.
-That is luck rather than a fix. The moment the project is restored, the `trips`
-table becomes readable again by anyone holding the publishable key, which is printed
-in the page source of the deployed site.
+**Done (2026-09-07).** The project was restored and the hole closed in one
+`--apply` run. Post-migration, `anon` can read **0** rows from `trips` and
+`events`. A leftover empty `"Trips"` table was also locked down. Revoke the
+personal access token when you are finished with this session.
 
-So the sequence matters: the project must not be restored and then fixed as two
-separate steps, because that leaves a window. `supabase/apply.mjs` restores it and
-closes the hole in one run, and refuses to report success unless it has verified
-that the table is no longer readable.
+Previously the project (`jgqemguvrslzrbedjirq`) was paused, so nothing was being
+leaked while it was down — luck rather than a fix. The sequence mattered: restore
+and migrate in one run so there was no live-and-exposed window.
+`supabase/apply.mjs` refuses to report success unless the exposure check returns
+zero.
 
 ## What you do
 
