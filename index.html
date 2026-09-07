@@ -9,6 +9,18 @@
   // literal instead of these constants is a bug.
   window.PRODUCT_NAME = "Care Guide";
   window.PRODUCT_SLUG = "care-guide";
+
+  // The name is still being chosen, so ?name=Marela previews a candidate on a real
+  // device without a deploy. Restricted to letters and capped in length, because
+  // the value also reaches export filenames.
+  (function(){
+    const q = new URLSearchParams(location.search).get('name');
+    if(!q) return;
+    const clean = q.replace(/[^A-Za-z ]/g,'').trim().slice(0,24);
+    if(!clean) return;
+    window.PRODUCT_NAME = clean;
+    window.PRODUCT_SLUG = clean.toLowerCase().replace(/ +/g,'-');
+  })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Care Guide — for whoever is looking after your children</title>
@@ -612,7 +624,7 @@
 
     <!-- HOME -->
     <section class="screen home active" data-step="home">
-      <div class="greeting">Good morning</div>
+      <div class="greeting" id="greeting"></div>
       <h1>You can<br>leave now.</h1>
       <p class="hsub">One guide. Everything they need to know — so you can actually be present.</p>
       <button class="btn-reopen" id="reopenGuide" style="display:none;"
@@ -2598,6 +2610,15 @@ const ALL_ROUTINE_TYPES=['Breakfast','Milk/Feed','Nap','Lunch','Snack','Goûter'
   // Brand slots are filled from the single constant rather than typed into the
   // markup, so the name cannot drift between the header, the footer and a PDF.
   document.querySelectorAll('[data-brand-name]').forEach(el=>{el.textContent=PRODUCT_NAME;});
+
+  // The greeting was hardcoded to "Good morning", which read as a bug to anyone
+  // opening the app after lunch.
+  (function(){
+    const el=document.getElementById('greeting');
+    if(!el)return;
+    const h=new Date().getHours();
+    el.textContent = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
+  })();
 
   // ── SAVE / RESTORE ──────────────────────────────────────────
   // Everything the parent types is kept on their device so they never
