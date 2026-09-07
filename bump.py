@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Held — one-command deploy helper.
+Care Guide — one-command deploy helper.
 
 What it does, so you never hand-edit a version again:
-  1. Bumps the service-worker cache version (held-v7 -> held-v8).
+  1. Bumps the service-worker cache version (app-v7 -> app-v8).
   2. Stamps the same version into index.html as <meta name="app-version">
      and a ?v= query on the sw.js registration (belt-and-braces cache-bust).
   3. (optional) git add + commit + push, which triggers your Vercel deploy.
@@ -26,14 +26,14 @@ INDEX = HERE / "index.html"
 
 
 def bump_sw() -> str:
-    """Increment held-vN in sw.js and return the new version string."""
+    """Increment app-vN in sw.js and return the new version string."""
     text = SW.read_text(encoding="utf-8")
-    m = re.search(r"held-v(\d+)", text)
+    m = re.search(r"app-v(\d+)", text)
     if not m:
-        sys.exit("✗ Couldn't find 'held-vN' in sw.js — is CACHE_VERSION intact?")
+        sys.exit("✗ Couldn't find 'app-vN' in sw.js — is CACHE_VERSION intact?")
     new_n = int(m.group(1)) + 1
-    new_ver = f"held-v{new_n}"
-    text = re.sub(r"held-v\d+", new_ver, text, count=1)
+    new_ver = f"app-v{new_n}"
+    text = re.sub(r"app-v\d+", new_ver, text, count=1)
     SW.write_text(text, encoding="utf-8")
     print(f"✓ sw.js  cache version -> {new_ver}")
     return new_ver
