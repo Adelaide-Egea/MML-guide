@@ -383,6 +383,13 @@ styles. Colour contrast has not been formally measured and needs to be — see t
 This is a product whose users are frequently stressed, one-handed, and reading in bad light. The
 accessibility position is not acceptable for launch.
 
+Contrast has now been measured and is worse than expected. Held's muted text `#A8B8B0` on linen is
+**1.99:1**; its secondary `#7A8E85` is **3.34:1**. Readied's warning gold `#C99A3E` on linen is
+**2.42:1** — the lowest-contrast value in the system, used for warnings. And all twelve per-child
+identity colours fail as a background for the white text they carry (2.07:1 to 3.24:1), which means
+**every child-name tag in every generated guide currently fails AA**, including in the PDF the
+caregiver reads. Full measurements in `05-brand-and-design-system.md`.
+
 **Performance.** Held loads `html2pdf.bundle.min.js` and `html2canvas.min.js` — roughly 1 MB
 combined — as render-blocking scripts in `<head>`, on every page load, for a feature most users
 reach at the very end of a ten-step flow if at all. Readied loads the same libraries lazily via

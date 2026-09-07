@@ -298,7 +298,36 @@ shape, which is why they read as unrelated products.
 own rules: every value verified against both surfaces at 3:1; distinguishable under deuteranopia,
 protanopia and tritanopia; and **always paired with a symbol**, so colour is reinforcement and never
 the only carrier of identity. Held's existing `KID_IDENTITIES` array already pairs colour with an
-emoji, which is the right shape — the values just need verifying.
+emoji, which is the right shape.
+
+The values, however, do not survive measurement. I audited all twelve:
+
+**Every one fails as a background for white text.** `.kid-tag` — the pill carrying a child's name
+throughout every generated guide — sets `color: white` on the child's colour. Ratios run from
+**2.07:1** (`#C9B458`) to **3.24:1** (`#C17B8C`). Not one reaches 4.5:1; not one reaches even 3:1
+except a single value at 3.24. **Every child-name tag in every guide currently fails AA**, including
+in the PDF a caregiver reads on their phone in a dark hallway.
+
+**Ten of twelve are invisible against the page.** Against Held's linen `#FCFAF6`, only two values
+reach the 3:1 needed for a UI element to be perceivable. The rest sit between 1.98:1 and 2.95:1.
+
+**Several pairs are indistinguishable to colour-blind users.** Simulating the three common
+deficiencies and measuring separation in linear RGB:
+
+| Deficiency | Closest pair | Separation |
+|---|---|---|
+| Deuteranopia (~6% of men) | `#E0A458` 🦊 vs `#C9B458` 🐝 | **0.009** — effectively identical |
+| Protanopia (~2% of men) | `#8FA9D8` 🐳 vs `#A8A4D6` 🌙 | **0.015** — effectively identical |
+| Tritanopia | `#CBA135` 🦁 vs `#D68FB0` 🦄 | 0.033 |
+
+For a two-child household this rarely bites. For three or more it does, and a father with the most
+common form of colour blindness cannot use the colour coding at all.
+
+The emoji pairing is what saves it, and that is the lesson: **the symbol is the identity and the
+colour is the decoration**, not the other way round. The rebuilt scale needs verified values, a
+maximum of six or eight rather than twelve (twelve distinguishable hues is not achievable under
+these constraints), a separate darker `--person-text` variant for any text use, and the symbol
+present wherever the colour is.
 
 ### Hierarchy without heaviness
 
