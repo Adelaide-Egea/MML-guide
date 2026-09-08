@@ -191,8 +191,8 @@ borrowed it from Japanese. Spells itself from hearing, in both.
 A holdall is a bag that holds everything. The name says what the product does using a
 word that already exists, which is the Amazon/Stripe move at its most literal.
 
-- **App Store:** the most ownable thing found in the entire exercise. Three results
-  across all storefronts. Essentially an empty search space.
+- **App Store:** still the quietest of the four (noise ≈ 3), but an exact-token hit
+  now appears — no longer an empty search space.
 - **Costs:** unmistakably British, and meaningless to a French speaker. And it sits
   one vowel away from **Held**, which you have already rejected — the echo may be
   enough to kill it on its own.
@@ -214,6 +214,28 @@ name you have disliked. It is not free. If it holds, **Consigne** is the stronge
 French-first answer and the ownability is genuinely excellent — but it needs a
 reaction from French parents before anyone bets on it, because I cannot tell from
 here whether *consigne* lands as warm or as bureaucratic.
+
+## Trademark and collision triage (round four)
+
+This is a triage, not a clearance opinion. Formal filing advice still needs a
+solicitor and a full TMview / UKIPO / INPI / USPTO search against the exact goods
+and services. What follows is what can be checked from public records and the
+App Store screen without that.
+
+| Candidate | App Store (US/FR/GB) | Adjacent business use | Registry notes | Domains |
+|---|---|---|---|---|
+| **Understudy** | Exact used by one small actor app; noise ≈ 14 — winnable | Theatre meaning dominates; novel *The Paris Understudy*; no caregiver/family app found | USPTO serial 75793973 (Class 9, Roda Group) — **dead**, abandoned 2001 for no statement of use. No live EU/UK Class 9/42 hit found in public search. | understudy.com taken; `.app` / `.fr` / `.io` not responding |
+| **Consigne** | Exact clear in all three; term noise ≈ 46 (common French word) | Left-luggage and instructional French; no software product found under the name | No Class 9/42 software registration found in public search. Needs INPI + EUIPO word search before filing. | consigne.com taken; `.app` / `.fr` / `.io` not responding |
+| **Holdall** | Exact now used (noise ≈ 3) — still low, but no longer empty | Class 18 bag goods are the natural home of the word; descriptive risk for a “bag that holds everything” | No Class 9 software mark found; descriptive objection risk in UK is the real question | holdall.app and holdall.io live |
+| **Bento** | Contested (Creators app + others); noise ≈ 47 | bento.me link-in-bio; food/Japan association; defunct FileMaker product | Contested brand space — drop unless the picture is irresistible | bento.com / `.fr` / `.io` / `.app` all occupied |
+
+**Reading:** Understudy and Consigne remain the only two worth taking to a lawyer.
+Holdall’s App Store space closed a little since the first screen and the word is
+descriptive for luggage. Bento is a crowded borrowed word.
+
+**Still required before filing:** say-aloud / spell-back tests (especially Consigne
+to English ears), a French reaction check on Consigne’s warmth, App Store Connect
+name reservation, and a solicitor-run Class 9 + 42 search in UK, EU and FR.
 
 ## The decision
 

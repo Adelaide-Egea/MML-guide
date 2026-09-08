@@ -16,6 +16,9 @@ export default function Home() {
   const [adding, setAdding] = useState<SubjectKind | null>(null);
   const [name, setName] = useState('');
   const [switching, setSwitching] = useState(false);
+  /** Open the switcher already asking for a name — used when the sample itself
+   *  offers "start yours", so the person does not have to discover the switcher. */
+  const [startNaming, setStartNaming] = useState(false);
 
   const empty = household.subjects.length === 0;
   const guides = handovers.filter((h) => h.householdId === household.id);
@@ -29,6 +32,11 @@ export default function Home() {
     setAdding(null);
   }
 
+  function openSwitcher(naming = false) {
+    setStartNaming(naming);
+    setSwitching(true);
+  }
+
   return (
     <main className="shell">
       <div className="crown no-print">
@@ -39,7 +47,7 @@ export default function Home() {
         <button
           type="button"
           className="house-switch"
-          onClick={() => setSwitching((v) => !v)}
+          onClick={() => (switching ? setSwitching(false) : openSwitcher(false))}
           aria-expanded={switching}
         >
           <span>{household.name || 'This household'}</span>
@@ -49,11 +57,16 @@ export default function Home() {
 
       {switching && (
         <HouseSwitcher
-          onDone={() => setSwitching(false)}
+          startNaming={startNaming}
+          onDone={() => {
+            setSwitching(false);
+            setStartNaming(false);
+          }}
           onSample={() => {
             const { household: sample, handover, presets } = loadSample();
             actions.addSample(sample, handover, presets);
             setSwitching(false);
+            setStartNaming(false);
           }}
         />
       )}
@@ -62,7 +75,16 @@ export default function Home() {
 
       {isSample && (
         <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
-          This is a sample household, here to look around. Anything you change stays in it.
+          This is a sample household, here to look around. Anything you change stays in it.{' '}
+          <button
+            type="button"
+            className="btn btn-quiet btn-inline"
+            style={{ textDecoration: 'underline' }}
+            onClick={() => openSwitcher(true)}
+          >
+            Start your own
+          </button>
+          — the sample stays here.
         </p>
       )}
 
@@ -205,10 +227,18 @@ function Welcome() {
   );
 }
 
-function HouseSwitcher({ onDone, onSample }: { onDone: () => void; onSample: () => void }) {
+function HouseSwitcher({
+  onDone,
+  onSample,
+  startNaming = false,
+}: {
+  onDone: () => void;
+  onSample: () => void;
+  startNaming?: boolean;
+}) {
   const { households, household, sampleId } = useAppState();
   const actions = useActions();
-  const [naming, setNaming] = useState(false);
+  const [naming, setNaming] = useState(startNaming);
   const [name, setName] = useState('');
 
   return (
