@@ -251,3 +251,60 @@ Everything else follows. The code carries no product name anywhere —
 `packages/core` is deliberately name-free and the app renders its name from a single
 place — so applying a decision is a one-line change plus the manifest, and nothing
 in the build is waiting on it.
+
+---
+
+# Naming — round five
+
+Round four (Understudy / Consigne / Holdall / Bento) was rejected. Fresh metaphors,
+not rearrangements of the same shortlist.
+
+## Five that are actually different from each other
+
+### 1. Bercail — the fold you come home to
+
+French for the sheepfold, and by extension home: *"retour au bercail."* Warm, old,
+and almost empty on the App Store (noise 7, exact clear; French storefront returns
+nothing). An English speaker will need it said once; after that the picture holds.
+
+### 2. Nichoir — the box you prepare before anyone arrives
+
+A bird nesting box. You build it, put it up, and leave it ready. That is closer to
+what this product is than most of the metaphors tried so far. Clear, noise 8.
+
+### 3. Aimant — the fridge magnet
+
+The product *is* the note on the fridge. *Aimant* is magnet in French; clear on all
+three storefronts. Cost: an English speaker hears "ay-mon" and may not spell it, and
+the English word Magnet is already busy.
+
+### 4. Doublure — the lining, and the understudy
+
+In French: the lining of a coat *and* the theatre understudy. Same job as Understudy
+without being the English word that was already refused. Clearest ownability of this
+round (noise 5). Cost: if Understudy felt too theatrical, this may too.
+
+### 5. Latchkey — the key left for whoever comes next
+
+English, concrete, clear on the stores. Picture is immediate for anyone who grew up
+with a latchkey. Cost: dated in American English, and opaque in French.
+
+## Also ran, deliberately not shortlisted
+
+- **Escale** — layover; clear but soft and easy to forget
+- **Répit** — perfect in French social care, therefore partly descriptive there
+- **Outnote / Covernote / Kitbag** — ownable near-words; still sound invented
+- **Relève** — semantically the best French word in the whole exercise ("la relève
+  arrive"); already used by a team-planning app
+
+## What I need from you
+
+Not "which of these five." One sentence about **what was wrong with round four**:
+
+- too English?
+- too metaphorical / clever?
+- too cold?
+- too long for an icon?
+- or you want something that sounds like a *company*, not a metaphor?
+
+Without that, round six will miss the same way.
