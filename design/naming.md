@@ -308,3 +308,56 @@ Not "which of these five." One sentence about **what was wrong with round four**
 - or you want something that sounds like a *company*, not a metaphor?
 
 Without that, round six will miss the same way.
+
+---
+
+# Naming — round six
+
+The founder wrote the recommendation herself. That is the brief. Everything before
+this was naming a metaphor she does not use.
+
+## The sentence
+
+> You know when you need to tell the cleaning lady exactly what to do but every
+> time it just seems like a long list of details and it’s not clear and then she
+> doesn’t do it all and you get frustrated? Or she forgets? You should try this
+> app, it lets you create the list once and add pictures to show the exact thing
+> you’re talking about. It also lets you remove the mom brain fog by just putting
+> all the info somewhere and it prioritizes it into a timeline. She can even ask
+> the app where to find things and it’ll recap in her language.
+> Same with your pet and your kid, if you’re taking on a new nanny or parents
+> looking after the kid and you don’t want to sound like that micromanager but
+> also you don’t want to come back to your kid having a fully new routine … this
+> is the way to go.
+
+What the name has to survive: being dropped into that text after *“You should try
+____.”* Not a theatre metaphor. Not a nesting box.
+
+## What the product actually is, in her words
+
+1. Exact instructions (especially for a cleaner) — not a vague list
+2. Pictures so “this exact thing” is unambiguous
+3. Write it once (mom brain fog → somewhere)
+4. A timeline, not a pile
+5. She can ask; it answers in *her* language
+6. Same pattern for nanny / grandparents / pet — without sounding like a micromanager
+7. Protect the existing routine
+
+## Names that fit that sentence
+
+Screened. Exact App Store match is noted; it is not a veto.
+
+| Name | Why it fits the pitch | Store |
+|---|---|---|
+| **Nette** | French for clean / clear. Short. Sounds like an app you’d recommend to someone with a cleaner *and* a nanny. | Clear |
+| **Enclair** | “In plain language” — the Ask feature and the opposite of a WhatsApp essay. | Clear, noise 3 |
+| **Commeça** | “Like this” — what the photo is for. | Clear, noise ~24 |
+| **Unefois** | Once. The whole write-once promise in one word. | Clear, noise 2 |
+| **Showonce** | English, literal, recommendable without a story. | Clear |
+
+**Nickel** would have been perfect colloquial French (“c’est nickel”) and is dead — it’s a neo-bank.
+
+## Dead approaches (do not revive)
+
+Metaphor-first names (Understudy, Nichoir, Bercail, Bento, Holdall, Consigne, Aimant,
+Doublure, Latchkey). Clever. Not what she says when she recommends it.
