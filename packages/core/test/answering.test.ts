@@ -199,6 +199,39 @@ test('an ordinary question is not treated as safety-critical', () => {
   assert.equal(touchesSafetyCritical('à quelle heure le dîner ?', subjects), false);
 });
 
+test('a shared short stem does not make an ordinary question critical', () => {
+  // "bags" stems to "bag", which also appears in "blue bag only". That overlap
+  // must not open the dog's allergies when someone asks where the camping gear is.
+  const pomme: CareSubject = {
+    ...rio,
+    safety: {
+      ...EMPTY_SAFETY,
+      allergies: 'Chicken makes her scratch. Her food is the blue bag only.',
+      medication: 'Half a joint tablet with breakfast.',
+      emergencyNotes: 'Vet: Clinique des Batignolles, 01 42 26 55 00.',
+    },
+    entries: [
+      entry({
+        id: 'flat-bags',
+        topic: 'other',
+        title: 'Sleeping bags',
+        body: 'Top cupboard on the landing.',
+      }),
+    ],
+  };
+  assert.equal(touchesSafetyCritical('where are the sleeping bags?', [pomme]), false);
+  const prepared = prepare([pomme], 'where are the sleeping bags?', 'en');
+  assert.equal(prepared.route, 'model');
+});
+
+test('a short allergen name still forces the critical path', () => {
+  const allergic: CareSubject = {
+    ...lea,
+    safety: { ...EMPTY_SAFETY, allergies: 'Egg. The EpiPen is in the drawer.' },
+  };
+  assert.ok(touchesSafetyCritical('can she have egg?', [allergic]));
+});
+
 test('a safety-critical question never routes to a model', () => {
   const prepared = prepare(subjects, 'is Léa allergic to anything?', 'en');
   assert.equal(prepared.route, 'critical');

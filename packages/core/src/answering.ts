@@ -129,6 +129,26 @@ function safetyText(subject: CareSubject): string {
     .join(' ');
 }
 
+/** Short allergen and medical tokens that must still count even under four letters.
+ *
+ *  Everything else that short is too common to pin a critical route on. "bags" in
+ *  "sleeping bags" used to match "bag" in "Her food is the blue bag only", and the
+ *  caregiver was shown the dog's allergies when they asked where the camping gear
+ *  lives. That is worse than a blunt answer: it is the wrong safety box.
+ */
+const SHORT_SAFETY_TERMS = new Set([
+  'nut', 'egg', 'soy', 'dye', 'bee', 'msg', 'cow', 'hog', 'cat', 'dog', 'ivy', 'oak',
+]);
+
+/** Terms from a safety field that are distinctive enough to force the critical path.
+ *
+ *  Length 4 catches "kiwi"; the allowlist catches "nut" and "egg". Generic three-
+ *  letter stems like "bag" are deliberately left out.
+ */
+function distinctiveSafetyTerms(safety: string): readonly string[] {
+  return terms(safety).filter((t) => t.length >= 4 || SHORT_SAFETY_TERMS.has(t));
+}
+
 /** Subjects whose safety fields actually use a word from the question.
  *
  *  A parent who wrote "no kiwi, it makes her throat itch" has created a critical
@@ -147,7 +167,7 @@ function subjectsMatchingSafetyText(
   return subjects.filter((subject) => {
     const safety = safetyText(subject);
     if (!safety) return false;
-    return terms(safety).some((term) => asked.has(term));
+    return distinctiveSafetyTerms(safety).some((term) => asked.has(term));
   });
 }
 
