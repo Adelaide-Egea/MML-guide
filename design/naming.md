@@ -1,3 +1,17 @@
+# Naming — decision: Notula
+
+**Working name: Notula** (Latin diminutive of *nota* — the little note).
+
+Full brand system, go-to-market gates, and clearance checklist:
+`design/notula-brand.md`
+
+Data position draft: `design/notula-data-position.md`
+
+Earlier rounds below are historical. Do not revive rejected metaphor shortlists
+unless Notula fails Week 0 clearance — and do **not** fall back to Tabella (taken).
+
+---
+
 # Naming — round four
 
 Supersedes the coined round (Marela, Nolera, Nemba, Tanela, Tovela, Kembo), which

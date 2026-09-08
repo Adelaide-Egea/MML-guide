@@ -18,16 +18,14 @@ const ui = Figtree({
   display: 'swap',
 });
 
-// No product name yet, so nothing here asserts one. Swapping it later is a change
-// to this file and nothing else.
 export const metadata: Metadata = {
-  title: 'Care guide',
-  description: 'Everything someone needs to know while you are not there.',
+  title: 'Notula',
+  description: 'Everything she needs while you are not there.',
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#e0d2bc' },
+    { media: '(prefers-color-scheme: light)', color: '#efe7da' },
     { media: '(prefers-color-scheme: dark)', color: '#2b333a' },
   ],
 };

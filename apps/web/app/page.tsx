@@ -221,7 +221,7 @@ function Welcome() {
       <p>
         {listed
           ? `${listed} — everything about them, written down once, ready for whoever has them next.`
-          : 'Everything you would say on the way out of the door. Write it once, and stop repeating yourself.'}
+          : 'Everything she needs while you are not there. Write it once, with photos, and she can just ask it.'}
       </p>
     </section>
   );

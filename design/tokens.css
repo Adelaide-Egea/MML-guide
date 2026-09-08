@@ -1,100 +1,45 @@
-/* Design tokens.
+/* Design tokens — Notula.
+
+ * Brand system: design/notula-brand.md
  *
- * This is the brand manifest's palette, not a replacement for it. An earlier round
- * measured the manifest, found several pairs below WCAG AA, and then — wrongly —
- * substituted an entirely different scheme instead of correcting the values. The
- * strategic direction in the manifest was right and is kept: warmth comes from the
- * ground rather than the accents, the accents stay quiet so the content is what you
- * look at, and raspberry is reserved for completion.
+ * Putty is for the icon and marketing. The in-app ground is the warmer card
+ * tone — full-bleed putty reads heavy at product scale. Petrol is the only
+ * interactive accent; Lisette blue was retired because it collapsed into petrol.
+ * Raspberry stays completion-only; critical stays safety-only.
  *
- * Two things changed from the manifest, both deliberate.
- *
- * First, the neutrals moved down one step. The manifest named its surfaces loosely,
- * as "warm ground, light card", and the values that literal reading produced turned
- * out to be the most crowded colours in the category: the card landed within
- * CIEDE2000 1.6 of four competitors and the ground within 2.8 of another, while the
- * accents the founder actually chose by name were 9 to 20 away from anything. So
- * the manifest's ground became the card and a putty ground sits beneath it. It
- * occupies an empty band, it stays unmistakably warm, and the whole palette reads
- * as more expensive for it. design/competitive-colour-audit.md has the measurements.
- *
- * Second, colours that carry text were moved down in lightness until they clear
- * their target, keeping hue and saturation. A deeper ground costs a second, larger
- * correction than the first round needed — Lisette blue is 7.4% below the manifest
- * rather than 2.5% — but every one is still recognisably the colour that was
- * chosen. design/contrast.mjs verifies every pair and fails the build.
- *
- * Two constraints come from who actually reads this. A grandparent reading at 2am
- * has presbyopia and a dark room, so guide content is set larger than interface
- * text and dark mode is a first-class theme rather than an inversion. And a
- * caregiver reading in a second language needs contrast to be generous, because low
- * contrast costs more when you are also decoding the words.
+ * design/contrast.mjs verifies every pair and fails the build.
  */
 
 :root {
-  /* Surfaces. Warm paper rather than the blue-grey every other household app
-     defaults to — and one step deeper than a literal reading of the manifest, which
-     is what moves the two largest surfaces in the product out of the crowd. */
-  --paper: #e0d2bc; /* putty ground */
-  --surface: #efe7da; /* the manifest's "Ground", now the card */
-  --surface-sunk: #d3c4ac;
-  --hairline: #d7c9b2;
-  /* --hairline is 1.33:1 against the card. It may decorate a boundary but must
-     never be the only thing communicating one. */
+  /* Surfaces */
+  --putty: #e0d2bc; /* icon + marketing only */
+  --paper: #efe7da; /* in-app ground */
+  --surface: #faf6f0; /* elevated card on the in-app ground */
+  --surface-sunk: #e0d2bc;
+  --hairline: #e4d8c4;
   --hairline-strong: #b3a186;
 
-  /* Ink. Warm near-black rather than grey, so it sits on the beige instead of
-     floating above it. */
-  --ink: #2c2721; /* 9.94:1 on the ground, 12.06:1 on a card */
-  --ink-muted: #615b52; /* manifest #7C7468, down 9.6% to reach 4.51:1 */
+  /* Ink */
+  --ink: #2c2721;
+  --ink-muted: #4f4a42; /* darkened for 13px in a dim utility room */
 
-  /* Lisette blue — the manifest's accent for this surface, the care guide.
-     A quiet slate blue: credible and adult, and notably not the bright primary
-     blue that the family-calendar category has almost entirely to itself. */
-  --brand: #445f72; /* manifest #52738A, down 7.4% to reach 4.52:1 */
-  /* A tint pale enough for --brand text to clear 4.5:1 on it is, on a beige ground,
-     within 1.05:1 of the ground itself — a panel you cannot see. So the tint is
-     deeper and carries --ink, and a selected state is a solid --brand fill with
-     white text instead. Unambiguous, and it fails no target. */
-  --brand-tint: #c9dae5;
-  /* Text on a filled brand surface. It is a token rather than white because dark
-     mode's brand is a pale slate, and white on it is unreadable. */
+  /* Petrol — the single interactive accent */
+  --brand: #306369;
+  --brand-tint: #c5ddd8;
   --on-brand: #ffffff;
+  --petrol: #306369;
 
-  /* Jeannette petrol — the manifest's accent for the packing surface. Defined here
-     so the two products share one token file and cannot drift apart. */
-  --petrol: #306369; /* manifest #377278, down 4.4% */
-
-  /* Raspberry, exactly as the manifest specifies it. Reserved for completion, and
-     the one colour the deeper ground did not touch. It clears 3:1 on the card it
-     sits on, which is the bar for a large element or a filled shape, and it is
-     deliberately NOT used for small text or behind white type — darkening it enough
-     for that would have turned it into a different colour and put it uncomfortably
-     close to --critical. */
+  /* Raspberry — done only. Never a fill behind text. */
   --done: #d9577e;
   --done-tint: #f6dfe6;
 
-  /* Attention, not alarm. The manifest's warning gold, darkened. It draws a 1px
-     rule and nothing else, so 3:1 against the ground is the honest bar; it is held
-     to 4.5:1 against its own tint anyway, in case it ever carries a word. */
-  --amber: #7e5f23; /* manifest #C99A3E, down 19.9% */
+  --amber: #7e5f23;
   --amber-tint: #efdfc0;
 
-  /* Reserved exclusively for safety-critical content — allergies, medication,
-     emergency contacts. If this colour appears anywhere else it stops meaning
-     anything, and the one time it matters it will be skimmed past. Kept clearly
-     redder and darker than raspberry so completion and danger never read alike. */
-  --critical: #a92e2c; /* manifest #B3312F, down 2.4% to reach 4.53:1 */
+  --critical: #a92e2c;
   --critical-tint: #f4dcd9;
 
-  /* Per-subject identity. Colour is never the only signal: every one of these is
-     always paired with a symbol, because these hues are confusable under
-     deuteranopia and protanopia. All six clear 4.5:1 on the ground and behind white
-     text, so they may carry a label and not only decoration. */
   --id-petrol: #306369;
-  /* The one colour here that is louder than the rest of the palette, and it stays
-     that way: muting it toward the beige collapses it against --id-petrol under
-     deuteranopia. Its saturation is doing accessibility work, not decoration. */
   --id-indigo: #485899;
   --id-plum: #7a3c6e;
   --id-clay: #8f4828;
@@ -113,48 +58,36 @@
   --space-6: 28px;
   --space-7: 40px;
 
-  /* The manifest's pairing: a serif with real character for headings, a warm
-     geometric sans for everything else. Serif headings are close to absent in this
-     category, which is most of why they read as considered rather than generic. */
   --font-display: "Newsreader", Georgia, serif;
   --font-ui: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  /* Two body sizes, on purpose.
-     --text-base is the interface: labels, buttons, metadata, navigation.
-     --text-read is guide content and safety-critical facts — the words a caregiver
-     is actually trying to read, often in a second language and often at night.
-     Shrinking the chrome should not shrink those. */
-  --text-xs: 12px;
-  --text-sm: 13.5px;
-  --text-base: 15px;
-  --text-read: 16px;
-  --text-lg: 17px;
-  --text-xl: 21px;
-  --text-2xl: 26px;
+  /* Body 17px — second reader, often one-handed.
+     --text-read stays a step up for guide/safety content. */
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-base: 17px;
+  --text-read: 18px;
+  --text-lg: 19px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
 
-  /* A card on a putty ground is already a tonal step lighter than what surrounds
-     it, so the shadow only has to stop it floating. Anything heavier is the drop
-     shadow every template ships with. */
   --shadow-card: 0 1px 1px rgba(44, 39, 33, 0.03), 0 2px 8px rgba(44, 39, 33, 0.04);
 }
 
-/* Dark mode is the manifest's own charcoal-slate, not an inversion of the beige.
-   Inverting a warm paper theme produces muddy browns, and the identity hues would
-   collapse below 3:1. */
 :root[data-theme="dark"] {
-  --paper: #2b333a; /* manifest dark "Ground" */
-  --surface: #39434b; /* manifest dark "Card" */
+  --putty: #222a30;
+  --paper: #2b333a;
+  --surface: #39434b;
   --surface-sunk: #222a30;
   --hairline: #454f58;
   --hairline-strong: #5c6874;
 
   --ink: #f1ede6;
-  --ink-muted: #b4ada1; /* manifest #A8A093, up 5.1% */
+  --ink-muted: #b4ada1;
 
-  --brand: #98b1c2;
-  --brand-tint: #33414d;
+  --brand: #75b8bf;
+  --brand-tint: #2a4044;
   --on-brand: #1d242a;
-
   --petrol: #75b8bf;
 
   --done: #e796ae;
