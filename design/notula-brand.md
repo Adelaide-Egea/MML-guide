@@ -47,10 +47,10 @@ Decision document. Locked as the working brand direction pending Week 0 clearanc
 | Rule | Example |
 |---|---|
 | Short declaratives | "The bins go out Tuesday night." |
-| You address the writer. The guide addresses the reader. | App to you: "Add a photo." Guide to her: "The spare key is here." |
+| You address the writer. The guide addresses the reader. | App to you: "Add a photo." Guide to them: "The spare key is here." |
 | Photos replace adjectives | Never "the good blue cloth". Show it. |
 | No apology, no hedging | Not "if you could just...". "Tuesday night." |
-| Never cute | No emoji in product chrome. Emoji in her content is her choice. |
+| Never cute | No emoji in product chrome. Emoji in their content is their choice. |
 
 ---
 
@@ -96,13 +96,13 @@ Lisette blue `#445f72` is **retired** as an interactive accent. It sat too close
 
 ## 5. The pitch (say this out loud)
 
-> Every household runs on knowledge that lives in one person's head. Where the spare key is. Which cloth is for the pan. That the little one will say she's allowed screens after dinner and she isn't.
+> Every household runs on knowledge that lives in one person's head. Where the spare key is. Which cloth is for the pan. That the little one will say they're allowed screens after dinner and they aren't.
 >
-> When you leave, you try to transfer all of it in a text message on the way out of the door. It doesn't work. She forgets, or she guesses, or she calls you in a meeting. So you either micromanage or you come home to a routine you don't recognise.
+> When you leave, you try to transfer all of it in a text message on the way out of the door. It doesn't work. They forget, or they guess, or they call you in a meeting. So you either micromanage or you come home to a routine you don't recognise.
 >
-> Notula is the guide you write once. Photos of the exact thing, so there's no interpreting. A timeline, so she knows what matters when. And she can ask it questions and get the answer back in her own language, without asking you.
+> Notula is the guide you write once. Photos of the exact thing, so there's no interpreting. A timeline, so they know what matters when. And they can ask it questions and get the answer back in their own language, without asking you.
 >
-> You stop repeating yourself. She stops guessing. Nobody has to be managed.
+> You stop repeating yourself. They stop guessing. Nobody has to be managed.
 
 ---
 
