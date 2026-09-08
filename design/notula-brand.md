@@ -36,9 +36,9 @@ Decision document. Locked as the working brand direction pending Week 0 clearanc
 **What Notula is not:**
 - Not surveillance. No tracking, no completion policing, no reporting back to you.
 - Not "mum life". No pastel, no cursive, no exclamation marks.
-- Not a task list you assign. It is a reference she consults.
+- Not a task list you assign. It is a reference they consult.
 
-**The dignity rule.** The second reader is a competent adult doing a job. Every word in the product treats her that way. This is the single thing that will differentiate Notula from every competitor, and it is a brand decision, not a copy decision.
+**The dignity rule.** The second reader is a competent adult doing a job. Every word in the product treats them that way. This is the single thing that will differentiate Notula from every competitor, and it is a brand decision, not a copy decision.
 
 ---
 
