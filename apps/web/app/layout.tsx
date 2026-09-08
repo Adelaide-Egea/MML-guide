@@ -20,7 +20,7 @@ const ui = Figtree({
 
 export const metadata: Metadata = {
   title: 'Notula',
-  description: 'Everything she needs while you are not there.',
+  description: 'Everything they need while you are not there.',
 };
 
 export const viewport: Viewport = {

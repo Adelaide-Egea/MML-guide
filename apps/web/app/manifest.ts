@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Notula',
     short_name: 'Notula',
-    description: 'Everything she needs while you are not there.',
+    description: 'Everything they need while you are not there.',
     start_url: '/',
     display: 'standalone',
     background_color: '#efe7da',

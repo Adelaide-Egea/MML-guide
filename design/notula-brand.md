@@ -25,9 +25,9 @@ Decision document. Locked as the working brand direction pending Week 0 clearanc
 
 ## 2. The brand idea
 
-**One line:** Everything she needs while you are not there.
+**One line:** Everything they need while you are not there.
 
-**The recommendation sentence:** "You should try Notula. You write it once, with photos, and she can just ask it."
+**The recommendation sentence:** "You should try Notula. You write it once, with photos, and they can just ask it."
 
 **The enemy:** the long text message. Sent at 8:40am, half-read, wrong in three places, resented by both sides.
 
