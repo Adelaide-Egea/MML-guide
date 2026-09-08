@@ -361,3 +361,37 @@ Screened. Exact App Store match is noted; it is not a veto.
 
 Metaphor-first names (Understudy, Nichoir, Bercail, Bento, Holdall, Consigne, Aimant,
 Doublure, Latchkey). Clever. Not what she says when she recommends it.
+
+---
+
+# Naming — round seven (Greek / Latin)
+
+Same brief as round six. Different root language. Still has to survive
+*“You should try ___.”*
+
+## Shortlist
+
+| Name | Root | Why it fits her pitch | Store |
+|---|---|---|---|
+| **Enargon** | Greek *enargēs* — vivid, clear; *enargeia* = putting something before the eyes | The photo: show the exact thing | Clear, noise 5 |
+| **Saphene** | Greek *saphēs* / *saphēneia* — clarity, plainness | Opposite of the unclear WhatsApp list | Clear, noise 3 |
+| **Semel** | Latin *semel* — once | Write it once | Clear |
+| **Exactum** | Latin — made exact, finished precisely | “The exact thing you’re talking about” | Clear, noise 0 |
+| **Diataxis** | Greek *diataxis* — arrangement, putting in order | The timeline, not the pile | Clear, noise 1 |
+| **Epimele** | Greek *epimeleia* — care, attentiveness | Soft care without micromanager | Clear, noise 1 |
+| **Epitome** | Greek — abridgement / the essential summary | Ask → recap in her language | Clear |
+| **Dilucid** | Latin *dilucidare* — to make clear | Literal to the pitch | Clear, noise 0 |
+| **Brevium** | Latin *brevis* — short / brief | The brief you leave | Clear, noise 0 |
+| **Enchirid** | Greek *enchiridion* — handbook (literally “in the hand”) | The thing she carries and asks | Clear, noise 1 |
+
+## Also clear, less recommendable in a text message
+
+Lararium (household shrine), Ostentum (that which is shown), Melete (practice),
+Epimeleia / Epitrope (care / stewardship), Perspicua, Idoneus, Tradita, Phaneros,
+Vadem, Lucern.
+
+## Taken in this sphere — do not use
+
+Hestia (meal planner), Domus (home management), Vesta, Lares, Penates, Cura,
+Tutela, Lumen, Lucida, Claritas, Clarus, Hapax, Vademecum, Enchiridion, Manifest,
+Praxis, Kairos, Chronos.
