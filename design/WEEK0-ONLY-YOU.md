@@ -16,6 +16,10 @@ In Indonesian, *notula / notulen* ≈ meeting minutes — search for “Notula�
 
 **Do not** buy `notula.app` / `getnotula.com` as a “workaround.” The word itself is contested.
 
+### Also rejected: **Notula Home**
+
+Exact compound not found as a live product (App Store / web / Play phrase search quiet; compound domains like `notulahome.com` show no live DNS). **Still do not use.** The distinctive element remains *Notula*, which is already in software (notes, transcription, **Notula Health**). “Home” is a weak descriptive add-on — people will drop it, search still lands on competitors, and the “Notula + category” pattern is already taken. Clear a new root instead.
+
 Repo brand files (`notula-brand.md`, tokens, mark) are **draft under a failed name** — keep for salvageable design system pieces (putty / petrol / punctum / type) once a clear name is chosen. Product string “Notula” should be treated as temporary.
 
 ---
