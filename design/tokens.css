@@ -1,85 +1,48 @@
-/* Design tokens.
+/* Design tokens — Domela ("Shutter" palette).
+
+ * Brand: design/domela-brand.md
  *
- * This is the brand manifest's palette, not a replacement for it. An earlier round
- * measured the manifest, found several pairs below WCAG AA, and then — wrongly —
- * substituted an entirely different scheme instead of correcting the values. The
- * strategic direction in the manifest was right and is restored here: warmth comes
- * from the ground rather than the accents, the accents stay quiet so the content is
- * what you look at, and raspberry is reserved for completion.
+ * Chalk is the in-app ground. Clay is for the icon and marketing. Pine is ink.
+ * Marigold is the only interactive accent. Moss is done-only. Brick is safety-only.
  *
- * What changed, and only this: colours that carry text were moved down in lightness
- * until they clear their target, keeping hue and saturation. Most moves are
- * invisible — Lisette blue shifted 2.5%, Jeannette petrol 0.2%. Every pair below is
- * verified by design/contrast.mjs, which fails the build.
- *
- * Two constraints come from who actually reads this. A grandparent reading at 2am
- * has presbyopia and a dark room, so guide content is set larger than interface
- * text and dark mode is a first-class theme rather than an inversion. And a
- * caregiver reading in a second language needs contrast to be generous, because low
- * contrast costs more when you are also decoding the words.
+ * Buttons: pine text on marigold fill — never white on marigold.
+ * design/contrast.mjs verifies every pair and fails the build.
  */
 
 :root {
-  /* Surfaces. The manifest's Ground and Card, unchanged. Warm paper rather than
-     the blue-grey every other household app defaults to. */
-  --paper: #efe7da; /* manifest "Ground" */
-  --surface: #faf6f0; /* manifest "Card" */
-  --surface-sunk: #e5dbc9;
-  --hairline: #dfd5c4;
-  /* --hairline is 1.13:1 against paper. It may decorate a boundary but must never
-     be the only thing communicating one. */
-  --hairline-strong: #c0b39c;
+  /* Surfaces */
+  --putty: #e3d3bc; /* clay — icon + marketing */
+  --paper: #fbf6ee; /* chalk — in-app ground */
+  --surface: #f1e7d8; /* sand — raised cards */
+  --surface-sunk: #e3d3bc;
+  --hairline: #e8dcc8;
+  --hairline-strong: #b7a78e;
 
-  /* Ink. Warm near-black rather than grey, so it sits on the beige instead of
-     floating above it. */
-  --ink: #2c2721; /* 12.06:1 on paper */
-  --ink-muted: #6e675d; /* manifest #7C7468, down 4.9% to reach 4.55:1 */
+  /* Ink — pine */
+  --ink: #22332c;
+  --ink-muted: #5a6b60; /* sage */
 
-  /* Lisette blue — the manifest's accent for this surface, the care guide.
-     A quiet slate blue: credible and adult, and notably not the bright primary
-     blue that the family-calendar category has almost entirely to itself. */
-  --brand: #4d6c82; /* manifest #52738A, down 2.5% to reach 4.52:1 */
-  /* A tint pale enough for --brand text to clear 4.5:1 on it is, on a beige ground,
-     within 1.05:1 of the ground itself — a panel you cannot see. So the tint is
-     deeper and carries --ink, and a selected state is a solid --brand fill with
-     white text instead. Unambiguous, and it fails no target. */
-  --brand-tint: #d3e0e9;
+  /* Marigold — the single interactive accent */
+  --brand: #d08a2c;
+  --brand-tint: #f3e0c4;
+  --on-brand: #22332c; /* pine on marigold — never white */
+  --petrol: #d08a2c; /* alias kept for contrast.mjs / legacy refs */
 
-  /* Jeannette petrol — the manifest's accent for the packing surface. Defined here
-     so the two products share one token file and cannot drift apart. */
-  --petrol: #377177; /* manifest #377278, down 0.2% */
+  /* Moss — done only */
+  --done: #4e8c5b;
+  --done-tint: #d7e8db;
 
-  /* Raspberry, exactly as the manifest specifies it. Reserved for completion.
-     It clears 3:1 on the ground, which is the bar for a large element or a filled
-     shape, and it is deliberately NOT used for small text or behind white type —
-     darkening it enough for that would have turned it into a different colour and
-     put it uncomfortably close to --critical. */
-  --done: #d9577e;
-  --done-tint: #fae7ed;
+  --amber: #8a5612; /* marigold deep AA on chalk + amber-tint */
+  --amber-tint: #f3e0c4;
 
-  /* Attention, not alarm. The manifest's warning gold, darkened for text. */
-  --amber: #836325; /* manifest #C99A3E, down 18.6% to reach 4.53:1 */
-  --amber-tint: #f5ead2;
+  --critical: #9e2b25; /* brick — safety only */
+  --critical-tint: #f3d8d6;
 
-  /* Reserved exclusively for safety-critical content — allergies, medication,
-     emergency contacts. If this colour appears anywhere else it stops meaning
-     anything, and the one time it matters it will be skimmed past. Kept clearly
-     redder and darker than raspberry so completion and danger never read alike. */
-  --critical: #b3312f; /* 5.04:1 */
-  --critical-tint: #f7e4e2;
-
-  /* Per-subject identity. Colour is never the only signal: every one of these is
-     always paired with a symbol, because these hues are confusable under
-     deuteranopia and protanopia. All six clear 4.5:1 on the ground and behind white
-     text, so they may carry a label and not only decoration. */
-  --id-petrol: #377177;
-  /* The one colour here that is louder than the rest of the palette, and it stays
-     that way: muting it toward the beige collapses it against --id-petrol under
-     deuteranopia. Its saturation is doing accessibility work, not decoration. */
-  --id-indigo: #4a5a9c;
+  --id-petrol: #306369;
+  --id-indigo: #485899;
   --id-plum: #7a3c6e;
-  --id-clay: #a2522d;
-  --id-olive: #616e2a;
+  --id-clay: #8f4828;
+  --id-olive: #566125;
   --id-forest: #2f5d3a;
 
   --radius-sm: 8px;
@@ -94,51 +57,41 @@
   --space-6: 28px;
   --space-7: 40px;
 
-  /* The manifest's pairing: a serif with real character for headings, a warm
-     geometric sans for everything else. Serif headings are close to absent in this
-     category, which is most of why they read as considered rather than generic. */
-  --font-display: "Newsreader", Georgia, serif;
+  --font-display: "Fraunces", "Newsreader", Georgia, serif;
   --font-ui: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  /* Two body sizes, on purpose.
-     --text-base is the interface: labels, buttons, metadata, navigation.
-     --text-read is guide content and safety-critical facts — the words a caregiver
-     is actually trying to read, often in a second language and often at night.
-     Shrinking the chrome should not shrink those. */
-  --text-xs: 12px;
-  --text-sm: 13.5px;
-  --text-base: 15px;
-  --text-read: 16px;
-  --text-lg: 17px;
-  --text-xl: 21px;
-  --text-2xl: 26px;
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-base: 17px;
+  --text-read: 18px;
+  --text-lg: 19px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
 
-  --shadow-card: 0 1px 2px rgba(44, 39, 33, 0.04), 0 4px 14px rgba(44, 39, 33, 0.05);
+  --shadow-card: 0 1px 1px rgba(34, 51, 44, 0.03), 0 2px 8px rgba(34, 51, 44, 0.05);
 }
 
-/* Dark mode is the manifest's own charcoal-slate, not an inversion of the beige.
-   Inverting a warm paper theme produces muddy browns, and the identity hues would
-   collapse below 3:1. */
 :root[data-theme="dark"] {
-  --paper: #2b333a; /* manifest dark "Ground" */
-  --surface: #39434b; /* manifest dark "Card" */
-  --surface-sunk: #222a30;
-  --hairline: #454f58;
-  --hairline-strong: #5c6874;
+  --putty: #1a2420;
+  --paper: #1c2622;
+  --surface: #2a3530;
+  --surface-sunk: #1a2420;
+  --hairline: #3a4741;
+  --hairline-strong: #5a6b60;
 
-  --ink: #f1ede6;
-  --ink-muted: #b4ada1; /* manifest #A8A093, up 5.1% */
+  --ink: #fbf6ee;
+  --ink-muted: #a8b5ad;
 
-  --brand: #98b1c2;
-  --brand-tint: #33414d;
+  --brand: #e0a04a;
+  --brand-tint: #3a3224;
+  --on-brand: #1c2622;
+  --petrol: #e0a04a;
 
-  --petrol: #75b8bf;
+  --done: #7abc89;
+  --done-tint: #24382a;
 
-  --done: #e796ae;
-  --done-tint: #4a2c37;
-
-  --amber: #d0a858;
-  --amber-tint: #3b3222;
+  --amber: #e0a04a;
+  --amber-tint: #3a3224;
 
   --critical: #e49a98;
   --critical-tint: #4a2a29;

@@ -12,7 +12,7 @@
     font-family: var(--font-ui); font-size: var(--text-base);
     -webkit-font-smoothing: antialiased; padding: 56px 64px 64px;
   }
-  .display { font-family: var(--font-display); font-variation-settings: "SOFT" 40, "WONK" 1; }
+  .display { font-family: var(--font-display); }
   h1 { font-size: 44px; font-weight: 600; letter-spacing: -0.022em; line-height: 1.1; }
   .sub { color: var(--ink-muted); font-size: var(--text-lg); margin-top: 10px; max-width: 760px; line-height: 1.5; }
   section { margin-top: 52px; }
@@ -29,7 +29,7 @@
           padding: 48px 52px; box-shadow: var(--shadow-card); }
   .lockup { display: flex; align-items: center; gap: 20px; color: var(--brand); }
   .lockup svg { width: 62px; height: 62px; flex: none; }
-  .wordmark { font-family: var(--font-display); font-variation-settings: "SOFT" 40, "WONK" 1;
+  .wordmark { font-family: var(--font-display);
               font-size: 58px; font-weight: 600; letter-spacing: -0.028em; color: var(--ink); line-height: 1; }
   .tagline { margin-top: 20px; font-size: var(--text-lg); color: var(--ink-muted); line-height: 1.45; }
 
@@ -159,43 +159,49 @@
 </section>
 
 <section>
-  <div class="label">Core palette — measured against #FBF9F5 paper</div>
+  <div class="label">Core palette — the brand manifest, corrected against its own ground</div>
   <div class="swatches">
-    <div class="sw"><div class="chip" style="background:#fbf9f5;color:#5c554b;border-bottom:1px solid #e5dfd4">Aa</div><div class="meta"><b>Paper</b><code>#FBF9F5</code><span class="ratio">warm, not blue-grey</span></div></div>
-    <div class="sw"><div class="chip" style="background:#1f1b16;color:#fbf9f5">Aa</div><div class="meta"><b>Ink</b><code>#1F1B16</code><span class="ratio"><strong>16.3:1</strong> · AAA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#5c554b;color:#fff">Aa</div><div class="meta"><b>Ink muted</b><code>#5C554B</code><span class="ratio"><strong>6.99:1</strong> · AA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#14564e;color:#fff">Aa</div><div class="meta"><b>Brand</b><code>#14564E</code><span class="ratio"><strong>8.08:1</strong> · AAA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#8a5a00;color:#fff">Aa</div><div class="meta"><b>Attention</b><code>#8A5A00</code><span class="ratio"><strong>5.64:1</strong> · AA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#a3232b;color:#fff">Aa</div><div class="meta"><b>Safety only</b><code>#A3232B</code><span class="ratio"><strong>7.05:1</strong> · AAA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#efe7da;color:#6e675d">Aa</div><div class="meta"><b>Ground</b><code>#EFE7DA</code><span class="ratio">manifest value, unchanged</span></div></div>
+    <div class="sw"><div class="chip" style="background:#faf6f0;color:#6e675d">Aa</div><div class="meta"><b>Card</b><code>#FAF6F0</code><span class="ratio">manifest value, unchanged</span></div></div>
+    <div class="sw"><div class="chip" style="background:#2c2721;color:#efe7da">Aa</div><div class="meta"><b>Ink</b><code>#2C2721</code><span class="ratio"><strong>12.06:1</strong> · AAA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#6e675d;color:#fff">Aa</div><div class="meta"><b>Ink muted</b><code>#6E675D</code><span class="ratio"><strong>4.55:1</strong> · AA · was #7C7468</span></div></div>
+    <div class="sw"><div class="chip" style="background:#4d6c82;color:#fff">Aa</div><div class="meta"><b>Lisette blue</b><code>#4D6C82</code><span class="ratio"><strong>4.52:1</strong> · AA · was #52738A</span></div></div>
+    <div class="sw"><div class="chip" style="background:#377177;color:#fff">Aa</div><div class="meta"><b>Jeannette petrol</b><code>#377177</code><span class="ratio"><strong>4.51:1</strong> · AA · was #377278</span></div></div>
+    <div class="sw"><div class="chip" style="background:#d9577e;color:#fff">Aa</div><div class="meta"><b>Raspberry</b><code>#D9577E</code><span class="ratio"><strong>3.05:1</strong> · large shapes only</span></div></div>
+    <div class="sw"><div class="chip" style="background:#836325;color:#fff">Aa</div><div class="meta"><b>Attention</b><code>#836325</code><span class="ratio"><strong>4.53:1</strong> · AA · was #C99A3E</span></div></div>
+    <div class="sw"><div class="chip" style="background:#b3312f;color:#fff">Aa</div><div class="meta"><b>Safety only</b><code>#B3312F</code><span class="ratio"><strong>5.04:1</strong> · AA</span></div></div>
   </div>
-  <p class="note" style="margin-top:18px">The red is reserved for allergies, medication and emergency contacts and is used nowhere else. A colour that appears on ordinary content stops carrying weight, and the one screen where it matters gets skimmed.</p>
+  <p class="note" style="margin-top:18px">Every value here is the manifest's, moved only in lightness and only as far as its contrast target required. Lisette blue shifted 2.5%, Jeannette petrol 0.2% — neither is visible side by side. The ground, the card and raspberry did not move at all.</p>
+  <p class="note" style="margin-top:12px">Raspberry keeps its exact value because darkening it to 4.5:1 produced #C22C59 — a different colour, and close enough to the safety red to blur completion into danger. It is instead restricted to large filled shapes, where 3:1 is the correct target, and <code>design/contrast.mjs</code> enforces that restriction so a future use as small text fails the build.</p>
+  <p class="note" style="margin-top:12px">The red is reserved for allergies, medication and emergency contacts and is used nowhere else. A colour that appears on ordinary content stops carrying weight, and the one screen where it matters gets skimmed.</p>
 </section>
 
 <section>
   <div class="label">Per-person identity — colour never travels alone</div>
   <div class="ids">
-    <div class="id"><span class="dot" style="background:#0f6b63">●</span> Léa <code>#0F6B63</code></div>
-    <div class="id"><span class="dot" style="background:#a8452a">▲</span> Noah <code>#A8452A</code></div>
-    <div class="id"><span class="dot" style="background:#3b4e8c">■</span> Ines <code>#3B4E8C</code></div>
-    <div class="id"><span class="dot" style="background:#7a5b0f">◆</span> Tom <code>#7A5B0F</code></div>
-    <div class="id"><span class="dot" style="background:#71356a">★</span> Mia <code>#71356A</code></div>
-    <div class="id"><span class="dot" style="background:#44622b">✚</span> Otto <code>#44622B</code></div>
+    <div class="id"><span class="dot" style="background:#377177">●</span> Léa <code>#377177</code></div>
+    <div class="id"><span class="dot" style="background:#a2522d">▲</span> Noah <code>#A2522D</code></div>
+    <div class="id"><span class="dot" style="background:#4a5a9c">■</span> Ines <code>#4A5A9C</code></div>
+    <div class="id"><span class="dot" style="background:#616e2a">◆</span> Tom <code>#616E2A</code></div>
+    <div class="id"><span class="dot" style="background:#7a3c6e">★</span> Mia <code>#7A3C6E</code></div>
+    <div class="id"><span class="dot" style="background:#2f5d3a">✚</span> Otto <code>#2F5D3A</code></div>
   </div>
-  <p class="note" style="margin-top:18px">All six clear 4.5:1 on paper, so they can carry text rather than only decorate. Each is permanently paired with a symbol, because these hues are confusable under deuteranopia — and a parent choosing "the blue one" for a child with a nut allergy should not be relying on the caregiver having full colour vision.</p>
+  <p class="note" style="margin-top:18px">All six clear 4.5:1 on the ground, so they can carry text rather than only decorate. Each is permanently paired with a symbol, because these hues are confusable under deuteranopia — and a parent choosing "the blue one" for a child with a nut allergy should not be relying on the caregiver having full colour vision.</p>
+  <p class="note" style="margin-top:12px">The indigo is louder than the rest of the palette and stays that way. Muting it toward the beige collapses it against the petrol under simulated deuteranopia; its saturation is doing accessibility work rather than decoration.</p>
 </section>
 
 <section>
   <div class="label">Typography</div>
   <div class="type">
     <div class="spec">
-      <div class="name">Fraunces — brand and headings only</div>
+      <div class="name">Newsreader — brand and headings only</div>
       <div class="big display">Chez les Martin</div>
-      <div class="row note">Soft, slightly bookish, full French diacritics. Used for the wordmark and page titles. Never for body copy or interface labels.</div>
+      <div class="row note">The manifest's serif. Bookish without being decorative, full French diacritics. Used for the wordmark and page titles, never for body copy or interface labels. Serif headings are close to absent in this category, which is most of why they read as considered rather than generic.</div>
     </div>
     <div class="spec">
-      <div class="name">Inter — everything else, 17px base</div>
+      <div class="name">Figtree — everything else, two sizes</div>
       <div class="big" style="font-family:var(--font-ui);font-weight:500">Sleeping bags: 2.5 tog</div>
-      <div class="row note">Base size is 17px, not 16. A grandparent reading this at 2am has presbyopia and a dark room, and a caregiver reading in a second language pays a comprehension cost for every point of contrast you take away.</div>
+      <div class="row note">The interface sets at 15px. Guide content and safety-critical facts set at 16px, through a separate <code>--text-read</code> token. The chrome can afford to be compact; the sentences a caregiver is decoding in a second language at 2am cannot, and shrinking those to tidy up the layout optimises the screenshot over the reader.</div>
     </div>
   </div>
 </section>
@@ -207,12 +213,14 @@
     <span class="wordmark" style="font-size:44px">Marela</span>
   </div>
   <div class="swatches">
-    <div class="sw"><div class="chip" style="background:#16130f;color:#b3aa9c">Aa</div><div class="meta"><b>Paper</b><code>#16130F</code><span class="ratio">night feeds</span></div></div>
-    <div class="sw"><div class="chip" style="background:#211d18;color:#f2ede4">Aa</div><div class="meta"><b>Surface</b><code>#211D18</code><span class="ratio">cards</span></div></div>
-    <div class="sw"><div class="chip" style="background:#211d18;color:#f2ede4">Aa</div><div class="meta"><b>Ink</b><code>#F2EDE4</code><span class="ratio"><strong>14.4:1</strong> · AAA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#211d18;color:#6fc8b8">Aa</div><div class="meta"><b>Brand</b><code>#6FC8B8</code><span class="ratio"><strong>8.48:1</strong> · AAA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#211d18;color:#e8b75a">Aa</div><div class="meta"><b>Attention</b><code>#E8B75A</code><span class="ratio"><strong>9.06:1</strong> · AAA</span></div></div>
-    <div class="sw"><div class="chip" style="background:#211d18;color:#ff9a93">Aa</div><div class="meta"><b>Safety only</b><code>#FF9A93</code><span class="ratio"><strong>8.21:1</strong> · AAA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#2b333a;color:#b4ada1">Aa</div><div class="meta"><b>Ground</b><code>#2B333A</code><span class="ratio">manifest value, unchanged</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#f1ede6">Aa</div><div class="meta"><b>Card</b><code>#39434B</code><span class="ratio">manifest value, unchanged</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#f1ede6">Aa</div><div class="meta"><b>Ink</b><code>#F1EDE6</code><span class="ratio"><strong>8.66:1</strong> · AAA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#b4ada1">Aa</div><div class="meta"><b>Ink muted</b><code>#B4ADA1</code><span class="ratio"><strong>4.54:1</strong> · AA · was #A8A093</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#98b1c2">Aa</div><div class="meta"><b>Lisette blue</b><code>#98B1C2</code><span class="ratio"><strong>4.52:1</strong> · AA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#e796ae">Aa</div><div class="meta"><b>Raspberry</b><code>#E796AE</code><span class="ratio"><strong>4.51:1</strong> · AA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#d0a858">Aa</div><div class="meta"><b>Attention</b><code>#D0A858</code><span class="ratio"><strong>4.53:1</strong> · AA</span></div></div>
+    <div class="sw"><div class="chip" style="background:#39434b;color:#e49a98">Aa</div><div class="meta"><b>Safety only</b><code>#E49A98</code><span class="ratio"><strong>4.51:1</strong> · AA</span></div></div>
   </div>
 </section>
 

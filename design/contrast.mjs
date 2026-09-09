@@ -51,15 +51,15 @@ const PAIRS = [
   ['--ink', '--surface', 4.5],
   ['--ink-muted', '--paper', 4.5],
   ['--ink-muted', '--surface', 4.5],
-  ['--brand', '--paper', 4.5],
-  ['--brand', '--surface', 4.5],
+  // Marigold fill (--brand) is buttons/punctum only — contrast is --on-brand on --brand.
+  // Text accents use marigold-deep (--amber).
   ['--amber', '--paper', 4.5],
+  ['--amber', '--surface', 4.5],
   ['--critical', '--paper', 4.5],
   ['--critical', '--critical-tint', 4.5],
   ['--ink', '--surface-sunk', 4.5],
   ['--amber', '--amber-tint', 4.5],
   ['--ink', '--brand-tint', 4.5],
-  ['--petrol', '--paper', 4.5],
   ['--id-petrol', '--paper', 4.5],
   ['--id-indigo', '--paper', 4.5],
   ['--id-plum', '--paper', 4.5],
@@ -67,11 +67,8 @@ const PAIRS = [
   ['--id-olive', '--paper', 4.5],
   ['--id-forest', '--paper', 4.5],
   ['--hairline-strong', '--paper', 1.5],
-  // Raspberry is the manifest's completion colour and is kept at its exact value.
-  // 3:1 is the correct bar for it because it is only ever a large filled shape or a
-  // boundary, never small text and never behind white type. The test encodes that
-  // restriction so a future use as a text colour fails here rather than in review.
-  ['--done', '--paper', 3],
+  // Moss is done-only — large filled shape / boundary, never small text.
+  ['--done', '--surface', 3],
 ];
 
 for (const theme of [
@@ -90,10 +87,26 @@ for (const theme of [
   });
 }
 
-test('white text is legible on every filled brand surface', () => {
-  for (const token of ['--brand', '--critical', '--amber']) {
-    const r = ratio('#FFFFFF', light[token]);
-    assert.ok(r >= 4.5, `white on ${token} (${light[token]}) is ${r.toFixed(2)}:1`);
+test('label text is legible on every filled brand surface', () => {
+  for (const theme of [
+    { name: 'light', tokens: light },
+    { name: 'dark', tokens: dark },
+  ]) {
+    // Dark mode's brand is a pale slate, so the label that sits on it is not white.
+    const label = theme.tokens['--on-brand'];
+    assert.ok(label, `${theme.name}: --on-brand not defined`);
+    const r = ratio(label, theme.tokens['--brand']);
+    assert.ok(r >= 4.5, `${theme.name}: --on-brand on --brand is ${r.toFixed(2)}:1`);
+  }
+  // Filled criticals are only ever drawn in the light theme.
+  // Amber is marigold-deep for small text on light grounds — not white-on-fill.
+  {
+    const r = ratio('#FFFFFF', light['--critical']);
+    assert.ok(r >= 4.5, `white on --critical (${light['--critical']}) is ${r.toFixed(2)}:1`);
+  }
+  {
+    const r = ratio(light['--amber'], light['--paper']);
+    assert.ok(r >= 3, `marigold-deep on chalk is ${r.toFixed(2)}:1, needs 3:1 for large/UI`);
   }
 });
 

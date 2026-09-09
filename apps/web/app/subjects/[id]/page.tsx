@@ -95,10 +95,13 @@ export default function SubjectPage() {
       {/* Safety-critical content is separated in the model and separated here. It is
           the one thing that is never summarised, never reordered and never touched
           by a model, and the interface should make that visible. */}
-      <section className="critical stack" style={{ marginBottom: 'var(--space-5)' }}>
+      <section className="safety stack">
         <div>
-          <div className="eyebrow">Never paraphrased</div>
-          <p className="muted" style={{ marginTop: 'var(--space-1)' }}>
+          <div className="row">
+            <span className="safety-dot" aria-hidden="true" />
+            <span className="eyebrow safety-eyebrow">Never paraphrased</span>
+          </div>
+          <p className="muted" style={{ marginTop: 'var(--space-2)' }}>
             Anything here is shown to the caregiver word for word, in your language, at the top of
             the guide. It is never rewritten or translated by the assistant.
           </p>

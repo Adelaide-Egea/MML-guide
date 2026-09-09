@@ -11,9 +11,11 @@ import {
   prepare,
   subjectsFor,
 } from '@mml/core';
+import { Breathing } from '../../../../components/Breathing.tsx';
 import { TopBar } from '../../../../components/Chrome.tsx';
 import { MediaThumb } from '../../../../components/MediaField.tsx';
 import { useAppState } from '../../../../lib/store.ts';
+import { track } from '../../../../lib/trial.ts';
 
 /** The unreachable-assistant case is its own state rather than a hand-built Answer.
  *  A `grounded` answer with no prose would not survive the contract's own
@@ -25,12 +27,13 @@ type Shown =
 
 export default function AskPage() {
   const { id } = useParams<{ id: string }>();
-  const { household, handovers } = useAppState();
+  const { households, household: active, handovers } = useAppState();
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState<Shown | null>(null);
 
   const handover = handovers.find((h) => h.id === id);
+  const household = households.find((h) => h.id === handover?.householdId) ?? active;
   if (!handover) {
     return (
       <main className="shell">
@@ -46,13 +49,14 @@ export default function AskPage() {
     event.preventDefault();
     const asked = question.trim();
     if (!asked) return;
+    track('ask');
 
     setBusy(true);
     try {
       // The routing decision happens here, before any network call. A
       // safety-critical question is answered from the parent's own words and there
       // is no code path from it to a language model.
-      const prepared: Prepared = prepare(subjects, asked, language);
+      const prepared: Prepared = prepare(subjects, asked, language, household.routine);
 
       if (prepared.route !== 'model') {
         setShown({ question: asked, kind: 'answer', answer: prepared.answer });
@@ -114,7 +118,20 @@ export default function AskPage() {
         </button>
       </form>
 
-      {shown && (
+      {/* The one genuine wait left in the product, and the only place this belongs.
+          It is mounted while the request is in flight and unmounted when it lands,
+          so it can never run longer than the thing it is standing in for. */}
+      {busy && (
+        <Breathing
+          lines={[
+            'Looking through what was written down…',
+            'Only what is actually in the guide…',
+            'Nearly there…',
+          ]}
+        />
+      )}
+
+      {!busy && shown && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <p className="muted">“{shown.question}”</p>
           {shown.kind === 'answer' ? (

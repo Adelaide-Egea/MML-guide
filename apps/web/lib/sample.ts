@@ -6,8 +6,13 @@
 // showing is that one guide covers all three. A demo with three children would hide
 // the only structural decision that matters.
 
-import { type Entry, type Handover, EMPTY_SAFETY } from '@mml/core';
-import type { AppState } from './store.ts';
+import {
+  type Entry,
+  type Handover,
+  type Household,
+  type RoutinePreset,
+  EMPTY_SAFETY,
+} from '@mml/core';
 import { putBlob } from './media.ts';
 
 const NOW = '2026-09-01T09:00:00.000Z';
@@ -42,7 +47,15 @@ function placeholder(label: string, colour: string): Promise<Blob | null> {
   });
 }
 
-export function loadSample(): AppState {
+export interface Sample {
+  readonly household: Household;
+  readonly handover: Handover;
+  readonly presets: readonly RoutinePreset[];
+}
+
+/** Built with fixed identifiers so that adding it twice is a no-op rather than a
+ *  second copy of the Martins. */
+export function loadSample(): Sample {
   // Fire and forget: the guide renders immediately and the images appear when they
   // are ready, which is the same behaviour as a real upload finishing.
   void placeholder('Sleeping bags — top shelf', '#4d6c82').then(
@@ -204,7 +217,7 @@ export function loadSample(): AppState {
         { id: 'r8', time: null, kind: 'Bins', appliesTo: 'sub_flat', notes: 'Tuesday night.' },
       ],
     },
-    handovers: [handover],
+    handover,
     // One saved preset, so the sample shows that a routine you have already built
     // can be reused rather than retyped for the next child.
     presets: [

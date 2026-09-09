@@ -23,10 +23,12 @@
 //    more costly than no answer, because the caregiver cannot tell the difference
 //    and the parent is not there to correct it.
 
+import type { RoutineItem } from './household.ts';
 import {
   type CareSubject,
   type Entry,
   type Media,
+  type SubjectKind,
   allergyText,
   emergencyText,
   hasText,
@@ -69,10 +71,27 @@ const STOPWORDS = new Set([
   'jest', 'gdzie', 'jak', 'czy', 'sie',
 ]);
 
+/** Crude suffix stripping, applied identically to the question and to the guide.
+ *
+ *  "When should I walk Pomme" used to be refused against an entry titled "Walks",
+ *  because matching was exact and `walks !== walk`. Correctness as linguistics is
+ *  not the point and would need a real stemmer per language; the property that
+ *  matters is that both sides are mangled the same way, so a pair that should meet
+ *  still meets. Over-stripping costs a little precision, which retrieval's scoring
+ *  absorbs. Under-stripping costs the answer entirely.
+ */
+function stem(token: string): string {
+  if (token.length > 5 && token.endsWith('ing')) return token.slice(0, -3);
+  if (token.length > 4 && token.endsWith('es')) return token.slice(0, -2);
+  if (token.length > 3 && token.endsWith('s')) return token.slice(0, -1);
+  return token;
+}
+
 function terms(value: string): readonly string[] {
   return normalise(value)
     .split(/[^\p{Letter}\p{Number}]+/u)
-    .filter((t) => t.length > 2 && !STOPWORDS.has(t));
+    .filter((t) => t.length > 2 && !STOPWORDS.has(t))
+    .map(stem);
 }
 
 // ── Detecting a safety-critical question ─────────────────────────────────────
@@ -110,6 +129,26 @@ function safetyText(subject: CareSubject): string {
     .join(' ');
 }
 
+/** Short allergen and medical tokens that must still count even under four letters.
+ *
+ *  Everything else that short is too common to pin a critical route on. "bags" in
+ *  "sleeping bags" used to match "bag" in "Her food is the blue bag only", and the
+ *  caregiver was shown the dog's allergies when they asked where the camping gear
+ *  lives. That is worse than a blunt answer: it is the wrong safety box.
+ */
+const SHORT_SAFETY_TERMS = new Set([
+  'nut', 'egg', 'soy', 'dye', 'bee', 'msg', 'cow', 'hog', 'cat', 'dog', 'ivy', 'oak',
+]);
+
+/** Terms from a safety field that are distinctive enough to force the critical path.
+ *
+ *  Length 4 catches "kiwi"; the allowlist catches "nut" and "egg". Generic three-
+ *  letter stems like "bag" are deliberately left out.
+ */
+function distinctiveSafetyTerms(safety: string): readonly string[] {
+  return terms(safety).filter((t) => t.length >= 4 || SHORT_SAFETY_TERMS.has(t));
+}
+
 /** Subjects whose safety fields actually use a word from the question.
  *
  *  A parent who wrote "no kiwi, it makes her throat itch" has created a critical
@@ -128,7 +167,7 @@ function subjectsMatchingSafetyText(
   return subjects.filter((subject) => {
     const safety = safetyText(subject);
     if (!safety) return false;
-    return terms(safety).some((term) => asked.has(term));
+    return distinctiveSafetyTerms(safety).some((term) => asked.has(term));
   });
 }
 
@@ -139,6 +178,120 @@ export function touchesSafetyCritical(question: string, subjects: readonly CareS
 }
 
 // ── Retrieval ────────────────────────────────────────────────────────────────
+
+/** What a caregiver calls a subject when they do not use its name.
+ *
+ *  Nobody asks "when should I walk Pomme" the first time. They ask about "the dog",
+ *  and the guide has no idea that Pomme is one unless it is told. Terms here are
+ *  pre-stemmed by the same function the question goes through.
+ */
+const KIND_WORDS: Record<SubjectKind, readonly string[]> = {
+  child: [
+    'child', 'baby', 'kid', 'toddler', 'son', 'daughter', 'boy', 'girl', 'infant',
+    'enfant', 'bebe', 'fille', 'garcon', 'gosse', 'nino', 'nina', 'crianca',
+  ],
+  pet: [
+    'pet', 'dog', 'puppy', 'cat', 'kitten', 'animal', 'rabbit', 'hamster', 'bird',
+    'chien', 'chienne', 'chiot', 'chat', 'chatte', 'lapin', 'perro', 'gato',
+  ],
+  place: [
+    'flat', 'apartment', 'house', 'home', 'place', 'plant', 'boiler', 'bin',
+    'appartement', 'maison', 'logement', 'plante', 'casa', 'piso',
+  ],
+};
+
+/** Words that point at a topic without naming anything in the guide. "What time" is
+ *  a routine question even though no entry contains the word "time". */
+const TOPIC_WORDS: Record<string, readonly string[]> = {
+  routine: [
+    'time', 'when', 'schedule', 'routine', 'day', 'timetable', 'hour', 'usual',
+    'heure', 'horaire', 'journee', 'quand', 'habitude',
+  ],
+  meals: [
+    'eat', 'food', 'feed', 'meal', 'dinner', 'lunch', 'breakfast', 'snack', 'hungry',
+    'drink', 'bottle', 'manger', 'repas', 'nourriture', 'diner', 'dejeuner', 'gouter', 'boire',
+  ],
+  sleep: [
+    'sleep', 'nap', 'bed', 'bedtime', 'night', 'asleep', 'wake', 'tired',
+    'dormir', 'sieste', 'coucher', 'nuit', 'lit', 'reveil',
+  ],
+  clothing: [
+    'wear', 'clothe', 'clothing', 'dress', 'coat', 'shoe', 'pyjama', 'tog',
+    'habiller', 'vetement', 'manteau', 'chaussure',
+  ],
+  access: [
+    'wifi', 'password', 'code', 'key', 'door', 'entry', 'internet', 'alarm',
+    'clef', 'cle', 'porte', 'alarme', 'alarm',
+  ],
+  cleaning: [
+    'bin', 'rubbish', 'recycling', 'clean', 'laundry', 'wash', 'tidy', 'hoover',
+    'poubelle', 'menage', 'linge', 'nettoyer', 'lessive',
+  ],
+  comfort: ['upset', 'cry', 'comfort', 'soothe', 'calm', 'pleurer', 'consoler', 'calmer'],
+  'out-of-the-house': [
+    'walk', 'park', 'outside', 'out', 'garden', 'street', 'lead', 'leash',
+    'promenade', 'parc', 'sortir', 'dehors', 'jardin',
+  ],
+};
+
+const KIND_LOOKUP: Record<SubjectKind, ReadonlySet<string>> = {
+  child: new Set(KIND_WORDS.child.map(stem)),
+  pet: new Set(KIND_WORDS.pet.map(stem)),
+  place: new Set(KIND_WORDS.place.map(stem)),
+};
+
+const TOPIC_LOOKUP: ReadonlyMap<string, ReadonlySet<string>> = new Map(
+  Object.entries(TOPIC_WORDS).map(([topic, words]) => [topic, new Set(words.map(stem))]),
+);
+
+function topicsAskedAbout(asked: readonly string[]): ReadonlySet<string> {
+  const found = new Set<string>();
+  for (const [topic, words] of TOPIC_LOOKUP) {
+    if (asked.some((t) => words.has(t))) found.add(topic);
+  }
+  return found;
+}
+
+/** True when the question points at this subject by name, by descriptor, or by what
+ *  it is — "Pomme", "the Labrador", or "the dog". */
+function questionPointsAt(subject: CareSubject, asked: readonly string[]): boolean {
+  if (terms(subject.name).some((t) => asked.includes(t))) return true;
+  if (terms(subject.descriptor).some((t) => asked.includes(t))) return true;
+  return asked.some((t) => KIND_LOOKUP[subject.kind].has(t));
+}
+
+/** A subject's routine, expressed as an entry.
+ *
+ *  The walk times live in the household routine, not in any entry, so a guide that
+ *  plainly contains the answer was refusing questions about it. Making the routine
+ *  an entry means retrieval, citation, verification and the model context all treat
+ *  it exactly like anything else the parent wrote, rather than growing a second path
+ *  that has to be kept in step with the first.
+ */
+export function routineAsEntry(
+  subject: CareSubject,
+  routine: readonly RoutineItem[],
+): Entry | null {
+  const mine = routine.filter((r) => r.appliesTo === subject.id || r.appliesTo === 'all');
+  if (mine.length === 0) return null;
+
+  const body = [...mine]
+    .sort((a, b) => (a.time ?? '99:99').localeCompare(b.time ?? '99:99'))
+    .map((r) => [r.time ?? 'No fixed time', r.kind, r.notes].filter(hasText).join(' — '))
+    .join('\n');
+
+  const source = subject.entries[0];
+  return {
+    id: `routine:${subject.id}`,
+    topic: 'routine',
+    title: `${subject.name} — a typical day`,
+    body,
+    media: [],
+    writtenAt: source?.writtenAt ?? '',
+    writtenBy: source?.writtenBy ?? '',
+    language: source?.language ?? 'en',
+  };
+}
 
 export interface Candidate {
   readonly subjectId: string;
@@ -155,16 +308,21 @@ export function retrieve(
   subjects: readonly CareSubject[],
   question: string,
   limit = 4,
+  routine: readonly RoutineItem[] = [],
 ): readonly Candidate[] {
   const asked = terms(question);
   if (asked.length === 0) return [];
 
+  const topics = topicsAskedAbout(asked);
   const scored: Candidate[] = [];
 
   for (const subject of subjects) {
-    const namedSubject = terms(subject.name).some((t) => asked.includes(t));
+    const pointedAt = questionPointsAt(subject, asked);
 
-    for (const entry of subject.entries) {
+    const routineEntry = routineAsEntry(subject, routine);
+    const entries = routineEntry ? [...subject.entries, routineEntry] : subject.entries;
+
+    for (const entry of entries) {
       const fields: readonly (readonly [string, number])[] = [
         [entry.title, 3],
         [entry.topic.replace(/-/g, ' '), 2],
@@ -178,12 +336,30 @@ export function retrieve(
         for (const term of asked) if (bag.has(term)) score += weight;
       }
 
-      // Naming the subject narrows the question to them without being the only
-      // reason an entry surfaces.
-      if (namedSubject && score > 0) score += 2;
+      // A question can point at the right entry without sharing a word with it.
+      // "What time do I walk the dog" names no entry and no subject, but it is
+      // unambiguously about the pet's routine, and refusing it while the guide
+      // plainly contains the answer is the worst outcome available.
+      if (topics.has(entry.topic)) score += pointedAt ? 3 : 1;
+
+      // Naming the subject narrows a question to them.
+      if (pointedAt && score > 0) score += 2;
 
       if (score > 0) {
         scored.push({ subjectId: subject.id, subjectName: subject.name, entry, score });
+      }
+    }
+  }
+
+  // Naming someone and matching nothing they have is still a question about them.
+  // Showing what the guide holds about that subject beats saying it holds nothing.
+  if (scored.length === 0) {
+    for (const subject of subjects) {
+      if (!questionPointsAt(subject, asked)) continue;
+      const routineEntry = routineAsEntry(subject, routine);
+      const entries = routineEntry ? [...subject.entries, routineEntry] : subject.entries;
+      for (const entry of entries) {
+        scored.push({ subjectId: subject.id, subjectName: subject.name, entry, score: 1 });
       }
     }
   }
@@ -263,6 +439,7 @@ export function prepare(
   subjects: readonly CareSubject[],
   question: string,
   readerLanguage: string,
+  routine: readonly RoutineItem[] = [],
 ): Prepared {
   if (!hasText(question)) return { route: 'refusal', answer: refusal(readerLanguage) };
 
@@ -321,7 +498,7 @@ export function prepare(
     };
   }
 
-  const candidates = retrieve(subjects, question);
+  const candidates = retrieve(subjects, question, 4, routine);
   if (candidates.length === 0) return { route: 'refusal', answer: refusal(readerLanguage) };
   return { route: 'model', candidates };
 }

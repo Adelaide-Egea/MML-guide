@@ -39,7 +39,7 @@ p {
 }
 
 a {
-  color: var(--brand);
+  color: var(--amber);
 }
 
 button,
@@ -85,7 +85,7 @@ select {
 }
 
 .topbar .mark {
-  color: var(--brand);
+  color: var(--ink);
   flex: none;
 }
 
@@ -158,6 +158,63 @@ select {
   color: inherit;
 }
 
+/* A list of like things is one card with hairlines, not a card per item. Eight
+   stacked cards read as eight separate decisions; a day is a single list. */
+.rows {
+  padding: 0;
+}
+
+.rows-item {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.rows-item:first-child {
+  border-top: 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+/* Destructive actions in a list are marks, not full-width red buttons. The red
+   button repeated down a page reads as a warning about the page. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--surface-sunk);
+  color: var(--critical);
+}
+
+.preset-row {
+  border-top: 1px solid var(--hairline);
+  padding: var(--space-1) 0;
+}
+
+.preset-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+}
+
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
 
 .btn {
@@ -172,7 +229,7 @@ select {
   border-radius: var(--radius);
   border: 1px solid transparent;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
@@ -186,7 +243,7 @@ select {
 
 .btn-secondary {
   background: var(--surface);
-  color: var(--brand);
+  color: var(--ink);
   border-color: var(--hairline-strong);
 }
 
@@ -282,8 +339,16 @@ select {
 .chip[aria-pressed="true"] {
   background: var(--brand);
   border-color: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   font-weight: 600;
+}
+
+.chip .mark {
+  color: var(--mark, inherit);
+}
+
+.chip[aria-pressed="true"] .mark {
+  color: var(--on-brand);
 }
 
 .chips {
@@ -315,6 +380,45 @@ select {
   white-space: pre-wrap;
   font-weight: 600;
   font-size: var(--text-read);
+}
+
+/* The guide's safety banner.
+   
+   A full red-tinted block the height of a screen was the loudest thing in the
+   product and therefore the first thing skipped. This keeps the card surface of
+   everything around it and spends its emphasis on one red rule and one red dot,
+   which is enough to be unmistakable and little enough to be read. */
+.safety {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--critical);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.safety-eyebrow {
+  color: var(--critical);
+}
+
+.safety-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--critical);
+  flex: none;
+}
+
+.safety-collapsed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
 }
 
 .notice {
@@ -368,8 +472,139 @@ select {
 
 .routine-time {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--brand);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.routine-note {
+  display: block;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  margin-top: 2px;
+}
+
+/* A heading inside a hairline list belongs to the list, not to a row. */
+.rows-head {
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.rows .routine-item {
+  padding: var(--space-3) var(--space-4);
+}
+
+/* A row that is both — one hairline between neighbours, not two. */
+.rows-item.routine-item {
+  border-bottom: 0;
+}
+
+a.routine-item {
+  text-decoration: none;
+  color: inherit;
+}
+
+.print-only {
+  display: none;
+}
+
+/* ── Breathing ────────────────────────────────────────────────────────────── */
+
+.breathing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+}
+
+/* Four seconds in, four seconds out — a slow breath rather than a spinner, which
+   is the difference between being told to wait and being given a moment. */
+.breathing-mark {
+  color: var(--ink);
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.breathing-line {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--text-xl);
+  color: var(--ink-muted);
+  max-width: 26ch;
+}
+
+/* ── Welcome ──────────────────────────────────────────────────────────────── */
+
+.welcome {
+  padding: var(--space-6) 0 var(--space-7);
+}
+
+.welcome h2 {
+  font-size: var(--text-2xl);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-3);
+}
+
+.welcome p {
+  color: var(--ink-muted);
+  max-width: 32ch;
+  line-height: 1.55;
+}
+
+.crown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  color: var(--ink);
+}
+
+/* Which house you are in. Quiet until you need it, which is most of the time. */
+.house-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 60%;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--hairline-strong);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.house-option {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  cursor: pointer;
+  color: inherit;
+}
+
+.house-option:first-child {
+  border-top: 0;
+}
+
+.house-switch > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Ask ──────────────────────────────────────────────────────────────────── */
@@ -390,15 +625,77 @@ select {
   color: var(--ink-muted);
 }
 
+.site-footer {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+.site-footer a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.read .lede {
+  font-size: var(--text-lg);
+  color: var(--ink-muted);
+  max-width: 36rem;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.plain-list li {
+  margin-bottom: var(--space-2);
+}
+
+.disclaimer {
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--space-5);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.data-table th {
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 @media print {
   .no-print {
     display: none !important;
   }
+  .print-only {
+    display: flex;
+  }
   body {
     background: #fff;
   }
-  .card {
+  .card,
+  .safety {
     box-shadow: none;
+  }
+  .no-break,
+  .safety {
     break-inside: avoid;
   }
 }
