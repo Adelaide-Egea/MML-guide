@@ -20,7 +20,22 @@ In Indonesian, *notula / notulen* ≈ meeting minutes — search for “Notula�
 
 Exact compound not found as a live product (App Store / web / Play phrase search quiet; compound domains like `notulahome.com` show no live DNS). **Still do not use.** The distinctive element remains *Notula*, which is already in software (notes, transcription, **Notula Health**). “Home” is a weak descriptive add-on — people will drop it, search still lands on competitors, and the “Notula + category” pattern is already taken. Clear a new root instead.
 
-Repo brand files (`notula-brand.md`, tokens, mark) are **draft under a failed name** — keep for salvageable design system pieces (putty / petrol / punctum / type) once a clear name is chosen. Product string “Notula” should be treated as temporary.
+### Screened: **Koymos** — CAUTION, not lock-ready
+
+Full check (web + App Store API + domains), not store-only.
+
+| Check | Result |
+|---|---|
+| Exact software / app | No live product named Koymos |
+| App Store exact | Quiet (fuzzy search returns unrelated Greek apps) |
+| Play exact | No listing under that spelling |
+| `koymos.com` | **Taken** — registered 2023-08, expires 2027, Amazon Registrar; no live site / DNS |
+| `koymos.app` | Looks unregistered |
+| Corporate | **KOYMOS-GESTION** (BE) — campsite holding company, trades as Naturia (Chimay). Different class; exact legal name exists |
+| Near software | **Kosmoy** (`kosmoy.com`) — live enterprise AI governance platform. One-letter transposition; same mouth in speech |
+| Other noise | Kozmos / Kosmoz apps; Cretan tourist site **Koumos**; one travel blog spells it “Koymos” |
+
+**Brand risks:** English ear can land on **Kohl’s**; speech/search collision with **Kosmoy**; if linked to Greek *κῶμος* = revelry, wrong valence for a handover guide. Do not lock until `koymos.com` is acquired or abandoned as primary, and a solicitor clears classes 9/42 against Kosmoy and KOYMOS-GESTION. Prefer a cleaner root unless the sound is non-negotiable.
 
 ---
 
