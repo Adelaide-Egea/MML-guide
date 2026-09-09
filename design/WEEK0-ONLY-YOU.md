@@ -1,99 +1,46 @@
-# Week 0 — only what you must do
+# Week 0 — name status (updated after full web check)
 
-I have already done everything that does not need your wallet, identity, or address book.
-Your remaining work is **four short sessions**. Do them in order. Stop if a gate fails.
+## Verdict on **Notula: FAIL — do not buy or file**
 
-Estimated total: **~45 minutes** of your time (excluding waiting for trademark search results).
+Earlier clearance was incomplete (App Store exact match only). A full Google / domain / live-product check shows the name is already in use in software, including the AI notes / transcription category.
 
----
-
-## Session A — Buy a domain (10 min)
-
-Likely free / no DNS from this environment (re-check at purchase):
-
-| Domain | Priority |
+| Collision | What it is |
 |---|---|
-| **notula.app** | Best. Buy first if available. |
-| **notula.io** | Strong alternate |
-| **notula.uk** | UK launch signal |
-| getnotula.com / usenotula.com | Fallback compounds |
+| **[notula.ai](https://notula.ai)** | Live AI platform for meeting transcription & automatic minutes (Indonesia; paying users) |
+| **[notulaapp.com](https://www.notulaapp.com)** | “Notula — Professional AI Transcription & Note-Taking for macOS” (Apexio) |
+| **[notula.org](https://notula.org)** | Desktop Markdown / docs-as-code editor |
+| **Google / Play** | “Notula Health” (`com.notulahealth.notula`) |
+| **Dribbble / concepts** | Multiple “Notula – AI Notes & Summary” designs |
 
-Taken / responding: `notula.co`, `notula.fr` (do not chase).
+In Indonesian, *notula / notulen* ≈ meeting minutes — search for “Notula” is dominated by that category. We would be entering a crowded, already-occupied lane under the same spelling.
 
-**Do:** open your registrar (Namecheap / Cloudflare / Google Domains), search `notula.app`, buy if free.  
-If `.app` is gone, buy `.io` + `getnotula.com`.
+**Do not** buy `notula.app` / `getnotula.com` as a “workaround.” The word itself is contested.
 
-Paste the domain you bought back into the chat — I will wire it into the docs/manifest.
-
----
-
-## Session B — Trademark quick look (20 min)
-
-You are not filing yet — you are checking. Use exact word **NOTULA**, classes **9** and **42**.
-
-| Office | Open this |
-|---|---|
-| UKIPO | https://www.gov.uk/search-for-trademark |
-| EUIPO eSearch | https://euipo.europa.eu/eSearch/ |
-| USPTO | https://tmsearch.uspto.gov/ |
-| TMview (multi) | https://www.tmdn.org/tmview/ |
-
-**Pass if:** no live identical mark in class 9/42 for software / apps / SaaS in UK or EU.  
-**Fail if:** identical live mark in those classes → stop and tell me; we switch fallback (not Tabella).
-
-App Store: already clear (exact). Companies House: **no company named Notula** as of this check.
-
-When clear enough to sleep: file UK word mark (cheap, first-to-file). A solicitor can do this in one email if you prefer — I can draft the brief for them.
+Repo brand files (`notula-brand.md`, tokens, mark) are **draft under a failed name** — keep for salvageable design system pieces (putty / petrol / punctum / type) once a clear name is chosen. Product string “Notula” should be treated as temporary.
 
 ---
 
-## Session C — Handles (5 min)
+## What still stands from Week 0 (name-agnostic)
 
-Reserve if free (same day as domain):
-
-- Instagram `@notula`
-- TikTok `@notula`
-- X `@notula`
-
-If taken, take `@getnotula` / `@usenotula` and tell me which.
-
----
-
-## Session D — Eight real handovers (10 min to list, rest is calendar)
-
-Reply with a list like this (names only — I will turn it into a tracker):
-
-```
-1. Name — cleaner / nanny / grandparents / dog sitter — date of absence
-2. …
-```
-
-Need **8 households with a real absence in the next 14 days**.  
-I will build the invite script + observation checklist so you only send texts.
+1. **One sentence:** They get the WhatsApp list wrong. You write it once, with photos of the exact thing, a timeline, and Ask in their language — so you don’t come home to a new child routine.
+2. **Tagline:** Everything they need while you are not there.
+3. **Visual system (keep):** putty `#e0d2bc`, petrol `#306369`, Newsreader + Figtree, punctum mark, soft putty icons.
+4. **Data one-pager:** rewrite under the final name (`design/notula-data-position.md` is draft copy only).
+5. **8 households** still required before any paid spend.
+6. **Tabella is not a fallback** (Catholic prayer app + `tabella.app`).
 
 ---
 
-## Already done for you
+## Next names to clear properly (full web + stores + domains before lock)
 
-- Brand board + punctum icons in repo  
-- Petrol accent, muted text, in-app ground, 17px body  
-- Gender-neutral tagline wired (see below)  
-- Data-position draft (`design/notula-data-position.md`) — fill bracketed email before parent groups  
-- App Store + Companies House pre-check  
-- Domain shortlist above  
-- Tabella removed as fallback  
+Shortlist to verify the same way this time — not App Store only:
 
----
+| Candidate | Why it might work | Risk to check |
+|---|---|---|
+| **Semel** | Latin “once” — write once | Exact apps / domains |
+| **Exactum** | Exact thing | Exact apps / domains |
+| **Enargon** | Charge handed over | Exact apps / domains |
+| **Epitome** | Perfect instance of the thing | Exact apps / domains |
+| **Saphene** | Soft coinage | Exact apps / domains |
 
-## Tagline (no “she”)
-
-**Primary (same cadence as your board):**  
-`Everything they need while you are not there.`
-
-**Pronoun-free alternate:**  
-`Everything needed while you are not there.`
-
-**Shorter:**  
-`What to know while you are not there.`
-
-Primary is locked in the product until you pick another.
+**Rule:** a name is “available” only after Google (web), App Store, Play, and primary domains all look clear — not after one store search.
