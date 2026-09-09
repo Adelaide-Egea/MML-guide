@@ -156,22 +156,20 @@ Deprioritise Product Hunt and tech Twitter.
 
 ## 8. Clearance checklist (do first)
 
-- [ ] **UKIPO** search, classes 9 and 42
-- [ ] **EUIPO** search, classes 9 and 42
-- [ ] **USPTO** search, classes 9 and 42
-- [ ] App Store and Google Play exact-match search *(App Store exact: clear as of screen; re-check before filing)*
-- [ ] Companies House name check
-- [ ] Domains: `notula.app`, `notula.co`, plus fallback compound (`getnotula.com`, `usenotula.com`)
-- [ ] Instagram, TikTok, X handles
-- [ ] Google the word in French, Italian, Portuguese and Polish for accidental meanings *(IT: restaurant bill sense of *notula*)*
-- [ ] Note existing desktop Markdown product named Notula (adjacent software — solicitor view)
-- [ ] If clear: **file the UK word mark before you launch**
+**Result: FAIL.** Do not buy domains or file marks for Notula.
+
+- [x] Google / live web — **collisions:** notula.ai, notulaapp.com, notula.org, design concepts
+- [x] App Store and Google Play — App Store exact was quiet; Play has “Notula Health”
+- [ ] UKIPO / EUIPO / USPTO — **skip filing**; name is contested in software
+- [ ] Companies House / social handles — moot
+- [x] Domains — primary `notula.*` surfaces already in use; do not buy workarounds
+- [x] Accidental meanings — ID: *notula/notulen* ≈ meeting minutes (category ownership)
 
 ### Fallback if Notula fails clearance
 
-**Do not fall back to Tabella.** Tabella is taken: *Tabella Catholic App* (Churchly) owns `tabella.app` and exact App Store listings in US/FR/GB.
+**Notula has failed.** **Do not fall back to Tabella.** Tabella is taken: *Tabella Catholic App* (Churchly) owns `tabella.app` and exact App Store listings in US/FR/GB.
 
-Viable same-shelf fallbacks if Notula fails: **Semel**, **Exactum**, **Brevium**, or reopen Epitome. Re-screen before committing.
+Next shortlist for **full** clearance (web + stores + domains before lock): **Semel**, **Exactum**, **Enargon**, **Epitome**, **Saphene**. Re-screen before committing.
 
 ---
 
@@ -191,8 +189,8 @@ See `design/notula-data-position.md` for the draft data position.
 
 ## 10. Next 72 hours
 
-1. Run the four trademark searches and buy the domain. Everything downstream is blocked on this.
-2. Export the app icon at 1024px from the punctum spec (§4). *(In-repo mark + icons updated on this branch.)*
+1. **Pick and fully clear the next name** (web + App Store + Play + domains). Do not buy or file Notula.
+2. Export the app icon at 1024px from the punctum spec (§4). *(In-repo mark + icons updated on this branch — rename with final name.)*
 3. Write the list of 8 households with a real absence in the next fortnight. Names, not personas.
-4. Make the two colour changes: retire Lisette, darken muted to `#4f4a42`. *(Done in `design/tokens.css`.)*
-5. Draft the one-page data position. *(See `design/notula-data-position.md`.)*
+4. Colour tokens: petrol brand, muted `#4f4a42`. *(Done in `design/tokens.css`.)*
+5. Draft the one-page data position under the final name. *(See `design/notula-data-position.md` — draft only.)*
