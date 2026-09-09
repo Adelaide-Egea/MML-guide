@@ -1,12 +1,15 @@
 # Notula — brand system and launch plan
 
-Decision document. Locked as the working brand direction pending Week 0 clearance (§8).
+> **STATUS: FAIL — do not buy or file this name.**  
+> Full web check: live products at **notula.ai** (AI meeting minutes), **notulaapp.com** (macOS AI transcription), **notula.org** (Markdown editor), plus Play “Notula Health” and AI-notes concepts. Earlier “clear” was App Store exact-match only — incomplete. See `WEEK0-ONLY-YOU.md`. Keep this file for salvageable design/GTM (putty / petrol / punctum / type / voice) under the next clear name. **Tabella is not a fallback.**
+
+Decision document. Previously locked as working brand direction; name clearance failed (§8).
 
 ---
 
 ## 1. The name
 
-**Notula** — Latin, the diminutive of *nota*. The little note.
+**Notula** — Latin, the diminutive of *nota*. The little note. **Failed clearance.**
 
 | Test | Result |
 |---|---|
@@ -15,7 +18,7 @@ Decision document. Locked as the working brand direction pending Week 0 clearanc
 | Second reader | Transparent to Portuguese, Spanish, Italian, Polish speakers via *nota* |
 | Metaphor to explain | None. It is the artifact, not a picture of it |
 | French mouth | No friction. no-TU-la |
-| Namespace | App Store exact-match clear (noise 1: near-hit `Notu.la`). A desktop Markdown tool also uses the word — **clearance still required — see §8** |
+| Namespace | **FAIL.** App Store exact-match was incomplete. Live: notula.ai, notulaapp.com, notula.org, Notula Health (Play). Indonesian *notula/notulen* ≈ meeting minutes — search owned by AI-notes. |
 
 **Why it beat the others:** every Latin word with a pretty image attached (Tessera, Vesta, Lumen, Nexus, Epitome-as-aspiration) is crowded or elevated. The uncrowded shelf is Latin words whose meaning is administratively dull. That shelf is also the correct one — this product *is* stationery.
 
