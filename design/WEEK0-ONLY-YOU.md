@@ -52,14 +52,18 @@ Full check (web + App Store API + domains), not store-only.
 
 ## Next names to clear properly (full web + stores + domains before lock)
 
-Shortlist to verify the same way this time — not App Store only:
+Village / help / solidarity shelf explored in `design/naming-village-shelf.md`.
 
 | Candidate | Why it might work | Risk to check |
 |---|---|---|
+| **Opitulus** | Latin helper / bringer of aid — stores quiet; `.com` looks free | 4 syllables; Jupiter epithet |
+| **Epitropy** | Greek *epitropē* = commission / guardianship — domains look free | Rhetoric sense of *epitrope* |
+| **Alleleia** / **Allelum** | From *allēlōn* “of one another” — village without saying village | Near *allele* / Allelica genomics |
+| **Vicula** | Little village | `.com` taken |
 | **Semel** | Latin “once” — write once | Exact apps / domains |
 | **Exactum** | Exact thing | Exact apps / domains |
 | **Enargon** | Charge handed over | Exact apps / domains |
 | **Epitome** | Perfect instance of the thing | Exact apps / domains |
 | **Saphene** | Soft coinage | Exact apps / domains |
 
-**Rule:** a name is “available” only after Google (web), App Store, Play, and primary domains all look clear — not after one store search.
+**Rule:** a name is “available” only after Google (web), App Store, Play, and primary domains all look clear — not after one store search. **Do not brand as “Village.”**
