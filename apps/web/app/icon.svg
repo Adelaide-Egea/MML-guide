@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Notula">
-  <!-- Punctum: a small square on a rule. -->
-  <line x1="10" y1="22" x2="38" y2="22" stroke="#2c2721" stroke-width="3" stroke-linecap="round"/>
-  <rect x="20" y="16" width="8" height="8" fill="#2c2721"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Domela">
+  <!-- D doorway + marigold punctum -->
+  <path d="M13 9 V39" stroke="#22332C" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M13 9 H25 C34.5 9 39 15.5 39 24 C39 32.5 34.5 39 25 39 H18" stroke="#22332C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="21" y="21" width="6" height="6" fill="#D08A2C"/>
 </svg>

@@ -13,6 +13,7 @@ import {
 import { TopBar } from '../../../components/Chrome.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
 import { useAppState } from '../../../lib/store.ts';
+import { track } from '../../../lib/trial.ts';
 
 /** Whose part of the guide is on screen. `all` is the default and the one a guide
  *  is printed in; the rest exist because a caregiver mid-task is doing one thing for
@@ -37,6 +38,10 @@ export default function GuidePage() {
   useEffect(() => {
     setAcknowledged(window.localStorage.getItem(ackKey) === '1');
   }, [ackKey]);
+
+  useEffect(() => {
+    if (handover) track('guide');
+  }, [handover]);
 
   // buildVerifiedGuide builds from facts, applies enrichment, then asserts that
   // nothing safety-critical was lost or altered on the way. It throws rather than

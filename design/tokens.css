@@ -1,43 +1,42 @@
-/* Design tokens — Notula.
+/* Design tokens — Domela ("Shutter" palette).
 
- * Brand system: design/notula-brand.md
+ * Brand: design/domela-brand.md
  *
- * Putty is for the icon and marketing. The in-app ground is the warmer card
- * tone — full-bleed putty reads heavy at product scale. Petrol is the only
- * interactive accent; Lisette blue was retired because it collapsed into petrol.
- * Raspberry stays completion-only; critical stays safety-only.
+ * Chalk is the in-app ground. Clay is for the icon and marketing. Pine is ink.
+ * Marigold is the only interactive accent. Moss is done-only. Brick is safety-only.
  *
+ * Buttons: pine text on marigold fill — never white on marigold.
  * design/contrast.mjs verifies every pair and fails the build.
  */
 
 :root {
   /* Surfaces */
-  --putty: #e0d2bc; /* icon + marketing only */
-  --paper: #efe7da; /* in-app ground */
-  --surface: #faf6f0; /* elevated card on the in-app ground */
-  --surface-sunk: #e0d2bc;
-  --hairline: #e4d8c4;
-  --hairline-strong: #b3a186;
+  --putty: #e3d3bc; /* clay — icon + marketing */
+  --paper: #fbf6ee; /* chalk — in-app ground */
+  --surface: #f1e7d8; /* sand — raised cards */
+  --surface-sunk: #e3d3bc;
+  --hairline: #e8dcc8;
+  --hairline-strong: #b7a78e;
 
-  /* Ink */
-  --ink: #2c2721;
-  --ink-muted: #4f4a42; /* darkened for 13px in a dim utility room */
+  /* Ink — pine */
+  --ink: #22332c;
+  --ink-muted: #5a6b60; /* sage */
 
-  /* Petrol — the single interactive accent */
-  --brand: #306369;
-  --brand-tint: #c5ddd8;
-  --on-brand: #ffffff;
-  --petrol: #306369;
+  /* Marigold — the single interactive accent */
+  --brand: #d08a2c;
+  --brand-tint: #f3e0c4;
+  --on-brand: #22332c; /* pine on marigold — never white */
+  --petrol: #d08a2c; /* alias kept for contrast.mjs / legacy refs */
 
-  /* Raspberry — done only. Never a fill behind text. */
-  --done: #d9577e;
-  --done-tint: #f6dfe6;
+  /* Moss — done only */
+  --done: #4e8c5b;
+  --done-tint: #d7e8db;
 
-  --amber: #7e5f23;
-  --amber-tint: #efdfc0;
+  --amber: #8a5612; /* marigold deep AA on chalk + amber-tint */
+  --amber-tint: #f3e0c4;
 
-  --critical: #a92e2c;
-  --critical-tint: #f4dcd9;
+  --critical: #9e2b25; /* brick — safety only */
+  --critical-tint: #f3d8d6;
 
   --id-petrol: #306369;
   --id-indigo: #485899;
@@ -58,11 +57,9 @@
   --space-6: 28px;
   --space-7: 40px;
 
-  --font-display: "Newsreader", Georgia, serif;
+  --font-display: "Fraunces", "Newsreader", Georgia, serif;
   --font-ui: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  /* Body 17px — second reader, often one-handed.
-     --text-read stays a step up for guide/safety content. */
   --text-xs: 13px;
   --text-sm: 15px;
   --text-base: 17px;
@@ -71,30 +68,30 @@
   --text-xl: 22px;
   --text-2xl: 28px;
 
-  --shadow-card: 0 1px 1px rgba(44, 39, 33, 0.03), 0 2px 8px rgba(44, 39, 33, 0.04);
+  --shadow-card: 0 1px 1px rgba(34, 51, 44, 0.03), 0 2px 8px rgba(34, 51, 44, 0.05);
 }
 
 :root[data-theme="dark"] {
-  --putty: #222a30;
-  --paper: #2b333a;
-  --surface: #39434b;
-  --surface-sunk: #222a30;
-  --hairline: #454f58;
-  --hairline-strong: #5c6874;
+  --putty: #1a2420;
+  --paper: #1c2622;
+  --surface: #2a3530;
+  --surface-sunk: #1a2420;
+  --hairline: #3a4741;
+  --hairline-strong: #5a6b60;
 
-  --ink: #f1ede6;
-  --ink-muted: #b4ada1;
+  --ink: #fbf6ee;
+  --ink-muted: #a8b5ad;
 
-  --brand: #75b8bf;
-  --brand-tint: #2a4044;
-  --on-brand: #1d242a;
-  --petrol: #75b8bf;
+  --brand: #e0a04a;
+  --brand-tint: #3a3224;
+  --on-brand: #1c2622;
+  --petrol: #e0a04a;
 
-  --done: #e796ae;
-  --done-tint: #4a2c37;
+  --done: #7abc89;
+  --done-tint: #24382a;
 
-  --amber: #d0a858;
-  --amber-tint: #3b3222;
+  --amber: #e0a04a;
+  --amber-tint: #3a3224;
 
   --critical: #e49a98;
   --critical-tint: #4a2a29;

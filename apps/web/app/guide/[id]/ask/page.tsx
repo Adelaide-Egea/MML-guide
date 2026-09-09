@@ -15,6 +15,7 @@ import { Breathing } from '../../../../components/Breathing.tsx';
 import { TopBar } from '../../../../components/Chrome.tsx';
 import { MediaThumb } from '../../../../components/MediaField.tsx';
 import { useAppState } from '../../../../lib/store.ts';
+import { track } from '../../../../lib/trial.ts';
 
 /** The unreachable-assistant case is its own state rather than a hand-built Answer.
  *  A `grounded` answer with no prose would not survive the contract's own
@@ -48,6 +49,7 @@ export default function AskPage() {
     event.preventDefault();
     const asked = question.trim();
     if (!asked) return;
+    track('ask');
 
     setBusy(true);
     try {

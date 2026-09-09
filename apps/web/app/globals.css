@@ -39,7 +39,7 @@ p {
 }
 
 a {
-  color: var(--brand);
+  color: var(--amber);
 }
 
 button,
@@ -85,7 +85,7 @@ select {
 }
 
 .topbar .mark {
-  color: var(--brand);
+  color: var(--ink);
   flex: none;
 }
 
@@ -243,7 +243,7 @@ select {
 
 .btn-secondary {
   background: var(--surface);
-  color: var(--brand);
+  color: var(--ink);
   border-color: var(--hairline-strong);
 }
 
@@ -520,7 +520,7 @@ a.routine-item {
 /* Four seconds in, four seconds out — a slow breath rather than a spinner, which
    is the difference between being told to wait and being given a moment. */
 .breathing-mark {
-  color: var(--brand);
+  color: var(--ink);
   animation: breathe 8s ease-in-out infinite;
 }
 
@@ -569,7 +569,7 @@ a.routine-item {
   justify-content: space-between;
   gap: var(--space-3);
   padding-top: var(--space-3);
-  color: var(--brand);
+  color: var(--ink);
 }
 
 /* Which house you are in. Quiet until you need it, which is most of the time. */
@@ -623,6 +623,61 @@ a.routine-item {
   text-align: center;
   padding: var(--space-6) var(--space-4);
   color: var(--ink-muted);
+}
+
+.site-footer {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+.site-footer a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.read .lede {
+  font-size: var(--text-lg);
+  color: var(--ink-muted);
+  max-width: 36rem;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.plain-list li {
+  margin-bottom: var(--space-2);
+}
+
+.disclaimer {
+  border-top: 1px solid var(--hairline);
+  padding-top: var(--space-5);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.data-table th {
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 @media print {

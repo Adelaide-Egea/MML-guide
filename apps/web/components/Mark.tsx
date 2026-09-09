@@ -1,22 +1,31 @@
-/** The mark: the punctum.
+/** The mark: the D is the door.
  *
- *  A small square sitting on a rule — the smallest mark you can make, which is
- *  what "Notula" means. Not a checkbox, not a mosaic, not a handover arc.
+ *  Capital D with the counter open to the baseline — an open doorway.
+ *  Inside: the punctum (note left for whoever comes in).
+ *  Spec: design/domela-brand.md
  */
-export function Mark({ size = 32 }: { size?: number }) {
-  // Optical centre sits slightly above geometric centre (~4%).
+export function Mark({
+  size = 32,
+  withPunctum = true,
+}: {
+  size?: number;
+  withPunctum?: boolean;
+}) {
+  const showDot = withPunctum && size >= 24;
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <line
-        x1="10"
-        y1="22"
-        x2="38"
-        y2="22"
+      {/* Stem */}
+      <path d="M13 9 V39" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" />
+      {/* Open bowl — gap at the bottom-left of the counter creates the doorway */}
+      <path
+        d="M13 9 H25 C34.5 9 39 15.5 39 24 C39 32.5 34.5 39 25 39 H18"
         stroke="currentColor"
-        strokeWidth="3"
+        strokeWidth="3.4"
         strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
       />
-      <rect x="20" y="16" width="8" height="8" fill="currentColor" />
+      {showDot && <rect x="21" y="21" width="6" height="6" fill="var(--brand, #d08a2c)" />}
     </svg>
   );
 }

@@ -1,19 +1,17 @@
 import type { MetadataRoute } from 'next';
 
-/** Installable, because the caregiver opening this is standing in someone else's
- *  kitchen and should not have to find a browser tab. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Notula',
-    short_name: 'Notula',
-    description: 'Everything they need while you are not there.',
+    name: 'Domela',
+    short_name: 'Domela',
+    description: 'The household guide — everything they need while you are not there.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#efe7da',
-    theme_color: '#306369',
+    background_color: '#fbf6ee',
+    theme_color: '#d08a2c',
     icons: [
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
       { src: '/icon-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   };
