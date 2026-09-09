@@ -17,7 +17,9 @@ Brand pitch: `design/domela-brand.md`
 | Near | Domela Architectes (Paris, `domela.fr`); DOMELA LTD (UK, real estate, Mar 2026); expired TW cosmetics mark; Dutch historical surname |
 | Accidental meanings | *dom* readable as home in PL/CZ/HR/RU — intended |
 
-**Buy now:** `domela.app` + `getdomela.com` (and `.co` if you want). File UK/EU 9+42. Solicitor: note DOMELA LTD + architect firm (different classes).
+**Buy now:** `domela.app` ✅ **bought** + `getdomela.com` (optional spare). File UK/EU 9+42. Solicitor: note DOMELA LTD + architect firm (different classes).
+
+**Next for domain:** In Vercel → Project → Settings → Domains → add `domela.app` → set the DNS records Vercel shows (usually at Porkbun/Namecheap where you bought it).
 
 ### Colour — Shutter palette vs category
 
