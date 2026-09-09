@@ -241,6 +241,13 @@ function HouseSwitcher({
   const [naming, setNaming] = useState(startNaming);
   const [name, setName] = useState('');
 
+  // Parent can ask us to open the name field after we are already mounted
+  // (e.g. "Start your own" while the switcher is open). useState alone only
+  // reads startNaming on the first mount, so without this the button looked dead.
+  useEffect(() => {
+    if (startNaming) setNaming(true);
+  }, [startNaming]);
+
   return (
     <div className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
       {households.map((h) => (
