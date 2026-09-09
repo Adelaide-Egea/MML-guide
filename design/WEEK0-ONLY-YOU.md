@@ -16,9 +16,23 @@ In Indonesian, *notula / notulen* ≈ meeting minutes — search for “Notula�
 
 **Do not** buy `notula.app` / `getnotula.com` as a “workaround.” The word itself is contested.
 
+### Also rejected: the “descriptor + compound domain” rescue
+
+Advice considered and refused:
+
+1. Lock a descriptor: *Notula — the household guide*
+2. Buy `notula.co` / `getnotula.com`; leave the `.app` spam farm
+3. Put memorability in the Latin story + punctum, not the bare word
+
+**Why it still fails.** A subtitle does not clear a contested root. People type **Notula** into Google, App Store, and WhatsApp. Results are already owned by AI minutes / transcription (`notula.ai`, `notulaapp.com`), Markdown (`notula.org`), and Notula Health. The descriptor only helps *after* someone has already found you; it does not win the search you need to be found. Compound domains being free is real (`notula.co` / `getnotula.com` look unregistered today) and still irrelevant — owning a side door does not move the front door. Story + punctum are keepable under a *clear* name; they are not a reason to keep a blocked one.
+
 ### Also rejected: **Notula Home**
 
 Exact compound not found as a live product (App Store / web / Play phrase search quiet; compound domains like `notulahome.com` show no live DNS). **Still do not use.** The distinctive element remains *Notula*, which is already in software (notes, transcription, **Notula Health**). “Home” is a weak descriptive add-on — people will drop it, search still lands on competitors, and the “Notula + category” pattern is already taken. Clear a new root instead.
+
+### Killed for the record: **Chatelaine**
+
+Loved for fit: mistress of the house + the ring of keys handed over when someone else took charge. French roots, exact handover metaphor. Killed twice: (1) spelling-from-hearing fails the same way Xenia did; (2) **Chatelaine** is Canada’s major women’s magazine brand (`chatelaine.com` since 1995, magazine apps). Do not revive.
 
 ### Screened: **Koymos** — CAUTION, not lock-ready
 

@@ -22,7 +22,7 @@ Decision document. Previously locked as working brand direction; name clearance 
 
 **Why it beat the others:** every Latin word with a pretty image attached (Tessera, Vesta, Lumen, Nexus, Epitome-as-aspiration) is crowded or elevated. The uncrowded shelf is Latin words whose meaning is administratively dull. That shelf is also the correct one — this product *is* stationery.
 
-**Rejected / superseded for this decision:** Epitome (elevated), Tessera (crowded), Tabella (taken — see §8), Understudy, Consigne, Holdall, Bento, Household, coined soft names, metaphor-first round five.
+**Rejected / superseded for this decision:** Epitome (elevated), Tessera (crowded), Tabella (taken — see §8), Understudy, Consigne, Holdall, Bento, Household, coined soft names, metaphor-first round five. **Chatelaine** (perfect keys-at-the-belt handover metaphor; killed on spelling-from-hearing *and* Canadian magazine brand). **Notula itself later failed full web clearance** — see `WEEK0-ONLY-YOU.md`; do not apply the descriptor/`getnotula.com` rescue.
 
 ---
 
