@@ -7,9 +7,12 @@ import {
   type EntryTopic,
   ENTRY_TOPICS,
   hasSafetyCritical,
+  topicsForKind,
   validateSubject,
+  type ChildPrompt,
 } from '@mml/core';
 import { Badge, TopBar } from '../../../components/Chrome.tsx';
+import { ChildPrompts } from '../../../components/ChildPrompts.tsx';
 import { IdentityPicker } from '../../../components/IdentityPicker.tsx';
 import { MediaField, MediaThumb } from '../../../components/MediaField.tsx';
 import { RoutineEditor } from '../../../components/RoutineEditor.tsx';
@@ -134,7 +137,7 @@ export default function SubjectPage() {
           />
         </div>
 
-        {subject.kind !== 'place' && (
+                {subject.kind !== 'place' && (
           <div className="field">
             <label htmlFor="medication">Medication</label>
             <textarea
@@ -147,6 +150,23 @@ export default function SubjectPage() {
                 })
               }
               placeholder="Half a joint tablet with breakfast."
+            />
+          </div>
+        )}
+
+        {subject.kind !== 'place' && (
+          <div className="field">
+            <label htmlFor="medicalNotes">Other medical notes</label>
+            <textarea
+              id="medicalNotes"
+              className="textarea"
+              value={subject.safety.medicalNotes}
+              onChange={(e) =>
+                actions.updateSubject(subject.id, {
+                  safety: { ...subject.safety, medicalNotes: e.target.value },
+                })
+              }
+              placeholder="Asthma inhaler in the kitchen drawer. Peak flow is normal for her."
             />
           </div>
         )}
@@ -176,6 +196,21 @@ export default function SubjectPage() {
       <div style={{ marginBottom: 'var(--space-5)' }}>
         <RoutineEditor subject={subject} />
       </div>
+
+      {subject.kind === 'child' && (
+        <ChildPrompts
+          subject={subject}
+          existingTitles={new Set(subject.entries.map((e) => e.title))}
+          onPick={(prompt: ChildPrompt) =>
+            setEditing({
+              ...blank(),
+              topic: prompt.topic,
+              title: prompt.title,
+              body: prompt.placeholder,
+            })
+          }
+        />
+      )}
 
       <section className="stack">
         <div className="spread">
@@ -232,7 +267,7 @@ export default function SubjectPage() {
                 value={editing.topic}
                 onChange={(e) => setEditing({ ...editing, topic: e.target.value as EntryTopic })}
               >
-                {ENTRY_TOPICS.map((topic) => (
+                {topicsForKind(subject.kind).map((topic) => (
                   <option key={topic} value={topic}>
                     {TOPIC_LABEL[topic]}
                   </option>

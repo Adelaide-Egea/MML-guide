@@ -125,8 +125,26 @@ export function loadSample(): Sample {
             entry(
               'e_lea_comfort',
               'comfort',
+              'Likes & comfort',
+              'Rabbit sleeps in the bed. She will pretend-cook for about twenty minutes if you set her up at the kitchen stool.',
+            ),
+            entry(
+              'e_lea_upset',
+              'comfort',
               'If she is upset',
-              'Rabbit is in the bed. If Rabbit is lost, look under the sofa first. Do not offer a substitute rabbit.',
+              'Give her space first, then offer Rabbit. Singing works better than talking. Do not offer a substitute rabbit.',
+            ),
+            entry(
+              'e_lea_out',
+              'out-of-the-house',
+              'Park and scooter',
+              'Square des Batignolles is fine. She may go on the scooter paths, not the road. The blue helmet is by the door.',
+            ),
+            entry(
+              'e_lea_screens',
+              'house-rules',
+              'Screens',
+              'No screens after 18:00. Before that, one Bluey episode is the negotiated maximum.',
             ),
           ],
         },
