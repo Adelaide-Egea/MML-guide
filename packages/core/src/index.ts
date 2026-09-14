@@ -5,3 +5,4 @@ export * from './guide.ts';
 export * from './answering.ts';
 export * from './languages.ts';
 export * from './childPrompts.ts';
+export * from './away.ts';

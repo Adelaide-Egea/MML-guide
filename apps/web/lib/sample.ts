@@ -11,7 +11,9 @@ import {
   type Handover,
   type Household,
   type RoutinePreset,
+  type Trip,
   EMPTY_SAFETY,
+  createTrip,
 } from '@mml/core';
 import { putBlob } from './media.ts';
 
@@ -51,6 +53,7 @@ export interface Sample {
   readonly household: Household;
   readonly handover: Handover;
   readonly presets: readonly RoutinePreset[];
+  readonly trips: readonly Trip[];
 }
 
 /** Built with fixed identifiers so that adding it twice is a no-op rather than a
@@ -76,8 +79,7 @@ export function loadSample(): Sample {
     signOff: 'Thank you — Claire',
   };
 
-  return {
-    household: {
+  const household: Household = {
       id: 'hh_sample',
       name: 'Chez Martin',
       country: 'FR',
@@ -234,8 +236,33 @@ export function loadSample(): Sample {
         { id: 'r7', time: '19:15', kind: 'Bedtime', appliesTo: 'sub_lea', notes: '' },
         { id: 'r8', time: null, kind: 'Bins', appliesTo: 'sub_flat', notes: 'Tuesday night.' },
       ],
-    },
+    };
+
+  // Weekend with grandparents — packing sits next to the care guide, same people.
+  let packN = 0;
+  const trip = createTrip({
+    household,
+    householdId: household.id,
+    travellerIds: ['sub_lea', 'sub_pom'],
+    startDate: '2026-09-18',
+    endDate: '2026-09-21',
+    mode: 'train',
+    destinationKind: 'family',
+    destinationLabel: 'Grandparents in Brittany',
+    laundryAccess: true,
+    laundryAfterNights: 2,
+    title: 'Brittany weekend',
+    notes: 'Pomme comes. The flat stays with Margaret.',
+    tripId: 'trip_sample',
+    legId: 'leg_sample',
+    now: NOW,
+    id: () => `pack_sample_${++packN}`,
+  });
+
+  return {
+    household,
     handover,
+    trips: [trip],
     // One saved preset, so the sample shows that a routine you have already built
     // can be reused rather than retyped for the next child.
     presets: [

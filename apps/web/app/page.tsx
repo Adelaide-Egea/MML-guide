@@ -11,7 +11,7 @@ import { loadSample } from '../lib/sample.ts';
 const KINDS: readonly SubjectKind[] = ['child', 'pet', 'place'];
 
 export default function Home() {
-  const { household, handovers, sampleId } = useAppState();
+  const { household, handovers, trips, sampleId } = useAppState();
   const actions = useActions();
   const [adding, setAdding] = useState<SubjectKind | null>(null);
   const [name, setName] = useState('');
@@ -22,6 +22,7 @@ export default function Home() {
 
   const empty = household.subjects.length === 0;
   const guides = handovers.filter((h) => h.householdId === household.id);
+  const awayTrips = trips.filter((t) => t.householdId === household.id);
   const isSample = household.id === sampleId;
 
   function add(event: React.FormEvent) {
@@ -63,8 +64,8 @@ export default function Home() {
             setStartNaming(false);
           }}
           onSample={() => {
-            const { household: sample, handover, presets } = loadSample();
-            actions.addSample(sample, handover, presets);
+            const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
+            actions.addSample(sample, handover, presets, sampleTrips);
             setSwitching(false);
             setStartNaming(false);
           }}
@@ -169,6 +170,24 @@ export default function Home() {
         </section>
       )}
 
+      {!empty && (
+        <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
+          <h2 className="eyebrow">Away</h2>
+          <p className="muted">Packing for trips — part of organising the household.</p>
+          {awayTrips.map((trip) => (
+            <Link key={trip.id} href={`/away/${trip.id}`} className="card card-link">
+              <strong>{trip.title}</strong>
+              <span className="muted" style={{ display: 'block' }}>
+                {trip.destinationLabel || trip.startDate}
+              </span>
+            </Link>
+          ))}
+          <Link href="/away/new" className="btn">
+            Plan a trip
+          </Link>
+        </section>
+      )}
+
       {empty && !sampleId && (
         <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
           Want to look around first?{' '}
@@ -177,8 +196,8 @@ export default function Home() {
             className="btn btn-quiet btn-inline"
             style={{ textDecoration: 'underline' }}
             onClick={() => {
-              const { household: sample, handover, presets } = loadSample();
-              actions.addSample(sample, handover, presets);
+              const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
+              actions.addSample(sample, handover, presets, sampleTrips);
             }}
           >
             Load a sample household

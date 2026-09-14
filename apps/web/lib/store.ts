@@ -15,9 +15,11 @@ import {
   type Entry,
   type Handover,
   type Household,
+  type PackItem,
   type RoutineItem,
   type RoutinePreset,
   type SubjectKind,
+  type Trip,
   EMPTY_SAFETY,
   instantiatePreset,
   presetFromRoutine,
@@ -41,6 +43,8 @@ interface Stored {
   /** Every guide across every household. Each one names the household it belongs
    *  to, so a link to a guide resolves without depending on what is selected. */
   readonly handovers: readonly Handover[];
+  /** Trips / packing lists for the Away surface. Same ownership rule as guides. */
+  readonly trips: readonly Trip[];
   /** Only the parent's own presets. The built-in ones live in core and are not
    *  copied into storage, so improving them does not require a migration. */
   readonly presets: readonly RoutinePreset[];
@@ -86,6 +90,7 @@ function emptyState(): Stored {
     households: [household],
     activeId: household.id,
     handovers: [],
+    trips: [],
     presets: [],
     sampleId: null,
   };
@@ -95,17 +100,22 @@ function emptyState(): Stored {
 interface StoredV1 {
   readonly household?: Household;
   readonly handovers?: readonly Handover[];
+  readonly trips?: readonly Trip[];
   readonly presets?: readonly RoutinePreset[];
   readonly sample?: boolean;
 }
 
 function migrate(parsed: Partial<Stored> & StoredV1): Stored {
-  if (parsed.households) return { ...emptyState(), ...(parsed as Partial<Stored>) } as Stored;
+  if (parsed.households) {
+    const base = { ...emptyState(), ...(parsed as Partial<Stored>) } as Stored;
+    return { ...base, trips: base.trips ?? [] };
+  }
   const household = parsed.household ?? emptyHousehold();
   return {
     households: [household],
     activeId: household.id,
     handovers: parsed.handovers ?? [],
+    trips: parsed.trips ?? [],
     presets: parsed.presets ?? [],
     sampleId: parsed.sample ? household.id : null,
   };
@@ -116,18 +126,28 @@ function migrate(parsed: Partial<Stored> & StoredV1): Stored {
  *  Adding a second household when the first is still the blank one the app created
  *  on boot leaves a permanent "Unnamed household · 0 to look after" in the switcher.
  *  Nothing is lost by dropping it, because there is nothing in it. */
-function untouched(household: Household, handovers: readonly Handover[]): boolean {
+function untouched(
+  household: Household,
+  handovers: readonly Handover[],
+  trips: readonly Trip[],
+): boolean {
   return (
     household.name.trim() === '' &&
     household.subjects.length === 0 &&
     household.contacts.length === 0 &&
     household.routine.length === 0 &&
-    !handovers.some((h) => h.householdId === household.id)
+    !handovers.some((h) => h.householdId === household.id) &&
+    !trips.some((t) => t.householdId === household.id)
   );
 }
 
-function prune(households: readonly Household[], keepId: string, handovers: readonly Handover[]) {
-  const kept = households.filter((h) => h.id === keepId || !untouched(h, handovers));
+function prune(
+  households: readonly Household[],
+  keepId: string,
+  handovers: readonly Handover[],
+  trips: readonly Trip[],
+) {
+  const kept = households.filter((h) => h.id === keepId || !untouched(h, handovers, trips));
   return kept.length > 0 ? kept : households;
 }
 
@@ -191,6 +211,7 @@ const SERVER_STATE: AppState = {
   activeId: 'ssr',
   household: SSR_HOUSEHOLD,
   handovers: [],
+  trips: [],
   presets: [],
   sampleId: null,
 };
@@ -230,7 +251,7 @@ export function useActions() {
         const household = emptyHousehold(name);
         update((s) => ({
           ...s,
-          households: prune([...s.households, household], household.id, s.handovers),
+          households: prune([...s.households, household], household.id, s.handovers, s.trips),
           activeId: household.id,
         }));
         return household.id;
@@ -250,26 +271,35 @@ export function useActions() {
             households,
             activeId: s.activeId === id ? households[0]!.id : s.activeId,
             handovers: s.handovers.filter((ho) => ho.householdId !== id),
+            trips: s.trips.filter((t) => t.householdId !== id),
             sampleId: s.sampleId === id ? null : s.sampleId,
           };
         });
       },
 
       /** Adds the demo alongside whatever is already there and switches to it. */
-      addSample(household: Household, handover: Handover, presets: readonly RoutinePreset[]) {
+      addSample(
+        household: Household,
+        handover: Handover,
+        presets: readonly RoutinePreset[],
+        trips: readonly Trip[] = [],
+      ) {
         update((s) => {
           const already = s.households.some((h) => h.id === household.id);
+          const tripIds = new Set(s.trips.map((t) => t.id));
           return {
             ...s,
             households: prune(
               already ? s.households : [...s.households, household],
               household.id,
               s.handovers,
+              s.trips,
             ),
             activeId: household.id,
             handovers: s.handovers.some((h) => h.id === handover.id)
               ? s.handovers
               : [...s.handovers, handover],
+            trips: [...s.trips, ...trips.filter((t) => !tripIds.has(t.id))],
             presets: [
               ...s.presets,
               ...presets.filter((p) => !s.presets.some((q) => q.id === p.id)),
@@ -323,6 +353,22 @@ export function useActions() {
             ho.householdId === s.household.id
               ? { ...ho, subjectIds: ho.subjectIds.filter((sid) => sid !== id) }
               : ho,
+          ),
+          trips: s.trips.map((trip) =>
+            trip.householdId === s.household.id
+              ? {
+                  ...trip,
+                  travellerIds: trip.travellerIds.filter((sid) => sid !== id),
+                  legs: trip.legs.map((leg) => ({
+                    ...leg,
+                    travellerIds: leg.travellerIds.filter((sid) => sid !== id),
+                  })),
+                  items: trip.items.map((item) => ({
+                    ...item,
+                    forSubjectIds: item.forSubjectIds.filter((sid) => sid !== id),
+                  })),
+                }
+              : trip,
           ),
         }));
       },
@@ -426,6 +472,68 @@ export function useActions() {
 
       removeHandover(id: string) {
         update((s) => ({ ...s, handovers: s.handovers.filter((h) => h.id !== id) }));
+      },
+
+      // ── Trips (Away / packing) ──────────────────────────────────────────────
+      saveTrip(trip: Trip) {
+        update((s) => ({
+          ...s,
+          trips: s.trips.some((t) => t.id === trip.id)
+            ? s.trips.map((t) => (t.id === trip.id ? trip : t))
+            : [...s.trips, trip],
+        }));
+      },
+
+      removeTrip(id: string) {
+        update((s) => ({ ...s, trips: s.trips.filter((t) => t.id !== id) }));
+      },
+
+      setPackItemPacked(tripId: string, itemId: string, packed: boolean) {
+        update((s) => ({
+          ...s,
+          trips: s.trips.map((trip) => {
+            if (trip.id !== tripId) return trip;
+            return {
+              ...trip,
+              updatedAt: new Date().toISOString(),
+              items: trip.items.map((item) =>
+                item.id === itemId ? { ...item, packed } : item,
+              ),
+            };
+          }),
+        }));
+      },
+
+      upsertPackItem(tripId: string, item: PackItem) {
+        update((s) => ({
+          ...s,
+          trips: s.trips.map((trip) => {
+            if (trip.id !== tripId) return trip;
+            const exists = trip.items.some((i) => i.id === item.id);
+            return {
+              ...trip,
+              updatedAt: new Date().toISOString(),
+              items: exists
+                ? trip.items.map((i) => (i.id === item.id ? item : i))
+                : [...trip.items, item],
+            };
+          }),
+        }));
+      },
+
+      removePackItem(tripId: string, itemId: string) {
+        update((s) => ({
+          ...s,
+          trips: s.trips.map((trip) =>
+            trip.id !== tripId
+              ? trip
+              : {
+                  ...trip,
+                  updatedAt: new Date().toISOString(),
+                  items: trip.items.filter((i) => i.id !== itemId),
+                },
+          ),
+        }));
       },
     }),
     [update, patch],
