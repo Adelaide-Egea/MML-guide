@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "mml",
   "version": "0.0.0",
   "private": true,
@@ -21,13 +20,5 @@
   "devDependencies": {
     "@types/node": "^22.18.12",
     "typescript": "^5.9.3"
-=======
-  "name": "held",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test test/*.test.js"
->>>>>>> origin/main
   }
 }
