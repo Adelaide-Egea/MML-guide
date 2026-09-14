@@ -17,7 +17,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
+  /* Cool sage mist with a soft depth wash — avoids a flat cream slab. */
+  background:
+    radial-gradient(120% 70% at 100% -10%, rgba(110, 150, 145, 0.22), transparent 55%),
+    radial-gradient(90% 50% at 0% 100%, rgba(90, 130, 140, 0.12), transparent 45%),
+    var(--paper);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: var(--text-base);
