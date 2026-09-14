@@ -14,7 +14,7 @@ import {
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
-import { shareUrlFor } from '../../../lib/share.ts';
+import { buildShareUrl } from '../../../lib/share.ts';
 import { useActions, useAppState } from '../../../lib/store.ts';
 import { track } from '../../../lib/trial.ts';
 
@@ -28,7 +28,12 @@ export default function GuidePage() {
   const { households, household: active, handovers } = useAppState();
   const [focus, setFocus] = useState<Focus>('all');
   const [acknowledged, setAcknowledged] = useState(false);
-  const [shareState, setShareState] = useState<'idle' | 'working' | 'copied' | 'failed'>('idle');
+  const [shareState, setShareState] = useState<
+    'idle' | 'working' | 'copied' | 'failed' | 'too-large'
+  >('idle');
+  /** Explicit opt-in: photos only travel with the link when the parent ticks this. */
+  const [includePhotos, setIncludePhotos] = useState(false);
+  const [shareNote, setShareNote] = useState<string | null>(null);
   const actions = useActions();
 
   const handover = handovers.find((h) => h.id === id);
@@ -138,21 +143,43 @@ export default function GuidePage() {
             onClick={() => {
               void (async () => {
                 setShareState('working');
+                setShareNote(null);
                 try {
-                  const url = await shareUrlFor(household, handover);
+                  const result = await buildShareUrl(household, handover, { includePhotos });
+                  if (!result.ok) {
+                    setShareState('too-large');
+                    setShareNote(
+                      'Those photos make the link too big to send. Untick photos and send the text, or remove a few pictures and try again.',
+                    );
+                    return;
+                  }
+                  if (includePhotos && result.omittedVideos > 0) {
+                    setShareNote(
+                      `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone — they are too large for a link.`,
+                    );
+                  } else if (includePhotos) {
+                    setShareNote(
+                      result.photoCount === 0
+                        ? 'No photos on this guide yet — the link is text only.'
+                        : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`,
+                    );
+                  } else {
+                    setShareNote('Text only — photos stayed on this phone.');
+                  }
                   if (navigator.share) {
                     await navigator.share({
                       title: `Guide for ${handover.caregiverName || 'caregiver'}`,
                       text: 'Everything they need while you are not there.',
-                      url,
+                      url: result.url,
                     });
                     setShareState('copied');
                   } else {
-                    await navigator.clipboard.writeText(url);
+                    await navigator.clipboard.writeText(result.url);
                     setShareState('copied');
                   }
                 } catch {
                   setShareState('failed');
+                  setShareNote(null);
                 }
               })();
             }}
@@ -161,14 +188,35 @@ export default function GuidePage() {
               ? 'Link ready'
               : shareState === 'failed'
                 ? 'Could not share'
-                : shareState === 'working'
-                  ? 'Preparing…'
-                  : 'Send to caregiver'}
+                : shareState === 'too-large'
+                  ? 'Link too large'
+                  : shareState === 'working'
+                    ? 'Preparing…'
+                    : 'Send to caregiver'}
           </button>
         </div>
+        <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={includePhotos}
+            onChange={(e) => {
+              setIncludePhotos(e.target.checked);
+              setShareState('idle');
+              setShareNote(null);
+            }}
+          />
+          <span>
+            Include photos in this link
+            <span className="muted" style={{ display: 'block' }}>
+              Off by default. When on, pictures travel inside the link so the caregiver or cleaner
+              can see them — anyone you send it to can see them too.
+            </span>
+          </span>
+        </label>
         <p className="hint no-print">
           Send opens the caregiver view on their phone — guide plus Ask — without uploading the
-          household. Photos stay on this device; the link carries the text.
+          household to Domela.
+          {shareNote ? ` ${shareNote}` : ''}
         </p>
       </div>
 

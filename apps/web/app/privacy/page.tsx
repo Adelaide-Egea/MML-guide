@@ -39,6 +39,15 @@ export default function PrivacyPage() {
           <li>No account. No email required to use the app.</li>
           <li>No sale of data. No advertising profiles.</li>
           <li>No uploading of photos or guide text to Domela servers in ordinary use.</li>
+          <li>
+            Caregiver links are text-only by default. If you tick “Include photos in this link”,
+            those pictures travel inside the link itself — Domela still does not host them, but
+            anyone with the link can see them.
+          </li>
+          <li>
+            App updates keep what you already saved on this device. A backup copy of your
+            household is kept locally so a bad upgrade does not wipe guides, trips, or notes.
+          </li>
         </ul>
       </section>
 

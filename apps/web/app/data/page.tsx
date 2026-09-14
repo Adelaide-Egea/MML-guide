@@ -32,7 +32,12 @@ export default function DataPage() {
           <tr>
             <td>Photos</td>
             <td>This browser (IndexedDB)</td>
-            <td>No</td>
+            <td>Only if you tick “Include photos” when sending a caregiver link</td>
+          </tr>
+          <tr>
+            <td>Your saved household (guides, trips, notes)</td>
+            <td>This browser (localStorage + backup copy)</td>
+            <td>No — updates keep what you already saved</td>
           </tr>
           <tr>
             <td>Ask question + selected snippets</td>

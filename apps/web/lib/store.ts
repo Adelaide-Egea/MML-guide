@@ -28,6 +28,8 @@ import { useCallback, useSyncExternalStore } from 'react';
 import { newId } from './ids.ts';
 
 const KEY = 'household-v1';
+/** Last-known-good copy — written before each save so a bad migrate cannot wipe people. */
+const BACKUP_KEY = 'household-v1.bak';
 
 /** What is written to disk.
  *
@@ -105,19 +107,57 @@ interface StoredV1 {
   readonly sample?: boolean;
 }
 
-function migrate(parsed: Partial<Stored> & StoredV1): Stored {
-  if (parsed.households) {
-    const base = { ...emptyState(), ...(parsed as Partial<Stored>) } as Stored;
-    return { ...base, trips: base.trips ?? [] };
+/** Lift older shapes into the current Stored form without dropping what people saved.
+ *
+ *  Rules:
+ *  - Always start from emptyState defaults (additive fields get a safe empty value).
+ *  - Prefer existing arrays/ids over inventing new ones.
+ *  - Never invent a wipe: a missing `trips` becomes `[]`, not a blank household.
+ *  - Unknown top-level keys are ignored on write (canonical save), so upgrades stay
+ *    forward-compatible without accumulating junk forever.
+ */
+export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
+  const defaults = emptyState();
+
+  if (parsed.households && parsed.households.length > 0) {
+    const households = parsed.households;
+    const activeId =
+      typeof parsed.activeId === 'string' && households.some((h) => h.id === parsed.activeId)
+        ? parsed.activeId
+        : households[0]!.id;
+    return {
+      households,
+      activeId,
+      handovers: parsed.handovers ?? defaults.handovers,
+      trips: parsed.trips ?? defaults.trips,
+      presets: parsed.presets ?? defaults.presets,
+      sampleId:
+        parsed.sampleId === undefined
+          ? defaults.sampleId
+          : parsed.sampleId,
+    };
   }
-  const household = parsed.household ?? emptyHousehold();
+
+  // Pre-plural shape: a single `household` field.
+  const household = parsed.household ?? defaults.households[0] ?? emptyHousehold();
   return {
     households: [household],
     activeId: household.id,
     handovers: parsed.handovers ?? [],
     trips: parsed.trips ?? [],
     presets: parsed.presets ?? [],
-    sampleId: parsed.sample ? household.id : null,
+    sampleId: parsed.sample ? household.id : parsed.sampleId ?? null,
+  };
+}
+
+function canonical(stored: Stored): Stored {
+  return {
+    households: stored.households,
+    activeId: stored.activeId,
+    handovers: stored.handovers,
+    trips: stored.trips ?? [],
+    presets: stored.presets,
+    sampleId: stored.sampleId,
   };
 }
 
@@ -166,22 +206,57 @@ function derive(stored: Stored): AppState {
 let state: AppState | null = null;
 const listeners = new Set<() => void>();
 
+function readFrom(raw: string | null): AppState | null {
+  if (!raw) return null;
+  try {
+    return derive(migrate(JSON.parse(raw)));
+  } catch {
+    return null;
+  }
+}
+
 function read(): AppState {
   if (state) return state;
   try {
-    const raw = localStorage.getItem(KEY);
-    state = derive(raw ? migrate(JSON.parse(raw)) : emptyState());
+    const primary = readFrom(localStorage.getItem(KEY));
+    if (primary) {
+      state = primary;
+      return state;
+    }
+    // Primary missing or unreadable — try the last-known-good backup before wiping.
+    const backup = readFrom(localStorage.getItem(BACKUP_KEY));
+    if (backup) {
+      state = backup;
+      try {
+        localStorage.setItem(KEY, JSON.stringify(canonical(backup)));
+      } catch {
+        // Still usable in memory even if we cannot restore the primary key.
+      }
+      return state;
+    }
   } catch {
-    // A corrupt blob is recoverable by starting over; a crash on boot is not.
-    state = derive(emptyState());
+    // Fall through to empty.
   }
+  // Only reach here when both primary and backup are gone or unreadable.
+  state = derive(emptyState());
   return state;
 }
 
 function save(next: Stored): void {
-  state = derive(next);
+  const stored = canonical(next);
+  state = derive(stored);
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    // Preserve the previous good blob before overwriting, so a future bad write or
+    // migrate never leaves the parent with nothing.
+    const previous = localStorage.getItem(KEY);
+    if (previous) {
+      try {
+        localStorage.setItem(BACKUP_KEY, previous);
+      } catch {
+        // Backup is best-effort; a full quota should not block the real save.
+      }
+    }
+    localStorage.setItem(KEY, JSON.stringify(stored));
   } catch {
     // Quota exceeded. The in-memory state is still correct, so the session keeps
     // working and only persistence is lost.

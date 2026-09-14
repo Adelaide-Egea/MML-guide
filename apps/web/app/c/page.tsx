@@ -13,7 +13,7 @@ import {
 import { TopBar } from '../../components/Chrome.tsx';
 import { LanguageToggle } from '../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../components/MediaField.tsx';
-import { decodeSnapshot, type GuideSnapshot } from '../../lib/share.ts';
+import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
 
 /** Caregiver / cleaner view opened from a shared link.
  *
@@ -34,23 +34,40 @@ export default function CaregiverPage() {
       setError('This link has no guide in it.');
       return;
     }
-    void decodeSnapshot(hash).then((decoded) => {
+    void decodeSnapshot(hash).then(async (decoded) => {
       if (!decoded) {
         setError('This link could not be read. Ask them to send it again.');
         return;
+      }
+      // When the parent opted in, photo bytes are in the snapshot — install them
+      // into this phone's media store so the existing thumbs can resolve.
+      try {
+        await installSnapshotMedia(decoded);
+      } catch {
+        // Text still shows; missing photos are better than failing the whole guide.
       }
       setSnapshot(decoded);
       setLanguage(decoded.handover.language || 'en');
       window.sessionStorage.setItem(
         'mml.caregiver-snapshot',
-        JSON.stringify({ ...decoded, handover: { ...decoded.handover, language: decoded.handover.language } }),
+        JSON.stringify({
+          ...decoded,
+          // Blobs are already in IndexedDB; drop them from sessionStorage to save space.
+          mediaBlobs: undefined,
+          handover: { ...decoded.handover, language: decoded.handover.language },
+        }),
       );
     });
   }, []);
 
   useEffect(() => {
     if (!snapshot) return;
-    const next = { ...snapshot, handover: { ...snapshot.handover, language } };
+    // Keep blobs out of sessionStorage — they live in IndexedDB after install.
+    const next = {
+      ...snapshot,
+      mediaBlobs: undefined,
+      handover: { ...snapshot.handover, language },
+    };
     window.sessionStorage.setItem('mml.caregiver-snapshot', JSON.stringify(next));
   }, [language, snapshot]);
 
