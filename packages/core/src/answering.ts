@@ -23,7 +23,7 @@
 //    more costly than no answer, because the caregiver cannot tell the difference
 //    and the parent is not there to correct it.
 
-import type { RoutineItem } from './household.ts';
+import { type RoutineItem, routineItemLabel } from './household.ts';
 import {
   type CareSubject,
   type Entry,
@@ -277,14 +277,28 @@ export function routineAsEntry(
 
   const body = [...mine]
     .sort((a, b) => (a.time ?? '99:99').localeCompare(b.time ?? '99:99'))
-    .map((r) => [r.time ?? 'No fixed time', r.kind, r.notes].filter(hasText).join(' — '))
+    .map((r) => {
+      const name = routineItemLabel(r);
+      const bits = [
+        r.time ?? (subject.kind === 'place' ? null : 'No fixed time'),
+        r.priority === 'must' ? 'Must do' : r.priority === 'nice' ? 'Nice to have' : null,
+        r.section,
+        name,
+        r.product ? `use ${r.product}` : null,
+        r.notes,
+      ];
+      return bits.filter(hasText).join(' — ');
+    })
     .join('\n');
 
   const source = subject.entries[0];
   return {
     id: `routine:${subject.id}`,
     topic: 'routine',
-    title: `${subject.name} — a typical day`,
+    title:
+      subject.kind === 'place'
+        ? `${subject.name} — while you are here`
+        : `${subject.name} — a typical day`,
     body,
     media: [],
     writtenAt: source?.writtenAt ?? '',

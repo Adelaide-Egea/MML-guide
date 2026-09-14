@@ -699,3 +699,37 @@ a.routine-item {
     break-inside: avoid;
   }
 }
+
+
+/* Identity picker — colour swatches and glyph/emoji marks */
+.identity-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.identity-swatch[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
+}
+.identity-glyph {
+  min-width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 var(--space-2);
+}
+.identity-glyph[aria-pressed='true'] {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+}

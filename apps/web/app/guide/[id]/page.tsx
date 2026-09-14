@@ -8,11 +8,14 @@ import {
   type GuideBlock,
   UnsafeGuideError,
   buildVerifiedGuide,
+  routineItemLabel,
   subjectsFor,
 } from '@mml/core';
 import { TopBar } from '../../../components/Chrome.tsx';
+import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
-import { useAppState } from '../../../lib/store.ts';
+import { shareUrlFor } from '../../../lib/share.ts';
+import { useActions, useAppState } from '../../../lib/store.ts';
 import { track } from '../../../lib/trial.ts';
 
 /** Whose part of the guide is on screen. `all` is the default and the one a guide
@@ -25,6 +28,8 @@ export default function GuidePage() {
   const { households, household: active, handovers } = useAppState();
   const [focus, setFocus] = useState<Focus>('all');
   const [acknowledged, setAcknowledged] = useState(false);
+  const [shareState, setShareState] = useState<'idle' | 'working' | 'copied' | 'failed'>('idle');
+  const actions = useActions();
 
   const handover = handovers.find((h) => h.id === id);
   // A guide names the household it belongs to, so a link to one opens correctly
@@ -118,9 +123,53 @@ export default function GuidePage() {
           For {handover.caregiverName || 'whoever is looking after things'}
           {handover.caregiverRelationship ? ` · ${handover.caregiverRelationship}` : ''}
         </p>
-        <Link href={`/guide/${handover.id}/ask`} className="btn no-print">
-          Ask about anything
-        </Link>
+        <LanguageToggle
+          value={handover.language}
+          onChange={(language) => actions.saveHandover({ ...handover, language })}
+        />
+        <div className="row no-print" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+          <Link href={`/guide/${handover.id}/ask`} className="btn">
+            Ask about anything
+          </Link>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={shareState === 'working'}
+            onClick={() => {
+              void (async () => {
+                setShareState('working');
+                try {
+                  const url = await shareUrlFor(household, handover);
+                  if (navigator.share) {
+                    await navigator.share({
+                      title: `Guide for ${handover.caregiverName || 'caregiver'}`,
+                      text: 'Everything they need while you are not there.',
+                      url,
+                    });
+                    setShareState('copied');
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    setShareState('copied');
+                  }
+                } catch {
+                  setShareState('failed');
+                }
+              })();
+            }}
+          >
+            {shareState === 'copied'
+              ? 'Link ready'
+              : shareState === 'failed'
+                ? 'Could not share'
+                : shareState === 'working'
+                  ? 'Preparing…'
+                  : 'Send to caregiver'}
+          </button>
+        </div>
+        <p className="hint no-print">
+          Send opens the caregiver view on their phone — guide plus Ask — without uploading the
+          household. Photos stay on this device; the link carries the text.
+        </p>
       </div>
 
       <SafetyBlock
@@ -140,18 +189,28 @@ export default function GuidePage() {
         <section className="card rows no-break" style={{ marginBottom: 'var(--space-5)' }}>
           <div className="rows-head">
             <span className="eyebrow">
-              {focused ? `${focused.name} — a typical day` : 'A typical day'}
+              {focused
+                ? focused.kind === 'place'
+                  ? `${focused.name} — while you are here`
+                  : `${focused.name} — a typical day`
+                : subjects.every((s) => s.kind === 'place')
+                  ? 'While you are here'
+                  : 'A typical day'}
             </span>
           </div>
           {routine.map((item) => {
             const who = subjects.find((s) => s.id === item.appliesTo);
+            const title = routineItemLabel(item);
             return (
               <div key={item.id} className="routine-item">
-                <span className="routine-time">{item.time ?? '—'}</span>
+                <span className="routine-time">
+                  {item.time ?? (item.priority === 'nice' ? 'Nice' : item.priority === 'must' ? 'Must' : '—')}
+                </span>
                 <span>
-                  <strong>{item.kind}</strong>
-                  {/* Only worth naming when the filter is not already saying it. */}
+                  <strong>{title}</strong>
+                  {item.section && <span className="muted"> · {item.section}</span>}
                   {who && focus === 'all' && <span className="muted"> · {who.name}</span>}
+                  {item.product && <span className="routine-note">Use {item.product}</span>}
                   {item.notes && <span className="routine-note">{item.notes}</span>}
                 </span>
               </div>

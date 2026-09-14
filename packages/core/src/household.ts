@@ -50,6 +50,20 @@ export type RoutineKind =
   | 'Plants'
   | 'Post'
   | 'Laundry'
+  | 'Sheets'
+  | 'Towels'
+  | 'TeaTowels'
+  | 'ToiletPaper'
+  | 'Kitchen'
+  | 'Bathroom'
+  | 'Floors'
+  | 'Surfaces'
+  | 'Oven'
+  | 'Fridge'
+  | 'Shower'
+  | 'Dusting'
+  | 'Vacuum'
+  | 'Restock'
   | 'Other';
 
 /** Exported as a value so a surface can render the list without redeclaring it and
@@ -74,8 +88,60 @@ export const ROUTINE_KINDS: readonly RoutineKind[] = [
   'Plants',
   'Post',
   'Laundry',
+  'Sheets',
+  'Towels',
+  'TeaTowels',
+  'ToiletPaper',
+  'Kitchen',
+  'Bathroom',
+  'Floors',
+  'Surfaces',
+  'Oven',
+  'Fridge',
+  'Shower',
+  'Dusting',
+  'Vacuum',
+  'Restock',
   'Other',
 ];
+
+/** Human labels for kinds whose enum id is not already readable English. */
+export const ROUTINE_KIND_LABEL: Record<RoutineKind, string> = {
+  Breakfast: 'Breakfast',
+  Snack: 'Snack',
+  Lunch: 'Lunch',
+  Dinner: 'Dinner',
+  Feed: 'Feed',
+  Bottle: 'Bottle',
+  Nappy: 'Nappy',
+  Nap: 'Nap',
+  Bath: 'Bath',
+  Bedtime: 'Bedtime',
+  School: 'School',
+  Walk: 'Walk',
+  Litter: 'Litter',
+  Activity: 'Activity',
+  Medication: 'Medication',
+  Bins: 'Bins',
+  Plants: 'Plants',
+  Post: 'Post',
+  Laundry: 'Laundry',
+  Sheets: 'Sheets',
+  Towels: 'Towels',
+  TeaTowels: 'Tea towels',
+  ToiletPaper: 'Toilet paper',
+  Kitchen: 'Kitchen',
+  Bathroom: 'Bathroom',
+  Floors: 'Floors',
+  Surfaces: 'Surfaces',
+  Oven: 'Oven',
+  Fridge: 'Fridge',
+  Shower: 'Shower',
+  Dusting: 'Dusting',
+  Vacuum: 'Vacuum',
+  Restock: 'Restock',
+  Other: 'Other',
+};
 
 /** Which kinds are worth offering for each sort of subject.
  *
@@ -101,8 +167,36 @@ export const ROUTINE_KINDS_FOR: Record<SubjectKind, readonly RoutineKind[]> = {
     'Other',
   ],
   pet: ['Feed', 'Walk', 'Litter', 'Medication', 'Activity', 'Other'],
-  place: ['Bins', 'Plants', 'Post', 'Laundry', 'Other'],
+  place: [
+    'Sheets',
+    'Towels',
+    'TeaTowels',
+    'ToiletPaper',
+    'Kitchen',
+    'Bathroom',
+    'Floors',
+    'Surfaces',
+    'Oven',
+    'Fridge',
+    'Shower',
+    'Dusting',
+    'Vacuum',
+    'Laundry',
+    'Bins',
+    'Plants',
+    'Post',
+    'Restock',
+    'Other',
+  ],
 };
+
+export type RoutinePriority = 'must' | 'nice';
+
+/** Place checklist kinds — kept even when an evening handover would otherwise
+ *  drop everything that is not dinner-through-bedtime. */
+export function isPlaceRoutineKind(kind: RoutineKind): boolean {
+  return (ROUTINE_KINDS_FOR.place as readonly RoutineKind[]).includes(kind);
+}
 
 /** The kinds worth offering for a routine row, given who it applies to.
  *
@@ -136,6 +230,20 @@ export interface RoutineItem {
   /** A subject id, or `all`. */
   readonly appliesTo: string;
   readonly notes: string;
+  /** Custom name when `kind` is Other (or any override the parent prefers). */
+  readonly label?: string;
+  /** Checklist grouping for place work — e.g. "Change", "Deep clean". */
+  readonly section?: string;
+  /** Must-do vs nice-to-have for a cleaner visit. */
+  readonly priority?: RoutinePriority;
+  /** Product or tool to use for this task (steamer, specific detergent, etc.). */
+  readonly product?: string;
+}
+
+/** What to print on a row: a custom "Other" name when set, otherwise the kind label. */
+export function routineItemLabel(item: Pick<RoutineItem, 'kind' | 'label'>): string {
+  if (item.label?.trim()) return item.label.trim();
+  return ROUTINE_KIND_LABEL[item.kind];
 }
 
 export interface Household {

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { Handover, HandoverDuration } from '@mml/core';
 import { Badge, TopBar } from '../../../components/Chrome.tsx';
+import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { newId } from '../../../lib/ids.ts';
 import { KIND_LABEL, useActions, useAppState } from '../../../lib/store.ts';
 
@@ -23,6 +24,9 @@ export default function NewGuide() {
   const [duration, setDuration] = useState<HandoverDuration>('fewdays');
   const [subjectIds, setSubjectIds] = useState<readonly string[]>([]);
   const [note, setNote] = useState('');
+  const [language, setLanguage] = useState(
+    typeof navigator === 'undefined' ? 'en' : navigator.language,
+  );
 
   function toggle(id: string) {
     setSubjectIds((ids) => (ids.includes(id) ? ids.filter((s) => s !== id) : [...ids, id]));
@@ -36,7 +40,7 @@ export default function NewGuide() {
       caregiverName: caregiverName.trim(),
       caregiverRelationship: caregiverRelationship.trim(),
       duration,
-      language: typeof navigator === 'undefined' ? 'en' : navigator.language,
+      language,
       // Empty means every subject. Selecting a subset is a privacy boundary, not a
       // convenience: someone coming to clean has no business reading a child's
       // medical notes.
@@ -142,6 +146,11 @@ export default function NewGuide() {
             onChange={(e) => setNote(e.target.value)}
             placeholder="We land back on Sunday at 18:40."
           />
+        </div>
+
+        <div className="field">
+          <label>Their language</label>
+          <LanguageToggle value={language} onChange={setLanguage} />
         </div>
 
         <button type="submit" className="btn" disabled={subjectIds.length === 0}>

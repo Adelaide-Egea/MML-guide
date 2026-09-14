@@ -96,7 +96,11 @@ export default function HouseholdPage() {
           shown to the parent — and each row is a way into the page that owns it. */}
       <section className="stack">
         <div className="spread">
-          <h2 className="eyebrow">A typical day</h2>
+          <h2 className="eyebrow">
+            {household.subjects.length > 0 && household.subjects.every((s) => s.kind === 'place')
+              ? 'While they are here'
+              : 'A typical day'}
+          </h2>
           <button
             type="button"
             className="btn btn-quiet"
@@ -115,15 +119,16 @@ export default function HouseholdPage() {
         </div>
 
         <p className="muted">
-          Everyone in one timeline, which is how a caregiver reads it. Tap a row to change it on
-          the page it belongs to. Add here only what applies to the household rather than to one
-          of them.
+          {household.subjects.length > 0 && household.subjects.every((s) => s.kind === 'place')
+            ? 'The checklist for a visit, in one place. Tap a row to edit it on the place page. Add here only what applies to the whole household.'
+            : 'Everyone in one timeline, which is how a caregiver reads it. Tap a row to change it on the page it belongs to. Add here only what applies to the household rather than to one of them.'}
         </p>
 
         {household.routine.length === 0 && (
           <p className="muted">
-            Optional. An evening sitter is only shown the evening, so adding the school run costs
-            them nothing.
+            {household.subjects.length > 0 && household.subjects.every((s) => s.kind === 'place')
+              ? 'Optional. A cleaner only needs the checklist for the day they come — start from a preset on the place page.'
+              : 'Optional. An evening sitter is only shown the evening, so adding the school run costs them nothing.'}
           </p>
         )}
 

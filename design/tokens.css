@@ -1,39 +1,38 @@
-/* Design tokens — Domela ("Shutter" palette).
+/* Design tokens — Domela.
 
- * Brand: design/domela-brand.md
- *
- * Chalk is the in-app ground. Clay is for the icon and marketing. Pine is ink.
- * Marigold is the only interactive accent. Moss is done-only. Brick is safety-only.
+ * Less chalk, more mist: cool paper and pine ink, with marigold kept as the only
+ * interactive accent. Chalk/sand beige was reading as "beige app"; this keeps the
+ * same structure and contrast targets with a cooler ground.
  *
  * Buttons: pine text on marigold fill — never white on marigold.
  * design/contrast.mjs verifies every pair and fails the build.
  */
 
 :root {
-  /* Surfaces */
-  --putty: #e3d3bc; /* clay — icon + marketing */
-  --paper: #fbf6ee; /* chalk — in-app ground */
-  --surface: #f1e7d8; /* sand — raised cards */
-  --surface-sunk: #e3d3bc;
-  --hairline: #e8dcc8;
-  --hairline-strong: #b7a78e;
+  /* Surfaces — cool mist, not warm chalk */
+  --putty: #c5d4cc; /* soft sage — icon + marketing */
+  --paper: #f3f6f4; /* mist — in-app ground */
+  --surface: #e7eee9; /* raised cards */
+  --surface-sunk: #d5e0d9;
+  --hairline: #cfd9d3;
+  --hairline-strong: #8a9a90;
 
   /* Ink — pine */
-  --ink: #22332c;
-  --ink-muted: #5a6b60; /* sage */
+  --ink: #1e2f28;
+  --ink-muted: #5a6b62;
 
   /* Marigold — the single interactive accent */
-  --brand: #d08a2c;
-  --brand-tint: #f3e0c4;
-  --on-brand: #22332c; /* pine on marigold — never white */
-  --petrol: #d08a2c; /* alias kept for contrast.mjs / legacy refs */
+  --brand: #d9923a;
+  --brand-tint: #f0e2cc;
+  --on-brand: #1e2f28; /* pine on marigold — never white */
+  --petrol: #d9923a; /* alias kept for contrast.mjs / legacy refs */
 
   /* Moss — done only */
-  --done: #4e8c5b;
-  --done-tint: #d7e8db;
+  --done: #3f7a4d;
+  --done-tint: #d4e6d9;
 
-  --amber: #8a5612; /* marigold deep AA on chalk + amber-tint */
-  --amber-tint: #f3e0c4;
+  --amber: #8a5612; /* marigold deep AA on mist + amber-tint */
+  --amber-tint: #f0e2cc;
 
   --critical: #9e2b25; /* brick — safety only */
   --critical-tint: #f3d8d6;
@@ -68,23 +67,23 @@
   --text-xl: 22px;
   --text-2xl: 28px;
 
-  --shadow-card: 0 1px 1px rgba(34, 51, 44, 0.03), 0 2px 8px rgba(34, 51, 44, 0.05);
+  --shadow-card: 0 1px 1px rgba(30, 47, 40, 0.03), 0 2px 8px rgba(30, 47, 40, 0.05);
 }
 
 :root[data-theme="dark"] {
-  --putty: #1a2420;
-  --paper: #1c2622;
-  --surface: #2a3530;
-  --surface-sunk: #1a2420;
-  --hairline: #3a4741;
-  --hairline-strong: #5a6b60;
+  --putty: #15201c;
+  --paper: #18231f;
+  --surface: #25322c;
+  --surface-sunk: #15201c;
+  --hairline: #35433d;
+  --hairline-strong: #5a6b62;
 
-  --ink: #fbf6ee;
+  --ink: #f3f6f4;
   --ink-muted: #a8b5ad;
 
   --brand: #e0a04a;
   --brand-tint: #3a3224;
-  --on-brand: #1c2622;
+  --on-brand: #18231f;
   --petrol: #e0a04a;
 
   --done: #7abc89;

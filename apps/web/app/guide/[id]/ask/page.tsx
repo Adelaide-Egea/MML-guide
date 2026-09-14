@@ -13,6 +13,8 @@ import {
 } from '@mml/core';
 import { Breathing } from '../../../../components/Breathing.tsx';
 import { TopBar } from '../../../../components/Chrome.tsx';
+import { LanguageToggle } from '../../../../components/LanguageToggle.tsx';
+import { useActions } from '../../../../lib/store.ts';
 import { MediaThumb } from '../../../../components/MediaField.tsx';
 import { useAppState } from '../../../../lib/store.ts';
 import { track } from '../../../../lib/trial.ts';
@@ -43,7 +45,8 @@ export default function AskPage() {
   }
 
   const subjects = subjectsFor(household, handover);
-  const language = typeof navigator === 'undefined' ? 'en' : navigator.language;
+  const actions = useActions();
+  const language = handover.language || 'en';
 
   async function ask(event: React.FormEvent) {
     event.preventDefault();
@@ -98,7 +101,12 @@ export default function AskPage() {
     <main className="shell">
       <TopBar title="Ask" back={`/guide/${handover.id}`} />
 
-      <form className="stack" onSubmit={(e) => void ask(e)}>
+      <LanguageToggle
+        value={language}
+        onChange={(next) => actions.saveHandover({ ...handover, language: next })}
+      />
+
+      <form className="stack" onSubmit={(e) => void ask(e)} style={{ marginTop: 'var(--space-4)' }}>
         <div className="field">
           <label htmlFor="q">What do you need to know?</label>
           <span className="hint">

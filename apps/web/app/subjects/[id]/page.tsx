@@ -10,6 +10,7 @@ import {
   validateSubject,
 } from '@mml/core';
 import { Badge, TopBar } from '../../../components/Chrome.tsx';
+import { IdentityPicker } from '../../../components/IdentityPicker.tsx';
 import { MediaField, MediaThumb } from '../../../components/MediaField.tsx';
 import { RoutineEditor } from '../../../components/RoutineEditor.tsx';
 import { newId } from '../../../lib/ids.ts';
@@ -66,7 +67,7 @@ export default function SubjectPage() {
     <main className="shell">
       <TopBar title={subject.name || KIND_LABEL[subject.kind]} back="/" />
 
-      <div className="row" style={{ marginBottom: 'var(--space-5)' }}>
+      <div className="row" style={{ marginBottom: 'var(--space-3)' }}>
         <Badge subject={subject} size={48} />
         <div className="grow stack-tight">
           <input
@@ -91,6 +92,11 @@ export default function SubjectPage() {
           />
         </div>
       </div>
+
+      <IdentityPicker
+        subject={subject}
+        onChange={(identity) => actions.updateSubject(subject.id, { identity })}
+      />
 
       {/* Safety-critical content is separated in the model and separated here. It is
           the one thing that is never summarised, never reordered and never touched
