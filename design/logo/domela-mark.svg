@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Domela">
+  <path d="M13 9 V39" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M13 9 H25 C34.5 9 39 15.5 39 24 C39 32.5 34.5 39 25 39 H18" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="21" y="21" width="6" height="6" fill="#D08A2C"/>
+</svg>

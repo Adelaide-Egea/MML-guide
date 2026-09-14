@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <rect width="48" height="48" rx="11" fill="#4d6c82"/>
-  <g stroke="#efe7da" fill="#efe7da">
-    <path d="M12 31 Q24 11 36 31" stroke-width="3.6" stroke-linecap="round" fill="none"/>
-    <circle cx="12" cy="31" r="4"/>
-    <circle cx="36" cy="31" r="4"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Domela">
+  <!-- D doorway + marigold punctum -->
+  <path d="M13 9 V39" stroke="#22332C" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M13 9 H25 C34.5 9 39 15.5 39 24 C39 32.5 34.5 39 25 39 H18" stroke="#22332C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="21" y="21" width="6" height="6" fill="#D08A2C"/>
 </svg>

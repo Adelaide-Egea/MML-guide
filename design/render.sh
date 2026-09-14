@@ -28,6 +28,7 @@ google-chrome \
   --no-first-run --no-default-browser-check --disable-extensions \
   --disable-background-networking --disable-sync --disable-default-apps \
   --disable-features=Translate,MediaRouter,OptimizationHints,DialMediaRouteProvider \
+  --user-data-dir="$(mktemp -d)" \
   --hide-scrollbars --force-device-scale-factor=2 \
   --window-size="${width},${maxheight}" --virtual-time-budget=4000 \
   --screenshot="$out" "$here/$page" >/dev/null 2>&1 &

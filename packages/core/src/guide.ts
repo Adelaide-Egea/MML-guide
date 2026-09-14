@@ -25,6 +25,7 @@ import {
   type Handover,
   type Household,
   type RoutineItem,
+  isPlaceRoutineKind,
   subjectsFor,
 } from './household.ts';
 
@@ -93,6 +94,9 @@ const DURATION_SCOPE: Record<Handover['duration'], readonly RoutineItem['kind'][
 
 /** Routine items relevant to the occasion. An evening sitter does not need the
  *  school run, and showing it makes the things they *do* need harder to find.
+ *
+ *  Place checklist items are never evening-scoped away: a cleaner coming for the
+ *  evening still needs the bins and the shower, and those kinds are not dinner-through-bedtime.
  */
 export function scopeRoutine(
   routine: readonly RoutineItem[],
@@ -100,7 +104,9 @@ export function scopeRoutine(
   subjects?: readonly CareSubject[],
 ): readonly RoutineItem[] {
   const kinds = DURATION_SCOPE[duration];
-  let scoped = kinds.length ? routine.filter((item) => kinds.includes(item.kind)) : routine;
+  let scoped = kinds.length
+    ? routine.filter((item) => kinds.includes(item.kind) || isPlaceRoutineKind(item.kind))
+    : routine;
 
   if (subjects) {
     const ids = new Set(subjects.map((s) => s.id));
@@ -108,6 +114,10 @@ export function scopeRoutine(
   }
 
   return [...scoped].sort((a, b) => {
+    // Must-dos before nice-to-haves when times are equal / absent.
+    const pa = a.priority === 'nice' ? 1 : 0;
+    const pb = b.priority === 'nice' ? 1 : 0;
+    if (pa !== pb) return pa - pb;
     if (a.time === b.time) return 0;
     if (a.time === null) return 1; // untimed items sink to the bottom
     if (b.time === null) return -1;

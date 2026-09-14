@@ -12,7 +12,7 @@
 // Note what a preset does *not* contain: no subject, no ids, no notes that assume a
 // particular household. It is a shape, and `instantiatePreset` binds it to someone.
 
-import type { RoutineItem, RoutineKind } from './household.ts';
+import type { RoutineItem, RoutineKind, RoutinePriority } from './household.ts';
 import type { SubjectKind } from './subject.ts';
 
 export interface TemplateItem {
@@ -20,6 +20,10 @@ export interface TemplateItem {
   readonly time: string | null;
   readonly kind: RoutineKind;
   readonly notes: string;
+  readonly label?: string;
+  readonly section?: string;
+  readonly priority?: RoutinePriority;
+  readonly product?: string;
 }
 
 export interface RoutinePreset {
@@ -128,21 +132,172 @@ export const BUILT_IN_PRESETS: readonly RoutinePreset[] = [
     hint: 'Bins, post and plants while nobody is in',
     appliesToKind: 'place',
     items: [
-      { time: null, kind: 'Bins', notes: 'Out on the night before collection.' },
-      { time: null, kind: 'Post', notes: 'Bring it in off the mat.' },
-      { time: null, kind: 'Plants', notes: 'Once while you are here.' },
+      {
+        time: null,
+        kind: 'Bins',
+        notes: 'Out on the night before collection.',
+        section: 'While away',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Post',
+        notes: 'Bring it in off the mat.',
+        section: 'While away',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Plants',
+        notes: 'Once while you are here.',
+        section: 'While away',
+        priority: 'nice',
+      },
     ],
   },
   {
-    id: 'preset:cleaner',
-    label: 'Cleaner',
-    hint: 'What you would leave on a note',
+    id: 'preset:cleaner-visit',
+    label: 'Cleaner visit',
+    hint: 'Must-dos for the day they come — not a timed schedule',
     appliesToKind: 'place',
     items: [
-      { time: null, kind: 'Laundry', notes: 'On before you start, hung out before you go.' },
-      { time: null, kind: 'Bins', notes: '' },
-      { time: null, kind: 'Plants', notes: '' },
-      { time: null, kind: 'Other', notes: '' },
+      {
+        time: null,
+        kind: 'Kitchen',
+        notes: 'Counters, sink, hob.',
+        section: 'Must do',
+        priority: 'must',
+        product: '',
+      },
+      {
+        time: null,
+        kind: 'Bathroom',
+        notes: 'Basin, toilet, shower screen.',
+        section: 'Must do',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Floors',
+        notes: 'Vacuum then mop.',
+        section: 'Must do',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Surfaces',
+        notes: 'Wipe and dust the main rooms.',
+        section: 'Must do',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Bins',
+        notes: 'Empty kitchen and bathroom bins.',
+        section: 'Must do',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Laundry',
+        notes: 'On before you start, hung out before you go.',
+        section: 'Nice to have',
+        priority: 'nice',
+      },
+      {
+        time: null,
+        kind: 'Plants',
+        notes: '',
+        section: 'Nice to have',
+        priority: 'nice',
+      },
+    ],
+  },
+  {
+    id: 'preset:change-restock',
+    label: 'Change & restock',
+    hint: 'Sheets, towels, tea towels, toilet paper',
+    appliesToKind: 'place',
+    items: [
+      {
+        time: null,
+        kind: 'Sheets',
+        notes: 'Strip beds; fresh set is in the airing cupboard.',
+        section: 'Change',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Towels',
+        notes: 'Bathroom towels — replace with the clean stack.',
+        section: 'Change',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'TeaTowels',
+        notes: 'Kitchen tea towels and cloths.',
+        section: 'Change',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'ToiletPaper',
+        notes: 'Spare rolls under the sink.',
+        section: 'Restock',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Restock',
+        notes: 'Soap, washing-up liquid, bin bags if low.',
+        section: 'Restock',
+        priority: 'nice',
+      },
+    ],
+  },
+  {
+    id: 'preset:deep-clean',
+    label: 'Deep clean',
+    hint: 'Oven, fridge, shower and the jobs that are not every visit',
+    appliesToKind: 'place',
+    items: [
+      {
+        time: null,
+        kind: 'Oven',
+        notes: 'Inside and the door glass.',
+        section: 'Deep clean',
+        priority: 'must',
+        product: '',
+      },
+      {
+        time: null,
+        kind: 'Fridge',
+        notes: 'Wipe shelves; bin anything past it.',
+        section: 'Deep clean',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Shower',
+        notes: 'Descaling / mould on the seal.',
+        section: 'Deep clean',
+        priority: 'must',
+      },
+      {
+        time: null,
+        kind: 'Dusting',
+        notes: 'High shelves, lamp shades, skirting.',
+        section: 'Deep clean',
+        priority: 'nice',
+      },
+      {
+        time: null,
+        kind: 'Vacuum',
+        notes: 'Under sofas and beds if you can move them.',
+        section: 'Deep clean',
+        priority: 'nice',
+      },
     ],
   },
 ];
@@ -167,6 +322,10 @@ export function instantiatePreset(
     kind: item.kind,
     appliesTo: subjectId,
     notes: item.notes,
+    ...(item.label ? { label: item.label } : {}),
+    ...(item.section ? { section: item.section } : {}),
+    ...(item.priority ? { priority: item.priority } : {}),
+    ...(item.product ? { product: item.product } : {}),
   }));
 }
 
@@ -188,7 +347,15 @@ export function presetFromRoutine(
     custom: true,
     items: routine
       .filter((item) => item.appliesTo === subjectId)
-      .map(({ time, kind, notes }) => ({ time, kind, notes })),
+      .map(({ time, kind, notes, label: itemLabel, section, priority, product }) => ({
+        time,
+        kind,
+        notes,
+        ...(itemLabel ? { label: itemLabel } : {}),
+        ...(section ? { section } : {}),
+        ...(priority ? { priority } : {}),
+        ...(product ? { product } : {}),
+      })),
   };
 }
 

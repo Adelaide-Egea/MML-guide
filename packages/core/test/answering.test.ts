@@ -126,6 +126,55 @@ test('retrieval returns nothing when the guide does not cover the question', () 
   assert.deepEqual(retrieve(subjects, 'quel est le code du wifi ?'), []);
 });
 
+const walks = [
+  { id: 'r1', time: '07:30', kind: 'Walk' as const, appliesTo: 'rio', notes: 'Short one.' },
+  { id: 'r2', time: '18:00', kind: 'Walk' as const, appliesTo: 'rio', notes: 'The long one.' },
+  { id: 'r3', time: '08:00', kind: 'Breakfast' as const, appliesTo: 'all', notes: '' },
+];
+
+test('a plural in the guide still answers a singular in the question', () => {
+  // Reported from the preview: an entry titled "Walks" refused "when should I walk
+  // Pomme", because matching was exact and the s made them different words.
+  const titled = [{ ...rio, entries: [entry({ id: 'rio-walks', title: 'Walks' })] }];
+  assert.equal(retrieve(titled, 'when should I walk Rio')[0]?.entry.id, 'rio-walks');
+});
+
+test('the daily routine is answerable, not just the written entries', () => {
+  const hits = retrieve(subjects, 'what time do I walk Rio?', 4, walks);
+  assert.equal(hits[0]?.entry.id, 'routine:rio');
+  assert.match(hits[0]?.entry.body ?? '', /07:30 — Walk/);
+});
+
+test('the routine answer holds only what belongs to that subject', () => {
+  const hits = retrieve(subjects, 'what time do I walk Rio?', 4, walks);
+  const body = hits[0]?.entry.body ?? '';
+  assert.match(body, /18:00/);
+  // 'all' applies to everyone, so it belongs here; another subject's items do not.
+  assert.match(body, /Breakfast/);
+  assert.doesNotMatch(body, /Nap/);
+});
+
+test('asking about "the dog" finds the dog without naming it', () => {
+  // Nobody uses the name the first time. They ask about the dog, and the guide has
+  // to know that Rio is one.
+  const hits = retrieve(subjects, 'when do I feed the dog?', 4, walks);
+  assert.equal(hits[0]?.subjectId, 'rio');
+});
+
+test('naming a subject beats refusing, even when no word matches', () => {
+  const hits = retrieve(subjects, 'anything about Rio?', 4, []);
+  assert.ok(hits.length > 0);
+  assert.ok(hits.every((h) => h.subjectId === 'rio'));
+});
+
+test('prepare passes the routine through to retrieval', () => {
+  const prepared = prepare(subjects, 'what time is the walk?', 'en', walks);
+  assert.equal(prepared.route, 'model');
+  assert.ok(
+    prepared.route === 'model' && prepared.candidates.some((c) => c.entry.id === 'routine:rio'),
+  );
+});
+
 // ── The critical route ───────────────────────────────────────────────────────
 
 test('safety-critical questions are recognised across languages', () => {
@@ -148,6 +197,39 @@ test('a term the parent invented counts as safety-critical', () => {
 
 test('an ordinary question is not treated as safety-critical', () => {
   assert.equal(touchesSafetyCritical('à quelle heure le dîner ?', subjects), false);
+});
+
+test('a shared short stem does not make an ordinary question critical', () => {
+  // "bags" stems to "bag", which also appears in "blue bag only". That overlap
+  // must not open the dog's allergies when someone asks where the camping gear is.
+  const pomme: CareSubject = {
+    ...rio,
+    safety: {
+      ...EMPTY_SAFETY,
+      allergies: 'Chicken makes her scratch. Her food is the blue bag only.',
+      medication: 'Half a joint tablet with breakfast.',
+      emergencyNotes: 'Vet: Clinique des Batignolles, 01 42 26 55 00.',
+    },
+    entries: [
+      entry({
+        id: 'flat-bags',
+        topic: 'other',
+        title: 'Sleeping bags',
+        body: 'Top cupboard on the landing.',
+      }),
+    ],
+  };
+  assert.equal(touchesSafetyCritical('where are the sleeping bags?', [pomme]), false);
+  const prepared = prepare([pomme], 'where are the sleeping bags?', 'en');
+  assert.equal(prepared.route, 'model');
+});
+
+test('a short allergen name still forces the critical path', () => {
+  const allergic: CareSubject = {
+    ...lea,
+    safety: { ...EMPTY_SAFETY, allergies: 'Egg. The EpiPen is in the drawer.' },
+  };
+  assert.ok(touchesSafetyCritical('can she have egg?', [allergic]));
 });
 
 test('a safety-critical question never routes to a model', () => {

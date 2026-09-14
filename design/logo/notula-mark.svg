@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Notula">
+  <!-- Punctum: a small square on a rule. -->
+  <line x1="10" y1="22" x2="38" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <rect x="20" y="16" width="8" height="8" fill="currentColor"/>
+</svg>

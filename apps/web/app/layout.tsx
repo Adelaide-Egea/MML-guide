@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Figtree, Newsreader } from 'next/font/google';
+import { Figtree, Fraunces } from 'next/font/google';
 import './globals.css';
+import { SiteFooter } from '../components/SiteFooter.tsx';
+import { TrialBeacon } from '../components/TrialBeacon.tsx';
 
-// The brand manifest's pairing. Newsreader for headings only; Figtree for
-// everything a caregiver actually reads. Loaded through next/font so they are
-// self-hosted and there is no render-blocking request to a third party.
-const display = Newsreader({
+const display = Fraunces({
   subsets: ['latin'],
-  weight: ['500', '600'],
+  weight: ['500', '600', '700'],
   variable: '--font-display-loaded',
   display: 'swap',
 });
@@ -18,23 +17,18 @@ const ui = Figtree({
   display: 'swap',
 });
 
-// No product name yet, so nothing here asserts one. Swapping it later is a change
-// to this file and nothing else.
 export const metadata: Metadata = {
-  title: 'Care guide',
-  description: 'Everything someone needs to know while you are not there.',
+  title: 'Domela — the household guide',
+  description: 'Everything they need while you are not there.',
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#efe7da' },
-    { media: '(prefers-color-scheme: dark)', color: '#2b333a' },
+    { media: '(prefers-color-scheme: light)', color: '#fbf6ee' },
+    { media: '(prefers-color-scheme: dark)', color: '#1c2622' },
   ],
 };
 
-/** Sets the theme before first paint. Doing this in an effect produces a white
- *  flash on every load, which is exactly the wrong thing for a product whose dark
- *  theme exists for people reading at 2am. */
 const THEME_SCRIPT = `
 try {
   var stored = localStorage.getItem('theme');
@@ -46,9 +40,6 @@ try {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // The theme script sets data-theme before React hydrates, which is the whole
-    // point of it — the alternative is a flash of the wrong theme. React sees that
-    // as a mismatch on this element only.
     <html lang="en" className={`${display.variable} ${ui.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
@@ -57,7 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           --font-ui: var(--font-ui-loaded), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }`}</style>
       </head>
-      <body>{children}</body>
+      <body>
+        <TrialBeacon />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }

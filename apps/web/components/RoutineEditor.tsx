@@ -5,17 +5,20 @@ import {
   type CareSubject,
   type RoutineItem,
   type RoutineKind,
+  type RoutinePriority,
+  ROUTINE_KIND_LABEL,
   ROUTINE_KINDS,
   ROUTINE_KINDS_FOR,
   presetsFor,
   routineFor,
+  routineItemLabel,
 } from '@mml/core';
 import { newId } from '../lib/ids.ts';
 import { useActions, useAppState } from '../lib/store.ts';
 
-/** One subject's day, edited where you are already thinking about them.
+/** One subject's day — or, for a place, the checklist for the visit.
  *
- *  The routine still belongs to the household rather than to the subject — an
+ *  The routine still belongs to the household rather than to the subject: an
  *  evening contains a feed and a walk and a bath, and the guide has to interleave
  *  them into one timeline. This is a filtered view onto that list, not a second
  *  copy of it.
@@ -26,16 +29,19 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
   const [showPresets, setShowPresets] = useState(false);
   const [naming, setNaming] = useState(false);
   const [label, setLabel] = useState('');
+  const place = subject.kind === 'place';
 
-  const items = [...routineFor(household.routine, subject.id)].sort((a, b) =>
-    (a.time ?? '99:99').localeCompare(b.time ?? '99:99'),
-  );
+  const items = [...routineFor(household.routine, subject.id)].sort((a, b) => {
+    const pa = a.priority === 'nice' ? 1 : 0;
+    const pb = b.priority === 'nice' ? 1 : 0;
+    if (pa !== pb) return pa - pb;
+    const sa = a.section ?? '';
+    const sb = b.section ?? '';
+    if (sa !== sb) return sa.localeCompare(sb);
+    return (a.time ?? '99:99').localeCompare(b.time ?? '99:99');
+  });
   const offered = presetsFor(subject.kind, presets);
 
-  // Kinds are filtered to the ones that make sense for this sort of subject, so a
-  // flat is not offered "Nappy" and a baby is not offered "Bins". 'Other' is always
-  // there, and an item that already holds an unusual kind keeps it rather than
-  // silently changing under the parent.
   function kindsFor(item: RoutineItem): readonly RoutineKind[] {
     const suggested = ROUTINE_KINDS_FOR[subject.kind];
     return suggested.includes(item.kind) ? suggested : [item.kind, ...suggested];
@@ -45,21 +51,19 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
     const fallback = ROUTINE_KINDS_FOR[subject.kind][0] ?? ROUTINE_KINDS[0]!;
     actions.upsertRoutine({
       id: newId('r'),
-      time: '08:00',
+      time: place ? null : '08:00',
       kind: fallback,
       appliesTo: subject.id,
       notes: '',
+      ...(place ? { priority: 'must' as const, section: 'Must do' } : {}),
     });
   }
 
   return (
     <section className="stack">
       <div className="spread">
-        <h2 className="eyebrow">Their day</h2>
+        <h2 className="eyebrow">{place ? 'While they are here' : 'Their day'}</h2>
         <div className="row">
-          {/* Offered whether or not the day is already started. Reusing a preset on
-              a child who has one item recorded is the normal case, not an edge one,
-              and hiding it until the list is empty made it unreachable. */}
           {offered.length > 0 && (
             <button type="button" className="btn btn-quiet" onClick={() => setShowPresets((v) => !v)}>
               Use a preset
@@ -73,48 +77,43 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
 
       {items.length === 0 && !showPresets && (
         <p className="muted">
-          Optional, and quick to start from a preset. An evening sitter is only shown the evening,
-          so filling in the whole day costs them nothing.
+          {place
+            ? 'Optional. Start from a cleaner, change-and-restock, or deep-clean preset — a checklist for the visit, not a timed day.'
+            : 'Optional, and quick to start from a preset. An evening sitter is only shown the evening, so filling in the whole day costs them nothing.'}
         </p>
       )}
 
       {showPresets && (
         <div className="card stack-tight">
-          <span className="hint">A starting point. Everything is editable afterwards.</span>
+          <span className="hint">
+            {place
+              ? 'Pick a visit shape. Sections, priorities and product notes stay editable.'
+              : 'A starting point. Everything is editable afterwards.'}
+          </span>
           {offered.map((preset) => (
-            <div
-              key={preset.id}
-              className="row"
-              style={{ borderTop: '1px solid var(--hairline)', padding: 'var(--space-2) 0' }}
-            >
+            <div key={preset.id} className="row preset-row">
               <button
                 type="button"
-                className="grow"
+                className="grow preset-pick"
                 onClick={() => {
                   actions.applyPreset(preset, subject.id);
                   setShowPresets(false);
                 }}
-                style={{
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  background: 'transparent',
-                  border: 0,
-                  padding: 'var(--space-2) 0',
-                }}
               >
                 <strong>{preset.label}</strong>
-                <span className="muted" style={{ display: 'block' }}>
+                <span className="muted">
                   {preset.hint} · {preset.items.length} items
                 </span>
               </button>
               {preset.custom && (
                 <button
                   type="button"
-                  className="btn btn-danger"
+                  className="icon-btn"
                   onClick={() => actions.removePreset(preset.id)}
                   aria-label={`Delete the ${preset.label} preset`}
+                  title="Delete this preset"
                 >
-                  Delete
+                  ×
                 </button>
               )}
             </div>
@@ -125,60 +124,17 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
         </div>
       )}
 
-      {/* One card with hairline-separated rows rather than a card per item. A day is
-          a list, and eight stacked cards read as eight separate decisions. */}
       {items.length > 0 && (
-        <div className="card stack-tight">
-          {items.map((item, i) => (
-            <div
+        <div className="card rows">
+          {items.map((item) => (
+            <RoutineRow
               key={item.id}
-              className="stack-tight"
-              style={
-                i === 0
-                  ? undefined
-                  : { borderTop: '1px solid var(--hairline)', paddingTop: 'var(--space-3)' }
-              }
-            >
-              <div className="row">
-                <input
-                  className="input"
-                  type="time"
-                  value={item.time ?? ''}
-                  onChange={(e) => actions.upsertRoutine({ ...item, time: e.target.value || null })}
-                  aria-label="Time"
-                  style={{ maxWidth: 140 }}
-                />
-                <select
-                  className="select grow"
-                  value={item.kind}
-                  onChange={(e) =>
-                    actions.upsertRoutine({ ...item, kind: e.target.value as RoutineKind })
-                  }
-                  aria-label="What happens"
-                >
-                  {kindsFor(item).map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => actions.removeRoutine(item.id)}
-                  aria-label={`Remove ${item.kind}`}
-                >
-                  ✕
-                </button>
-              </div>
-              <input
-                className="input"
-                value={item.notes}
-                onChange={(e) => actions.upsertRoutine({ ...item, notes: e.target.value })}
-                placeholder="Anything worth adding"
-                aria-label={`Notes for ${item.kind}`}
-              />
-            </div>
+              item={item}
+              place={place}
+              kinds={kindsFor(item)}
+              onChange={(next) => actions.upsertRoutine(next)}
+              onRemove={() => actions.removeRoutine(item.id)}
+            />
           ))}
         </div>
       )}
@@ -226,5 +182,132 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
         </div>
       )}
     </section>
+  );
+}
+
+function RoutineRow({
+  item,
+  place,
+  kinds,
+  onChange,
+  onRemove,
+}: {
+  item: RoutineItem;
+  place: boolean;
+  kinds: readonly RoutineKind[];
+  onChange: (item: RoutineItem) => void;
+  onRemove: () => void;
+}) {
+  const title = routineItemLabel(item);
+
+  return (
+    <div className="rows-item stack-tight">
+      <div className="row">
+        {!place && (
+          <input
+            className="input"
+            type="time"
+            value={item.time ?? ''}
+            onChange={(e) => onChange({ ...item, time: e.target.value || null })}
+            aria-label="Time"
+            style={{ maxWidth: 128 }}
+          />
+        )}
+        {place && (
+          <select
+            className="select"
+            value={item.priority ?? 'must'}
+            onChange={(e) => onChange({ ...item, priority: e.target.value as RoutinePriority })}
+            aria-label="Priority"
+            style={{ maxWidth: 140 }}
+          >
+            <option value="must">Must do</option>
+            <option value="nice">Nice to have</option>
+          </select>
+        )}
+        <select
+          className="select grow"
+          value={item.kind}
+          onChange={(e) => {
+            const kind = e.target.value as RoutineKind;
+            if (kind === 'Other') {
+              onChange({ ...item, kind });
+              return;
+            }
+            const { label: _removed, ...rest } = item;
+            onChange({ ...rest, kind });
+          }}
+          aria-label="What happens"
+        >
+          {kinds.map((kind) => (
+            <option key={kind} value={kind}>
+              {ROUTINE_KIND_LABEL[kind]}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={onRemove}
+          aria-label={`Remove ${title}`}
+          title="Remove"
+        >
+          ×
+        </button>
+      </div>
+
+      {item.kind === 'Other' && (
+        <input
+          className="input"
+          value={item.label ?? ''}
+          onChange={(e) => onChange({ ...item, label: e.target.value })}
+          placeholder="Name this — e.g. Quiet time, Steam the bathroom"
+          aria-label="Name for Other"
+        />
+      )}
+
+      {place && (
+        <>
+          <input
+            className="input"
+            value={item.section ?? ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!value) {
+                const { section: _removed, ...rest } = item;
+                onChange(rest);
+              } else {
+                onChange({ ...item, section: value });
+              }
+            }}
+            placeholder="Section — Change, Deep clean, Restock…"
+            aria-label="Section"
+          />
+          <input
+            className="input"
+            value={item.product ?? ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!value) {
+                const { product: _removed, ...rest } = item;
+                onChange(rest);
+              } else {
+                onChange({ ...item, product: value });
+              }
+            }}
+            placeholder="Product or tool — steamer, Product A, gloves under the sink"
+            aria-label="Product or tool"
+          />
+        </>
+      )}
+
+      <input
+        className="input"
+        value={item.notes}
+        onChange={(e) => onChange({ ...item, notes: e.target.value })}
+        placeholder={place ? 'Anything worth adding for this task' : 'Anything worth adding'}
+        aria-label={`Notes for ${title}`}
+      />
+    </div>
   );
 }
