@@ -13,6 +13,8 @@ export interface ChromeCopy {
   readonly looking: string;
   readonly askTitle: string;
   readonly whatDoYouNeed: string;
+  /** Example question in the Ask box — care-focused, never cleaning-kit jokes. */
+  readonly askPlaceholder: string;
   readonly askHintCaregiver: string;
   readonly askHintParent: string;
   readonly openGuideFirst: string;
@@ -57,6 +59,7 @@ const EN: ChromeCopy = {
   looking: 'Looking…',
   askTitle: 'Ask',
   whatDoYouNeed: 'What do you need to know?',
+  askPlaceholder: 'When is bedtime? / Where are the spare nappies?',
   askHintCaregiver:
     'Answered only from this guide. Ask in your language — the reply follows the toggle above.',
   askHintParent: 'Answered only from what was written in this guide. Ask in whatever language you like.',
@@ -104,6 +107,7 @@ const FR: ChromeCopy = {
   looking: 'Recherche…',
   askTitle: 'Demander',
   whatDoYouNeed: 'De quoi avez-vous besoin ?',
+  askPlaceholder: 'À quelle heure le coucher ? / Où sont les couches ?',
   askHintCaregiver:
     'Réponse uniquement à partir de ce guide. Posez la question dans votre langue — la réponse suit le choix ci-dessus.',
   askHintParent:

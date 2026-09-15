@@ -121,7 +121,13 @@ export default function CaregiverAskPage() {
 
       <LanguageToggle value={language} onChange={setLanguage} />
 
-      <form className="stack" onSubmit={(e) => void ask(e)} style={{ marginTop: 'var(--space-4)' }}>
+      <form
+        key={language}
+        className="stack"
+        onSubmit={(e) => void ask(e)}
+        style={{ marginTop: 'var(--space-4)' }}
+        lang={language}
+      >
         <div className="field">
           <label htmlFor="q">{chrome.whatDoYouNeed}</label>
           <span className="hint">{chrome.askHintCaregiver}</span>
@@ -130,7 +136,7 @@ export default function CaregiverAskPage() {
             className="textarea"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Where is the mop? / Où est la serpillière ?"
+            placeholder={chrome.askPlaceholder}
             autoFocus
           />
         </div>

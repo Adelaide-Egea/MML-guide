@@ -118,7 +118,7 @@ export default function AskPage() {
             className="textarea"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Où sont les sacs de couchage ?"
+            placeholder={chrome.askPlaceholder}
             autoFocus
           />
         </div>
