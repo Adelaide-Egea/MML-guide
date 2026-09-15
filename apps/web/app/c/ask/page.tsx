@@ -7,6 +7,7 @@ import {
   type Candidate,
   type Prepared,
   acceptModelAnswer,
+  chromeFor,
   modelContext,
   prepare,
   subjectsFor,
@@ -42,15 +43,25 @@ export default function CaregiverAskPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!snapshot) return;
+    const next = {
+      ...snapshot,
+      mediaBlobs: undefined,
+      handover: { ...snapshot.handover, language },
+    };
+    window.sessionStorage.setItem('mml.caregiver-snapshot', JSON.stringify(next));
+  }, [language, snapshot]);
+
+  const chrome = chromeFor(language);
+
   if (!snapshot) {
     return (
       <main className="shell">
-        <TopBar title="Ask" back="/c" />
-        <p className="muted">
-          Open the guide from the link you were sent first, then Ask will work on this phone.
-        </p>
+        <TopBar title={chrome.askTitle} back="/c" />
+        <p className="muted">{chrome.openGuideFirst}</p>
         <Link href="/c" className="btn btn-quiet">
-          Back to guide
+          {chrome.backToGuide}
         </Link>
       </main>
     );
@@ -103,17 +114,14 @@ export default function CaregiverAskPage() {
 
   return (
     <main className="shell">
-      <TopBar title="Ask" back="/c" />
+      <TopBar title={chrome.askTitle} back="/c" />
 
       <LanguageToggle value={language} onChange={setLanguage} />
 
       <form className="stack" onSubmit={(e) => void ask(e)} style={{ marginTop: 'var(--space-4)' }}>
         <div className="field">
-          <label htmlFor="q">What do you need to know?</label>
-          <span className="hint">
-            Answered only from this guide. Ask in your language — the reply follows the toggle
-            above. Safety facts stay in the parent&apos;s words.
-          </span>
+          <label htmlFor="q">{chrome.whatDoYouNeed}</label>
+          <span className="hint">{chrome.askHintCaregiver}</span>
           <textarea
             id="q"
             className="textarea"
@@ -124,7 +132,7 @@ export default function CaregiverAskPage() {
           />
         </div>
         <button type="submit" className="btn" disabled={busy || !question.trim()}>
-          {busy ? 'Looking…' : 'Ask'}
+          {busy ? chrome.looking : chrome.ask}
         </button>
       </form>
 

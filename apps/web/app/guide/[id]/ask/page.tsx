@@ -7,6 +7,7 @@ import {
   type Candidate,
   type Prepared,
   acceptModelAnswer,
+  chromeFor,
   modelContext,
   prepare,
   subjectsFor,
@@ -47,6 +48,7 @@ export default function AskPage() {
   const subjects = subjectsFor(household, handover);
   const actions = useActions();
   const language = handover.language || 'en';
+  const chrome = chromeFor(language);
 
   async function ask(event: React.FormEvent) {
     event.preventDefault();
@@ -99,7 +101,7 @@ export default function AskPage() {
 
   return (
     <main className="shell">
-      <TopBar title="Ask" back={`/guide/${handover.id}`} />
+      <TopBar title={chrome.askTitle} back={`/guide/${handover.id}`} />
 
       <LanguageToggle
         value={language}
@@ -108,10 +110,8 @@ export default function AskPage() {
 
       <form className="stack" onSubmit={(e) => void ask(e)} style={{ marginTop: 'var(--space-4)' }}>
         <div className="field">
-          <label htmlFor="q">What do you need to know?</label>
-          <span className="hint">
-            Answered only from what was written in this guide. Ask in whatever language you like.
-          </span>
+          <label htmlFor="q">{chrome.whatDoYouNeed}</label>
+          <span className="hint">{chrome.askHintParent}</span>
           <textarea
             id="q"
             className="textarea"
@@ -122,7 +122,7 @@ export default function AskPage() {
           />
         </div>
         <button type="submit" className="btn" disabled={busy || !question.trim()}>
-          {busy ? 'Looking…' : 'Ask'}
+          {busy ? chrome.looking : chrome.ask}
         </button>
       </form>
 

@@ -5,9 +5,11 @@ import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import {
   type CareSubject,
+  type ChromeCopy,
   type GuideBlock,
   UnsafeGuideError,
   buildVerifiedGuide,
+  chromeFor,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -99,6 +101,7 @@ export default function GuidePage() {
 
   const guide = result.guide;
   const subjects = subjectsFor(household, handover);
+  const chrome = chromeFor(handover.language || 'en');
 
   // Filtering never hides a safety-critical block. Narrowing to the dog must not be
   // a way to stop being told about the child's EpiPen, so `critical` is taken from
@@ -121,11 +124,11 @@ export default function GuidePage() {
 
   return (
     <main className="shell">
-      <TopBar title={handover.caregiverName || 'Guide'} back="/" />
+      <TopBar title={handover.caregiverName || chrome.guide} back="/" />
 
       <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
-          For {handover.caregiverName || 'whoever is looking after things'}
+          {chrome.forName(handover.caregiverName || 'whoever is looking after things')}
           {handover.caregiverRelationship ? (
             <>
               <br />
@@ -139,7 +142,7 @@ export default function GuidePage() {
         />
         <div className="row no-print" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
           <Link href={`/guide/${handover.id}/ask`} className="btn">
-            Ask about anything
+            {chrome.askAboutAnything}
           </Link>
           <button
             type="button"
@@ -192,7 +195,7 @@ export default function GuidePage() {
               })();
             }}
           >
-            Send to caregiver
+            {chrome.sendToCaregiver}
           </button>
         </div>
         <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
@@ -206,27 +209,27 @@ export default function GuidePage() {
             }}
           />
           <span>
-            Include photos in this link
+            {chrome.includePhotos}
             <span className="muted" style={{ display: 'block' }}>
-              Off by default. When on, pictures are added to the short link so the caregiver can see
-              them. Anyone with the link can see them too.
+              {chrome.includePhotosHint}
             </span>
           </span>
         </label>
         <p className="hint no-print" aria-live="polite">
           {shareState === 'working'
-            ? 'Preparing the link…'
+            ? chrome.preparingLink
             : shareState === 'too-large'
               ? shareNote
               : shareState === 'failed'
-                ? 'Could not share. Try again.'
+                ? chrome.couldNotShare
                 : shareNote
                   ? shareNote
-                  : 'Send creates a short private link for their phone. Guide plus Ask. Expires after 14 days.'}
+                  : chrome.sendHint}
         </p>
       </div>
 
       <SafetyBlock
+        chrome={chrome}
         blocks={critical}
         acknowledged={acknowledged}
         onAcknowledge={() => {
@@ -236,7 +239,7 @@ export default function GuidePage() {
       />
 
       {subjects.length > 1 && (
-        <FocusFilter subjects={subjects} focus={focus} onChange={setFocus} />
+        <FocusFilter chrome={chrome} subjects={subjects} focus={focus} onChange={setFocus} />
       )}
 
       {routine.length > 0 && (
@@ -245,11 +248,11 @@ export default function GuidePage() {
             <span className="eyebrow">
               {focused
                 ? focused.kind === 'place'
-                  ? `While you are here for ${focused.name}`
-                  : `A typical day for ${focused.name}`
+                  ? chrome.whileYouAreHereFor(focused.name)
+                  : chrome.aTypicalDayFor(focused.name)
                 : subjects.every((s) => s.kind === 'place')
-                  ? 'While you are here'
-                  : 'A typical day'}
+                  ? chrome.whileYouAreHere
+                  : chrome.aTypicalDay}
             </span>
           </div>
           {routine.map((item) => {
@@ -258,7 +261,12 @@ export default function GuidePage() {
             return (
               <div key={item.id} className="routine-item">
                 <span className="routine-time">
-                  {item.time ?? (item.priority === 'nice' ? 'Nice' : item.priority === 'must' ? 'Must' : '—')}
+                  {item.time ??
+                    (item.priority === 'nice'
+                      ? chrome.nice
+                      : item.priority === 'must'
+                        ? chrome.must
+                        : '—')}
                 </span>
                 <span>
                   <strong>{title}</strong>
@@ -269,10 +277,12 @@ export default function GuidePage() {
                   )}
                   {who && focus === 'all' && (
                     <span className="muted" style={{ display: 'block' }}>
-                      For {who.name}
+                      {chrome.forName(who.name)}
                     </span>
                   )}
-                  {item.product && <span className="routine-note">Use {item.product}</span>}
+                  {item.product && (
+                    <span className="routine-note">{chrome.useProduct(item.product)}</span>
+                  )}
                   {item.notes && <span className="routine-note">{item.notes}</span>}
                 </span>
               </div>
@@ -296,7 +306,7 @@ export default function GuidePage() {
           </article>
         ))}
         {rest.length === 0 && routine.length === 0 && (
-          <p className="muted">Nothing was written down for this one.</p>
+          <p className="muted">{chrome.nothingWritten}</p>
         )}
       </section>
 
@@ -316,10 +326,12 @@ export default function GuidePage() {
 }
 
 function FocusFilter({
+  chrome,
   subjects,
   focus,
   onChange,
 }: {
+  chrome: ChromeCopy;
   subjects: readonly CareSubject[];
   focus: Focus;
   onChange: (focus: Focus) => void;
@@ -332,7 +344,7 @@ function FocusFilter({
         aria-pressed={focus === 'all'}
         onClick={() => onChange('all')}
       >
-        Everyone
+        {chrome.everyone}
       </button>
       {subjects.map((subject) => (
         <button
@@ -368,10 +380,12 @@ function FocusFilter({
  *  always gets the full text regardless of what was tapped on screen.
  */
 function SafetyBlock({
+  chrome,
   blocks,
   acknowledged,
   onAcknowledge,
 }: {
+  chrome: ChromeCopy;
   blocks: readonly GuideBlock[];
   acknowledged: boolean;
   onAcknowledge: () => void;
@@ -398,8 +412,8 @@ function SafetyBlock({
           aria-expanded={false}
         >
           <span className="safety-dot" aria-hidden="true" />
-          <span className="grow">Allergies, medication and emergencies</span>
-          <span className="muted">Read · show</span>
+          <span className="grow">{chrome.allergiesMedicationEmergencies}</span>
+          <span className="muted">{chrome.readShow}</span>
         </button>
         {/* Folded on screen is not folded on paper. The printed guide is the copy
             that ends up on the fridge, and it carries the whole thing. */}
@@ -413,7 +427,7 @@ function SafetyBlock({
       <div className="row">
         <span className="safety-dot" aria-hidden="true" />
         <span id="safety-heading" className="eyebrow safety-eyebrow grow">
-          Read this first
+          {chrome.readThisFirst}
         </span>
       </div>
 
@@ -421,11 +435,11 @@ function SafetyBlock({
 
       {acknowledged ? (
         <button type="button" className="btn btn-quiet no-print" onClick={() => setReopened(false)}>
-          Hide again
+          {chrome.hideAgain}
         </button>
       ) : (
         <button type="button" className="btn btn-secondary no-print" onClick={onAcknowledge}>
-          I have read this
+          {chrome.iHaveReadThis}
         </button>
       )}
     </section>

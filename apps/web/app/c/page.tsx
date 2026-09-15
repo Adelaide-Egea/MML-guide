@@ -7,6 +7,7 @@ import {
   type GuideBlock,
   UnsafeGuideError,
   buildVerifiedGuide,
+  chromeFor,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -113,10 +114,12 @@ export default function CaregiverPage() {
     }
   }, [snapshot, language]);
 
+  const chrome = chromeFor(language);
+
   if (error) {
     return (
       <main className="shell">
-        <TopBar title="Guide" />
+        <TopBar title={chrome.guide} />
         <p className="muted">{error}</p>
       </main>
     );
@@ -125,8 +128,8 @@ export default function CaregiverPage() {
   if (!result) {
     return (
       <main className="shell">
-        <TopBar title="Guide" />
-        <p className="muted">Opening the guide…</p>
+        <TopBar title={chrome.guide} />
+        <p className="muted">{chrome.openingGuide}</p>
       </main>
     );
   }
@@ -134,7 +137,7 @@ export default function CaregiverPage() {
   if (result.error || !result.guide) {
     return (
       <main className="shell">
-        <TopBar title="Guide" />
+        <TopBar title={chrome.guide} />
         <div className="critical stack-tight">
           <div className="eyebrow">Not safe to show</div>
           <p>{result.error}</p>
@@ -157,11 +160,11 @@ export default function CaregiverPage() {
 
   return (
     <main className="shell">
-      <TopBar title={handover.caregiverName || 'Your guide'} />
+      <TopBar title={handover.caregiverName || chrome.yourGuide} />
 
       <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
-          For {handover.caregiverName || 'you'}
+          {chrome.forName(handover.caregiverName || 'you')}
           {handover.caregiverRelationship ? (
             <>
               <br />
@@ -171,7 +174,7 @@ export default function CaregiverPage() {
         </p>
         <LanguageToggle value={language} onChange={setLanguage} />
         <Link href="/c/ask" className="btn">
-          Ask about anything
+          {chrome.askAboutAnything}
         </Link>
       </div>
 
@@ -179,7 +182,7 @@ export default function CaregiverPage() {
         <section className="safety stack" style={{ marginBottom: 'var(--space-5)' }}>
           {!acknowledged ? (
             <>
-              <div className="eyebrow">Read first</div>
+              <div className="eyebrow">{chrome.readFirst}</div>
               {critical.map((block) => (
                 <article key={block.id} className="stack-tight">
                   <strong>{block.heading}</strong>
@@ -187,12 +190,12 @@ export default function CaregiverPage() {
                 </article>
               ))}
               <button type="button" className="btn" onClick={() => setAcknowledged(true)}>
-                I have read this
+                {chrome.iHaveReadThis}
               </button>
             </>
           ) : (
             <button type="button" className="btn btn-quiet" onClick={() => setAcknowledged(false)}>
-              Safety notes. Tap to reopen.
+              {chrome.safetyNotesReopen}
             </button>
           )}
         </section>
@@ -206,7 +209,7 @@ export default function CaregiverPage() {
             aria-pressed={focus === 'all'}
             onClick={() => setFocus('all')}
           >
-            Everyone
+            {chrome.everyone}
           </button>
           {subjects.map((subject: CareSubject) => (
             <button
@@ -228,11 +231,11 @@ export default function CaregiverPage() {
             <span className="eyebrow">
               {focused
                 ? focused.kind === 'place'
-                  ? `While you are here for ${focused.name}`
-                  : `A typical day for ${focused.name}`
+                  ? chrome.whileYouAreHereFor(focused.name)
+                  : chrome.aTypicalDayFor(focused.name)
                 : placeOnly
-                  ? 'While you are here'
-                  : 'A typical day'}
+                  ? chrome.whileYouAreHere
+                  : chrome.aTypicalDay}
             </span>
           </div>
           {routine.map((item) => {
@@ -241,7 +244,11 @@ export default function CaregiverPage() {
               <div key={item.id} className="routine-item">
                 <span className="routine-time">
                   {item.time ??
-                    (item.priority === 'nice' ? 'Nice' : item.priority === 'must' ? 'Must' : '—')}
+                    (item.priority === 'nice'
+                      ? chrome.nice
+                      : item.priority === 'must'
+                        ? chrome.must
+                        : '—')}
                 </span>
                 <span>
                   <strong>{routineItemLabel(item)}</strong>
@@ -252,10 +259,12 @@ export default function CaregiverPage() {
                   )}
                   {who && focus === 'all' && (
                     <span className="muted" style={{ display: 'block' }}>
-                      For {who.name}
+                      {chrome.forName(who.name)}
                     </span>
                   )}
-                  {item.product && <span className="routine-note">Use {item.product}</span>}
+                  {item.product && (
+                    <span className="routine-note">{chrome.useProduct(item.product)}</span>
+                  )}
                   {item.notes && <span className="routine-note">{item.notes}</span>}
                 </span>
               </div>
@@ -279,7 +288,7 @@ export default function CaregiverPage() {
           </article>
         ))}
         {rest.length === 0 && routine.length === 0 && (
-          <p className="muted">Nothing was written down for this visit.</p>
+          <p className="muted">{chrome.nothingWritten}</p>
         )}
       </section>
 
