@@ -82,11 +82,12 @@ export default function AskPage() {
         });
         if (!response.ok) throw new Error(String(response.status));
         const model = (await response.json()) as { body: string; citedEntryIds: string[] };
-        setShown({
-          question: asked,
-          kind: 'answer',
-          answer: acceptModelAnswer(prepared, model, language),
-        });
+        const answer = acceptModelAnswer(prepared, model, language);
+        if (answer.kind === 'refusal' && prepared.candidates.length > 0) {
+          setShown({ question: asked, kind: 'degraded', candidates: prepared.candidates });
+        } else {
+          setShown({ question: asked, kind: 'answer', answer });
+        }
       } catch {
         // The assistant being unavailable must not mean no answer. Retrieval is
         // deterministic and already ran, so the matched entries are shown exactly as
@@ -141,11 +142,13 @@ export default function AskPage() {
 
       {!busy && shown && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
-          <p className="muted">“{shown.question}”</p>
+          <p className="muted">
+            {chrome.youAsked}: {shown.question}
+          </p>
           {shown.kind === 'answer' ? (
-            <AnswerView answer={shown.answer} />
+            <AnswerView answer={shown.answer} chrome={chrome} />
           ) : (
-            <FromTheGuide candidates={shown.candidates} />
+            <FromTheGuide candidates={shown.candidates} chrome={chrome} />
           )}
         </section>
       )}
@@ -156,10 +159,16 @@ export default function AskPage() {
 /** What the guide says, with no model involved. Also what the whole product falls
  *  back to during a provider outage, which is why the AI is an improvement to this
  *  rather than a dependency of it. */
-function FromTheGuide({ candidates }: { candidates: readonly Candidate[] }) {
+function FromTheGuide({
+  candidates,
+  chrome,
+}: {
+  candidates: readonly Candidate[];
+  chrome: ReturnType<typeof chromeFor>;
+}) {
   return (
     <div className="answer stack-tight">
-      <p className="muted">The assistant is unavailable, so here is what the guide says.</p>
+      <p className="muted">{chrome.assistantUnavailable}</p>
       {candidates.map((candidate) => (
         <div key={candidate.entry.id} className="stack-tight" style={{ marginTop: 'var(--space-3)' }}>
           <strong>{candidate.entry.title}</strong>
@@ -181,7 +190,13 @@ function FromTheGuide({ candidates }: { candidates: readonly Candidate[] }) {
   );
 }
 
-function AnswerView({ answer }: { answer: Answer }) {
+function AnswerView({
+  answer,
+  chrome,
+}: {
+  answer: Answer;
+  chrome: ReturnType<typeof chromeFor>;
+}) {
   if (answer.kind === 'critical-passthrough') {
     return (
       <div className="critical stack-tight">
@@ -203,11 +218,8 @@ function AnswerView({ answer }: { answer: Answer }) {
   if (answer.kind === 'refusal') {
     return (
       <div className="notice stack-tight">
-        <strong>That is not in the guide.</strong>
-        <p className="muted">
-          Rather than guess, this says nothing. If it matters, call the number under &ldquo;who to
-          call&rdquo;.
-        </p>
+        <strong>{chrome.notInGuide}</strong>
+        <p className="muted">{chrome.notInGuideHint}</p>
       </div>
     );
   }

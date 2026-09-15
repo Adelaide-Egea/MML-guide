@@ -39,6 +39,10 @@ export interface ChromeCopy {
   readonly preparingLink: string;
   readonly couldNotShare: string;
   readonly openingGuide: string;
+  readonly youAsked: string;
+  readonly notInGuide: string;
+  readonly notInGuideHint: string;
+  readonly assistantUnavailable: string;
   readonly whileYouAreHereFor: (name: string) => string;
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
@@ -81,6 +85,11 @@ const EN: ChromeCopy = {
   preparingLink: 'Preparing the link…',
   couldNotShare: 'Could not share. Try again.',
   openingGuide: 'Opening the guide…',
+  youAsked: 'You asked',
+  notInGuide: 'That is not in the guide.',
+  notInGuideHint:
+    'Rather than guess, this says nothing. If it matters, call the number under “who to call”.',
+  assistantUnavailable: 'The assistant is unavailable, so here is what was written — unchanged.',
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
@@ -126,6 +135,11 @@ const FR: ChromeCopy = {
   preparingLink: 'Préparation du lien…',
   couldNotShare: 'Impossible de partager. Réessayez.',
   openingGuide: 'Ouverture du guide…',
+  youAsked: 'Vous avez demandé',
+  notInGuide: 'Ce n’est pas dans le guide.',
+  notInGuideHint:
+    'Plutôt que d’inventer, ceci ne dit rien. Si c’est important, appelez le numéro sous « qui appeler ».',
+  assistantUnavailable: 'L’assistant est indisponible, voici donc ce qui a été écrit — inchangé.',
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,

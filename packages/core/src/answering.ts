@@ -87,11 +87,53 @@ function stem(token: string): string {
   return token;
 }
 
+/** Caregivers ask about "TV" and "iPad"; parents write "screens". Without this
+ *  bridge, retrieval never scores the entry that answers the question, and the
+ *  model — shown a pile of unrelated Elise notes — shrugs NOT_IN_GUIDE. */
+const TERM_SYNONYMS: ReadonlyMap<string, readonly string[]> = new Map([
+  ['tv', ['screen', 'television']],
+  ['television', ['screen', 'tv']],
+  ['tele', ['screen', 'tv', 'television']],
+  ['telly', ['screen', 'tv']],
+  ['ipad', ['screen', 'tablet']],
+  ['tablet', ['screen', 'ipad']],
+  ['iphone', ['screen', 'phone']],
+  ['phone', ['screen']],
+  ['youtube', ['screen']],
+  ['netflix', ['screen']],
+  ['disney', ['screen']],
+  ['cartoon', ['screen']],
+  ['video', ['screen']],
+  ['game', ['screen']],
+  ['gaming', ['screen']],
+  ['ecran', ['screen']],
+  ['ecrans', ['screen']],
+  ['tablette', ['screen', 'tablet']],
+  ['dessin', ['screen']],
+  ['watch', ['screen']], // "can she watch …" almost always means screens here
+  ['regarder', ['screen']],
+]);
+
+function expandTerm(token: string): readonly string[] {
+  const synonyms = TERM_SYNONYMS.get(token);
+  return synonyms ? [token, ...synonyms] : [token];
+}
+
 function terms(value: string): readonly string[] {
-  return normalise(value)
-    .split(/[^\p{Letter}\p{Number}]+/u)
-    .filter((t) => t.length > 2 && !STOPWORDS.has(t))
-    .map(stem);
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of normalise(value).split(/[^\p{Letter}\p{Number}]+/u)) {
+    if (raw.length < 2 || STOPWORDS.has(raw)) continue;
+    // Keep short tokens that are synonym keys (tv) even when under the usual
+    // three-letter floor — otherwise "tv" never enters the query at all.
+    if (raw.length < 3 && !TERM_SYNONYMS.has(raw)) continue;
+    for (const piece of expandTerm(stem(raw))) {
+      if (seen.has(piece)) continue;
+      seen.add(piece);
+      out.push(piece);
+    }
+  }
+  return out;
 }
 
 // ── Detecting a safety-critical question ─────────────────────────────────────
@@ -231,6 +273,14 @@ const TOPIC_WORDS: Record<string, readonly string[]> = {
   'out-of-the-house': [
     'walk', 'park', 'outside', 'out', 'garden', 'street', 'lead', 'leash',
     'promenade', 'parc', 'sortir', 'dehors', 'jardin',
+  ],
+  // Screens live under house-rules in the child prompts. Without these words,
+  // "can Elise watch TV?" never boosts the Screens entry over random notes.
+  'house-rules': [
+    'screen', 'screens', 'tv', 'television', 'tablet', 'ipad', 'phone', 'youtube',
+    'netflix', 'disney', 'cartoon', 'game', 'gaming', 'wifi',
+    'ecran', 'ecrans', 'tablette', 'tele', 'dessin', 'regarder', 'watch',
+    'rule', 'rules', 'allowed', 'permission', 'interdit', 'autoris',
   ],
 };
 
@@ -585,7 +635,23 @@ export function acceptModelAnswer(
   // into a refusal anyway, but a model that cites something alongside it would put
   // the sentinel itself on the caregiver's screen. Recognise it here instead of
   // relying on that accident.
-  if (model.body.trim() === refusal(readerLanguage).body) return refusal(readerLanguage);
+  //
+  // When retrieval already found a strong match (e.g. "can Elise watch TV?" against
+  // a Screens entry) and the model still shrugs, prefer the parent's own words over
+  // a blank refusal. The caregiver asked for a reason; "NOT_IN_GUIDE" on top of an
+  // entry that answers the question is the failure mode we are fixing.
+  if (model.body.trim() === refusal(readerLanguage).body) {
+    const top = prepared.candidates[0];
+    if (top && top.score >= 5 && hasText(top.entry.body)) {
+      return {
+        kind: 'grounded',
+        body: top.entry.body.trim(),
+        language: readerLanguage,
+        citations: [citationFor(top)],
+      };
+    }
+    return refusal(readerLanguage);
+  }
 
   const byId = new Map(prepared.candidates.map((c) => [c.entry.id, c]));
   const citations: Citation[] = [];

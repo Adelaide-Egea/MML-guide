@@ -98,11 +98,14 @@ export default function CaregiverAskPage() {
         });
         if (!response.ok) throw new Error(String(response.status));
         const model = (await response.json()) as { body: string; citedEntryIds: string[] };
-        setShown({
-          question: asked,
-          kind: 'answer',
-          answer: acceptModelAnswer(prepared, model, language),
-        });
+        const answer = acceptModelAnswer(prepared, model, language);
+        // If the model still refuses despite retrieval finding entries, show the
+        // parent's words rather than a blank wall — the caregiver asked for a reason.
+        if (answer.kind === 'refusal' && prepared.candidates.length > 0) {
+          setShown({ question: asked, kind: 'degraded', candidates: prepared.candidates });
+        } else {
+          setShown({ question: asked, kind: 'answer', answer });
+        }
       } catch {
         setShown({ question: asked, kind: 'degraded', candidates: prepared.candidates });
       }
@@ -138,16 +141,29 @@ export default function CaregiverAskPage() {
 
       {shown && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
-          <p className="muted">You asked: {shown.question}</p>
+          <p className="muted">
+            {chrome.youAsked}: {shown.question}
+          </p>
           {shown.kind === 'answer' ? (
-            <article className="card stack-tight">
-              <p className="block-body">{shown.answer.body || shown.answer.verbatim}</p>
-            </article>
+            shown.answer.kind === 'refusal' ? (
+              <article className="card stack-tight">
+                <strong>{chrome.notInGuide}</strong>
+                <p className="muted">{chrome.notInGuideHint}</p>
+              </article>
+            ) : (
+              <article className="card stack-tight">
+                <p className="block-body">{shown.answer.body || shown.answer.verbatim}</p>
+                {shown.answer.citations.map((citation) => (
+                  <span key={citation.entryId} className="citation">
+                    {citation.title}
+                    {citation.writtenBy ? ` · ${citation.writtenBy}` : ''}
+                  </span>
+                ))}
+              </article>
+            )
           ) : (
             <article className="card stack-tight">
-              <p className="muted">
-                The assistant is unavailable, so here is what was written — unchanged.
-              </p>
+              <p className="muted">{chrome.assistantUnavailable}</p>
               {shown.candidates.map((c) => (
                 <div key={c.entry.id} className="stack-tight">
                   <strong>{c.entry.title}</strong>

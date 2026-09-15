@@ -358,15 +358,62 @@ test('an invented citation degrades to a refusal rather than throwing at the car
 
 test('the refusal sentinel never reaches the caregiver as prose', () => {
   // A model that says NOT_IN_GUIDE *and* cites something would otherwise pass
-  // verification and put the sentinel itself on the screen.
+  // verification and put the sentinel itself on the screen. Accepting it must
+  // still produce a refusal with no citations — the UI maps the kind to copy,
+  // and must never paint answer.body when kind is refusal.
   const prepared = prepare(subjects, 'où sont les produits de nettoyage ?', 'pt');
   const answer = acceptModelAnswer(
     prepared,
     { body: 'NOT_IN_GUIDE', citedEntryIds: ['house-storage'] },
     'pt',
   );
-  assert.equal(answer.kind, 'refusal');
-  assert.equal(answer.citations.length, 0);
+  if (answer.kind === 'grounded') {
+    // Strong retrieval may promote the parent's words instead — that is fine,
+    // and the body must be those words, not the sentinel.
+    assert.notEqual(answer.body, 'NOT_IN_GUIDE');
+    assert.ok(answer.citations.length > 0);
+  } else {
+    assert.equal(answer.kind, 'refusal');
+    assert.equal(answer.citations.length, 0);
+  }
+});
+
+test('a TV / screen-time question finds the Screens entry, not a blank refusal', () => {
+  // Reported live: "Can elise Watch tv" returned NOT_IN_GUIDE while the guide
+  // plainly said Élise is not allowed screen time.
+  const elise: CareSubject = {
+    ...subjects.find((s) => s.kind === 'child')!,
+    id: 'elise',
+    name: 'Élise',
+    entries: [
+      entry({
+        id: 'elise-screens',
+        topic: 'house-rules',
+        title: 'Screens',
+        body: "Élise isn't allowed screen time.",
+      }),
+      entry({
+        id: 'elise-food',
+        topic: 'meals',
+        title: 'Food',
+        body: 'Likes pasta.',
+      }),
+    ],
+  };
+  const hits = retrieve([elise], 'Can elise Watch tv');
+  assert.equal(hits[0]?.entry.id, 'elise-screens');
+  assert.ok((hits[0]?.score ?? 0) >= 5);
+
+  const prepared = prepare([elise], 'Can elise Watch tv', 'en');
+  assert.equal(prepared.route, 'model');
+  const answer = acceptModelAnswer(
+    prepared,
+    { body: 'NOT_IN_GUIDE', citedEntryIds: [] },
+    'en',
+  );
+  assert.equal(answer.kind, 'grounded');
+  assert.match(answer.body, /screen time/i);
+  assert.equal(answer.citations[0]?.entryId, 'elise-screens');
 });
 
 test('a well-formed model answer is accepted and keeps its provenance', () => {
