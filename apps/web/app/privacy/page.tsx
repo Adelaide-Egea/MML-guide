@@ -40,9 +40,10 @@ export default function PrivacyPage() {
           <li>No sale of data. No advertising profiles.</li>
           <li>No uploading of photos or guide text to Domela servers in ordinary use.</li>
           <li>
-            Caregiver links are text-only by default. If you tick “Include photos in this link”,
-            those pictures travel inside the link itself — Domela still does not host them, but
-            anyone with the link can see them.
+            Caregiver links are short private links that expire after 14 days. The guide for that
+            visit is stored temporarily so the babysitter gets a link that fits in WhatsApp. After
+            it expires, the link stops working. Photos are included only if you tick “Include photos
+            in this link” — anyone with the link can then see them.
           </li>
           <li>
             App updates keep what you already saved on this device. A backup copy of your

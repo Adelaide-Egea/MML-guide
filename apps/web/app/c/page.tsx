@@ -30,21 +30,16 @@ export default function CaregiverPage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '');
-    if (!hash) {
-      setError('This link has no guide in it.');
-      return;
-    }
-    void decodeSnapshot(hash).then(async (decoded) => {
-      if (!decoded) {
-        setError('This link could not be read. Ask them to send it again.');
-        return;
-      }
-      // When the parent opted in, photo bytes are in the snapshot — install them
-      // into this phone's media store so the existing thumbs can resolve.
-      try {
-        await installSnapshotMedia(decoded);
-      } catch {
-        // Text still shows; missing photos are better than failing the whole guide.
+
+    const open = async (decoded: GuideSnapshot, installMedia: boolean) => {
+      if (installMedia) {
+        // When the parent opted in, photo bytes are in the snapshot — install them
+        // into this phone's media store so the existing thumbs can resolve.
+        try {
+          await installSnapshotMedia(decoded);
+        } catch {
+          // Text still shows; missing photos are better than failing the whole guide.
+        }
       }
       setSnapshot(decoded);
       setLanguage(decoded.handover.language || 'en');
@@ -57,7 +52,33 @@ export default function CaregiverPage() {
           handover: { ...decoded.handover, language: decoded.handover.language },
         }),
       );
-    });
+    };
+
+    if (hash) {
+      void decodeSnapshot(hash).then(async (decoded) => {
+        if (!decoded) {
+          setError('This link could not be read. Ask them to send it again.');
+          return;
+        }
+        await open(decoded, true);
+      });
+      return;
+    }
+
+    // Short links (/c/s/{id}) land here after the snapshot is parked in sessionStorage.
+    try {
+      const raw = window.sessionStorage.getItem('mml.caregiver-snapshot');
+      if (raw) {
+        const parsed = JSON.parse(raw) as GuideSnapshot;
+        if (parsed?.household && parsed?.handover) {
+          void open(parsed, false);
+          return;
+        }
+      }
+    } catch {
+      // Fall through to the empty-link error.
+    }
+    setError('This link has no guide in it.');
   }, []);
 
   useEffect(() => {

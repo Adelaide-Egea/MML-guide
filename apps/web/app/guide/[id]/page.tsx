@@ -153,19 +153,20 @@ export default function GuidePage() {
                     );
                     return;
                   }
-                  if (includePhotos && result.omittedVideos > 0) {
-                    setShareNote(
-                      `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone — they are too large for a link.`,
-                    );
-                  } else if (includePhotos) {
-                    setShareNote(
-                      result.photoCount === 0
-                        ? 'No photos on this guide yet — the link is text only.'
-                        : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`,
-                    );
+                  let note =
+                    includePhotos && result.omittedVideos > 0
+                      ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone — they are too large for a link.`
+                      : includePhotos
+                        ? result.photoCount === 0
+                          ? 'No photos on this guide yet — the link is text only.'
+                          : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`
+                        : 'Text only — photos stayed on this phone.';
+                  if (result.short) {
+                    note = `${note} Short link ready — easy to paste into WhatsApp. Expires in 14 days.`;
                   } else {
-                    setShareNote('Text only — photos stayed on this phone.');
+                    note = `${note} Could not shorten the link, so this one is long — still works.`;
                   }
+                  setShareNote(note);
                   if (navigator.share) {
                     await navigator.share({
                       title: `Guide for ${handover.caregiverName || 'caregiver'}`,
@@ -208,14 +209,14 @@ export default function GuidePage() {
           <span>
             Include photos in this link
             <span className="muted" style={{ display: 'block' }}>
-              Off by default. When on, pictures travel inside the link so the caregiver or cleaner
-              can see them — anyone you send it to can see them too.
+              Off by default. When on, pictures are added to the short link so the caregiver can see
+              them — anyone with the link can see them too.
             </span>
           </span>
         </label>
         <p className="hint no-print">
-          Send opens the caregiver view on their phone — guide plus Ask — without uploading the
-          household to Domela.
+          Send creates a short private link for their phone — guide plus Ask. It expires after 14
+          days.
           {shareNote ? ` ${shareNote}` : ''}
         </p>
       </div>

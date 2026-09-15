@@ -32,7 +32,7 @@ export default function DataPage() {
           <tr>
             <td>Photos</td>
             <td>This browser (IndexedDB)</td>
-            <td>Only if you tick “Include photos” when sending a caregiver link</td>
+            <td>Only if you tick “Include photos” when sending a caregiver link (stored in the short link for 14 days)</td>
           </tr>
           <tr>
             <td>Your saved household (guides, trips, notes)</td>

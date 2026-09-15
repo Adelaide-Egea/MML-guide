@@ -1,13 +1,12 @@
 // Caregiver share snapshots.
 //
-// The parent writes on one phone; the caregiver needs the guide on theirs. Until a
-// short-lived server exists, the snapshot rides in the URL fragment so nothing is
-// uploaded to Domela. Fragments are not sent to the server, which keeps medical
-// detail out of logs.
+// Sending to a babysitter creates a short /c/s/{id} link. The encoded guide is
+// stored privately for 14 days so WhatsApp/SMS stay readable. If short-link
+// storage is unavailable, we fall back to a long URL fragment (nothing uploaded).
 //
-// Photos are opt-in. By default the link carries text only and blobs stay on this
-// device. When the parent consents, photo bytes are embedded in the fragment so
-// the caregiver can see them — anyone with the link can then see them too.
+// Photos are opt-in. By default the link carries text only. When the parent
+// consents, photo bytes are compressed and included — anyone with the link can
+// then see them.
 
 import type { Handover, Household, Media } from '@mml/core';
 import { subjectsFor } from '@mml/core';
@@ -43,6 +42,9 @@ export type ShareBuildResult =
       readonly url: string;
       readonly photoCount: number;
       readonly omittedVideos: number;
+      /** True when the URL is a short /c/s/{id} link stored temporarily on Domela. */
+      readonly short: boolean;
+      readonly expiresAt?: string;
     }
   | {
       readonly ok: false;
@@ -180,15 +182,51 @@ export function videoCountIn(household: Household): number {
   return n;
 }
 
+/** Max edge length for photos embedded in a share (keeps babysitter links small). */
+const SHARE_PHOTO_MAX_EDGE = 1280;
+const SHARE_PHOTO_QUALITY = 0.72;
+
+/** Downscale + re-encode a photo for sharing. Falls back to the original bytes. */
+async function compressPhotoForShare(blob: Blob): Promise<{ mime: string; bytes: Uint8Array }> {
+  if (typeof createImageBitmap === 'undefined' || typeof document === 'undefined') {
+    return { mime: blob.type || 'image/jpeg', bytes: new Uint8Array(await blob.arrayBuffer()) };
+  }
+  try {
+    const bitmap = await createImageBitmap(blob);
+    const scale = Math.min(1, SHARE_PHOTO_MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      bitmap.close();
+      return { mime: blob.type || 'image/jpeg', bytes: new Uint8Array(await blob.arrayBuffer()) };
+    }
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+    const compressed = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), 'image/jpeg', SHARE_PHOTO_QUALITY),
+    );
+    if (!compressed) {
+      return { mime: blob.type || 'image/jpeg', bytes: new Uint8Array(await blob.arrayBuffer()) };
+    }
+    return { mime: 'image/jpeg', bytes: new Uint8Array(await compressed.arrayBuffer()) };
+  } catch {
+    return { mime: blob.type || 'image/jpeg', bytes: new Uint8Array(await blob.arrayBuffer()) };
+  }
+}
+
 async function loadPhotoBlobs(keys: readonly string[]): Promise<Record<string, EmbeddedBlob>> {
   const out: Record<string, EmbeddedBlob> = {};
   for (const key of keys) {
     const blob = await getBlob(key);
     if (!blob) continue;
-    const buf = new Uint8Array(await blob.arrayBuffer());
+    const compressed = await compressPhotoForShare(blob);
     out[key] = {
-      mime: blob.type || 'image/jpeg',
-      data: bytesToBase64(buf),
+      mime: compressed.mime,
+      data: bytesToBase64(compressed.bytes),
     };
   }
   return out;
@@ -236,11 +274,38 @@ export async function buildShareUrl(
     return { ok: false, reason: 'too-large', photoCount, chars: encoded.length };
   }
   const base = typeof window === 'undefined' ? '' : window.location.origin;
+
+  // Prefer a short /c/s/{id} link so WhatsApp/SMS stay readable. Falls back to the
+  // long fragment URL if the short-link service is unavailable (offline, misconfig).
+  try {
+    const response = await fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: encoded }),
+    });
+    if (response.ok) {
+      const data = (await response.json()) as { id?: string; path?: string; expiresAt?: string };
+      if (data.path && data.id) {
+        return {
+          ok: true,
+          url: `${base}${data.path}`,
+          photoCount,
+          omittedVideos,
+          short: true,
+          ...(data.expiresAt ? { expiresAt: data.expiresAt } : {}),
+        };
+      }
+    }
+  } catch {
+    // Fall through to fragment URL.
+  }
+
   return {
     ok: true,
     url: `${base}/c#${encoded}`,
     photoCount,
     omittedVideos,
+    short: false,
   };
 }
 
