@@ -162,7 +162,12 @@ export default function CaregiverPage() {
       <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
           For {handover.caregiverName || 'you'}
-          {handover.caregiverRelationship ? ` · ${handover.caregiverRelationship}` : ''}
+          {handover.caregiverRelationship ? (
+            <>
+              <br />
+              {handover.caregiverRelationship}
+            </>
+          ) : null}
         </p>
         <LanguageToggle value={language} onChange={setLanguage} />
         <Link href="/c/ask" className="btn">
@@ -187,7 +192,7 @@ export default function CaregiverPage() {
             </>
           ) : (
             <button type="button" className="btn btn-quiet" onClick={() => setAcknowledged(false)}>
-              Safety notes — tap to reopen
+              Safety notes. Tap to reopen.
             </button>
           )}
         </section>
@@ -223,8 +228,8 @@ export default function CaregiverPage() {
             <span className="eyebrow">
               {focused
                 ? focused.kind === 'place'
-                  ? `${focused.name} — while you are here`
-                  : `${focused.name} — a typical day`
+                  ? `While you are here for ${focused.name}`
+                  : `A typical day for ${focused.name}`
                 : placeOnly
                   ? 'While you are here'
                   : 'A typical day'}
@@ -240,8 +245,16 @@ export default function CaregiverPage() {
                 </span>
                 <span>
                   <strong>{routineItemLabel(item)}</strong>
-                  {item.section && <span className="muted"> · {item.section}</span>}
-                  {who && focus === 'all' && <span className="muted"> · {who.name}</span>}
+                  {item.section && (
+                    <span className="muted" style={{ display: 'block' }}>
+                      {item.section}
+                    </span>
+                  )}
+                  {who && focus === 'all' && (
+                    <span className="muted" style={{ display: 'block' }}>
+                      For {who.name}
+                    </span>
+                  )}
                   {item.product && <span className="routine-note">Use {item.product}</span>}
                   {item.notes && <span className="routine-note">{item.notes}</span>}
                 </span>

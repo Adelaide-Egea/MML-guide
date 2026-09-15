@@ -18,14 +18,21 @@ const ui = Figtree({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://domela.app'),
   title: 'Domela — the household guide',
   description: 'Everything they need while you are not there.',
+  openGraph: {
+    title: 'Domela — the household guide',
+    description: 'Everything you need while they are away.',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#dfe8e5' },
-    { media: '(prefers-color-scheme: dark)', color: '#15201c' },
+    { media: '(prefers-color-scheme: light)', color: '#eef0ed' },
+    { media: '(prefers-color-scheme: dark)', color: '#18241f' },
   ],
 };
 

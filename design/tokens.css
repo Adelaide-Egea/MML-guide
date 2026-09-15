@@ -1,43 +1,43 @@
 /* Design tokens — Domela.
 
- * Cool slate-sage ground — not chalk, not cream. The previous mist (#f3f6f4)
- * still read as beige next to marigold; this ground is clearly green-grey.
- * Marigold stays the only interactive accent. Brand tints are cool washes,
- * never sand.
+ * Neutral ground. Not cream, not sage. Photos of a real household sit on this
+ * page; a tinted ground casts every one of them. The brand lives in pine ink
+ * and marigold accent, never in the paper.
  *
  * Buttons: pine text on marigold fill — never white on marigold.
  * design/contrast.mjs verifies every pair and fails the build.
  */
 
 :root {
-  /* Surfaces — cool slate-sage (deliberately not cream) */
-  --putty: #9eb5ae;
-  --paper: #dfe8e5;
-  --surface: #d0ddd8;
-  --surface-sunk: #bfcfc9;
-  --hairline: #aebfc0;
-  --hairline-strong: #6a7f78;
+  /* Surfaces — three steps, not five muddy neighbours */
+  --putty: #c5cbc4;
+  --paper: #eef0ed;
+  --surface: #ffffff;
+  --surface-sunk: #e2e6e1;
+  --hairline: #dbdfd9;
+  --hairline-strong: #8a968f;
 
   /* Ink — pine */
-  --ink: #1a2c26;
-  --ink-muted: #4f635b;
+  --ink: #18241f;
+  --ink-muted: #56645d;
 
-  /* Marigold — the single interactive accent */
+  /* Marigold — interactive fills and the punctum only */
   --brand: #d9923a;
-  --brand-tint: #d5e3dd; /* cool sage wash, not sand */
-  --on-brand: #1a2c26; /* pine on marigold — never white */
+  --brand-tint: #e8ebe7; /* neutral wash, not sand */
+  --on-brand: #18241f; /* pine on marigold — never white */
   --petrol: #d9923a; /* alias kept for contrast.mjs / legacy refs */
 
   /* Moss — done only */
-  --done: #3f7a4d;
-  --done-tint: #cfe0d4;
+  --done: #2f7a45;
+  --done-tint: #d4e8da;
 
-  --amber: #7a4c10; /* marigold deep AA on cool paper + amber-tint */
-  --amber-tint: #d7e0d6; /* cool wash */
+  --amber: #8a5310; /* marigold deep — small text / icons on light ground */
+  --amber-tint: #f0e6d8;
 
-  --critical: #9e2b25; /* brick — safety only */
+  --critical: #a8231f; /* brick — safety only */
   --critical-tint: #f0d6d4;
 
+  /* Subject identity hues — user content, subordinate to brand */
   --id-petrol: #306369;
   --id-indigo: #485899;
   --id-plum: #7a3c6e;
@@ -68,23 +68,23 @@
   --text-xl: 22px;
   --text-2xl: 28px;
 
-  --shadow-card: 0 1px 1px rgba(26, 44, 38, 0.04), 0 2px 10px rgba(26, 44, 38, 0.06);
+  --shadow-card: 0 1px 1px rgba(24, 36, 31, 0.04), 0 2px 10px rgba(24, 36, 31, 0.06);
 }
 
 :root[data-theme="dark"] {
-  --putty: #121c19;
-  --paper: #15201c;
-  --surface: #21302b;
-  --surface-sunk: #101a17;
+  --putty: #0f1814;
+  --paper: #18241f;
+  --surface: #24332c;
+  --surface-sunk: #121c18;
   --hairline: #31413b;
-  --hairline-strong: #5a6f67;
+  --hairline-strong: #8a968f;
 
-  --ink: #dfe8e5;
-  --ink-muted: #9aada5;
+  --ink: #eef0ed;
+  --ink-muted: #a3b0a9;
 
   --brand: #e0a04a;
   --brand-tint: #2a3832;
-  --on-brand: #15201c;
+  --on-brand: #18241f;
   --petrol: #e0a04a;
 
   --done: #7abc89;

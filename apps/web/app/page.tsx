@@ -190,6 +190,8 @@ export default function Home() {
 
       {empty && !sampleId && (
         <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+          Write it once. She can ask it the rest.
+          <br />
           Want to look around first?{' '}
           <button
             type="button"
@@ -239,8 +241,8 @@ function Welcome() {
       <h2 className="display">{greeting ? `${greeting}.` : '\u00a0'}</h2>
       <p>
         {listed
-          ? `${listed} — everything about them, written down once, ready for whoever has them next.`
-          : 'Everything they need while you are not there. Write it once, with photos, and they can just ask it.'}
+          ? `Everything about ${listed}, written once, so it is still there on Thursday.`
+          : "Everything you'd put in a long text message on the way out of the door. Written once, so it's still there on Thursday."}
       </p>
     </section>
   );

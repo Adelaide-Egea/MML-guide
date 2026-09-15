@@ -126,7 +126,12 @@ export default function GuidePage() {
       <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
           For {handover.caregiverName || 'whoever is looking after things'}
-          {handover.caregiverRelationship ? ` · ${handover.caregiverRelationship}` : ''}
+          {handover.caregiverRelationship ? (
+            <>
+              <br />
+              {handover.caregiverRelationship}
+            </>
+          ) : null}
         </p>
         <LanguageToggle
           value={handover.language}
@@ -155,16 +160,16 @@ export default function GuidePage() {
                   }
                   let note =
                     includePhotos && result.omittedVideos > 0
-                      ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone — they are too large for a link.`
+                      ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone; they are too large for a link.`
                       : includePhotos
                         ? result.photoCount === 0
-                          ? 'No photos on this guide yet — the link is text only.'
+                          ? 'No photos on this guide yet. The link is text only.'
                           : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`
-                        : 'Text only — photos stayed on this phone.';
+                        : 'Text only. Photos stayed on this phone.';
                   if (result.short) {
-                    note = `${note} Short link ready — easy to paste into WhatsApp. Expires in 14 days.`;
+                    note = `${note} Short link ready for WhatsApp. Expires in 14 days.`;
                   } else {
-                    note = `${note} Could not shorten the link, so this one is long — still works.`;
+                    note = `${note} Could not shorten the link, so this one is long. It still works.`;
                   }
                   setShareNote(note);
                   if (navigator.share) {
@@ -174,9 +179,11 @@ export default function GuidePage() {
                       url: result.url,
                     });
                     setShareState('copied');
+                    setShareNote(`Sent. ${note}`);
                   } else {
                     await navigator.clipboard.writeText(result.url);
                     setShareState('copied');
+                    setShareNote(`Sent. ${note}`);
                   }
                 } catch {
                   setShareState('failed');
@@ -185,15 +192,7 @@ export default function GuidePage() {
               })();
             }}
           >
-            {shareState === 'copied'
-              ? 'Link ready'
-              : shareState === 'failed'
-                ? 'Could not share'
-                : shareState === 'too-large'
-                  ? 'Link too large'
-                  : shareState === 'working'
-                    ? 'Preparing…'
-                    : 'Send to caregiver'}
+            Send to caregiver
           </button>
         </div>
         <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
@@ -210,14 +209,20 @@ export default function GuidePage() {
             Include photos in this link
             <span className="muted" style={{ display: 'block' }}>
               Off by default. When on, pictures are added to the short link so the caregiver can see
-              them — anyone with the link can see them too.
+              them. Anyone with the link can see them too.
             </span>
           </span>
         </label>
-        <p className="hint no-print">
-          Send creates a short private link for their phone — guide plus Ask. It expires after 14
-          days.
-          {shareNote ? ` ${shareNote}` : ''}
+        <p className="hint no-print" aria-live="polite">
+          {shareState === 'working'
+            ? 'Preparing the link…'
+            : shareState === 'too-large'
+              ? shareNote
+              : shareState === 'failed'
+                ? 'Could not share. Try again.'
+                : shareNote
+                  ? shareNote
+                  : 'Send creates a short private link for their phone. Guide plus Ask. Expires after 14 days.'}
         </p>
       </div>
 
@@ -240,8 +245,8 @@ export default function GuidePage() {
             <span className="eyebrow">
               {focused
                 ? focused.kind === 'place'
-                  ? `${focused.name} — while you are here`
-                  : `${focused.name} — a typical day`
+                  ? `While you are here for ${focused.name}`
+                  : `A typical day for ${focused.name}`
                 : subjects.every((s) => s.kind === 'place')
                   ? 'While you are here'
                   : 'A typical day'}
@@ -257,8 +262,16 @@ export default function GuidePage() {
                 </span>
                 <span>
                   <strong>{title}</strong>
-                  {item.section && <span className="muted"> · {item.section}</span>}
-                  {who && focus === 'all' && <span className="muted"> · {who.name}</span>}
+                  {item.section && (
+                    <span className="muted" style={{ display: 'block' }}>
+                      {item.section}
+                    </span>
+                  )}
+                  {who && focus === 'all' && (
+                    <span className="muted" style={{ display: 'block' }}>
+                      For {who.name}
+                    </span>
+                  )}
                   {item.product && <span className="routine-note">Use {item.product}</span>}
                   {item.notes && <span className="routine-note">{item.notes}</span>}
                 </span>

@@ -71,52 +71,58 @@ When you leave, you try to transfer all of it in a text message on the way out o
 
 ## 6. The mark
 
-**The D is the door.** A capital D whose counter is cut through to the baseline, so the letter reads as an open doorway. Not a house, not a roof, not a key — those are the three clichés of the category. Inside the doorway sits a small square, the punctum: the note left for whoever comes in.
+**The D is the door.** A capital D whose counter is cut through to the baseline, so the letter reads as an open doorway. Not a house, not a roof, not a key — those are the three clichés of the category. Inside the doorway sits a small square, the punctum: the note left for whoever comes in. The opening is deliberately narrow (2.5 units at 48-unit scale) so the letter still reads as a D at 16–24px.
 
 | Asset | Spec |
 |---|---|
-| App icon | Clay tile `#E3D3BC`, corner radius 22% of tile, D in pine `#22332C`, punctum in marigold `#D08A2C` |
+| App icon | Pine tile `#18241F`, corner radius 22% of tile, D in paper `#EEF0ED`, punctum in marigold `#D9923A` |
+| On light | D in pine `#18241F`, punctum marigold |
 | Monochrome | D in pine, no punctum. Use below 24px |
-| Reversed | Pine tile, D in chalk `#FBF6EE` |
-| Minimum size | 16px. Below that, drop the punctum |
+| Reversed | Pine tile, D in paper `#EEF0ED` |
+| Minimum size | 16px. Below 24px, drop the punctum |
 | Clear space | One punctum-width on all sides |
+| Counter opening | 2.5 units at 48-unit scale. Do not widen — it stops reading as a D below 32px |
 
-**Do not:** outline the mark, add a gradient, close the doorway, sit the mark on marigold, or place the wordmark inside the tile.
+**Do not:** outline the mark, add a gradient, widen the doorway, sit the mark on marigold, or place the wordmark inside the tile.
+
+The icon tile is pine rather than clay. A light tile at 60px on a phone home screen disappears into a light wallpaper; a dark tile with a light letterform holds. It also matches the OG image.
 
 ---
 
-## 7. Colour — the "Shutter" palette
+## 7. Colour
 
-The previous system was putty and near-black. It read as quiet editorial, which is not the same as warm. The fix is not more colour, it is a **dark with hue in it**: black is an absence, pine is a decision.
+The ground is neutral. Not cream, not sage. The product's content is photographs of a real household — the cloth, the bottle, the key, the child's inhaler — and any tinted ground casts every one of them. Neutral is not timidity; it is the only choice that lets the actual product look right. The brand lives in the ink and the accent, never in the paper.
 
 | Token | Hex | Role |
 |---|---|---|
-| Chalk | `#FBF6EE` | App ground. Lighter and less yellow than putty |
-| Sand | `#F1E7D8` | Cards and raised surfaces |
-| Clay | `#E3D3BC` | Icon tile, dividers, marketing surfaces. Your old putty, demoted to where it was always strongest |
-| Pine | `#22332C` | All primary text and the mark. Replaces `#2c2721` |
-| Sage | `#5A6B60` | Secondary text |
-| Marigold | `#D08A2C` | Interactive and brand accent. Fills, buttons, the punctum |
-| Marigold deep | `#A96A18` | Marigold as small text or icons on a light ground |
-| Moss | `#4E8C5B` | Done state only |
-| Brick | `#9E2B25` | Safety only, and never colour alone — always with an icon or word |
+| Paper | `#EEF0ED` | Page ground. Near-white, faint cool cast |
+| Surface | `#FFFFFF` | Cards, inputs, anything raised |
+| Sunk | `#E2E6E1` | Wells, unselected chips |
+| Hairline | `#DBDFD9` | Dividers |
+| Pine | `#18241F` | All primary text, the mark, the icon tile |
+| Sage | `#56645D` | Secondary text |
+| Marigold | `#D9923A` | Interactive fills, buttons, the punctum |
+| Marigold deep | `#8A5310` | Marigold as small text, links, icons on light ground |
+| Moss | `#2F7A45` | Done state only |
+| Brick | `#A8231F` | Safety only, and never colour alone |
 
-**Retired:** raspberry `#d9577e` (fights marigold and tips pink-on-beige toward the pastel parenting category), Lisette blue `#445f72` (same value as petrol, read as one colour), petrol `#306369` (pine now carries the green).
+**Retired:** chalk `#FBF6EE`, sand `#F1E7D8`, clay `#E3D3BC`, and the sage ground `#DFE8E5`. Warm cream with a serif display and a warm clay accent is currently the most recognisable machine-generated design signature on the web. Sage-and-marigold is the same cliché one step left. Both read as "calm lifestyle". The buyer is not buying calm — she is buying relief from holding it all in her head.
+
+**Three surfaces, not five.** Paper, surface, sunk, with a real step between each.
+
+**Subject identity hues are subordinate.** They are user content, not brand. No screen should show more than three hues at once, counting brand.
 
 ### Contrast, checked
 
-| Pair | Ratio | Verdict |
-|---|---|---|
-| Pine on chalk | ~12.3:1 | Excellent |
-| Pine on sand | ~10.7:1 | Excellent |
-| Sage on chalk | ~5.2:1 | Passes AA at body size |
-| Sage on sand | ~4.6:1 | Passes AA, but don't go below 15px |
-| **Pine text on marigold fill** | ~4.6:1 | Passes. **Buttons use pine text, never white** |
-| Marigold on chalk | ~2.7:1 | **Fills and large shapes only. Never small text — use marigold deep** |
+| Pair | Role |
+|---|---|
+| Pine on paper / surface | Body text |
+| Sage on paper / surface | Secondary text |
+| Pine text on marigold fill | Buttons — never white on marigold |
+| Marigold deep on paper | Small accent text / icons |
+| Brick on paper / brick-tint | Safety only |
 
-Your reader is often looking at this one-handed in a dim utility room. These floors are not decorative.
-
----
+Run `npm run test:contrast` — the build fails if a pair slips.
 
 ## 8. Type
 
@@ -126,9 +132,9 @@ Your reader is often looking at this one-handed in a dim utility room. These flo
 | UI and body | Figtree | Body **17px**, not 15 |
 | Timeline times | Figtree | Tabular numerals on. Times must align to scan |
 
-**On the display face.** Newsreader is handsome but austere, and austerity is half of what made the old system feel taciturn. Fraunces carries more warmth at the same size and holds a Latin-rooted name well. Both are on Google Fonts, so switching costs you one line. Set them side by side at 33px and pick with your eyes — this is the one decision here that is genuinely taste, not analysis.
+**Kill the ALL-CAPS tracked-out eyebrow.** Section headings are 17px, sentence case, full-strength pine. The only surviving eyebrow is the safety label, where the shout is earned.
 
----
+**On the display face.** Fraunces carries more warmth than Newsreader at the same size and holds a Latin-rooted name well. Both are on Google Fonts.
 
 ## 9. Before anything ships
 
