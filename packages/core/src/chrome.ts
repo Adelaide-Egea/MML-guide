@@ -72,6 +72,10 @@ export interface ChromeCopy {
   readonly onlyWhatIsInGuide: string;
   readonly nearlyThere: string;
   readonly safetyShownVerbatim: string;
+  /** Print / PDF masthead and footer. */
+  readonly printGuideFor: (name: string) => string;
+  readonly printIntro: string;
+  readonly printFooter: string;
   readonly whileYouAreHereFor: (name: string) => string;
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
@@ -209,6 +213,9 @@ const EN: ChromeCopy = {
   nearlyThere: 'Nearly there…',
   safetyShownVerbatim:
     'This is safety information, so it is shown word for word and not translated.',
+  printGuideFor: (name) => `Guide for ${name}`,
+  printIntro: 'Everything they need while you are away — clear, calm, and on one page.',
+  printFooter: 'Domela — the household guide',
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
@@ -278,6 +285,9 @@ const FR: ChromeCopy = {
   nearlyThere: 'Presque…',
   safetyShownVerbatim:
     'Ceci est une information de sécurité : elle est affichée mot pour mot, sans traduction.',
+  printGuideFor: (name) => `Guide pour ${name}`,
+  printIntro: 'Tout ce qu’il faut pendant votre absence — clair, calme, sur une page.',
+  printFooter: 'Domela — le guide du foyer',
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,

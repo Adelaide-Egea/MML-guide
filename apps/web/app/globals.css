@@ -514,6 +514,13 @@ a.routine-item {
   display: none;
 }
 
+/* Print masthead / footer exist only for PDF — structured here so screen CSS
+   never has to fight the print document layout. */
+.print-masthead,
+.print-footer {
+  display: none;
+}
+
 /* ── Breathing ────────────────────────────────────────────────────────────── */
 
 .breathing {
@@ -692,63 +699,308 @@ a.routine-item {
   .no-print {
     display: none !important;
   }
-  .print-only {
+
+  .print-only.print-masthead {
+    display: block !important;
+  }
+
+  .print-only.print-footer {
+    display: block !important;
+  }
+
+  .print-only:not(.print-masthead):not(.print-footer) {
     display: flex !important;
   }
 
   @page {
-    margin: 14mm 12mm;
+    size: A4;
+    margin: 12mm 11mm;
   }
 
   html,
   body {
     background: #fff !important;
-    color: #18241f !important;
-    font-size: 11pt;
+    color: var(--ink) !important;
+    font-size: 10.5pt;
     line-height: 1.45;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  .shell {
+  .shell,
+  .shell.guide-print {
     max-width: none;
     margin: 0;
     padding: 0;
     min-height: 0;
   }
 
-  .card,
-  .safety,
-  .critical {
-    box-shadow: none !important;
+  /* ── Masthead: pine band, Fraunces names, marigold punctum ─────────────── */
+
+  .print-masthead {
+    background: var(--ink) !important;
+    color: #eef0ed !important;
+    text-align: center;
+    padding: 14mm 10mm 11mm;
+    margin: 0 0 7mm;
+    border-radius: 0 0 10px 10px;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
+  .print-masthead-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #eef0ed;
+    margin-bottom: 8px;
+  }
+
+  .print-masthead-wordmark {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 11pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .print-masthead-marks {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 16pt;
+    margin: 6px 0 4px;
+    opacity: 0.92;
+  }
+
+  .print-masthead-names {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 26pt;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #eef0ed !important;
+    margin: 4px 0 6px;
+  }
+
+  .print-masthead-for {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(238, 240, 237, 0.62) !important;
+    margin: 0 0 8px;
+  }
+
+  .print-masthead-intro {
+    font-size: 10pt;
+    line-height: 1.5;
+    max-width: 38ch;
+    margin: 0 auto;
+    color: rgba(238, 240, 237, 0.82) !important;
+  }
+
+  .print-masthead-rule {
+    width: 36px;
+    height: 3px;
+    margin: 12px auto 0;
+    background: var(--brand) !important;
+    border-radius: 2px;
+  }
+
+  /* ── Document sections — not a stack of phone cards ────────────────────── */
+
+  .guide-print .card,
+  .guide-print .safety,
+  .guide-print .critical {
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  .guide-print .card {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  .guide-print .rows {
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .guide-print .rows-head {
+    padding: 0 0 4px;
+  }
+
+  .guide-print .eyebrow,
+  .guide-print .safety-eyebrow {
+    font-size: 8pt !important;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink) !important;
+  }
+
+  .guide-print .print-schedule {
+    margin-bottom: 6mm !important;
+    padding-bottom: 2mm;
+    border-bottom: 1px solid var(--hairline) !important;
+  }
+
+  .guide-print .routine-item {
+    display: grid;
+    grid-template-columns: 16mm 1fr;
+    gap: 3mm;
+    align-items: baseline;
+    padding: 2.4mm 0 !important;
+    border-bottom: 1px solid rgba(24, 36, 31, 0.08) !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .guide-print .routine-item:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .guide-print .routine-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 9.5pt;
+    color: var(--ink) !important;
+  }
+
+  .guide-print .routine-item strong {
+    font-size: 10.5pt;
+    font-weight: 650;
+  }
+
+  .guide-print .routine-note,
+  .guide-print .routine-item .muted {
+    font-size: 9pt;
+    color: var(--ink-muted) !important;
+  }
+
+  /* Safety — tinted panel, brick rule, never folded away on paper */
+  .guide-print .safety {
+    background: var(--critical-tint) !important;
+    border: 0 !important;
+    border-left: 4px solid var(--critical) !important;
+    border-radius: 8px !important;
+    padding: 4mm 5mm !important;
+    margin-bottom: 6mm !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .guide-print .safety .safety-dot {
+    background: var(--critical) !important;
+  }
+
+  .guide-print .safety .stack-tight + .stack-tight,
+  .guide-print .safety > .stack-tight + .stack-tight {
+    margin-top: 3mm;
+    padding-top: 3mm;
+    border-top: 1px solid rgba(168, 35, 31, 0.18);
+  }
+
+  .guide-print .critical-body,
+  .guide-print .block-body {
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+
+  /* Notes — quiet section titles, hairline between entries */
+  .guide-print .print-notes {
+    gap: 0 !important;
+  }
+
+  .guide-print .print-note {
+    padding: 3.5mm 0 !important;
+    border-bottom: 1px solid rgba(24, 36, 31, 0.1) !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .guide-print .print-note:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .guide-print .print-note > strong {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 12pt;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5mm;
+  }
+
+  .guide-print .print-signoff {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 12pt;
+    color: var(--ink-muted) !important;
+    margin-top: 8mm !important;
+    break-inside: avoid;
+  }
+
+  .print-footer {
+    text-align: center;
+    margin-top: 8mm;
+    padding-top: 4mm;
+    border-top: 1px solid var(--hairline);
+    font-size: 7.5pt;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted) !important;
+    break-before: avoid;
+  }
+
   .no-break,
-  article,
-  .routine-item {
+  .routine-item,
+  .print-note,
+  .safety .stack-tight {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
   h1,
   h2,
-  h3 {
+  h3,
+  .eyebrow {
     break-after: avoid;
     page-break-after: avoid;
   }
 
+  .media-grid {
+    gap: 2mm !important;
+    margin-top: 2mm;
+  }
+
   .media-grid img,
   .media-thumb img {
-    max-height: 42mm;
+    max-height: 32mm;
     width: auto;
     object-fit: cover;
+    border-radius: 4px;
   }
 
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Interactive chrome never belongs on the fridge copy */
+  .chips,
+  .btn,
+  .topbar,
+  .site-footer,
+  .house-switch {
+    display: none !important;
   }
 }
 

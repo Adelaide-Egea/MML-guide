@@ -17,6 +17,7 @@ import {
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
+import { PrintFooter, PrintMasthead } from '../../../components/PrintChrome.tsx';
 import { buildShareUrl } from '../../../lib/share.ts';
 import { useActions, useAppState } from '../../../lib/store.ts';
 import { track } from '../../../lib/trial.ts';
@@ -129,10 +130,16 @@ export default function GuidePage() {
   };
 
   return (
-    <main className="shell">
+    <main className="shell guide-print">
       <TopBar title={handover.caregiverName || chrome.guide} back="/" />
 
-      <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
+      <PrintMasthead
+        chrome={chrome}
+        caregiverName={handover.caregiverName}
+        subjects={subjects}
+      />
+
+      <div className="stack no-print" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
           {chrome.forName(handover.caregiverName || 'whoever is looking after things')}
           {handover.caregiverRelationship ? (
@@ -146,7 +153,7 @@ export default function GuidePage() {
           value={handover.language}
           onChange={(language) => actions.saveHandover({ ...handover, language })}
         />
-        <div className="row no-print" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+        <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
           <Link href={`/guide/${handover.id}/ask`} className="btn">
             {chrome.askAboutAnything}
           </Link>
@@ -204,7 +211,7 @@ export default function GuidePage() {
             {chrome.sendToCaregiver}
           </button>
         </div>
-        <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
+        <label className="row" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
           <input
             type="checkbox"
             checked={includePhotos}
@@ -221,7 +228,7 @@ export default function GuidePage() {
             </span>
           </span>
         </label>
-        <p className="hint no-print" aria-live="polite">
+        <p className="hint" aria-live="polite">
           {shareState === 'working'
             ? chrome.preparingLink
             : shareState === 'too-large'
@@ -249,7 +256,7 @@ export default function GuidePage() {
       )}
 
       {routine.length > 0 && (
-        <section className="card rows no-break" style={{ marginBottom: 'var(--space-5)' }}>
+        <section className="card rows print-schedule" style={{ marginBottom: 'var(--space-5)' }}>
           <div className="rows-head">
             <span className="eyebrow">
               {focused
@@ -297,9 +304,9 @@ export default function GuidePage() {
         </section>
       )}
 
-      <section className="stack">
+      <section className="stack print-notes">
         {rest.map((block) => (
-          <article key={block.id} className="card stack-tight no-break">
+          <article key={block.id} className="card stack-tight print-note">
             <strong>{heading(block)}</strong>
             {block.body && <p className="block-body">{block.body}</p>}
             {block.media.length > 0 && (
@@ -317,10 +324,12 @@ export default function GuidePage() {
       </section>
 
       {handover.signOff && (
-        <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+        <p className="print-signoff muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
           {handover.signOff}
         </p>
       )}
+
+      <PrintFooter chrome={chrome} />
 
       <div className="row no-print" style={{ marginTop: 'var(--space-6)' }}>
         <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
