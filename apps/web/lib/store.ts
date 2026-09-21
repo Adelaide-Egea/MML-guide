@@ -320,15 +320,30 @@ export function useActions() {
         patch((h) => ({ ...h, ...fields }));
       },
 
-      /** Adds a household and selects it. Nothing that already exists is touched,
-       *  which is the whole point: the sample stays where it is. */
+      /** Adds a real household and selects it.
+       *
+       *  If the sample was the active household, it is removed — the sample is an
+       *  example to look around, not a second house that should linger in the list.
+       */
       addHousehold(name = ''): string {
         const household = emptyHousehold(name);
-        update((s) => ({
-          ...s,
-          households: prune([...s.households, household], household.id, s.handovers, s.trips),
-          activeId: household.id,
-        }));
+        update((s) => {
+          const leavingSample = Boolean(s.sampleId && s.activeId === s.sampleId);
+          const base = leavingSample
+            ? s.households.filter((h) => h.id !== s.sampleId)
+            : s.households;
+          const sampleId = leavingSample ? null : s.sampleId;
+          return {
+            ...s,
+            households: prune([...base, household], household.id, s.handovers, s.trips),
+            activeId: household.id,
+            handovers: leavingSample
+              ? s.handovers.filter((ho) => ho.householdId !== s.sampleId)
+              : s.handovers,
+            trips: leavingSample ? s.trips.filter((t) => t.householdId !== s.sampleId) : s.trips,
+            sampleId,
+          };
+        });
         return household.id;
       },
 
@@ -348,6 +363,24 @@ export function useActions() {
             handovers: s.handovers.filter((ho) => ho.householdId !== id),
             trips: s.trips.filter((t) => t.householdId !== id),
             sampleId: s.sampleId === id ? null : s.sampleId,
+          };
+        });
+      },
+
+      /** Dismiss the example household. Same as removeHousehold(sampleId). */
+      removeSample() {
+        update((s) => {
+          if (!s.sampleId) return s;
+          const id = s.sampleId;
+          const remaining = s.households.filter((h) => h.id !== id);
+          const households = remaining.length > 0 ? remaining : [emptyHousehold()];
+          return {
+            ...s,
+            households,
+            activeId: s.activeId === id ? households[0]!.id : s.activeId,
+            handovers: s.handovers.filter((ho) => ho.householdId !== id),
+            trips: s.trips.filter((t) => t.householdId !== id),
+            sampleId: null,
           };
         });
       },

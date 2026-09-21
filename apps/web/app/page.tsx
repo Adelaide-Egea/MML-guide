@@ -76,7 +76,7 @@ export default function Home() {
 
       {isSample && (
         <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
-          This is a sample household, here to look around. Anything you change stays in it.{' '}
+          This is an example, not one of your households — look around, then start yours.{' '}
           <button
             type="button"
             className="btn btn-quiet btn-inline"
@@ -85,7 +85,15 @@ export default function Home() {
           >
             Start your own
           </button>
-          — the sample stays here.
+          {' · '}
+          <button
+            type="button"
+            className="btn btn-quiet btn-inline"
+            style={{ textDecoration: 'underline' }}
+            onClick={() => actions.removeSample()}
+          >
+            Remove example
+          </button>
         </p>
       )}
 
@@ -202,7 +210,7 @@ export default function Home() {
               actions.addSample(sample, handover, presets, sampleTrips);
             }}
           >
-            Load a sample household
+            See an example
           </button>
         </p>
       )}
@@ -269,9 +277,12 @@ function HouseSwitcher({
     if (startNaming) setNaming(true);
   }, [startNaming]);
 
+  const realHouseholds = households.filter((h) => h.id !== sampleId);
+  const sample = sampleId ? households.find((h) => h.id === sampleId) : undefined;
+
   return (
     <div className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
-      {households.map((h) => (
+      {realHouseholds.map((h) => (
         <button
           key={h.id}
           type="button"
@@ -284,12 +295,42 @@ function HouseSwitcher({
           <span className="grow">
             <strong>{h.name || 'Unnamed household'}</strong>
             <span className="muted" style={{ display: 'block' }}>
-              {h.id === sampleId ? 'Sample' : `${h.subjects.length} to look after`}
+              {`${h.subjects.length} to look after`}
             </span>
           </span>
           {h.id === household.id && <span aria-hidden="true">✓</span>}
         </button>
       ))}
+
+      {sample && (
+        <div className="rows-item stack-tight" style={{ borderTop: '1px solid var(--hairline)' }}>
+          <span className="hint">Example — not one of your households</span>
+          <div className="row">
+            <button
+              type="button"
+              className="btn btn-quiet grow"
+              onClick={() => {
+                actions.selectHousehold(sample.id);
+                onDone();
+              }}
+              style={{ justifyContent: 'flex-start' }}
+            >
+              {sample.name || 'Example'}
+              {household.id === sample.id ? ' ✓' : ''}
+            </button>
+            <button
+              type="button"
+              className="btn btn-quiet btn-inline"
+              onClick={() => {
+                actions.removeSample();
+                onDone();
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="rows-item stack-tight">
         {naming ? (
@@ -322,12 +363,9 @@ function HouseSwitcher({
           </button>
         )}
 
-        {/* The sample is a household like any other, so it can be brought back
-            after it has been left. It used to be a mode, and leaving it meant
-            deleting it. */}
         {!sampleId && (
           <button type="button" className="btn btn-quiet" onClick={onSample}>
-            Show the sample household
+            See an example
           </button>
         )}
       </div>
