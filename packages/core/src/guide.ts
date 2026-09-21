@@ -11,6 +11,7 @@
 // also what makes the free tier cost pennies and the whole thing survivable when a
 // model provider has an outage.
 
+import { chromeFor } from './chrome.ts';
 import {
   type CareSubject,
   type Media,
@@ -135,13 +136,15 @@ export function buildGuide(
   now: Date = new Date(),
 ): GuideDocument {
   const subjects = subjectsFor(household, handover);
+  const chrome = chromeFor(handover.language || 'en');
   const blocks: GuideBlock[] = [];
 
   // Critical content leads. A caregiver skimming for ten seconds must reach the
-  // things that could hurt someone before anything else.
+  // things that could hurt someone before anything else. Headings are chrome
+  // (localized); bodies stay in the parent's words.
   for (const note of handover.importantNotes.filter(hasText)) {
     blocks.push(
-      factBlock(`important:${blocks.length}`, 'Important', note.trim(), { critical: true }),
+      factBlock(`important:${blocks.length}`, chrome.important, note.trim(), { critical: true }),
     );
   }
 
@@ -149,7 +152,7 @@ export function buildGuide(
     const allergies = allergyText(subject);
     if (allergies) {
       blocks.push(
-        factBlock(`allergy:${subject.id}`, `${subject.name} — allergies`, allergies, {
+        factBlock(`allergy:${subject.id}`, `${subject.name} — ${chrome.allergies}`, allergies, {
           critical: true,
           subjectId: subject.id,
         }),
@@ -159,7 +162,7 @@ export function buildGuide(
     const medical = medicalText(subject);
     if (medical) {
       blocks.push(
-        factBlock(`medical:${subject.id}`, `${subject.name} — medication`, medical, {
+        factBlock(`medical:${subject.id}`, `${subject.name} — ${chrome.medication}`, medical, {
           critical: true,
           subjectId: subject.id,
         }),
@@ -169,10 +172,15 @@ export function buildGuide(
     const emergency = emergencyText(subject);
     if (emergency) {
       blocks.push(
-        factBlock(`emergency:${subject.id}`, `${subject.name} — in an emergency`, emergency, {
-          critical: true,
-          subjectId: subject.id,
-        }),
+        factBlock(
+          `emergency:${subject.id}`,
+          `${subject.name} — ${chrome.inAnEmergency}`,
+          emergency,
+          {
+            critical: true,
+            subjectId: subject.id,
+          },
+        ),
       );
     }
   }
@@ -182,7 +190,7 @@ export function buildGuide(
     blocks.push(
       factBlock(
         'contacts',
-        'Who to call',
+        chrome.whoToCall,
         contacts
           .map((c) => `${c.name}${c.relationship ? ` (${c.relationship})` : ''} — ${c.phone}`)
           .join('\n'),
@@ -206,7 +214,7 @@ export function buildGuide(
   }
 
   if (hasText(handover.extra)) {
-    blocks.push(factBlock('extra', 'Anything else', handover.extra.trim()));
+    blocks.push(factBlock('extra', chrome.anythingElse, handover.extra.trim()));
   }
 
   return {

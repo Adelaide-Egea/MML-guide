@@ -8,12 +8,14 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  localizeGuideHeading,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
 import { TopBar } from '../../components/Chrome.tsx';
 import { LanguageToggle } from '../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../components/MediaField.tsx';
+import { PrintFooter, PrintMasthead } from '../../components/PrintChrome.tsx';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
 
 /** Caregiver / cleaner view opened from a shared link.
@@ -139,7 +141,7 @@ export default function CaregiverPage() {
       <main className="shell">
         <TopBar title={chrome.guide} />
         <div className="critical stack-tight">
-          <div className="eyebrow">Not safe to show</div>
+          <div className="eyebrow">{chrome.notSafeToShow}</div>
           <p>{result.error}</p>
         </div>
       </main>
@@ -159,10 +161,16 @@ export default function CaregiverPage() {
   const placeOnly = subjects.length > 0 && subjects.every((s) => s.kind === 'place');
 
   return (
-    <main className="shell">
+    <main className="shell guide-print">
       <TopBar title={handover.caregiverName || chrome.yourGuide} />
 
-      <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
+      <PrintMasthead
+        chrome={chrome}
+        caregiverName={handover.caregiverName}
+        subjects={subjects}
+      />
+
+      <div className="stack no-print" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
           {chrome.forName(handover.caregiverName || 'you')}
           {handover.caregiverRelationship ? (
@@ -185,24 +193,40 @@ export default function CaregiverPage() {
               <div className="eyebrow">{chrome.readFirst}</div>
               {critical.map((block) => (
                 <article key={block.id} className="stack-tight">
-                  <strong>{block.heading}</strong>
+                  <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
                   <p className="block-body">{block.body}</p>
                 </article>
               ))}
-              <button type="button" className="btn" onClick={() => setAcknowledged(true)}>
+              <button type="button" className="btn no-print" onClick={() => setAcknowledged(true)}>
                 {chrome.iHaveReadThis}
               </button>
             </>
           ) : (
-            <button type="button" className="btn btn-quiet" onClick={() => setAcknowledged(false)}>
-              {chrome.safetyNotesReopen}
-            </button>
+            <>
+              <button
+                type="button"
+                className="btn btn-quiet no-print"
+                onClick={() => setAcknowledged(false)}
+              >
+                {chrome.safetyNotesReopen}
+              </button>
+              {/* Folded on screen is not folded on paper. */}
+              <div className="print-only stack">
+                <div className="eyebrow">{chrome.readFirst}</div>
+                {critical.map((block) => (
+                  <article key={block.id} className="stack-tight">
+                    <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
+                    <p className="block-body">{block.body}</p>
+                  </article>
+                ))}
+              </div>
+            </>
           )}
         </section>
       )}
 
       {subjects.length > 1 && (
-        <div className="chips" style={{ marginBottom: 'var(--space-4)' }}>
+        <div className="chips no-print" style={{ marginBottom: 'var(--space-4)' }}>
           <button
             type="button"
             className="chip"
@@ -226,7 +250,7 @@ export default function CaregiverPage() {
       )}
 
       {routine.length > 0 && (
-        <section className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
+        <section className="card rows print-schedule" style={{ marginBottom: 'var(--space-5)' }}>
           <div className="rows-head">
             <span className="eyebrow">
               {focused
@@ -251,7 +275,7 @@ export default function CaregiverPage() {
                         : '—')}
                 </span>
                 <span>
-                  <strong>{routineItemLabel(item)}</strong>
+                  <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
                   {item.section && (
                     <span className="muted" style={{ display: 'block' }}>
                       {item.section}
@@ -273,10 +297,10 @@ export default function CaregiverPage() {
         </section>
       )}
 
-      <section className="stack">
+      <section className="stack print-notes">
         {rest.map((block) => (
-          <article key={block.id} className="card stack-tight">
-            <strong>{block.heading}</strong>
+          <article key={block.id} className="card stack-tight print-note">
+            <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
             {block.body && <p className="block-body">{block.body}</p>}
             {block.media.length > 0 && (
               <div className="media-grid">
@@ -293,10 +317,18 @@ export default function CaregiverPage() {
       </section>
 
       {handover.signOff && (
-        <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+        <p className="print-signoff muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
           {handover.signOff}
         </p>
       )}
+
+      <PrintFooter chrome={chrome} />
+
+      <div className="row no-print" style={{ marginTop: 'var(--space-6)' }}>
+        <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+          {chrome.printOrSavePdf}
+        </button>
+      </div>
     </main>
   );
 }
