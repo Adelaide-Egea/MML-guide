@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { CareSubject } from '@mml/core';
+import { identityPair } from '../lib/identity.ts';
 import { Mark } from './Mark.tsx';
 
 export function TopBar({ title, back }: { title: string; back?: string }) {
@@ -21,13 +22,15 @@ export function TopBar({ title, back }: { title: string; back?: string }) {
   );
 }
 
-/** Colour plus symbol, always together. */
+/** Colour plus symbol, always together — tint ground, matching ink. */
 export function Badge({ subject, size = 40 }: { subject: CareSubject; size?: number }) {
+  const { tint, ink } = identityPair(subject.identity.colourToken);
   return (
     <span
       className="badge"
       style={{
-        background: `var(${subject.identity.colourToken})`,
+        background: `var(${tint})`,
+        color: `var(${ink})`,
         width: size,
         height: size,
         fontSize: size * 0.5,

@@ -60,14 +60,14 @@ export interface AppState extends Stored {
   readonly household: Household;
 }
 
-/** Identity tokens, paired with a symbol so colour is never the only signal. */
-export const IDENTITIES: readonly { token: string; symbol: string }[] = [
-  { token: '--id-petrol', symbol: '●' },
-  { token: '--id-clay', symbol: '▲' },
-  { token: '--id-indigo', symbol: '■' },
-  { token: '--id-olive', symbol: '◆' },
-  { token: '--id-plum', symbol: '★' },
-  { token: '--id-forest', symbol: '✚' },
+/** Identity tokens — tint background + matching ink. Colour never travels alone. */
+export const IDENTITIES: readonly { token: string; ink: string; symbol: string }[] = [
+  { token: '--id-dusk', ink: '--id-dusk-ink', symbol: '●' },
+  { token: '--id-terracotta', ink: '--id-terracotta-ink', symbol: '▲' },
+  { token: '--id-sage', ink: '--id-sage-ink', symbol: '■' },
+  { token: '--id-clay', ink: '--id-clay-ink', symbol: '◆' },
+  { token: '--id-plum', ink: '--id-plum-ink', symbol: '★' },
+  { token: '--id-honey', ink: '--id-honey-ink', symbol: '✚' },
 ];
 
 export const KIND_LABEL: Record<SubjectKind, string> = {

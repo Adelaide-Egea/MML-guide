@@ -49,6 +49,15 @@ export interface ChromeCopy {
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
   readonly useProduct: (product: string) => string;
+  readonly helloName: (name: string) => string;
+  readonly scenarioEvening: string;
+  readonly scenarioFullDay: string;
+  readonly scenarioWeekend: string;
+  readonly shapeEvening: string;
+  readonly shapeFullDay: (who: string) => string;
+  readonly shapeWeekend: string;
+  readonly askPlaceholderTonight: string;
+  readonly safetyExpand: string;
 }
 
 const EN: ChromeCopy = {
@@ -97,6 +106,15 @@ const EN: ChromeCopy = {
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
   useProduct: (product) => `Use ${product}`,
+  helloName: (name) => `Hello ${name}.`,
+  scenarioEvening: 'Evening sitter',
+  scenarioFullDay: 'Full day',
+  scenarioWeekend: 'Weekend',
+  shapeEvening: 'Tonight: dinner, bath, bed.',
+  shapeFullDay: (who) => `A full day with ${who}.`,
+  shapeWeekend: 'A few days — everything you need is here.',
+  askPlaceholderTonight: 'Ask anything about tonight',
+  safetyExpand: 'Show all safety notes',
 };
 
 const FR: ChromeCopy = {
@@ -148,6 +166,15 @@ const FR: ChromeCopy = {
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,
   useProduct: (product) => `Utiliser ${product}`,
+  helloName: (name) => `Bonjour ${name}.`,
+  scenarioEvening: 'Soirée',
+  scenarioFullDay: 'Journée complète',
+  scenarioWeekend: 'Week-end',
+  shapeEvening: 'Ce soir : dîner, bain, coucher.',
+  shapeFullDay: (who) => `Une journée complète avec ${who}.`,
+  shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
+  askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
+  safetyExpand: 'Voir toutes les notes de sécurité',
 };
 
 const PT_BR: ChromeCopy = {

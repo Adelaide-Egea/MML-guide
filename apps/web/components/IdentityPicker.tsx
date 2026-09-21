@@ -3,12 +3,12 @@
 import type { CareSubject, SubjectIdentity, SubjectKind } from '@mml/core';
 
 const COLOURS: readonly { token: string; label: string }[] = [
-  { token: '--id-petrol', label: 'Petrol' },
+  { token: '--id-dusk', label: 'Dusk' },
+  { token: '--id-sage', label: 'Sage' },
+  { token: '--id-terracotta', label: 'Terracotta' },
   { token: '--id-clay', label: 'Clay' },
-  { token: '--id-indigo', label: 'Indigo' },
-  { token: '--id-olive', label: 'Olive' },
+  { token: '--id-honey', label: 'Honey' },
   { token: '--id-plum', label: 'Plum' },
-  { token: '--id-forest', label: 'Forest' },
 ];
 
 const SHAPES: readonly string[] = ['●', '▲', '■', '◆', '★', '✚'];
@@ -42,7 +42,10 @@ export function IdentityPicker({
             aria-label={colour.label}
             aria-pressed={subject.identity.colourToken === colour.token}
             onClick={() => onChange({ ...subject.identity, colourToken: colour.token })}
-            style={{ background: `var(${colour.token})` }}
+            style={{
+              background: `var(${colour.token})`,
+              boxShadow: `inset 0 0 0 2px var(${colour.token}-ink)`,
+            }}
           />
         ))}
       </div>

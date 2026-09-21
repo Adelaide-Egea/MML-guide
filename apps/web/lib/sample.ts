@@ -89,7 +89,7 @@ export function loadSample(): Sample {
           kind: 'child',
           name: 'Léa',
           descriptor: '3 years',
-          identity: { colourToken: '--id-petrol', symbol: '●' },
+          identity: { colourToken: '--id-dusk', symbol: '●' },
           safety: {
             allergies: 'Kiwi — her throat itches and her lips swell. No kiwi in anything.',
             medication: 'Nothing daily.',
@@ -155,7 +155,7 @@ export function loadSample(): Sample {
           kind: 'pet',
           name: 'Pomme',
           descriptor: 'Labrador, 7',
-          identity: { colourToken: '--id-clay', symbol: '▲' },
+          identity: { colourToken: '--id-terracotta', symbol: '▲' },
           safety: {
             allergies: 'Chicken makes her scratch. Her food is the blue bag only.',
             medication: 'Half a joint tablet with breakfast.',
@@ -182,7 +182,7 @@ export function loadSample(): Sample {
           kind: 'place',
           name: 'The flat',
           descriptor: 'Third floor, no lift',
-          identity: { colourToken: '--id-indigo', symbol: '■' },
+          identity: { colourToken: '--id-sage', symbol: '■' },
           safety: {
             allergies: '',
             medication: '',

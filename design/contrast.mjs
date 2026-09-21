@@ -19,11 +19,12 @@ function block(selector) {
   const start = css.indexOf(selector);
   assert.ok(start !== -1, `missing block: ${selector}`);
   const open = css.indexOf('{', start);
+  // Find matching close for nested-safe shallow parse (no nests in our tokens).
   const close = css.indexOf('}', open);
   const out = {};
   for (const line of css.slice(open + 1, close).split('\n')) {
-    const m = line.match(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})/);
-    if (m) out[m[1]] = m[2];
+    const hex = line.match(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})/);
+    if (hex) out[hex[1]] = hex[2];
   }
   return out;
 }
@@ -41,33 +42,60 @@ export function ratio(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-const light = block(':root {');
-const dark = block(':root[data-theme="dark"]');
+/** Resolve a token that may alias another via var(--name). */
+function resolve(tokens, name, depth = 0) {
+  const v = tokens[name];
+  if (!v) return undefined;
+  if (v.startsWith('#')) return v;
+  const m = v.match(/^var\((--[\w-]+)\)$/);
+  if (m && depth < 4) return resolve(tokens, m[1], depth + 1);
+  return undefined;
+}
+
+// Re-parse allowing var() aliases for the light block.
+function blockWithVars(selector) {
+  const start = css.indexOf(selector);
+  assert.ok(start !== -1, `missing block: ${selector}`);
+  const open = css.indexOf('{', start);
+  const close = css.indexOf('}', open);
+  const out = {};
+  for (const line of css.slice(open + 1, close).split('\n')) {
+    const hex = line.match(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})/);
+    if (hex) out[hex[1]] = hex[2];
+    const alias = line.match(/(--[\w-]+)\s*:\s*var\((--[\w-]+)\)/);
+    if (alias) out[alias[1]] = `var(${alias[2]})`;
+  }
+  return out;
+}
+
+const lightRaw = blockWithVars(':root {');
+const darkRaw = blockWithVars(":root[data-theme='dark']");
+// Fallback if dark uses double quotes in file
+const dark =
+  Object.keys(darkRaw).length > 5 ? darkRaw : blockWithVars(':root[data-theme="dark"]');
+const light = lightRaw;
 
 /** [foreground token, background token, minimum]. 4.5 is body text; 3 is large
  *  text and meaning-bearing UI boundaries. */
 const PAIRS = [
   ['--ink', '--paper', 4.5],
   ['--ink', '--surface', 4.5],
+  ['--ink', '--surface-warm', 4.5],
   ['--ink-muted', '--paper', 4.5],
   ['--ink-muted', '--surface', 4.5],
-  // Marigold fill (--brand) is buttons/punctum only — contrast is --on-brand on --brand.
-  // Text accents use marigold-deep (--amber).
-  ['--amber', '--paper', 4.5],
-  ['--amber', '--surface', 4.5],
+  ['--brand-deep', '--paper', 4.5],
+  ['--brand-deep', '--surface', 4.5],
   ['--critical', '--paper', 4.5],
   ['--critical', '--critical-tint', 4.5],
   ['--ink', '--surface-sunk', 4.5],
-  ['--amber', '--amber-tint', 4.5],
   ['--ink', '--brand-tint', 4.5],
-  ['--id-petrol', '--paper', 4.5],
-  ['--id-indigo', '--paper', 4.5],
-  ['--id-plum', '--paper', 4.5],
-  ['--id-clay', '--paper', 4.5],
-  ['--id-olive', '--paper', 4.5],
-  ['--id-forest', '--paper', 4.5],
+  ['--id-dusk-ink', '--id-dusk', 4.5],
+  ['--id-sage-ink', '--id-sage', 4.5],
+  ['--id-terracotta-ink', '--id-terracotta', 4.5],
+  ['--id-clay-ink', '--id-clay', 4.5],
+  ['--id-honey-ink', '--id-honey', 4.5],
+  ['--id-plum-ink', '--id-plum', 4.5],
   ['--hairline-strong', '--paper', 1.5],
-  // Moss is done-only — large filled shape / boundary, never small text.
   ['--done', '--surface', 3],
 ];
 
@@ -77,12 +105,15 @@ for (const theme of [
 ]) {
   test(`${theme.name} theme meets its contrast targets`, () => {
     for (const [fg, bg, min] of PAIRS) {
-      const a = theme.tokens[fg];
-      const b = theme.tokens[bg];
-      assert.ok(a, `${theme.name}: ${fg} not defined`);
-      assert.ok(b, `${theme.name}: ${bg} not defined`);
+      const a = resolve(theme.tokens, fg) ?? theme.tokens[fg];
+      const b = resolve(theme.tokens, bg) ?? theme.tokens[bg];
+      assert.ok(a && a.startsWith('#'), `${theme.name}: ${fg} not defined as hex`);
+      assert.ok(b && b.startsWith('#'), `${theme.name}: ${bg} not defined as hex`);
       const r = ratio(a, b);
-      assert.ok(r >= min, `${theme.name}: ${fg} (${a}) on ${bg} (${b}) is ${r.toFixed(2)}:1, needs ${min}:1`);
+      assert.ok(
+        r >= min,
+        `${theme.name}: ${fg} (${a}) on ${bg} (${b}) is ${r.toFixed(2)}:1, needs ${min}:1`,
+      );
     }
   });
 }
@@ -92,30 +123,35 @@ test('label text is legible on every filled brand surface', () => {
     { name: 'light', tokens: light },
     { name: 'dark', tokens: dark },
   ]) {
-    // Dark mode's brand is a pale slate, so the label that sits on it is not white.
-    const label = theme.tokens['--on-brand'];
-    assert.ok(label, `${theme.name}: --on-brand not defined`);
-    const r = ratio(label, theme.tokens['--brand']);
+    const label = resolve(theme.tokens, '--on-brand') ?? theme.tokens['--on-brand'];
+    const brand = resolve(theme.tokens, '--brand') ?? theme.tokens['--brand'];
+    assert.ok(label?.startsWith('#'), `${theme.name}: --on-brand not defined`);
+    const r = ratio(label, brand);
     assert.ok(r >= 4.5, `${theme.name}: --on-brand on --brand is ${r.toFixed(2)}:1`);
   }
-  // Filled criticals are only ever drawn in the light theme.
-  // Amber is marigold-deep for small text on light grounds — not white-on-fill.
   {
-    const r = ratio('#FFFFFF', light['--critical']);
-    assert.ok(r >= 4.5, `white on --critical (${light['--critical']}) is ${r.toFixed(2)}:1`);
+    const critical = resolve(light, '--critical');
+    const r = ratio('#FFFFFF', critical);
+    assert.ok(r >= 4.5, `white on --critical (${critical}) is ${r.toFixed(2)}:1`);
   }
   {
-    const r = ratio(light['--amber'], light['--paper']);
-    assert.ok(r >= 3, `marigold-deep on chalk is ${r.toFixed(2)}:1, needs 3:1 for large/UI`);
+    const deep = resolve(light, '--brand-deep');
+    const paper = resolve(light, '--paper');
+    const r = ratio(deep, paper);
+    assert.ok(r >= 4.5, `honey-deep on linen is ${r.toFixed(2)}:1, needs 4.5:1`);
   }
 });
 
-/** Identity colours must stay apart under the common colour-vision deficiencies,
- *  since six people in one household is a realistic load. This is a backstop, not
- *  the mitigation — the mitigation is that a colour never travels without a symbol.
- */
+/** Identity ink colours must stay apart under common colour-vision deficiencies. */
 test('identity colours stay distinguishable under deuteranopia and protanopia', () => {
-  const ids = ['--id-petrol', '--id-indigo', '--id-plum', '--id-clay', '--id-olive', '--id-forest'];
+  const ids = [
+    '--id-dusk-ink',
+    '--id-sage-ink',
+    '--id-terracotta-ink',
+    '--id-clay-ink',
+    '--id-honey-ink',
+    '--id-plum-ink',
+  ];
 
   const toLinear = (hex) =>
     [1, 3, 5].map((i) => {
@@ -123,7 +159,6 @@ test('identity colours stay distinguishable under deuteranopia and protanopia', 
       return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
     });
 
-  // Brettel/Viénot-style simulation matrices, applied in linear RGB.
   const SIM = {
     deuteranopia: [
       [0.625, 0.375, 0.0],
@@ -140,7 +175,10 @@ test('identity colours stay distinguishable under deuteranopia and protanopia', 
   const apply = (m, [r, g, b]) => m.map((row) => row[0] * r + row[1] * g + row[2] * b);
 
   for (const [name, matrix] of Object.entries(SIM)) {
-    const seen = ids.map((id) => ({ id, rgb: apply(matrix, toLinear(light[id])) }));
+    const seen = ids.map((id) => ({
+      id,
+      rgb: apply(matrix, toLinear(resolve(light, id))),
+    }));
     for (let i = 0; i < seen.length; i += 1) {
       for (let j = i + 1; j < seen.length; j += 1) {
         const d = Math.hypot(...seen[i].rgb.map((v, k) => v - seen[j].rgb[k]));

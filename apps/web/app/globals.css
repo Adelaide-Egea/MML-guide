@@ -2,6 +2,7 @@
    contrast test in design/contrast.mjs guards the colours that actually ship
    instead of a spec sheet nobody runs. */
 @import "../../../design/tokens.css";
+@import "./print.css";
 
 *,
 *::before,
@@ -40,7 +41,7 @@ p {
 }
 
 a {
-  color: var(--amber);
+  color: var(--brand-deep);
 }
 
 button,
@@ -688,70 +689,7 @@ a.routine-item {
   letter-spacing: 0.04em;
 }
 
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  .print-only {
-    display: flex !important;
-  }
-
-  @page {
-    margin: 14mm 12mm;
-  }
-
-  html,
-  body {
-    background: #fff !important;
-    color: #18241f !important;
-    font-size: 11pt;
-    line-height: 1.45;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .shell {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    min-height: 0;
-  }
-
-  .card,
-  .safety,
-  .critical {
-    box-shadow: none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .no-break,
-  article,
-  .routine-item {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  h1,
-  h2,
-  h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-
-  .media-grid img,
-  .media-thumb img {
-    max-height: 42mm;
-    width: auto;
-    object-fit: cover;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-}
-
+/* Print rules live in print.css (book-page sheet). */
 
 /* Identity picker — colour swatches and glyph/emoji marks */
 .identity-swatch {
@@ -785,3 +723,316 @@ a.routine-item {
   border-color: var(--brand);
   background: var(--brand-tint);
 }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Hotel card (caregiver view) ──────────────────────────────────────────── */
+
+.shell.hotel {
+  max-width: 420px;
+  padding-bottom: calc(var(--space-7) + 64px);
+}
+
+.hotel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.hotel-scenario {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hotel-lang-select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: 4px 0;
+  cursor: pointer;
+  max-width: 11rem;
+}
+
+.hotel-greeting {
+  margin-bottom: var(--space-5);
+}
+
+.hotel-greeting h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: var(--space-2);
+}
+
+.hotel-shape,
+.hotel-back {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  line-height: 1.45;
+  max-width: 34ch;
+}
+
+.hotel-back {
+  margin-top: 4px;
+}
+
+.hotel-safety {
+  margin-bottom: var(--space-5);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.hotel-safety-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) 0;
+  border: 0;
+  background: transparent;
+  color: var(--critical);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.hotel-safety-icon {
+  flex: none;
+  line-height: 1.3;
+}
+
+.hotel-safety-text {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.hotel-safety-body {
+  padding: 0 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hotel-safety-body strong {
+  display: block;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+  color: var(--ink);
+}
+
+.hotel-safety-body p {
+  font-size: var(--text-sm);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.hotel-focus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.hotel-focus-chip {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background: var(--surface-sunk);
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hotel-focus-chip[aria-pressed='true'] {
+  background: var(--brand-tint);
+  color: var(--ink);
+}
+
+.hotel-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--space-6);
+}
+
+.hotel-row {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.hotel-row-past {
+  color: var(--ink-muted);
+}
+
+.hotel-row-past .hotel-time,
+.hotel-row-past strong {
+  color: var(--ink-muted);
+}
+
+.hotel-row-now {
+  background: var(--brand-tint);
+  margin-left: -10px;
+  margin-right: -10px;
+  width: calc(100% + 20px);
+}
+
+.hotel-row-now .hotel-time {
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.hotel-row-future {
+  color: var(--ink);
+}
+
+.hotel-time {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.hotel-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hotel-row-body strong {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.hotel-detail {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.hotel-photos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.hotel-photo-note h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin: var(--space-2) 0 4px;
+}
+
+.hotel-photo-note p {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.hotel-photo-note .media-item figcaption {
+  display: none;
+}
+
+.hotel-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.hotel-note h3 {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hotel-note p {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.hotel-signoff {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--text-lg);
+  color: var(--ink-muted);
+  text-align: center;
+  margin-top: var(--space-5);
+}
+
+.hotel-ask-spacer {
+  height: 8px;
+}
+
+.hotel-ask {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(420px - 32px, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-card);
+  z-index: 20;
+}
+
+.hotel-ask-icon {
+  color: var(--brand-deep);
+  font-size: 16px;
+}
+
+/* Photo notes on the hotel card — caption under the mount */
+.hotel .media-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hotel .media-item figcaption {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
