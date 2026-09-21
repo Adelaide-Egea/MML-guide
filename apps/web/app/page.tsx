@@ -16,9 +16,6 @@ export default function Home() {
   const [adding, setAdding] = useState<SubjectKind | null>(null);
   const [name, setName] = useState('');
   const [switching, setSwitching] = useState(false);
-  /** Open the switcher already asking for a name — used when the sample itself
-   *  offers "start yours", so the person does not have to discover the switcher. */
-  const [startNaming, setStartNaming] = useState(false);
 
   const empty = household.subjects.length === 0;
   const guides = handovers.filter((h) => h.householdId === household.id);
@@ -33,9 +30,10 @@ export default function Home() {
     setAdding(null);
   }
 
-  function openSwitcher(naming = false) {
-    setStartNaming(naming);
-    setSwitching(true);
+  /** Leave the example in one tap: new blank household, sample gone from the list. */
+  function startYourOwn() {
+    actions.addHousehold('');
+    setSwitching(false);
   }
 
   return (
@@ -48,7 +46,7 @@ export default function Home() {
         <button
           type="button"
           className="house-switch"
-          onClick={() => (switching ? setSwitching(false) : openSwitcher(false))}
+          onClick={() => setSwitching((open) => !open)}
           aria-expanded={switching}
         >
           <span>{household.name || 'This household'}</span>
@@ -58,16 +56,11 @@ export default function Home() {
 
       {switching && (
         <HouseSwitcher
-          startNaming={startNaming}
-          onDone={() => {
-            setSwitching(false);
-            setStartNaming(false);
-          }}
+          onDone={() => setSwitching(false)}
           onSample={() => {
             const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
             actions.addSample(sample, handover, presets, sampleTrips);
             setSwitching(false);
-            setStartNaming(false);
           }}
         />
       )}
@@ -81,7 +74,7 @@ export default function Home() {
             type="button"
             className="btn btn-quiet btn-inline"
             style={{ textDecoration: 'underline' }}
-            onClick={() => openSwitcher(true)}
+            onClick={startYourOwn}
           >
             Start your own
           </button>
@@ -99,23 +92,29 @@ export default function Home() {
 
       <section className="stack">
         <h2 className="eyebrow">Who is here</h2>
-        {household.subjects.map((subject) => (
-          <Link key={subject.id} href={`/subjects/${subject.id}`} className="card card-link">
-            <div className="row">
-              <Badge subject={subject} />
-              <span className="grow">
-                <strong>{subjectLabel(subject)}</strong>
-                <span className="muted" style={{ display: 'block' }}>
-                  {KIND_LABEL[subject.kind]} · {subject.entries.length}{' '}
-                  {subject.entries.length === 1 ? 'note' : 'notes'}
+        {household.subjects.length > 0 && (
+          <div className="card rows">
+            {household.subjects.map((subject) => (
+              <Link
+                key={subject.id}
+                href={`/subjects/${subject.id}`}
+                className="rows-item row card-link"
+              >
+                <Badge subject={subject} />
+                <span className="grow">
+                  <strong>{subjectLabel(subject)}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {KIND_LABEL[subject.kind]} · {subject.entries.length}{' '}
+                    {subject.entries.length === 1 ? 'note' : 'notes'}
+                  </span>
                 </span>
-              </span>
-              <span aria-hidden="true" className="muted">
-                →
-              </span>
-            </div>
-          </Link>
-        ))}
+                <span aria-hidden="true" className="muted">
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {adding === null ? (
           <div className="chips">
@@ -161,14 +160,22 @@ export default function Home() {
       {!empty && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <h2 className="eyebrow">Guides</h2>
-          {guides.map((handover) => (
-            <Link key={handover.id} href={`/guide/${handover.id}`} className="card card-link">
-              <strong>{handover.caregiverName || 'Untitled guide'}</strong>
-              <span className="muted" style={{ display: 'block' }}>
-                {handover.caregiverRelationship || 'Caregiver'}
-              </span>
-            </Link>
-          ))}
+          {guides.length > 0 && (
+            <div className="card rows">
+              {guides.map((handover) => (
+                <Link
+                  key={handover.id}
+                  href={`/guide/${handover.id}`}
+                  className="rows-item card-link"
+                >
+                  <strong>{handover.caregiverName || 'Untitled guide'}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {handover.caregiverRelationship || 'Caregiver'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
           <Link href="/guide/new" className="btn">
             Create a guide
           </Link>
@@ -182,14 +189,18 @@ export default function Home() {
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <h2 className="eyebrow">Away</h2>
           <p className="muted">Packing for trips — part of organising the household.</p>
-          {awayTrips.map((trip) => (
-            <Link key={trip.id} href={`/away/${trip.id}`} className="card card-link">
-              <strong>{trip.title}</strong>
-              <span className="muted" style={{ display: 'block' }}>
-                {trip.destinationLabel || trip.startDate}
-              </span>
-            </Link>
-          ))}
+          {awayTrips.length > 0 && (
+            <div className="card rows">
+              {awayTrips.map((trip) => (
+                <Link key={trip.id} href={`/away/${trip.id}`} className="rows-item card-link">
+                  <strong>{trip.title}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {trip.destinationLabel || trip.startDate}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
           <Link href="/away/new" className="btn">
             Plan a trip
           </Link>
@@ -259,23 +270,14 @@ function Welcome() {
 function HouseSwitcher({
   onDone,
   onSample,
-  startNaming = false,
 }: {
   onDone: () => void;
   onSample: () => void;
-  startNaming?: boolean;
 }) {
   const { households, household, sampleId } = useAppState();
   const actions = useActions();
-  const [naming, setNaming] = useState(startNaming);
+  const [naming, setNaming] = useState(false);
   const [name, setName] = useState('');
-
-  // Parent can ask us to open the name field after we are already mounted
-  // (e.g. "Start your own" while the switcher is open). useState alone only
-  // reads startNaming on the first mount, so without this the button looked dead.
-  useEffect(() => {
-    if (startNaming) setNaming(true);
-  }, [startNaming]);
 
   const realHouseholds = households.filter((h) => h.id !== sampleId);
   const sample = sampleId ? households.find((h) => h.id === sampleId) : undefined;
