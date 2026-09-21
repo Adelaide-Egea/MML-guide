@@ -257,7 +257,7 @@ export default function GuidePage() {
           </div>
           {routine.map((item) => {
             const who = subjects.find((s) => s.id === item.appliesTo);
-            const title = routineItemLabel(item);
+            const title = routineItemLabel(item, chrome.routineKinds);
             return (
               <div key={item.id} className="routine-item">
                 <span className="routine-time">

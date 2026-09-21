@@ -251,7 +251,7 @@ export default function CaregiverPage() {
                         : '—')}
                 </span>
                 <span>
-                  <strong>{routineItemLabel(item)}</strong>
+                  <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
                   {item.section && (
                     <span className="muted" style={{ display: 'block' }}>
                       {item.section}

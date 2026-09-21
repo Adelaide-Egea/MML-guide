@@ -3,7 +3,11 @@
 // Safety facts stay in the parent's words. Ask replies follow the selected
 // language via the model. This table only covers on-screen chrome so a French
 // carer is not staring at English buttons after tapping Français.
+//
+// System headings baked into the guide ("Who to call", "Name — allergies") and
+// routine kind labels ("Snack", "Other") are chrome too — not parent prose.
 
+import { ROUTINE_KIND_LABEL, type RoutineKind } from './household.ts';
 import { matchCareLanguage } from './languages.ts';
 
 export interface ChromeCopy {
@@ -45,11 +49,58 @@ export interface ChromeCopy {
   readonly notInGuide: string;
   readonly notInGuideHint: string;
   readonly assistantUnavailable: string;
+  /** Contacts block heading — not the parent's relationship labels. */
+  readonly whoToCall: string;
+  readonly important: string;
+  readonly anythingElse: string;
+  /** Suffix after "Name — …" on safety fact headings. */
+  readonly allergies: string;
+  readonly medication: string;
+  readonly inAnEmergency: string;
+  /** Kind labels for routine rows when the parent did not set a custom name. */
+  readonly routineKinds: Readonly<Record<RoutineKind, string>>;
   readonly whileYouAreHereFor: (name: string) => string;
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
   readonly useProduct: (product: string) => string;
 }
+
+const FR_ROUTINE_KINDS: Record<RoutineKind, string> = {
+  Breakfast: 'Petit-déjeuner',
+  Snack: 'Goûter',
+  Lunch: 'Déjeuner',
+  Dinner: 'Dîner',
+  Feed: 'Repas',
+  Bottle: 'Biberon',
+  Nappy: 'Couche',
+  Nap: 'Sieste',
+  Bath: 'Bain',
+  Bedtime: 'Coucher',
+  School: 'École',
+  Walk: 'Promenade',
+  Litter: 'Litière',
+  Activity: 'Activité',
+  Medication: 'Médicaments',
+  Bins: 'Poubelles',
+  Plants: 'Plantes',
+  Post: 'Courrier',
+  Laundry: 'Lessive',
+  Sheets: 'Draps',
+  Towels: 'Serviettes',
+  TeaTowels: 'Torchons',
+  ToiletPaper: 'Papier toilette',
+  Kitchen: 'Cuisine',
+  Bathroom: 'Salle de bain',
+  Floors: 'Sols',
+  Surfaces: 'Surfaces',
+  Oven: 'Four',
+  Fridge: 'Frigo',
+  Shower: 'Douche',
+  Dusting: 'Dépoussiérage',
+  Vacuum: 'Aspirateur',
+  Restock: 'Réapprovisionner',
+  Other: 'Autre',
+};
 
 const EN: ChromeCopy = {
   languageHint:
@@ -93,6 +144,13 @@ const EN: ChromeCopy = {
   notInGuideHint:
     'Rather than guess, this says nothing. If it matters, call the number under “who to call”.',
   assistantUnavailable: 'The assistant is unavailable, so here is what was written — unchanged.',
+  whoToCall: 'Who to call',
+  important: 'Important',
+  anythingElse: 'Anything else',
+  allergies: 'allergies',
+  medication: 'medication',
+  inAnEmergency: 'in an emergency',
+  routineKinds: ROUTINE_KIND_LABEL,
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
@@ -144,6 +202,13 @@ const FR: ChromeCopy = {
   notInGuideHint:
     'Plutôt que d’inventer, ceci ne dit rien. Si c’est important, appelez le numéro sous « qui appeler ».',
   assistantUnavailable: 'L’assistant est indisponible, voici donc ce qui a été écrit — inchangé.',
+  whoToCall: 'Qui appeler',
+  important: 'Important',
+  anythingElse: 'Autre chose',
+  allergies: 'allergies',
+  medication: 'médicaments',
+  inAnEmergency: 'en cas d’urgence',
+  routineKinds: FR_ROUTINE_KINDS,
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,

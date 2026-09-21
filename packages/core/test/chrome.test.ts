@@ -9,10 +9,17 @@ test('chromeFor returns French UI chrome for fr', () => {
   assert.equal(chrome.everyone, 'Tout le monde');
   assert.equal(chrome.aTypicalDay, 'Une journée type');
   assert.equal(chrome.iHaveReadThis, 'J’ai lu ceci');
+  assert.equal(chrome.whoToCall, 'Qui appeler');
+  assert.equal(chrome.routineKinds.Snack, 'Goûter');
+  assert.equal(chrome.routineKinds.Other, 'Autre');
+  assert.equal(chrome.medication, 'médicaments');
+  assert.equal(chrome.inAnEmergency, 'en cas d’urgence');
 });
 
 test('chromeFor falls back to English for unknown tags', () => {
   const chrome = chromeFor('zz-ZZ');
   assert.equal(chrome.askAboutAnything, 'Ask about anything');
   assert.equal(chrome.everyone, 'Everyone');
+  assert.equal(chrome.whoToCall, 'Who to call');
+  assert.equal(chrome.routineKinds.Snack, 'Snack');
 });
