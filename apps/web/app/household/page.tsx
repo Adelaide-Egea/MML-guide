@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type RoutineItem, routineKindsFor } from '@mml/core';
+import { EMERGENCY_COUNTRIES, type RoutineItem, routineKindsFor } from '@mml/core';
 import { TopBar } from '../../components/Chrome.tsx';
 import { newId } from '../../lib/ids.ts';
 import { useActions, useAppState } from '../../lib/store.ts';
@@ -25,6 +25,25 @@ export default function HouseholdPage() {
             onChange={(e) => actions.setHousehold({ name: e.target.value })}
             placeholder="Chez Martin"
           />
+        </div>
+        <div className="field">
+          <label htmlFor="hh-country">Country</label>
+          <select
+            id="hh-country"
+            className="select"
+            value={household.country}
+            onChange={(e) => actions.setHousehold({ country: e.target.value })}
+          >
+            <option value="">Select…</option>
+            {EMERGENCY_COUNTRIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <span className="hint">
+            Sets the public emergency numbers (999, 15, 112…) on every guide.
+          </span>
         </div>
       </section>
 

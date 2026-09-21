@@ -339,7 +339,10 @@ function SafetyLine({
   open: boolean;
   onToggle: () => void;
 }) {
-  const first = blocks[0];
+  const first =
+    blocks.find((b) => b.id.startsWith('allergy:')) ??
+    blocks.find((b) => b.id === 'local-emergency') ??
+    blocks[0];
   const summary = first
     ? `${first.heading.replace(/\s*—\s*/, ': ')} · ${first.body.split(/[.\n]/)[0]?.trim()}`
     : chrome.readThisFirst;

@@ -82,7 +82,7 @@ export function loadSample(): Sample {
   const household: Household = {
       id: 'hh_sample',
       name: 'Chez Martin',
-      country: 'FR',
+      country: 'France',
       subjects: [
         {
           id: 'sub_lea',

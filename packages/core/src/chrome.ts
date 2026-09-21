@@ -58,6 +58,8 @@ export interface ChromeCopy {
   readonly shapeWeekend: string;
   readonly askPlaceholderTonight: string;
   readonly safetyExpand: string;
+  /** Country public emergency numbers heading, e.g. "Emergency (France)". */
+  readonly localEmergency: (country: string) => string;
 }
 
 const EN: ChromeCopy = {
@@ -115,6 +117,7 @@ const EN: ChromeCopy = {
   shapeWeekend: 'A few days — everything you need is here.',
   askPlaceholderTonight: 'Ask anything about tonight',
   safetyExpand: 'Show all safety notes',
+  localEmergency: (country) => `Emergency (${country})`,
 };
 
 const FR: ChromeCopy = {
@@ -175,6 +178,7 @@ const FR: ChromeCopy = {
   shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
   askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
   safetyExpand: 'Voir toutes les notes de sécurité',
+  localEmergency: (country) => `Urgences (${country})`,
 };
 
 const PT_BR: ChromeCopy = {

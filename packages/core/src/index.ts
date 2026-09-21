@@ -7,3 +7,4 @@ export * from './languages.ts';
 export * from './chrome.ts';
 export * from './childPrompts.ts';
 export * from './away.ts';
+export * from './emergencyNumbers.ts';

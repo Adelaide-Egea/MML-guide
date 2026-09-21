@@ -11,6 +11,8 @@
 // also what makes the free tier cost pennies and the whole thing survivable when a
 // model provider has an outage.
 
+import { chromeFor } from './chrome.ts';
+import { emergencyNumbersFor } from './emergencyNumbers.ts';
 import {
   type CareSubject,
   type Media,
@@ -186,6 +188,21 @@ export function buildGuide(
         contacts
           .map((c) => `${c.name}${c.relationship ? ` (${c.relationship})` : ''} — ${c.phone}`)
           .join('\n'),
+        { critical: true },
+      ),
+    );
+  }
+
+  // Public emergency services for the household's country — Held always printed these
+  // next to "who to call". Missing them left caregivers without 999 / 15 / 112.
+  const chrome = chromeFor(handover.language || 'en');
+  const localEmergency = emergencyNumbersFor(household.country, handover.language || 'en');
+  if (localEmergency) {
+    blocks.push(
+      factBlock(
+        'local-emergency',
+        chrome.localEmergency(localEmergency.country),
+        localEmergency.numbers,
         { critical: true },
       ),
     );
