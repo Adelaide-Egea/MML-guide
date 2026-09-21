@@ -240,10 +240,17 @@ export interface RoutineItem {
   readonly product?: string;
 }
 
-/** What to print on a row: a custom "Other" name when set, otherwise the kind label. */
-export function routineItemLabel(item: Pick<RoutineItem, 'kind' | 'label'>): string {
+/** What to print on a row: a custom "Other" name when set, otherwise the kind label.
+ *
+ *  Pass localized `labels` (e.g. `chromeFor(tag).routineKinds`) on caregiver
+ *  surfaces. Custom parent names stay as written.
+ */
+export function routineItemLabel(
+  item: Pick<RoutineItem, 'kind' | 'label'>,
+  labels: Readonly<Record<RoutineKind, string>> = ROUTINE_KIND_LABEL,
+): string {
   if (item.label?.trim()) return item.label.trim();
-  return ROUTINE_KIND_LABEL[item.kind];
+  return labels[item.kind];
 }
 
 export interface Household {

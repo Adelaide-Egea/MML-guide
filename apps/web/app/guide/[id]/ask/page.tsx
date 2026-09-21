@@ -132,11 +132,7 @@ export default function AskPage() {
           so it can never run longer than the thing it is standing in for. */}
       {busy && (
         <Breathing
-          lines={[
-            'Looking through what was written down…',
-            'Only what is actually in the guide…',
-            'Nearly there…',
-          ]}
+          lines={[chrome.lookingThrough, chrome.onlyWhatIsInGuide, chrome.nearlyThere]}
         />
       )}
 
@@ -171,7 +167,7 @@ function FromTheGuide({
       <p className="muted">{chrome.assistantUnavailable}</p>
       {candidates.map((candidate) => (
         <div key={candidate.entry.id} className="stack-tight" style={{ marginTop: 'var(--space-3)' }}>
-          <strong>{candidate.entry.title}</strong>
+          <strong>{chrome.entryTitles[candidate.entry.title] ?? candidate.entry.title}</strong>
           <p className="block-body">{candidate.entry.body}</p>
           <span className="citation">
             {candidate.subjectName}
@@ -201,16 +197,16 @@ function AnswerView({
     return (
       <div className="critical stack-tight">
         <div className="eyebrow">
-          {answer.subjectName ? `${answer.subjectName} — exactly as written` : 'Exactly as written'}
+          {answer.subjectName
+            ? chrome.subjectExactlyAsWritten(answer.subjectName)
+            : chrome.exactlyAsWritten}
         </div>
         {/* Verbatim, in the language it was written in. A mistranslated allergen is
             the worst thing this product could do, so nothing here is rewritten. */}
         <p className="critical-body" lang={answer.verbatimLanguage}>
           {answer.verbatim}
         </p>
-        <p className="muted">
-          This is safety information, so it is shown word for word and not translated.
-        </p>
+        <p className="muted">{chrome.safetyShownVerbatim}</p>
       </div>
     );
   }

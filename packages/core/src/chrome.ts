@@ -3,7 +3,11 @@
 // Safety facts stay in the parent's words. Ask replies follow the selected
 // language via the model. This table only covers on-screen chrome so a French
 // carer is not staring at English buttons after tapping Français.
+//
+// System headings baked into the guide ("Who to call", "Name — allergies") and
+// routine kind labels ("Snack", "Other") are chrome too — not parent prose.
 
+import { ROUTINE_KIND_LABEL, type RoutineKind } from './household.ts';
 import { matchCareLanguage } from './languages.ts';
 
 export interface ChromeCopy {
@@ -45,11 +49,106 @@ export interface ChromeCopy {
   readonly notInGuide: string;
   readonly notInGuideHint: string;
   readonly assistantUnavailable: string;
+  /** Contacts block heading — not the parent's relationship labels. */
+  readonly whoToCall: string;
+  readonly important: string;
+  readonly anythingElse: string;
+  /** Suffix after "Name — …" on safety fact headings. */
+  readonly allergies: string;
+  readonly medication: string;
+  readonly inAnEmergency: string;
+  /** Kind labels for routine rows when the parent did not set a custom name. */
+  readonly routineKinds: Readonly<Record<RoutineKind, string>>;
+  /**
+   * English default entry / section titles → localized display.
+   * Only exact matches remap; custom parent titles stay as written.
+   */
+  readonly entryTitles: Readonly<Record<string, string>>;
+  readonly printOrSavePdf: string;
+  readonly notSafeToShow: string;
+  readonly notFound: string;
+  readonly exactlyAsWritten: string;
+  readonly lookingThrough: string;
+  readonly onlyWhatIsInGuide: string;
+  readonly nearlyThere: string;
+  readonly safetyShownVerbatim: string;
   readonly whileYouAreHereFor: (name: string) => string;
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
   readonly useProduct: (product: string) => string;
+  readonly subjectExactlyAsWritten: (name: string) => string;
 }
+
+/** Built-in prompt / section titles seeded in English — display chrome, not parent prose. */
+const FR_ENTRY_TITLES: Record<string, string> = {
+  Screens: 'Écrans',
+  'Screen time': 'Écrans',
+  Potty: 'Pot',
+  'Potty / toilet': 'Pot / toilettes',
+  Food: 'Repas',
+  Sleep: 'Sommeil',
+  Bedtime: 'Coucher',
+  Nappies: 'Couches',
+  'Nappies & toilet': 'Couches et toilettes',
+  'Nappies / toilet': 'Couches / toilettes',
+  'Milk & bottles': 'Lait et biberons',
+  'Likes & comfort': 'Goûts et réconfort',
+  'If they are upset': 'S’ils sont contrariés',
+  'If upset': 'Si contrarié',
+  'Nursery / preschool': 'Crèche / maternelle',
+  Nursery: 'Crèche',
+  'Out of the house': 'Sorties',
+  'Out & about': 'Dehors',
+  School: 'École',
+  Activities: 'Activités',
+  Independence: 'Autonomie',
+  Walks: 'Promenades',
+  Meals: 'Repas',
+  Comfort: 'Réconfort',
+  Health: 'Santé',
+  Cleaning: 'Ménage',
+  'House rules': 'Règles de la maison',
+  'Keys & access': 'Clés et accès',
+  Routine: 'Routine',
+  Clothing: 'Vêtements',
+};
+
+const FR_ROUTINE_KINDS: Record<RoutineKind, string> = {
+  Breakfast: 'Petit-déjeuner',
+  Snack: 'Goûter',
+  Lunch: 'Déjeuner',
+  Dinner: 'Dîner',
+  Feed: 'Repas',
+  Bottle: 'Biberon',
+  Nappy: 'Couche',
+  Nap: 'Sieste',
+  Bath: 'Bain',
+  Bedtime: 'Coucher',
+  School: 'École',
+  Walk: 'Promenade',
+  Litter: 'Litière',
+  Activity: 'Activité',
+  Medication: 'Médicaments',
+  Bins: 'Poubelles',
+  Plants: 'Plantes',
+  Post: 'Courrier',
+  Laundry: 'Lessive',
+  Sheets: 'Draps',
+  Towels: 'Serviettes',
+  TeaTowels: 'Torchons',
+  ToiletPaper: 'Papier toilette',
+  Kitchen: 'Cuisine',
+  Bathroom: 'Salle de bain',
+  Floors: 'Sols',
+  Surfaces: 'Surfaces',
+  Oven: 'Four',
+  Fridge: 'Frigo',
+  Shower: 'Douche',
+  Dusting: 'Dépoussiérage',
+  Vacuum: 'Aspirateur',
+  Restock: 'Réapprovisionner',
+  Other: 'Autre',
+};
 
 const EN: ChromeCopy = {
   languageHint:
@@ -93,10 +192,28 @@ const EN: ChromeCopy = {
   notInGuideHint:
     'Rather than guess, this says nothing. If it matters, call the number under “who to call”.',
   assistantUnavailable: 'The assistant is unavailable, so here is what was written — unchanged.',
+  whoToCall: 'Who to call',
+  important: 'Important',
+  anythingElse: 'Anything else',
+  allergies: 'allergies',
+  medication: 'medication',
+  inAnEmergency: 'in an emergency',
+  routineKinds: ROUTINE_KIND_LABEL,
+  entryTitles: {},
+  printOrSavePdf: 'Print or save as PDF',
+  notSafeToShow: 'Not safe to show',
+  notFound: 'Not found',
+  exactlyAsWritten: 'Exactly as written',
+  lookingThrough: 'Looking through what was written down…',
+  onlyWhatIsInGuide: 'Only what is actually in the guide…',
+  nearlyThere: 'Nearly there…',
+  safetyShownVerbatim:
+    'This is safety information, so it is shown word for word and not translated.',
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
   useProduct: (product) => `Use ${product}`,
+  subjectExactlyAsWritten: (name) => `${name} — exactly as written`,
 };
 
 const FR: ChromeCopy = {
@@ -144,10 +261,28 @@ const FR: ChromeCopy = {
   notInGuideHint:
     'Plutôt que d’inventer, ceci ne dit rien. Si c’est important, appelez le numéro sous « qui appeler ».',
   assistantUnavailable: 'L’assistant est indisponible, voici donc ce qui a été écrit — inchangé.',
+  whoToCall: 'Qui appeler',
+  important: 'Important',
+  anythingElse: 'Autre chose',
+  allergies: 'allergies',
+  medication: 'médicaments',
+  inAnEmergency: 'en cas d’urgence',
+  routineKinds: FR_ROUTINE_KINDS,
+  entryTitles: FR_ENTRY_TITLES,
+  printOrSavePdf: 'Imprimer ou enregistrer en PDF',
+  notSafeToShow: 'Affichage non sûr',
+  notFound: 'Introuvable',
+  exactlyAsWritten: 'Tel quel, sans modification',
+  lookingThrough: 'Je parcours ce qui a été noté…',
+  onlyWhatIsInGuide: 'Uniquement ce qui est dans le guide…',
+  nearlyThere: 'Presque…',
+  safetyShownVerbatim:
+    'Ceci est une information de sécurité : elle est affichée mot pour mot, sans traduction.',
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,
   useProduct: (product) => `Utiliser ${product}`,
+  subjectExactlyAsWritten: (name) => `${name} — tel quel, sans modification`,
 };
 
 const PT_BR: ChromeCopy = {
@@ -459,4 +594,25 @@ const BY_TAG: Record<string, ChromeCopy> = {
 export function chromeFor(tag: string): ChromeCopy {
   const matched = matchCareLanguage(tag).tag;
   return BY_TAG[matched] ?? EN;
+}
+
+/** Remap known English system / prompt titles inside a guide heading.
+ *
+ *  Custom parent titles are left alone. Only exact segment matches against
+ *  `chrome.entryTitles` (and the fixed chrome headings) are rewritten.
+ */
+export function localizeGuideHeading(heading: string, chrome: ChromeCopy): string {
+  const fixed: Record<string, string> = {
+    'Who to call': chrome.whoToCall,
+    Important: chrome.important,
+    'Anything else': chrome.anythingElse,
+    allergies: chrome.allergies,
+    medication: chrome.medication,
+    'in an emergency': chrome.inAnEmergency,
+    ...chrome.entryTitles,
+  };
+  return heading
+    .split(' — ')
+    .map((part) => fixed[part] ?? part)
+    .join(' — ');
 }

@@ -8,6 +8,7 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  localizeGuideHeading,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -139,7 +140,7 @@ export default function CaregiverPage() {
       <main className="shell">
         <TopBar title={chrome.guide} />
         <div className="critical stack-tight">
-          <div className="eyebrow">Not safe to show</div>
+          <div className="eyebrow">{chrome.notSafeToShow}</div>
           <p>{result.error}</p>
         </div>
       </main>
@@ -185,7 +186,7 @@ export default function CaregiverPage() {
               <div className="eyebrow">{chrome.readFirst}</div>
               {critical.map((block) => (
                 <article key={block.id} className="stack-tight">
-                  <strong>{block.heading}</strong>
+                  <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
                   <p className="block-body">{block.body}</p>
                 </article>
               ))}
@@ -251,7 +252,7 @@ export default function CaregiverPage() {
                         : '—')}
                 </span>
                 <span>
-                  <strong>{routineItemLabel(item)}</strong>
+                  <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
                   {item.section && (
                     <span className="muted" style={{ display: 'block' }}>
                       {item.section}
@@ -276,7 +277,7 @@ export default function CaregiverPage() {
       <section className="stack">
         {rest.map((block) => (
           <article key={block.id} className="card stack-tight">
-            <strong>{block.heading}</strong>
+            <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
             {block.body && <p className="block-body">{block.body}</p>}
             {block.media.length > 0 && (
               <div className="media-grid">
