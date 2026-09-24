@@ -22,6 +22,7 @@ import {
   type Trip,
   EMPTY_SAFETY,
   instantiatePreset,
+  normalizeHandover,
   presetFromRoutine,
 } from '@mml/core';
 import { useCallback, useSyncExternalStore } from 'react';
@@ -119,6 +120,10 @@ interface StoredV1 {
 export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
   const defaults = emptyState();
 
+  const handovers = (parsed.handovers ?? defaults.handovers).map((h) =>
+    normalizeHandover(h as Handover),
+  );
+
   if (parsed.households && parsed.households.length > 0) {
     const households = parsed.households;
     const activeId =
@@ -128,7 +133,7 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
     return {
       households,
       activeId,
-      handovers: parsed.handovers ?? defaults.handovers,
+      handovers,
       trips: parsed.trips ?? defaults.trips,
       presets: parsed.presets ?? defaults.presets,
       sampleId:
@@ -143,7 +148,7 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
   return {
     households: [household],
     activeId: household.id,
-    handovers: parsed.handovers ?? [],
+    handovers: (parsed.handovers ?? []).map((h) => normalizeHandover(h as Handover)),
     trips: parsed.trips ?? [],
     presets: parsed.presets ?? [],
     sampleId: parsed.sample ? household.id : parsed.sampleId ?? null,

@@ -9,7 +9,7 @@
 // then see them.
 
 import type { Handover, Household, Media } from '@mml/core';
-import { subjectsFor } from '@mml/core';
+import { normalizeHandover, subjectsFor } from '@mml/core';
 import { getBlob, putBlob } from './media.ts';
 
 /** Practical ceiling for a shareable fragment. Beyond this, most messengers and
@@ -59,7 +59,8 @@ export function snapshotForShare(
   handover: Handover,
   opts: ShareOptions = {},
 ): GuideSnapshot {
-  const subjects = subjectsFor(household, handover);
+  const normalized = normalizeHandover(handover);
+  const subjects = subjectsFor(household, normalized);
   const ids = new Set(subjects.map((s) => s.id));
   const includePhotos = opts.includePhotos === true;
 
@@ -85,7 +86,7 @@ export function snapshotForShare(
         (item) => item.appliesTo === 'all' || ids.has(item.appliesTo),
       ),
     },
-    handover,
+    handover: normalized,
   };
 }
 
@@ -151,7 +152,10 @@ export async function decodeSnapshot(payload: string): Promise<GuideSnapshot | n
     if ((parsed?.v !== 1 && parsed?.v !== 2) || !parsed.household || !parsed.handover) {
       return null;
     }
-    return parsed;
+    return {
+      ...parsed,
+      handover: normalizeHandover(parsed.handover),
+    };
   } catch {
     return null;
   }

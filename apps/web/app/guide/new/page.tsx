@@ -2,16 +2,24 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import type { Handover, HandoverDuration } from '@mml/core';
+import {
+  DEFAULT_EXPECTATION,
+  durationFromScenario,
+  type Handover,
+  type Scenario,
+} from '@mml/core';
 import { Badge, TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { newId } from '../../../lib/ids.ts';
 import { KIND_LABEL, useActions, useAppState } from '../../../lib/store.ts';
 
-const DURATIONS: readonly { id: HandoverDuration; label: string; hint: string }[] = [
-  { id: 'evening', label: 'An evening', hint: 'Dinner through bedtime only' },
-  { id: 'fullday', label: 'A day', hint: 'The whole day' },
-  { id: 'fewdays', label: 'Several days', hint: 'Everything, including the dull bits' },
+const SCENARIO_OPTIONS: readonly { id: Scenario; label: string; hint: string }[] = [
+  { id: 'evening', label: 'Evening sitter', hint: 'After dinner or at bedtime' },
+  { id: 'fullday', label: 'Full day', hint: 'Meals, nap and pickup' },
+  { id: 'weekend', label: 'Weekend', hint: 'A few days in this house' },
+  { id: 'cleaner', label: 'Cleaner', hint: 'The house, room by room' },
+  { id: 'petsitter', label: 'Pet sitter', hint: 'Animals only' },
+  { id: 'goingtoyours', label: 'Going to yours', hint: 'Children travel to the caregiver' },
 ];
 
 export default function NewGuide() {
@@ -21,7 +29,7 @@ export default function NewGuide() {
 
   const [caregiverName, setCaregiverName] = useState('');
   const [caregiverRelationship, setRelationship] = useState('');
-  const [duration, setDuration] = useState<HandoverDuration>('fewdays');
+  const [scenario, setScenario] = useState<Scenario>('weekend');
   const [subjectIds, setSubjectIds] = useState<readonly string[]>([]);
   const [note, setNote] = useState('');
   const [language, setLanguage] = useState(
@@ -39,7 +47,9 @@ export default function NewGuide() {
       householdId: household.id,
       caregiverName: caregiverName.trim(),
       caregiverRelationship: caregiverRelationship.trim(),
-      duration,
+      scenario,
+      duration: durationFromScenario(scenario),
+      expectation: DEFAULT_EXPECTATION[scenario],
       language,
       // Empty means every subject. Selecting a subset is a privacy boundary, not a
       // convenience: someone coming to clean has no business reading a child's
@@ -82,21 +92,24 @@ export default function NewGuide() {
         </div>
 
         <div className="field">
-          <label>How long?</label>
+          <label>What kind of visit?</label>
           <div className="chips">
-            {DURATIONS.map((option) => (
+            {SCENARIO_OPTIONS.map((option) => (
               <button
                 key={option.id}
                 type="button"
                 className="chip"
-                aria-pressed={duration === option.id}
-                onClick={() => setDuration(option.id)}
+                aria-pressed={scenario === option.id}
+                onClick={() => setScenario(option.id)}
               >
                 {option.label}
               </button>
             ))}
           </div>
-          <span className="hint">{DURATIONS.find((d) => d.id === duration)?.hint}</span>
+          <span className="hint">{SCENARIO_OPTIONS.find((d) => d.id === scenario)?.hint}</span>
+          <span className="hint" style={{ display: 'block', marginTop: 'var(--space-2)' }}>
+            {DEFAULT_EXPECTATION[scenario]}
+          </span>
         </div>
 
         <div className="field">

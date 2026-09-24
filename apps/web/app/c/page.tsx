@@ -11,6 +11,7 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  normalizeHandover,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -99,7 +100,7 @@ export default function CaregiverPage() {
   const result = useMemo(() => {
     if (!snapshot) return null;
     try {
-      const handover = { ...snapshot.handover, language };
+      const handover = normalizeHandover({ ...snapshot.handover, language });
       return {
         guide: buildVerifiedGuide(snapshot.household, handover),
         handover,
@@ -109,7 +110,7 @@ export default function CaregiverPage() {
     } catch (err) {
       return {
         guide: null,
-        handover: { ...snapshot.handover, language },
+        handover: normalizeHandover({ ...snapshot.handover, language }),
         household: snapshot.household,
         error:
           err instanceof UnsafeGuideError ? err.message : 'This guide could not be built safely.',
@@ -166,7 +167,7 @@ export default function CaregiverPage() {
         <LanguageToggle value={language} onChange={setLanguage} compact />
       </header>
 
-      <Greeting chrome={chrome} handover={handover} subjects={subjects} />
+      <Greeting chrome={chrome} handover={handover} />
 
       {critical.length > 0 && (
         <SafetyLine
@@ -283,11 +284,17 @@ function ScenarioChip({
   tint: string;
 }) {
   const label =
-    handover.duration === 'evening'
+    handover.scenario === 'evening'
       ? chrome.scenarioEvening
-      : handover.duration === 'fullday'
+      : handover.scenario === 'fullday'
         ? chrome.scenarioFullDay
-        : chrome.scenarioWeekend;
+        : handover.scenario === 'cleaner'
+          ? chrome.scenarioCleaner
+          : handover.scenario === 'petsitter'
+            ? chrome.scenarioPetSitter
+            : handover.scenario === 'goingtoyours'
+              ? chrome.scenarioGoingToYours
+              : chrome.scenarioWeekend;
   return (
     <span className="hotel-scenario" style={{ background: `var(${tint})` }}>
       {label}
@@ -298,32 +305,14 @@ function ScenarioChip({
 function Greeting({
   chrome,
   handover,
-  subjects,
 }: {
   chrome: ChromeCopy;
   handover: Handover;
-  subjects: readonly CareSubject[];
 }) {
-  const who = subjects
-    .filter((s) => s.kind !== 'place')
-    .map((s) => s.name)
-    .join(' & ');
-  const shape =
-    handover.duration === 'evening'
-      ? chrome.shapeEvening
-      : handover.duration === 'fullday'
-        ? chrome.shapeFullDay(who || subjects[0]?.name || 'them')
-        : chrome.shapeWeekend;
-  // Prefer a dedicated return/back line from important notes — the "what's expected"
-  // sentence lands here once that field exists; until then keep the duration shape.
-  const back =
-    handover.importantNotes.find((n) => /back|return|land|rentr/i.test(n))?.trim() ?? null;
-
   return (
     <div className="hotel-greeting">
       <h1>{chrome.helloName(handover.caregiverName || 'there')}</h1>
-      <p className="hotel-shape">{shape}</p>
-      {back ? <p className="hotel-back">{back}</p> : null}
+      <p className="hotel-shape">{handover.expectation}</p>
     </div>
   );
 }

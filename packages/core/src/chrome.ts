@@ -53,6 +53,9 @@ export interface ChromeCopy {
   readonly scenarioEvening: string;
   readonly scenarioFullDay: string;
   readonly scenarioWeekend: string;
+  readonly scenarioCleaner: string;
+  readonly scenarioPetSitter: string;
+  readonly scenarioGoingToYours: string;
   readonly shapeEvening: string;
   readonly shapeFullDay: (who: string) => string;
   readonly shapeWeekend: string;
@@ -112,6 +115,9 @@ const EN: ChromeCopy = {
   scenarioEvening: 'Evening sitter',
   scenarioFullDay: 'Full day',
   scenarioWeekend: 'Weekend',
+  scenarioCleaner: 'Cleaner',
+  scenarioPetSitter: 'Pet sitter',
+  scenarioGoingToYours: 'Going to yours',
   shapeEvening: 'Tonight: dinner, bath, bed.',
   shapeFullDay: (who) => `A full day with ${who}.`,
   shapeWeekend: 'A few days — everything you need is here.',
@@ -173,6 +179,9 @@ const FR: ChromeCopy = {
   scenarioEvening: 'Soirée',
   scenarioFullDay: 'Journée complète',
   scenarioWeekend: 'Week-end',
+  scenarioCleaner: 'Ménage',
+  scenarioPetSitter: 'Garde d’animaux',
+  scenarioGoingToYours: 'Chez vous',
   shapeEvening: 'Ce soir : dîner, bain, coucher.',
   shapeFullDay: (who) => `Une journée complète avec ${who}.`,
   shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
@@ -219,6 +228,9 @@ const PT_BR: ChromeCopy = {
   aTypicalDayFor: (name) => `Um dia típico para ${name}`,
   forName: (name) => `Para ${name}`,
   useProduct: (product) => `Usar ${product}`,
+  scenarioCleaner: 'Limpeza',
+  scenarioPetSitter: 'Cuidador de animais',
+  scenarioGoingToYours: 'Na sua casa',
 };
 
 const PT_PT: ChromeCopy = {
@@ -272,6 +284,9 @@ const ES: ChromeCopy = {
   aTypicalDayFor: (name) => `Un día típico para ${name}`,
   forName: (name) => `Para ${name}`,
   useProduct: (product) => `Usar ${product}`,
+  scenarioCleaner: 'Limpieza',
+  scenarioPetSitter: 'Cuidador de mascotas',
+  scenarioGoingToYours: 'En su casa',
 };
 
 const TL: ChromeCopy = {
@@ -312,6 +327,9 @@ const TL: ChromeCopy = {
   aTypicalDayFor: (name) => `Isang karaniwang araw para kay ${name}`,
   forName: (name) => `Para kay ${name}`,
   useProduct: (product) => `Gamitin ang ${product}`,
+  scenarioCleaner: 'Tagalinis',
+  scenarioPetSitter: 'Tagapag-alaga ng hayop',
+  scenarioGoingToYours: 'Sa inyo',
 };
 
 const AR: ChromeCopy = {
@@ -351,6 +369,9 @@ const AR: ChromeCopy = {
   aTypicalDayFor: (name) => `يوم عادي لـ ${name}`,
   forName: (name) => `لـ ${name}`,
   useProduct: (product) => `استخدم ${product}`,
+  scenarioCleaner: 'تنظيف',
+  scenarioPetSitter: 'مجالسة حيوانات',
+  scenarioGoingToYours: 'عندكم',
 };
 
 const PL: ChromeCopy = {
@@ -391,6 +412,9 @@ const PL: ChromeCopy = {
   aTypicalDayFor: (name) => `Typowy dzień dla ${name}`,
   forName: (name) => `Dla ${name}`,
   useProduct: (product) => `Użyj ${product}`,
+  scenarioCleaner: 'Sprzątanie',
+  scenarioPetSitter: 'Opieka nad zwierzakiem',
+  scenarioGoingToYours: 'U was',
 };
 
 const RO: ChromeCopy = {
@@ -431,6 +455,9 @@ const RO: ChromeCopy = {
   aTypicalDayFor: (name) => `O zi tipică pentru ${name}`,
   forName: (name) => `Pentru ${name}`,
   useProduct: (product) => `Folosește ${product}`,
+  scenarioCleaner: 'Curățenie',
+  scenarioPetSitter: 'Îngrijire animale',
+  scenarioGoingToYours: 'La voi',
 };
 
 const IT: ChromeCopy = {
@@ -471,6 +498,9 @@ const IT: ChromeCopy = {
   aTypicalDayFor: (name) => `Una giornata tipo per ${name}`,
   forName: (name) => `Per ${name}`,
   useProduct: (product) => `Usa ${product}`,
+  scenarioCleaner: 'Pulizie',
+  scenarioPetSitter: 'Pet sitter',
+  scenarioGoingToYours: 'Da voi',
 };
 
 const BY_TAG: Record<string, ChromeCopy> = {

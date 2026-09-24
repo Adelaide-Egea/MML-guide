@@ -257,6 +257,98 @@ export interface Household {
 
 export type HandoverDuration = 'evening' | 'fullday' | 'fewdays';
 
+/** Kind of visit — what the caregiver is here for, not only how long. */
+export type Scenario =
+  | 'evening'
+  | 'fullday'
+  | 'weekend'
+  | 'cleaner'
+  | 'petsitter'
+  | 'goingtoyours';
+
+export const SCENARIOS: readonly Scenario[] = [
+  'evening',
+  'fullday',
+  'weekend',
+  'cleaner',
+  'petsitter',
+  'goingtoyours',
+];
+
+/** Default "what's expected of you" line under the greeting, per scenario. */
+export const DEFAULT_EXPECTATION: Record<Scenario, string> = {
+  evening:
+    "When you arrive the children will already be asleep. You shouldn't need to do anything except be here — here's what to do if they wake.",
+  fullday: 'A full day. Meals, nap and pickup are below.',
+  weekend: 'A few days. Each day is on its own tab.',
+  cleaner: "The house, room by room, in the order I'd walk it.",
+  petsitter: "Feeding, walks and the vet's number are below.",
+  goingtoyours: 'Everything that came in the bag, and what has to come home.',
+};
+
+/** Map a scenario onto the legacy duration used by routine scoping. */
+export function durationFromScenario(scenario: Scenario): HandoverDuration {
+  switch (scenario) {
+    case 'evening':
+      return 'evening';
+    case 'fullday':
+    case 'cleaner':
+    case 'petsitter':
+      return 'fullday';
+    case 'weekend':
+    case 'goingtoyours':
+      return 'fewdays';
+  }
+}
+
+/** Lift a pre-scenario handover that only stored duration. */
+export function scenarioFromDuration(duration: HandoverDuration): Scenario {
+  switch (duration) {
+    case 'evening':
+      return 'evening';
+    case 'fullday':
+      return 'fullday';
+    case 'fewdays':
+      return 'weekend';
+  }
+}
+
+function isScenario(value: unknown): value is Scenario {
+  return typeof value === 'string' && (SCENARIOS as readonly string[]).includes(value);
+}
+
+function isDuration(value: unknown): value is HandoverDuration {
+  return value === 'evening' || value === 'fullday' || value === 'fewdays';
+}
+
+/** Ensure scenario + expectation exist; keep duration derived for older readers. */
+export function normalizeHandover(
+  raw: Partial<Handover> & Pick<Handover, 'id' | 'householdId'>,
+): Handover {
+  const scenario = isScenario(raw.scenario)
+    ? raw.scenario
+    : scenarioFromDuration(isDuration(raw.duration) ? raw.duration : 'fewdays');
+  const expectation =
+    typeof raw.expectation === 'string' && raw.expectation.trim()
+      ? raw.expectation.trim()
+      : DEFAULT_EXPECTATION[scenario];
+  return {
+    id: raw.id,
+    householdId: raw.householdId,
+    caregiverName: raw.caregiverName ?? '',
+    caregiverRelationship: raw.caregiverRelationship ?? '',
+    scenario,
+    /** @deprecated Prefer `scenario`. Kept in sync for routine scoping and old links. */
+    duration: durationFromScenario(scenario),
+    language: raw.language ?? 'en',
+    subjectIds: raw.subjectIds ?? [],
+    importantNotes: raw.importantNotes ?? [],
+    extra: raw.extra ?? '',
+    signOff: raw.signOff ?? '',
+    expectation,
+  };
+}
+
 /** One occasion: this caregiver, this stretch of time, these subjects.
  *
  *  The household is the durable part and a handover is the disposable part, which
@@ -267,7 +359,14 @@ export interface Handover {
   readonly householdId: string;
   readonly caregiverName: string;
   readonly caregiverRelationship: string;
+  readonly scenario: Scenario;
+  /**
+   * @deprecated Prefer `scenario`. Still written so older clients and `scopeRoutine`
+   * keep working; always derived from `scenario` on normalize.
+   */
   readonly duration: HandoverDuration;
+  /** Editable "what's expected of you" sentence under the greeting. */
+  readonly expectation: string;
   /** BCP-47 tag. The caregiver's language, which is frequently not the parent's. */
   readonly language: string;
   /** Which subjects this caregiver is responsible for. Empty means all of them.

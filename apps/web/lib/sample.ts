@@ -71,7 +71,10 @@ export function loadSample(): Sample {
     householdId: 'hh_sample',
     caregiverName: 'Margaret',
     caregiverRelationship: 'Grandparent',
+    scenario: 'weekend',
     duration: 'fewdays',
+    expectation:
+      'A few days. Each day is on its own tab.',
     language: 'en',
     subjectIds: [],
     importantNotes: ['We land back on Sunday at 18:40. Call any time before that.'],
