@@ -9,6 +9,27 @@
 }
 
 @media print {
+  /* Dark-theme tokens are near-white; force light ink on white paper or the
+     fridge sheet prints blank for caregivers who print from dark mode. */
+  :root,
+  :root[data-theme='dark'] {
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --surface-warm: #ffffff;
+    --surface-sunk: #f2efe8;
+    --hairline: #e6dccb;
+    --hairline-strong: #a89880;
+    --ink: #2a3a33;
+    --ink-muted: #66706a;
+    --brand: #d39a4a;
+    --brand-deep: #8f5f1e;
+    --brand-tint: #f7ebd6;
+    --on-brand: #2a3a33;
+    --done: #3f6b4a;
+    --critical: #9e3a2f;
+    --critical-tint: #f7e8e4;
+  }
+
   .no-print,
   .hotel-ask,
   .hotel-ask-spacer,
@@ -97,6 +118,7 @@
     margin: 0 0 3mm;
     padding: 0;
     color: var(--ink) !important;
+    break-inside: avoid;
   }
 
   .print-timeline .hotel-time,
@@ -177,6 +199,10 @@
     flex: none;
   }
 
+  .hotel-greeting {
+    break-inside: avoid;
+  }
+
   .hotel-greeting h1 {
     font-size: 28px;
   }
@@ -185,14 +211,31 @@
     display: none !important;
   }
 
-  .hotel-safety-body {
+  /* Always mounted on screen (via [hidden]); force open + brick outline on paper. */
+  .hotel-safety-body,
+  .hotel-safety-body[hidden] {
     display: block !important;
+    border: 1.5px solid var(--critical);
+    border-radius: 8px;
+    background: transparent !important;
+    padding: 4mm 5mm;
+    margin-bottom: 8mm;
+    break-inside: avoid;
+  }
+
+  .hotel-photo-note,
+  .hotel-note {
+    break-inside: avoid;
   }
 
   .hotel-row-past,
   .hotel-row-now,
   .hotel-row-future {
     color: var(--ink) !important;
+  }
+
+  .hotel-row-now {
+    width: auto !important;
   }
 
   a {

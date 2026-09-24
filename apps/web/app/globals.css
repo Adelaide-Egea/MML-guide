@@ -321,7 +321,8 @@ select {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: #fff;
+  background: var(--surface-sunk);
+  color: var(--ink);
   font-size: var(--text-lg);
   flex: none;
 }
@@ -758,7 +759,7 @@ a.routine-item {
   padding: 0 12px;
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
 }
 
@@ -837,6 +838,10 @@ a.routine-item {
   gap: var(--space-3);
 }
 
+.hotel-safety-body[hidden] {
+  display: none;
+}
+
 .hotel-safety-body strong {
   display: block;
   font-size: var(--text-sm);
@@ -865,7 +870,7 @@ a.routine-item {
   background: var(--surface-sunk);
   color: var(--ink-muted);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -903,12 +908,11 @@ a.routine-item {
   background: var(--brand-tint);
   margin-left: -10px;
   margin-right: -10px;
-  width: calc(100% + 20px);
 }
 
 .hotel-row-now .hotel-time {
   color: var(--brand-deep);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .hotel-row-future {
@@ -918,7 +922,7 @@ a.routine-item {
 .hotel-time {
   font-variant-numeric: tabular-nums;
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink);
 }
 
@@ -931,7 +935,7 @@ a.routine-item {
 
 .hotel-row-body strong {
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .hotel-detail {
@@ -974,7 +978,7 @@ a.routine-item {
 .hotel-note h3 {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 4px;
 }
 

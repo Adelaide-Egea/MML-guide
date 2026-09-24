@@ -78,7 +78,7 @@ export default function Home() {
           >
             Start your own
           </button>
-          {' · '}
+          {' or '}
           <button
             type="button"
             className="btn btn-quiet btn-inline"
@@ -104,7 +104,7 @@ export default function Home() {
                 <span className="grow">
                   <strong>{subjectLabel(subject)}</strong>
                   <span className="muted" style={{ display: 'block' }}>
-                    {KIND_LABEL[subject.kind]} · {subject.entries.length}{' '}
+                    {KIND_LABEL[subject.kind]}, {subject.entries.length}{' '}
                     {subject.entries.length === 1 ? 'note' : 'notes'}
                   </span>
                 </span>
@@ -257,7 +257,7 @@ function Welcome() {
 
   return (
     <section className="welcome">
-      <h2 className="display">{greeting ? `${greeting}.` : '\u00a0'}</h2>
+      {greeting ? <h2 className="display">{greeting}.</h2> : null}
       <p>
         {listed
           ? `Everything about ${listed}, written once, so it is still there on Thursday.`

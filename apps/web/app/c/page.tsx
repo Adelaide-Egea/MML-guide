@@ -343,9 +343,7 @@ function SafetyLine({
     blocks.find((b) => b.id.startsWith('allergy:')) ??
     blocks.find((b) => b.id === 'local-emergency') ??
     blocks[0];
-  const summary = first
-    ? `${first.heading.replace(/\s*—\s*/, ': ')} · ${first.body.split(/[.\n]/)[0]?.trim()}`
-    : chrome.readThisFirst;
+  const summary = first ? safetySummary(first.heading, first.body) : chrome.readThisFirst;
 
   return (
     <section className="hotel-safety">
@@ -355,18 +353,24 @@ function SafetyLine({
         </span>
         <span className="hotel-safety-text">{open ? chrome.hideAgain : summary}</span>
       </button>
-      {open && (
-        <div className="hotel-safety-body">
-          {blocks.map((block) => (
-            <article key={block.id}>
-              <strong>{block.heading}</strong>
-              <p>{block.body}</p>
-            </article>
-          ))}
-        </div>
-      )}
+      <div className="hotel-safety-body" hidden={!open}>
+        {blocks.map((block) => (
+          <article key={block.id}>
+            <strong>{block.heading}</strong>
+            <p>{block.body}</p>
+          </article>
+        ))}
+      </div>
     </section>
   );
+}
+
+/** Two real sentences for the collapsed safety line — never a middle-dot chain. */
+function safetySummary(heading: string, body: string): string {
+  const lead = heading.replace(/\s*—\s*/, ': ').replace(/\.\s*$/, '');
+  const first = body.split(/[.\n]/)[0]?.trim() ?? '';
+  if (!first) return `${lead}.`;
+  return `${lead}. ${first.replace(/\.\s*$/, '')}.`;
 }
 
 function Timeline({

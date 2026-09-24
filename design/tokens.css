@@ -80,7 +80,7 @@
   --shadow-card: 0 1px 1px rgba(42, 58, 51, 0.04), 0 2px 10px rgba(42, 58, 51, 0.05);
 
   /* ---- Legacy aliases. Keep until every call site is migrated. ---- */
-  --petrol: var(--brand);
+  --petrol: var(--ink);
   --amber: var(--brand-deep); /* small text / links on linen — never raw honey */
   --amber-tint: var(--brand-tint);
   --putty: var(--surface-sunk);
@@ -132,7 +132,7 @@
   --id-plum: #2e2635;
   --id-plum-ink: #cbb6d6;
 
-  --petrol: var(--brand);
+  --petrol: var(--ink);
   --amber: var(--brand-deep);
   --amber-tint: var(--brand-tint);
   --putty: var(--surface-sunk);
