@@ -82,6 +82,8 @@ export interface ChromeCopy {
   readonly shapeWeekend: string;
   readonly askPlaceholderTonight: string;
   readonly safetyExpand: string;
+  /** Sticky dial button — "Call Claire". */
+  readonly callName: (name: string) => string;
   /** Country public emergency numbers heading, e.g. "Emergency (France)". */
   readonly localEmergency: (country: string) => string;
   readonly tapToSpeak: string;
@@ -227,6 +229,7 @@ const EN: ChromeCopy = {
   shapeWeekend: 'A few days — everything you need is here.',
   askPlaceholderTonight: 'Ask anything about tonight',
   safetyExpand: 'Show all safety notes',
+  callName: (name) => `Call ${name}`,
   localEmergency: (country) => `Emergency (${country})`,
   tapToSpeak: 'Tap the mic to ask out loud',
   listening: 'Listening…',
@@ -311,6 +314,7 @@ const FR: ChromeCopy = {
   shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
   askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
   safetyExpand: 'Voir toutes les notes de sécurité',
+  callName: (name) => `Appeler ${name}`,
   localEmergency: (country) => `Urgences (${country})`,
   tapToSpeak: 'Touchez le micro pour parler',
   listening: 'Écoute…',

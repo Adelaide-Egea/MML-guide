@@ -25,6 +25,7 @@ import { MediaThumb } from '../../components/MediaField.tsx';
 import { identityPair } from '../../lib/identity.ts';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
 import { useActions } from '../../lib/store.ts';
+import { linkifyPhones, telHref } from '../../lib/tel.ts';
 
 /** Caregiver view — a hotel desk card, not a form.
  *
@@ -258,7 +259,7 @@ export default function CaregiverPage() {
                 <MediaThumb key={m.id} media={m} />
               ))}
               <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
-              {block.body ? <p>{block.body}</p> : null}
+              {block.body ? <p>{linkifyPhones(block.body)}</p> : null}
             </article>
           ))}
         </section>
@@ -269,7 +270,7 @@ export default function CaregiverPage() {
           {textNotes.map((block) => (
             <article key={block.id} className="hotel-note">
               <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
-              {block.body ? <p>{block.body}</p> : null}
+              {block.body ? <p>{linkifyPhones(block.body)}</p> : null}
             </article>
           ))}
         </section>
@@ -282,12 +283,29 @@ export default function CaregiverPage() {
       {handover.signOff ? <p className="hotel-signoff">{handover.signOff}</p> : null}
 
       <div className="hotel-ask-spacer" aria-hidden="true" />
-      <Link href="/c/ask" className="hotel-ask">
-        <span className="hotel-ask-icon" aria-hidden="true">
-          ✉
-        </span>
-        <span>{chrome.askPlaceholderTonight}</span>
-      </Link>
+      <div className="hotel-dock no-print">
+        {(() => {
+          const contact = household.contacts.find((c) => c.phone.trim());
+          if (!contact) return null;
+          const href = telHref(contact.phone);
+          if (!href) return null;
+          return (
+            <a href={href} className="hotel-call">
+              {chrome.callName(contact.name)}
+            </a>
+          );
+        })()}
+        <Link href="/c/ask" className="hotel-ask">
+          <span className="hotel-ask-icon" aria-hidden="true">
+            ✉
+          </span>
+          <span>
+            {handover.scenario === 'evening'
+              ? chrome.askPlaceholderTonight
+              : chrome.askPlaceholder}
+          </span>
+        </Link>
+      </div>
     </main>
   );
 }
@@ -358,13 +376,21 @@ function SafetyLine({
   open: boolean;
   onToggle: () => void;
 }) {
-  const first =
-    blocks.find((b) => b.id.startsWith('allergy:')) ??
-    blocks.find((b) => b.id === 'local-emergency') ??
-    blocks[0];
-  const summary = first
-    ? safetySummary(localizeGuideHeading(first.heading, chrome), first.body)
-    : chrome.readThisFirst;
+  const allergies = blocks.filter((b) => b.id.startsWith('allergy:'));
+  const summary =
+    allergies.length > 0
+      ? allergies
+          .map((b) =>
+            safetySummary(localizeGuideHeading(b.heading, chrome), b.body),
+          )
+          .join(' ')
+      : (() => {
+          const first =
+            blocks.find((b) => b.id === 'local-emergency') ?? blocks[0];
+          return first
+            ? safetySummary(localizeGuideHeading(first.heading, chrome), first.body)
+            : chrome.readThisFirst;
+        })();
 
   return (
     <section className="hotel-safety">
@@ -373,12 +399,18 @@ function SafetyLine({
           ⚠
         </span>
         <span className="hotel-safety-text">{open ? chrome.hideAgain : summary}</span>
+        {!open && (
+          <span className="hotel-safety-more">
+            {chrome.safetyExpand}
+            <span aria-hidden="true"> →</span>
+          </span>
+        )}
       </button>
       <div className="hotel-safety-body" hidden={!open}>
         {blocks.map((block) => (
           <article key={block.id}>
             <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
-            <p>{block.body}</p>
+            <p>{linkifyPhones(block.body)}</p>
           </article>
         ))}
       </div>

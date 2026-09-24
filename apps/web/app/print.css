@@ -218,9 +218,17 @@
     border: 1.5px solid var(--critical);
     border-radius: 8px;
     background: transparent !important;
-    padding: 4mm 5mm;
+    padding: 4mm 5mm !important;
     margin-bottom: 8mm;
     break-inside: avoid;
+  }
+
+  .hotel-safety-body article {
+    break-inside: avoid;
+  }
+
+  .hotel-safety-body strong {
+    break-after: avoid;
   }
 
   .hotel-photo-note,
@@ -231,6 +239,11 @@
   .hotel-row-past,
   .hotel-row-now,
   .hotel-row-future {
+    color: var(--ink) !important;
+  }
+
+  .hotel-row-past .hotel-time,
+  .hotel-row-past strong {
     color: var(--ink) !important;
   }
 

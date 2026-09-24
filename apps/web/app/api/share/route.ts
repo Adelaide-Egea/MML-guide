@@ -8,6 +8,7 @@
 
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
+import { clientIp, isRateLimited } from '../../../lib/ratelimit.ts';
 import { isShareId, newShareId, SHARE_TTL_MS, shareBlobPath } from '../../../lib/share-id.ts';
 
 export const runtime = 'nodejs';
@@ -22,6 +23,14 @@ interface ShareRecord {
 }
 
 export async function POST(request: Request) {
+  const limited = await isRateLimited(clientIp(request), 'share');
+  if (limited.limited) {
+    return NextResponse.json(
+      { error: 'Too many share links from this phone. Try again in an hour.' },
+      { status: 429 },
+    );
+  }
+
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json({ error: 'Short links are not configured.' }, { status: 503 });
   }

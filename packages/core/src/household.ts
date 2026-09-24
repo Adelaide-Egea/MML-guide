@@ -333,7 +333,7 @@ export const DEFAULT_EXPECTATION: Record<Scenario, string> = {
   evening:
     "When you arrive the children will already be asleep. You shouldn't need to do anything except be here — here's what to do if they wake.",
   fullday: 'A full day. Meals, nap and pickup are below.',
-  weekend: 'A few days. Each day is on its own tab.',
+  weekend: 'A few days. Everything you need is here.',
   cleaner: "The house, room by room, in the order I'd walk it.",
   petsitter: "Feeding, walks and the vet's number are below.",
   goingtoyours: 'Everything that came in the bag, and what has to come home.',
