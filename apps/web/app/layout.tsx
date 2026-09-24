@@ -6,7 +6,8 @@ import { TrialBeacon } from '../components/TrialBeacon.tsx';
 
 const display = Fraunces({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['300', '500', '600', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-display-loaded',
   display: 'swap',
 });
@@ -31,8 +32,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#eef0ed' },
-    { media: '(prefers-color-scheme: dark)', color: '#18241f' },
+    { media: '(prefers-color-scheme: light)', color: '#f6f1e9' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a201d' },
   ],
 };
 

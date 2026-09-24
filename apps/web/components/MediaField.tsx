@@ -9,14 +9,16 @@ export function MediaThumb({ media }: { media: Media }) {
   const url = useMediaUrl(media.key);
   return (
     <figure className="media-item" style={{ margin: 0 }}>
-      {url === null ? (
-        <div style={{ aspectRatio: '4 / 3', background: 'var(--surface-sunk)', borderRadius: 'var(--radius-sm)' }} />
-      ) : media.kind === 'video' ? (
-        <video src={url} controls playsInline preload="metadata" />
-      ) : (
-        <img src={url} alt={media.caption} />
-      )}
-      <figcaption>{media.caption}</figcaption>
+      <div className="photo-mount">
+        {url === null ? (
+          <div style={{ aspectRatio: '4 / 3', background: 'var(--surface-sunk)', borderRadius: 'var(--radius-sm)' }} />
+        ) : media.kind === 'video' ? (
+          <video src={url} controls playsInline preload="metadata" />
+        ) : (
+          <img src={url} alt={media.caption} />
+        )}
+      </div>
+      {media.caption ? <figcaption>{media.caption}</figcaption> : null}
     </figure>
   );
 }

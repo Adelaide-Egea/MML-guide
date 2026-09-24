@@ -49,6 +49,26 @@ export interface ChromeCopy {
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
   readonly useProduct: (product: string) => string;
+  readonly helloName: (name: string) => string;
+  readonly scenarioEvening: string;
+  readonly scenarioFullDay: string;
+  readonly scenarioWeekend: string;
+  readonly scenarioCleaner: string;
+  readonly scenarioPetSitter: string;
+  readonly scenarioGoingToYours: string;
+  readonly shapeEvening: string;
+  readonly shapeFullDay: (who: string) => string;
+  readonly shapeWeekend: string;
+  readonly askPlaceholderTonight: string;
+  readonly safetyExpand: string;
+  /** Country public emergency numbers heading, e.g. "Emergency (France)". */
+  readonly localEmergency: (country: string) => string;
+  readonly tapToSpeak: string;
+  readonly listening: string;
+  readonly stopListening: string;
+  readonly speakUnavailable: string;
+  readonly speakDenied: string;
+  readonly speakNoSpeech: string;
 }
 
 const EN: ChromeCopy = {
@@ -59,7 +79,7 @@ const EN: ChromeCopy = {
   looking: 'Looking…',
   askTitle: 'Ask',
   whatDoYouNeed: 'What do you need to know?',
-  askPlaceholder: 'When is bedtime? / Where are the spare nappies?',
+  askPlaceholder: 'Where are the spare nappies? / How much milk at this hour?',
   askHintCaregiver:
     'Answered only from this guide. Ask in your language — the reply follows the toggle above.',
   askHintParent: 'Answered only from what was written in this guide. Ask in whatever language you like.',
@@ -71,7 +91,7 @@ const EN: ChromeCopy = {
   safetyNotesReopen: 'Safety notes. Tap to reopen.',
   hideAgain: 'Hide again',
   allergiesMedicationEmergencies: 'Allergies, medication and emergencies',
-  readShow: 'Read · show',
+  readShow: 'Read this',
   everyone: 'Everyone',
   whileYouAreHere: 'While you are here',
   aTypicalDay: 'A typical day',
@@ -97,6 +117,25 @@ const EN: ChromeCopy = {
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
   useProduct: (product) => `Use ${product}`,
+  helloName: (name) => `Hello ${name}.`,
+  scenarioEvening: 'Evening sitter',
+  scenarioFullDay: 'Full day',
+  scenarioWeekend: 'Weekend',
+  scenarioCleaner: 'Cleaner',
+  scenarioPetSitter: 'Pet sitter',
+  scenarioGoingToYours: 'Going to yours',
+  shapeEvening: 'Tonight: dinner, bath, bed.',
+  shapeFullDay: (who) => `A full day with ${who}.`,
+  shapeWeekend: 'A few days — everything you need is here.',
+  askPlaceholderTonight: 'Ask anything about tonight',
+  safetyExpand: 'Show all safety notes',
+  localEmergency: (country) => `Emergency (${country})`,
+  tapToSpeak: 'Tap the mic to ask out loud',
+  listening: 'Listening…',
+  stopListening: 'Stop listening',
+  speakUnavailable: 'Voice is not available on this phone. Type your question instead.',
+  speakDenied: 'Microphone permission is off. Type your question, or allow the mic in browser settings.',
+  speakNoSpeech: 'Did not catch that. Tap the mic and try again.',
 };
 
 const FR: ChromeCopy = {
@@ -107,7 +146,7 @@ const FR: ChromeCopy = {
   looking: 'Recherche…',
   askTitle: 'Demander',
   whatDoYouNeed: 'De quoi avez-vous besoin ?',
-  askPlaceholder: 'À quelle heure le coucher ? / Où sont les couches ?',
+  askPlaceholder: 'Où sont les couches ? / Combien de lait à cette heure-ci ?',
   askHintCaregiver:
     'Réponse uniquement à partir de ce guide. Posez la question dans votre langue — la réponse suit le choix ci-dessus.',
   askHintParent:
@@ -121,7 +160,7 @@ const FR: ChromeCopy = {
   safetyNotesReopen: 'Notes de sécurité. Touchez pour rouvrir.',
   hideAgain: 'Masquer à nouveau',
   allergiesMedicationEmergencies: 'Allergies, médicaments et urgences',
-  readShow: 'Lire · afficher',
+  readShow: 'Lire ceci',
   everyone: 'Tout le monde',
   whileYouAreHere: 'Pendant que vous êtes là',
   aTypicalDay: 'Une journée type',
@@ -148,6 +187,25 @@ const FR: ChromeCopy = {
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,
   useProduct: (product) => `Utiliser ${product}`,
+  helloName: (name) => `Bonjour ${name}.`,
+  scenarioEvening: 'Soirée',
+  scenarioFullDay: 'Journée complète',
+  scenarioWeekend: 'Week-end',
+  scenarioCleaner: 'Ménage',
+  scenarioPetSitter: 'Garde d’animaux',
+  scenarioGoingToYours: 'Chez vous',
+  shapeEvening: 'Ce soir : dîner, bain, coucher.',
+  shapeFullDay: (who) => `Une journée complète avec ${who}.`,
+  shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
+  askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
+  safetyExpand: 'Voir toutes les notes de sécurité',
+  localEmergency: (country) => `Urgences (${country})`,
+  tapToSpeak: 'Touchez le micro pour parler',
+  listening: 'Écoute…',
+  stopListening: 'Arrêter d’écouter',
+  speakUnavailable: 'La voix n’est pas disponible sur ce téléphone. Tapez votre question.',
+  speakDenied: 'Le micro est refusé. Tapez votre question, ou autorisez le micro dans le navigateur.',
+  speakNoSpeech: 'Rien entendu. Touchez le micro et réessayez.',
 };
 
 const PT_BR: ChromeCopy = {
@@ -169,7 +227,7 @@ const PT_BR: ChromeCopy = {
   safetyNotesReopen: 'Notas de segurança. Toque para reabrir.',
   hideAgain: 'Ocultar de novo',
   allergiesMedicationEmergencies: 'Alergias, medicamentos e emergências',
-  readShow: 'Ler · mostrar',
+  readShow: 'Ler isto',
   everyone: 'Todos',
   whileYouAreHere: 'Enquanto você está aqui',
   aTypicalDay: 'Um dia típico',
@@ -188,6 +246,9 @@ const PT_BR: ChromeCopy = {
   aTypicalDayFor: (name) => `Um dia típico para ${name}`,
   forName: (name) => `Para ${name}`,
   useProduct: (product) => `Usar ${product}`,
+  scenarioCleaner: 'Limpeza',
+  scenarioPetSitter: 'Cuidador de animais',
+  scenarioGoingToYours: 'Na sua casa',
 };
 
 const PT_PT: ChromeCopy = {
@@ -222,7 +283,7 @@ const ES: ChromeCopy = {
   safetyNotesReopen: 'Notas de seguridad. Toque para volver a abrir.',
   hideAgain: 'Ocultar de nuevo',
   allergiesMedicationEmergencies: 'Alergias, medicación y emergencias',
-  readShow: 'Leer · mostrar',
+  readShow: 'Leer esto',
   everyone: 'Todos',
   whileYouAreHere: 'Mientras está aquí',
   aTypicalDay: 'Un día típico',
@@ -241,6 +302,9 @@ const ES: ChromeCopy = {
   aTypicalDayFor: (name) => `Un día típico para ${name}`,
   forName: (name) => `Para ${name}`,
   useProduct: (product) => `Usar ${product}`,
+  scenarioCleaner: 'Limpieza',
+  scenarioPetSitter: 'Cuidador de mascotas',
+  scenarioGoingToYours: 'En su casa',
 };
 
 const TL: ChromeCopy = {
@@ -262,7 +326,7 @@ const TL: ChromeCopy = {
   safetyNotesReopen: 'Mga tala sa kaligtasan. Pindutin para buksan ulit.',
   hideAgain: 'Itago ulit',
   allergiesMedicationEmergencies: 'Allergy, gamot, at emerhensya',
-  readShow: 'Basahin · ipakita',
+  readShow: 'Basahin ito',
   everyone: 'Lahat',
   whileYouAreHere: 'Habang nandito kayo',
   aTypicalDay: 'Isang karaniwang araw',
@@ -281,6 +345,9 @@ const TL: ChromeCopy = {
   aTypicalDayFor: (name) => `Isang karaniwang araw para kay ${name}`,
   forName: (name) => `Para kay ${name}`,
   useProduct: (product) => `Gamitin ang ${product}`,
+  scenarioCleaner: 'Tagalinis',
+  scenarioPetSitter: 'Tagapag-alaga ng hayop',
+  scenarioGoingToYours: 'Sa inyo',
 };
 
 const AR: ChromeCopy = {
@@ -301,7 +368,7 @@ const AR: ChromeCopy = {
   safetyNotesReopen: 'ملاحظات السلامة. المس لإعادة الفتح.',
   hideAgain: 'إخفاء مرة أخرى',
   allergiesMedicationEmergencies: 'الحساسية والأدوية والطوارئ',
-  readShow: 'اقرأ · أظهر',
+  readShow: 'اقرأ هذا',
   everyone: 'الجميع',
   whileYouAreHere: 'أثناء وجودك هنا',
   aTypicalDay: 'يوم عادي',
@@ -320,6 +387,9 @@ const AR: ChromeCopy = {
   aTypicalDayFor: (name) => `يوم عادي لـ ${name}`,
   forName: (name) => `لـ ${name}`,
   useProduct: (product) => `استخدم ${product}`,
+  scenarioCleaner: 'تنظيف',
+  scenarioPetSitter: 'مجالسة حيوانات',
+  scenarioGoingToYours: 'عندكم',
 };
 
 const PL: ChromeCopy = {
@@ -341,7 +411,7 @@ const PL: ChromeCopy = {
   safetyNotesReopen: 'Uwagi o bezpieczeństwie. Dotknij, aby otworzyć ponownie.',
   hideAgain: 'Ukryj ponownie',
   allergiesMedicationEmergencies: 'Alergie, leki i nagłe wypadki',
-  readShow: 'Czytaj · pokaż',
+  readShow: 'Przeczytaj',
   everyone: 'Wszyscy',
   whileYouAreHere: 'Gdy tu jesteś',
   aTypicalDay: 'Typowy dzień',
@@ -360,6 +430,9 @@ const PL: ChromeCopy = {
   aTypicalDayFor: (name) => `Typowy dzień dla ${name}`,
   forName: (name) => `Dla ${name}`,
   useProduct: (product) => `Użyj ${product}`,
+  scenarioCleaner: 'Sprzątanie',
+  scenarioPetSitter: 'Opieka nad zwierzakiem',
+  scenarioGoingToYours: 'U was',
 };
 
 const RO: ChromeCopy = {
@@ -381,7 +454,7 @@ const RO: ChromeCopy = {
   safetyNotesReopen: 'Note de siguranță. Atinge pentru a redeschide.',
   hideAgain: 'Ascunde din nou',
   allergiesMedicationEmergencies: 'Alergii, medicamente și urgențe',
-  readShow: 'Citește · arată',
+  readShow: 'Citește asta',
   everyone: 'Toată lumea',
   whileYouAreHere: 'Cât ești aici',
   aTypicalDay: 'O zi tipică',
@@ -400,6 +473,9 @@ const RO: ChromeCopy = {
   aTypicalDayFor: (name) => `O zi tipică pentru ${name}`,
   forName: (name) => `Pentru ${name}`,
   useProduct: (product) => `Folosește ${product}`,
+  scenarioCleaner: 'Curățenie',
+  scenarioPetSitter: 'Îngrijire animale',
+  scenarioGoingToYours: 'La voi',
 };
 
 const IT: ChromeCopy = {
@@ -421,7 +497,7 @@ const IT: ChromeCopy = {
   safetyNotesReopen: 'Note di sicurezza. Tocca per riaprire.',
   hideAgain: 'Nascondi di nuovo',
   allergiesMedicationEmergencies: 'Allergie, farmaci ed emergenze',
-  readShow: 'Leggi · mostra',
+  readShow: 'Leggi questo',
   everyone: 'Tutti',
   whileYouAreHere: 'Mentre sei qui',
   aTypicalDay: 'Una giornata tipo',
@@ -440,6 +516,9 @@ const IT: ChromeCopy = {
   aTypicalDayFor: (name) => `Una giornata tipo per ${name}`,
   forName: (name) => `Per ${name}`,
   useProduct: (product) => `Usa ${product}`,
+  scenarioCleaner: 'Pulizie',
+  scenarioPetSitter: 'Pet sitter',
+  scenarioGoingToYours: 'Da voi',
 };
 
 const BY_TAG: Record<string, ChromeCopy> = {

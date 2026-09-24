@@ -1,8 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { type SubjectKind, subjectLabel } from '@mml/core';
+import { useMemo, useState } from 'react';
+import {
+  DEFAULT_EXPECTATION,
+  durationFromScenario,
+  guideCoverage,
+  type Handover,
+  type SubjectKind,
+  subjectLabel,
+} from '@mml/core';
 import { Badge } from '../components/Chrome.tsx';
 import { Mark } from '../components/Mark.tsx';
 import { KIND_HINT, KIND_LABEL, useActions, useAppState } from '../lib/store.ts';
@@ -16,9 +23,6 @@ export default function Home() {
   const [adding, setAdding] = useState<SubjectKind | null>(null);
   const [name, setName] = useState('');
   const [switching, setSwitching] = useState(false);
-  /** Open the switcher already asking for a name — used when the sample itself
-   *  offers "start yours", so the person does not have to discover the switcher. */
-  const [startNaming, setStartNaming] = useState(false);
 
   const empty = household.subjects.length === 0;
   const guides = handovers.filter((h) => h.householdId === household.id);
@@ -33,9 +37,10 @@ export default function Home() {
     setAdding(null);
   }
 
-  function openSwitcher(naming = false) {
-    setStartNaming(naming);
-    setSwitching(true);
+  /** Leave the example in one tap: new blank household, sample gone from the list. */
+  function startYourOwn() {
+    actions.addHousehold('');
+    setSwitching(false);
   }
 
   return (
@@ -48,7 +53,7 @@ export default function Home() {
         <button
           type="button"
           className="house-switch"
-          onClick={() => (switching ? setSwitching(false) : openSwitcher(false))}
+          onClick={() => setSwitching((open) => !open)}
           aria-expanded={switching}
         >
           <span>{household.name || 'This household'}</span>
@@ -58,56 +63,65 @@ export default function Home() {
 
       {switching && (
         <HouseSwitcher
-          startNaming={startNaming}
-          onDone={() => {
-            setSwitching(false);
-            setStartNaming(false);
-          }}
+          onDone={() => setSwitching(false)}
           onSample={() => {
             const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
             actions.addSample(sample, handover, presets, sampleTrips);
             setSwitching(false);
-            setStartNaming(false);
           }}
         />
       )}
 
-      <Welcome />
+      <Readiness />
 
       {isSample && (
         <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
-          This is a sample household, here to look around. Anything you change stays in it.{' '}
+          This is an example, not one of your households — look around, then start yours.{' '}
           <button
             type="button"
             className="btn btn-quiet btn-inline"
             style={{ textDecoration: 'underline' }}
-            onClick={() => openSwitcher(true)}
+            onClick={startYourOwn}
           >
             Start your own
           </button>
-          — the sample stays here.
+          {' or '}
+          <button
+            type="button"
+            className="btn btn-quiet btn-inline"
+            style={{ textDecoration: 'underline' }}
+            onClick={() => actions.removeSample()}
+          >
+            Remove example
+          </button>
         </p>
       )}
 
       <section className="stack">
         <h2 className="eyebrow">Who is here</h2>
-        {household.subjects.map((subject) => (
-          <Link key={subject.id} href={`/subjects/${subject.id}`} className="card card-link">
-            <div className="row">
-              <Badge subject={subject} />
-              <span className="grow">
-                <strong>{subjectLabel(subject)}</strong>
-                <span className="muted" style={{ display: 'block' }}>
-                  {KIND_LABEL[subject.kind]} · {subject.entries.length}{' '}
-                  {subject.entries.length === 1 ? 'note' : 'notes'}
+        {household.subjects.length > 0 && (
+          <div className="card rows">
+            {household.subjects.map((subject) => (
+              <Link
+                key={subject.id}
+                href={`/subjects/${subject.id}`}
+                className="rows-item row card-link"
+              >
+                <Badge subject={subject} />
+                <span className="grow">
+                  <strong>{subjectLabel(subject)}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {KIND_LABEL[subject.kind]}, {subject.entries.length}{' '}
+                    {subject.entries.length === 1 ? 'note' : 'notes'}
+                  </span>
                 </span>
-              </span>
-              <span aria-hidden="true" className="muted">
-                →
-              </span>
-            </div>
-          </Link>
-        ))}
+                <span aria-hidden="true" className="muted">
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {adding === null ? (
           <div className="chips">
@@ -153,14 +167,22 @@ export default function Home() {
       {!empty && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <h2 className="eyebrow">Guides</h2>
-          {guides.map((handover) => (
-            <Link key={handover.id} href={`/guide/${handover.id}`} className="card card-link">
-              <strong>{handover.caregiverName || 'Untitled guide'}</strong>
-              <span className="muted" style={{ display: 'block' }}>
-                {handover.caregiverRelationship || 'Caregiver'}
-              </span>
-            </Link>
-          ))}
+          {guides.length > 0 && (
+            <div className="card rows">
+              {guides.map((handover) => (
+                <Link
+                  key={handover.id}
+                  href={`/guide/${handover.id}`}
+                  className="rows-item card-link"
+                >
+                  <strong>{handover.caregiverName || 'Untitled guide'}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {handover.caregiverRelationship || 'Caregiver'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
           <Link href="/guide/new" className="btn">
             Create a guide
           </Link>
@@ -174,14 +196,18 @@ export default function Home() {
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
           <h2 className="eyebrow">Away</h2>
           <p className="muted">Packing for trips — part of organising the household.</p>
-          {awayTrips.map((trip) => (
-            <Link key={trip.id} href={`/away/${trip.id}`} className="card card-link">
-              <strong>{trip.title}</strong>
-              <span className="muted" style={{ display: 'block' }}>
-                {trip.destinationLabel || trip.startDate}
-              </span>
-            </Link>
-          ))}
+          {awayTrips.length > 0 && (
+            <div className="card rows">
+              {awayTrips.map((trip) => (
+                <Link key={trip.id} href={`/away/${trip.id}`} className="rows-item card-link">
+                  <strong>{trip.title}</strong>
+                  <span className="muted" style={{ display: 'block' }}>
+                    {trip.destinationLabel || trip.startDate}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
           <Link href="/away/new" className="btn">
             Plan a trip
           </Link>
@@ -190,7 +216,7 @@ export default function Home() {
 
       {empty && !sampleId && (
         <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
-          Write it once. She can ask it the rest.
+          Write it once. They can ask it the rest.
           <br />
           Want to look around first?{' '}
           <button
@@ -202,7 +228,7 @@ export default function Home() {
               actions.addSample(sample, handover, presets, sampleTrips);
             }}
           >
-            Load a sample household
+            See an example
           </button>
         </p>
       )}
@@ -210,40 +236,86 @@ export default function Home() {
   );
 }
 
-/** The first thing on the screen, and the reason the screen is not a list of
- *  records. Someone opening this has just remembered they are leaving in an hour;
- *  being greeted rather than queried is most of the difference. */
-function Welcome() {
-  const { household } = useAppState();
-  // The greeting depends on the clock, which the server does not share, so it waits
-  // for the client rather than rendering a guess and correcting it.
-  const [greeting, setGreeting] = useState<string | null>(null);
-  useEffect(() => {
-    const h = new Date().getHours();
-    setGreeting(h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
-  }, []);
+/** Lead with coverage of the latest guide — gaps as chips, not validation errors. */
+function Readiness() {
+  const { household, handovers } = useAppState();
+  const guides = handovers.filter((h) => h.householdId === household.id);
+  const latest = guides[0] ?? null;
 
-  // "Léa, Pomme and The flat" reads as a typo. A place is usually named with its
-  // article, which is right as a title and wrong halfway through a sentence.
-  const names = household.subjects
-    .map((s) => s.name)
-    .filter(Boolean)
-    .map((name, i) => (i === 0 ? name : name.replace(/^(The|Le|La|Les) /, (m) => m.toLowerCase())));
-  const listed =
-    names.length === 0
-      ? null
-      : names.length === 1
-        ? names[0]
-        : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  const draft: Handover = useMemo(
+    () => ({
+      id: 'draft',
+      householdId: household.id,
+      caregiverName: '',
+      caregiverRelationship: '',
+      scenario: 'weekend',
+      duration: durationFromScenario('weekend'),
+      expectation: DEFAULT_EXPECTATION.weekend,
+      language: 'en',
+      subjectIds: [],
+      importantNotes: [],
+      extra: '',
+      signOff: '',
+      tripId: null,
+    }),
+    [household.id],
+  );
+
+  const coverage = guideCoverage(household, latest ?? draft);
+  const remaining = coverage.total - coverage.covered;
+
+  if (household.subjects.length === 0 || coverage.total === 0) {
+    return (
+      <section className="welcome">
+        <p>
+          Everything you&apos;d put in a long text message on the way out of the door. Written once,
+          so it&apos;s still there when you need it.
+        </p>
+      </section>
+    );
+  }
+
+  function gapHref(gap: string): string {
+    if (gap === 'No emergency number' || gap === 'Country blank' || gap === 'Bedtime blank') {
+      return '/household';
+    }
+    if (gap === 'Caregiver name blank') {
+      return latest ? `/guide/${latest.id}` : '/guide/new';
+    }
+    const name = gap.split(':')[0]?.trim();
+    const subject = household.subjects.find((s) => s.name === name);
+    return subject ? `/subjects/${subject.id}` : '/household';
+  }
 
   return (
-    <section className="welcome">
-      <h2 className="display">{greeting ? `${greeting}.` : '\u00a0'}</h2>
-      <p>
-        {listed
-          ? `Everything about ${listed}, written once, so it is still there on Thursday.`
-          : "Everything you'd put in a long text message on the way out of the door. Written once, so it's still there on Thursday."}
-      </p>
+    <section className="welcome readiness">
+      <h2 className="display">
+        {coverage.covered} of {coverage.total} things covered
+      </h2>
+      {coverage.gaps.length > 0 ? (
+        <div className="readiness-gaps">
+          {coverage.gaps.map((gap) => (
+            <Link key={gap} href={gapHref(gap)} className="readiness-chip">
+              {gap}
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="muted">Ready to send.</p>
+      )}
+      <div className="row" style={{ gap: 'var(--space-2)', marginTop: 'var(--space-4)' }}>
+        {remaining > 0 ? (
+          <Link href={gapHref(coverage.gaps[0]!)} className="btn">
+            Fill the {remaining} gap{remaining === 1 ? '' : 's'}
+          </Link>
+        ) : null}
+        <Link
+          href={latest ? `/guide/${latest.id}` : '/guide/new'}
+          className={remaining > 0 ? 'btn btn-secondary' : 'btn'}
+        >
+          Send
+        </Link>
+      </div>
     </section>
   );
 }
@@ -251,27 +323,21 @@ function Welcome() {
 function HouseSwitcher({
   onDone,
   onSample,
-  startNaming = false,
 }: {
   onDone: () => void;
   onSample: () => void;
-  startNaming?: boolean;
 }) {
   const { households, household, sampleId } = useAppState();
   const actions = useActions();
-  const [naming, setNaming] = useState(startNaming);
+  const [naming, setNaming] = useState(false);
   const [name, setName] = useState('');
 
-  // Parent can ask us to open the name field after we are already mounted
-  // (e.g. "Start your own" while the switcher is open). useState alone only
-  // reads startNaming on the first mount, so without this the button looked dead.
-  useEffect(() => {
-    if (startNaming) setNaming(true);
-  }, [startNaming]);
+  const realHouseholds = households.filter((h) => h.id !== sampleId);
+  const sample = sampleId ? households.find((h) => h.id === sampleId) : undefined;
 
   return (
     <div className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
-      {households.map((h) => (
+      {realHouseholds.map((h) => (
         <button
           key={h.id}
           type="button"
@@ -284,12 +350,42 @@ function HouseSwitcher({
           <span className="grow">
             <strong>{h.name || 'Unnamed household'}</strong>
             <span className="muted" style={{ display: 'block' }}>
-              {h.id === sampleId ? 'Sample' : `${h.subjects.length} to look after`}
+              {`${h.subjects.length} to look after`}
             </span>
           </span>
           {h.id === household.id && <span aria-hidden="true">✓</span>}
         </button>
       ))}
+
+      {sample && (
+        <div className="rows-item stack-tight" style={{ borderTop: '1px solid var(--hairline)' }}>
+          <span className="hint">Example — not one of your households</span>
+          <div className="row">
+            <button
+              type="button"
+              className="btn btn-quiet grow"
+              onClick={() => {
+                actions.selectHousehold(sample.id);
+                onDone();
+              }}
+              style={{ justifyContent: 'flex-start' }}
+            >
+              {sample.name || 'Example'}
+              {household.id === sample.id ? ' ✓' : ''}
+            </button>
+            <button
+              type="button"
+              className="btn btn-quiet btn-inline"
+              onClick={() => {
+                actions.removeSample();
+                onDone();
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="rows-item stack-tight">
         {naming ? (
@@ -322,12 +418,9 @@ function HouseSwitcher({
           </button>
         )}
 
-        {/* The sample is a household like any other, so it can be brought back
-            after it has been left. It used to be a mode, and leaving it meant
-            deleting it. */}
         {!sampleId && (
           <button type="button" className="btn btn-quiet" onClick={onSample}>
-            Show the sample household
+            See an example
           </button>
         )}
       </div>

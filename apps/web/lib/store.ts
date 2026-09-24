@@ -22,6 +22,8 @@ import {
   type Trip,
   EMPTY_SAFETY,
   instantiatePreset,
+  normalizeHandover,
+  normalizeTrip,
   presetFromRoutine,
 } from '@mml/core';
 import { useCallback, useSyncExternalStore } from 'react';
@@ -60,14 +62,14 @@ export interface AppState extends Stored {
   readonly household: Household;
 }
 
-/** Identity tokens, paired with a symbol so colour is never the only signal. */
-export const IDENTITIES: readonly { token: string; symbol: string }[] = [
-  { token: '--id-petrol', symbol: '●' },
-  { token: '--id-clay', symbol: '▲' },
-  { token: '--id-indigo', symbol: '■' },
-  { token: '--id-olive', symbol: '◆' },
-  { token: '--id-plum', symbol: '★' },
-  { token: '--id-forest', symbol: '✚' },
+/** Identity tokens — tint background + matching ink. Colour never travels alone. */
+export const IDENTITIES: readonly { token: string; ink: string; symbol: string }[] = [
+  { token: '--id-dusk', ink: '--id-dusk-ink', symbol: '●' },
+  { token: '--id-terracotta', ink: '--id-terracotta-ink', symbol: '▲' },
+  { token: '--id-sage', ink: '--id-sage-ink', symbol: '■' },
+  { token: '--id-clay', ink: '--id-clay-ink', symbol: '◆' },
+  { token: '--id-plum', ink: '--id-plum-ink', symbol: '★' },
+  { token: '--id-honey', ink: '--id-honey-ink', symbol: '✚' },
 ];
 
 export const KIND_LABEL: Record<SubjectKind, string> = {
@@ -119,6 +121,11 @@ interface StoredV1 {
 export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
   const defaults = emptyState();
 
+  const handovers = (parsed.handovers ?? defaults.handovers).map((h) =>
+    normalizeHandover(h as Handover),
+  );
+  const trips = (parsed.trips ?? defaults.trips).map((t) => normalizeTrip(t as Trip));
+
   if (parsed.households && parsed.households.length > 0) {
     const households = parsed.households;
     const activeId =
@@ -128,8 +135,8 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
     return {
       households,
       activeId,
-      handovers: parsed.handovers ?? defaults.handovers,
-      trips: parsed.trips ?? defaults.trips,
+      handovers,
+      trips,
       presets: parsed.presets ?? defaults.presets,
       sampleId:
         parsed.sampleId === undefined
@@ -143,8 +150,8 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
   return {
     households: [household],
     activeId: household.id,
-    handovers: parsed.handovers ?? [],
-    trips: parsed.trips ?? [],
+    handovers: (parsed.handovers ?? []).map((h) => normalizeHandover(h as Handover)),
+    trips: (parsed.trips ?? []).map((t) => normalizeTrip(t as Trip)),
     presets: parsed.presets ?? [],
     sampleId: parsed.sample ? household.id : parsed.sampleId ?? null,
   };
@@ -320,15 +327,30 @@ export function useActions() {
         patch((h) => ({ ...h, ...fields }));
       },
 
-      /** Adds a household and selects it. Nothing that already exists is touched,
-       *  which is the whole point: the sample stays where it is. */
+      /** Adds a real household and selects it.
+       *
+       *  If the sample was the active household, it is removed — the sample is an
+       *  example to look around, not a second house that should linger in the list.
+       */
       addHousehold(name = ''): string {
         const household = emptyHousehold(name);
-        update((s) => ({
-          ...s,
-          households: prune([...s.households, household], household.id, s.handovers, s.trips),
-          activeId: household.id,
-        }));
+        update((s) => {
+          const leavingSample = Boolean(s.sampleId && s.activeId === s.sampleId);
+          const base = leavingSample
+            ? s.households.filter((h) => h.id !== s.sampleId)
+            : s.households;
+          const sampleId = leavingSample ? null : s.sampleId;
+          return {
+            ...s,
+            households: prune([...base, household], household.id, s.handovers, s.trips),
+            activeId: household.id,
+            handovers: leavingSample
+              ? s.handovers.filter((ho) => ho.householdId !== s.sampleId)
+              : s.handovers,
+            trips: leavingSample ? s.trips.filter((t) => t.householdId !== s.sampleId) : s.trips,
+            sampleId,
+          };
+        });
         return household.id;
       },
 
@@ -348,6 +370,24 @@ export function useActions() {
             handovers: s.handovers.filter((ho) => ho.householdId !== id),
             trips: s.trips.filter((t) => t.householdId !== id),
             sampleId: s.sampleId === id ? null : s.sampleId,
+          };
+        });
+      },
+
+      /** Dismiss the example household. Same as removeHousehold(sampleId). */
+      removeSample() {
+        update((s) => {
+          if (!s.sampleId) return s;
+          const id = s.sampleId;
+          const remaining = s.households.filter((h) => h.id !== id);
+          const households = remaining.length > 0 ? remaining : [emptyHousehold()];
+          return {
+            ...s,
+            households,
+            activeId: s.activeId === id ? households[0]!.id : s.activeId,
+            handovers: s.handovers.filter((ho) => ho.householdId !== id),
+            trips: s.trips.filter((t) => t.householdId !== id),
+            sampleId: null,
           };
         });
       },

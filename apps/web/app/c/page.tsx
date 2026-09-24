@@ -4,42 +4,49 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import {
   type CareSubject,
+  type ChromeCopy,
   type GuideBlock,
+  type Handover,
+  type PackItem,
+  type RoutineItem,
+  type Trip,
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  normalizeHandover,
+  packingProgress,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
-import { TopBar } from '../../components/Chrome.tsx';
 import { LanguageToggle } from '../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../components/MediaField.tsx';
+import { identityPair } from '../../lib/identity.ts';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
+import { useActions } from '../../lib/store.ts';
 
-/** Caregiver / cleaner view opened from a shared link.
+/** Caregiver view — a hotel desk card, not a form.
  *
- *  The snapshot lives in the URL fragment, so another phone can open the guide
- *  without an account and without uploading the household. Ask uses the same
- *  snapshot held in sessionStorage for this tab.
+ *  Greeting, one safety line, a live timeline, photo notes, ask bar.
+ *  Spec: DOMELA-VISUAL-SPEC §2.
  */
 export default function CaregiverPage() {
   const [snapshot, setSnapshot] = useState<GuideSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState('en');
   const [focus, setFocus] = useState<'all' | string>('all');
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const [nowMinutes, setNowMinutes] = useState(() => minutesNow());
+  const actions = useActions();
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '');
 
     const open = async (decoded: GuideSnapshot, installMedia: boolean) => {
       if (installMedia) {
-        // When the parent opted in, photo bytes are in the snapshot — install them
-        // into this phone's media store so the existing thumbs can resolve.
         try {
           await installSnapshotMedia(decoded);
         } catch {
-          // Text still shows; missing photos are better than failing the whole guide.
+          // Text still shows.
         }
       }
       setSnapshot(decoded);
@@ -48,7 +55,6 @@ export default function CaregiverPage() {
         'mml.caregiver-snapshot',
         JSON.stringify({
           ...decoded,
-          // Blobs are already in IndexedDB; drop them from sessionStorage to save space.
           mediaBlobs: undefined,
           handover: { ...decoded.handover, language: decoded.handover.language },
         }),
@@ -66,7 +72,6 @@ export default function CaregiverPage() {
       return;
     }
 
-    // Short links (/c/s/{id}) land here after the snapshot is parked in sessionStorage.
     try {
       const raw = window.sessionStorage.getItem('mml.caregiver-snapshot');
       if (raw) {
@@ -77,14 +82,13 @@ export default function CaregiverPage() {
         }
       }
     } catch {
-      // Fall through to the empty-link error.
+      // Fall through.
     }
     setError('This link has no guide in it.');
   }, []);
 
   useEffect(() => {
     if (!snapshot) return;
-    // Keep blobs out of sessionStorage — they live in IndexedDB after install.
     const next = {
       ...snapshot,
       mediaBlobs: undefined,
@@ -93,10 +97,15 @@ export default function CaregiverPage() {
     window.sessionStorage.setItem('mml.caregiver-snapshot', JSON.stringify(next));
   }, [language, snapshot]);
 
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMinutes(minutesNow()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   const result = useMemo(() => {
     if (!snapshot) return null;
     try {
-      const handover = { ...snapshot.handover, language };
+      const handover = normalizeHandover({ ...snapshot.handover, language });
       return {
         guide: buildVerifiedGuide(snapshot.household, handover),
         handover,
@@ -106,7 +115,7 @@ export default function CaregiverPage() {
     } catch (err) {
       return {
         guide: null,
-        handover: { ...snapshot.handover, language },
+        handover: normalizeHandover({ ...snapshot.handover, language }),
         household: snapshot.household,
         error:
           err instanceof UnsafeGuideError ? err.message : 'This guide could not be built safely.',
@@ -118,8 +127,7 @@ export default function CaregiverPage() {
 
   if (error) {
     return (
-      <main className="shell">
-        <TopBar title={chrome.guide} />
+      <main className="shell hotel">
         <p className="muted">{error}</p>
       </main>
     );
@@ -127,8 +135,7 @@ export default function CaregiverPage() {
 
   if (!result) {
     return (
-      <main className="shell">
-        <TopBar title={chrome.guide} />
+      <main className="shell hotel">
         <p className="muted">{chrome.openingGuide}</p>
       </main>
     );
@@ -136,10 +143,8 @@ export default function CaregiverPage() {
 
   if (result.error || !result.guide) {
     return (
-      <main className="shell">
-        <TopBar title={chrome.guide} />
+      <main className="shell hotel">
         <div className="critical stack-tight">
-          <div className="eyebrow">Not safe to show</div>
           <p>{result.error}</p>
         </div>
       </main>
@@ -151,152 +156,451 @@ export default function CaregiverPage() {
   const critical = guide.blocks.filter((b) => b.critical);
   const inFocus = (b: GuideBlock) =>
     focus === 'all' || b.subjectId === focus || b.subjectId === undefined;
-  const rest = guide.blocks.filter((b) => !b.critical && inFocus(b));
+  const notes = guide.blocks.filter((b) => !b.critical && inFocus(b) && (b.body || b.media.length));
+  const photoNotes = notes.filter((b) => b.media.length > 0);
+  const textNotes = notes.filter((b) => b.media.length === 0 && b.body);
   const routine = guide.routine.filter(
     (r) => focus === 'all' || r.appliesTo === focus || r.appliesTo === 'all',
   );
-  const focused = subjects.find((s) => s.id === focus);
-  const placeOnly = subjects.length > 0 && subjects.every((s) => s.kind === 'place');
+  const primary = subjects.find((s) => s.kind === 'child') ?? subjects[0];
+  const tint = primary ? identityPair(primary.identity.colourToken).tint : '--id-dusk';
+  const spine = spineForScenario(handover.scenario);
+  const trip = snapshot?.trip ?? null;
+
+  function togglePacked(itemId: string, packed: boolean) {
+    if (!snapshot?.trip) return;
+    const nextTrip: Trip = {
+      ...snapshot.trip,
+      updatedAt: new Date().toISOString(),
+      items: snapshot.trip.items.map((item) =>
+        item.id === itemId ? { ...item, packed } : item,
+      ),
+    };
+    setSnapshot({ ...snapshot, trip: nextTrip });
+    actions.setPackItemPacked(nextTrip.id, itemId, packed);
+  }
 
   return (
-    <main className="shell">
-      <TopBar title={handover.caregiverName || chrome.yourGuide} />
+    <main className="shell hotel">
+      <header className="hotel-top">
+        <ScenarioChip chrome={chrome} handover={handover} tint={tint} />
+        <LanguageToggle value={language} onChange={setLanguage} compact />
+      </header>
 
-      <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
-        <p className="muted">
-          {chrome.forName(handover.caregiverName || 'you')}
-          {handover.caregiverRelationship ? (
-            <>
-              <br />
-              {handover.caregiverRelationship}
-            </>
-          ) : null}
-        </p>
-        <LanguageToggle value={language} onChange={setLanguage} />
-        <Link href="/c/ask" className="btn">
-          {chrome.askAboutAnything}
-        </Link>
-      </div>
+      <Greeting chrome={chrome} handover={handover} />
 
       {critical.length > 0 && (
-        <section className="safety stack" style={{ marginBottom: 'var(--space-5)' }}>
-          {!acknowledged ? (
-            <>
-              <div className="eyebrow">{chrome.readFirst}</div>
-              {critical.map((block) => (
-                <article key={block.id} className="stack-tight">
-                  <strong>{block.heading}</strong>
-                  <p className="block-body">{block.body}</p>
-                </article>
-              ))}
-              <button type="button" className="btn" onClick={() => setAcknowledged(true)}>
-                {chrome.iHaveReadThis}
-              </button>
-            </>
-          ) : (
-            <button type="button" className="btn btn-quiet" onClick={() => setAcknowledged(false)}>
-              {chrome.safetyNotesReopen}
-            </button>
-          )}
-        </section>
+        <SafetyLine
+          chrome={chrome}
+          blocks={critical}
+          open={safetyOpen}
+          onToggle={() => setSafetyOpen((v) => !v)}
+        />
       )}
 
-      {subjects.length > 1 && (
-        <div className="chips" style={{ marginBottom: 'var(--space-4)' }}>
+      {subjects.length > 1 && spine !== 'bag' && (
+        <div className="hotel-focus">
           <button
             type="button"
-            className="chip"
+            className="hotel-focus-chip"
             aria-pressed={focus === 'all'}
             onClick={() => setFocus('all')}
           >
             {chrome.everyone}
           </button>
-          {subjects.map((subject: CareSubject) => (
-            <button
-              key={subject.id}
-              type="button"
-              className="chip"
-              aria-pressed={focus === subject.id}
-              onClick={() => setFocus(subject.id)}
-            >
-              <span aria-hidden="true">{subject.identity.symbol}</span> {subject.name}
-            </button>
-          ))}
+          {subjects.map((subject: CareSubject) => {
+            const pair = identityPair(subject.identity.colourToken);
+            return (
+              <button
+                key={subject.id}
+                type="button"
+                className="hotel-focus-chip"
+                aria-pressed={focus === subject.id}
+                onClick={() => setFocus(subject.id)}
+                style={
+                  focus === subject.id
+                    ? { background: `var(${pair.tint})`, color: `var(${pair.ink})` }
+                    : undefined
+                }
+              >
+                <span aria-hidden="true">{subject.identity.symbol}</span> {subject.name}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {routine.length > 0 && (
-        <section className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
-          <div className="rows-head">
-            <span className="eyebrow">
-              {focused
-                ? focused.kind === 'place'
-                  ? chrome.whileYouAreHereFor(focused.name)
-                  : chrome.aTypicalDayFor(focused.name)
-                : placeOnly
-                  ? chrome.whileYouAreHere
-                  : chrome.aTypicalDay}
-            </span>
-          </div>
-          {routine.map((item) => {
-            const who = subjects.find((s) => s.id === item.appliesTo);
-            return (
-              <div key={item.id} className="routine-item">
-                <span className="routine-time">
-                  {item.time ??
-                    (item.priority === 'nice'
-                      ? chrome.nice
-                      : item.priority === 'must'
-                        ? chrome.must
-                        : '—')}
-                </span>
-                <span>
-                  <strong>{routineItemLabel(item)}</strong>
-                  {item.section && (
-                    <span className="muted" style={{ display: 'block' }}>
-                      {item.section}
-                    </span>
-                  )}
-                  {who && focus === 'all' && (
-                    <span className="muted" style={{ display: 'block' }}>
-                      {chrome.forName(who.name)}
-                    </span>
-                  )}
-                  {item.product && (
-                    <span className="routine-note">{chrome.useProduct(item.product)}</span>
-                  )}
-                  {item.notes && <span className="routine-note">{item.notes}</span>}
-                </span>
-              </div>
-            );
-          })}
+      {spine === 'bag' && trip ? (
+        <PackingPanel trip={trip} onToggle={togglePacked} />
+      ) : spine === 'bag' ? (
+        <p className="muted">No packing list was attached to this guide.</p>
+      ) : null}
+
+      {spine !== 'bag' && routine.length > 0 && (
+        <Timeline
+          chrome={chrome}
+          items={routine}
+          parentOrder={household.routine}
+          subjects={subjects}
+          focus={focus}
+          nowMinutes={nowMinutes}
+          spine={spine}
+        />
+      )}
+
+      {photoNotes.length > 0 && (
+        <section className="hotel-photos">
+          {photoNotes.map((block) => (
+            <article key={block.id} className="hotel-photo-note">
+              {block.media.slice(0, 1).map((m) => (
+                <MediaThumb key={m.id} media={m} />
+              ))}
+              <h3>{block.heading}</h3>
+              {block.body ? <p>{block.body}</p> : null}
+            </article>
+          ))}
         </section>
       )}
 
-      <section className="stack">
-        {rest.map((block) => (
-          <article key={block.id} className="card stack-tight">
+      {textNotes.length > 0 && (
+        <section className="hotel-notes">
+          {textNotes.map((block) => (
+            <article key={block.id} className="hotel-note">
+              <h3>{block.heading}</h3>
+              {block.body ? <p>{block.body}</p> : null}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {routine.length === 0 && notes.length === 0 && (
+        <p className="muted">{chrome.nothingWritten}</p>
+      )}
+
+      {handover.signOff ? <p className="hotel-signoff">{handover.signOff}</p> : null}
+
+      <div className="hotel-ask-spacer" aria-hidden="true" />
+      <Link href="/c/ask" className="hotel-ask">
+        <span className="hotel-ask-icon" aria-hidden="true">
+          ✉
+        </span>
+        <span>{chrome.askPlaceholderTonight}</span>
+      </Link>
+    </main>
+  );
+}
+
+function minutesNow(): number {
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+function parseTime(time: string | null): number | null {
+  if (!time) return null;
+  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+function ScenarioChip({
+  chrome,
+  handover,
+  tint,
+}: {
+  chrome: ChromeCopy;
+  handover: Handover;
+  tint: string;
+}) {
+  const label =
+    handover.scenario === 'evening'
+      ? chrome.scenarioEvening
+      : handover.scenario === 'fullday'
+        ? chrome.scenarioFullDay
+        : handover.scenario === 'cleaner'
+          ? chrome.scenarioCleaner
+          : handover.scenario === 'petsitter'
+            ? chrome.scenarioPetSitter
+            : handover.scenario === 'goingtoyours'
+              ? chrome.scenarioGoingToYours
+              : chrome.scenarioWeekend;
+  return (
+    <span className="hotel-scenario" style={{ background: `var(${tint})` }}>
+      {label}
+    </span>
+  );
+}
+
+function Greeting({
+  chrome,
+  handover,
+}: {
+  chrome: ChromeCopy;
+  handover: Handover;
+}) {
+  return (
+    <div className="hotel-greeting">
+      <h1>{chrome.helloName(handover.caregiverName || 'there')}</h1>
+      <p className="hotel-shape">{handover.expectation}</p>
+    </div>
+  );
+}
+
+function SafetyLine({
+  chrome,
+  blocks,
+  open,
+  onToggle,
+}: {
+  chrome: ChromeCopy;
+  blocks: readonly GuideBlock[];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const first =
+    blocks.find((b) => b.id.startsWith('allergy:')) ??
+    blocks.find((b) => b.id === 'local-emergency') ??
+    blocks[0];
+  const summary = first ? safetySummary(first.heading, first.body) : chrome.readThisFirst;
+
+  return (
+    <section className="hotel-safety">
+      <button type="button" className="hotel-safety-line" onClick={onToggle} aria-expanded={open}>
+        <span className="hotel-safety-icon" aria-hidden="true">
+          ⚠
+        </span>
+        <span className="hotel-safety-text">{open ? chrome.hideAgain : summary}</span>
+      </button>
+      <div className="hotel-safety-body" hidden={!open}>
+        {blocks.map((block) => (
+          <article key={block.id}>
             <strong>{block.heading}</strong>
-            {block.body && <p className="block-body">{block.body}</p>}
-            {block.media.length > 0 && (
-              <div className="media-grid">
-                {block.media.map((m) => (
-                  <MediaThumb key={m.id} media={m} />
-                ))}
-              </div>
-            )}
+            <p>{block.body}</p>
           </article>
         ))}
-        {rest.length === 0 && routine.length === 0 && (
-          <p className="muted">{chrome.nothingWritten}</p>
-        )}
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {handover.signOff && (
-        <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
-          {handover.signOff}
+/** Two real sentences for the collapsed safety line — never a middle-dot chain. */
+function safetySummary(heading: string, body: string): string {
+  const lead = heading.replace(/\s*—\s*/, ': ').replace(/\.\s*$/, '');
+  const first = body.split(/[.\n]/)[0]?.trim() ?? '';
+  if (!first) return `${lead}.`;
+  return `${lead}. ${first.replace(/\.\s*$/, '')}.`;
+}
+
+function spineForScenario(scenario: Handover['scenario']): 'time' | 'room' | 'bag' {
+  if (scenario === 'cleaner') return 'room';
+  if (scenario === 'goingtoyours') return 'bag';
+  return 'time';
+}
+
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function PackingPanel({
+  trip,
+  onToggle,
+}: {
+  trip: Trip;
+  onToggle: (itemId: string, packed: boolean) => void;
+}) {
+  const returnReady = Boolean(trip.returnsOn && todayISO() >= trip.returnsOn);
+  const [returnList, setReturnList] = useState(returnReady);
+
+  useEffect(() => {
+    setReturnList(returnReady);
+  }, [returnReady, trip.id]);
+
+  const visible = returnList
+    ? trip.items.filter((item) => item.comesHome)
+    : trip.items.filter((item) => item.leg !== 'return' || item.comesHome);
+  const progress = packingProgress(visible);
+  const bags: string[] = [];
+  const byBag = new Map<string, PackItem[]>();
+  for (const item of visible) {
+    const bag = item.bag?.trim() || 'Shared';
+    if (!byBag.has(bag)) {
+      bags.push(bag);
+      byBag.set(bag, []);
+    }
+    byBag.get(bag)!.push(item);
+  }
+  const fill = progress.total === 0 ? 0 : (progress.packed / progress.total) * 100;
+
+  return (
+    <section className="hotel-packing" aria-label={returnList ? 'Before they leave' : 'Packing'}>
+      <div className="hotel-pack-progress">
+        <p className="hotel-pack-count">
+          {progress.packed} of {progress.total} packed
         </p>
-      )}
-    </main>
+        <div className="hotel-pack-track" aria-hidden="true">
+          <div className="hotel-pack-fill" style={{ width: `${fill}%` }} />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="btn btn-quiet btn-inline"
+        style={{ marginBottom: 'var(--space-4)', textDecoration: 'underline' }}
+        onClick={() => setReturnList((v) => !v)}
+      >
+        {returnList ? 'Show full list' : 'Before they leave'}
+      </button>
+
+      {returnList ? <h2 className="eyebrow">Before they leave</h2> : null}
+
+      {bags.map((bag) => (
+        <div key={bag} className="hotel-pack-bag">
+          <h3 className="hotel-room-heading">{bag}</h3>
+          <ul className="hotel-pack-list">
+            {(byBag.get(bag) ?? []).map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className={`hotel-pack-item${item.packed ? ' is-packed' : ''}`}
+                  onClick={() => onToggle(item.id, !item.packed)}
+                  aria-pressed={item.packed}
+                >
+                  <span className="hotel-pack-mark" aria-hidden="true">
+                    {item.packed ? '✓' : '○'}
+                  </span>
+                  <span className="grow">
+                    <strong>
+                      {item.qty > 1 ? `${item.qty}× ` : ''}
+                      {item.label}
+                    </strong>
+                    {item.comesHome && !returnList ? (
+                      <span className="hotel-pack-tag">comes home</span>
+                    ) : null}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function Timeline({
+  chrome,
+  items,
+  parentOrder,
+  subjects,
+  focus,
+  nowMinutes,
+  spine,
+}: {
+  chrome: ChromeCopy;
+  items: readonly RoutineItem[];
+  parentOrder: readonly RoutineItem[];
+  subjects: readonly CareSubject[];
+  focus: string;
+  nowMinutes: number;
+  spine: 'time' | 'room' | 'bag';
+}) {
+  // Packing spine is rendered by PackingPanel, not this timeline.
+  if (spine === 'bag') {
+    return null;
+  }
+
+  if (spine === 'room') {
+    const ordered = [...items].sort((a, b) => {
+      const ia = parentOrder.findIndex((r) => r.id === a.id);
+      const ib = parentOrder.findIndex((r) => r.id === b.id);
+      return (ia < 0 ? 9999 : ia) - (ib < 0 ? 9999 : ib);
+    });
+    const groups: { section: string; items: RoutineItem[] }[] = [];
+    const index = new Map<string, number>();
+    for (const item of ordered) {
+      const section = item.section?.trim() ?? '';
+      let at = index.get(section);
+      if (at === undefined) {
+        at = groups.length;
+        index.set(section, at);
+        groups.push({ section, items: [] });
+      }
+      groups[at]!.items.push(item);
+    }
+
+    return (
+      <section className="hotel-timeline" aria-label={chrome.aTypicalDay}>
+        {groups.map((group) => (
+          <div key={group.section || 'ungrouped'} className="hotel-room-group">
+            {group.section ? <h3 className="hotel-room-heading">{group.section}</h3> : null}
+            {group.items.map((item) => {
+              const who = subjects.find((s) => s.id === item.appliesTo);
+              return (
+                <div key={item.id} className="hotel-row hotel-row-future">
+                  <span className="hotel-time">
+                    {item.priority === 'nice'
+                      ? chrome.nice
+                      : item.priority === 'must'
+                        ? chrome.must
+                        : '—'}
+                  </span>
+                  <div className="hotel-row-body">
+                    <strong>{routineItemLabel(item)}</strong>
+                    {who && focus === 'all' && (
+                      <span className="hotel-detail">{chrome.forName(who.name)}</span>
+                    )}
+                    {item.product && (
+                      <span className="hotel-detail">{chrome.useProduct(item.product)}</span>
+                    )}
+                    {item.notes && <span className="hotel-detail">{item.notes}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </section>
+    );
+  }
+
+  const timed = items
+    .map((item) => ({ item, mins: parseTime(item.time) }))
+    .sort((a, b) => (a.mins ?? 9999) - (b.mins ?? 9999));
+
+  let nowIndex = -1;
+  for (let i = 0; i < timed.length; i += 1) {
+    const mins = timed[i]?.mins ?? null;
+    if (mins === null) continue;
+    if (mins <= nowMinutes) nowIndex = i;
+  }
+  // If everything is still ahead, highlight the first timed row.
+  if (nowIndex < 0) {
+    nowIndex = timed.findIndex((t) => t.mins !== null);
+  }
+
+  return (
+    <section className="hotel-timeline" aria-label={chrome.aTypicalDay}>
+      {timed.map(({ item, mins }, index) => {
+        const who = subjects.find((s) => s.id === item.appliesTo);
+        const state =
+          mins === null ? 'future' : index < nowIndex ? 'past' : index === nowIndex ? 'now' : 'future';
+        const showDetail = state === 'now' || Boolean(item.notes) || Boolean(item.product);
+        return (
+          <div key={item.id} className={`hotel-row hotel-row-${state}`}>
+            <span className="hotel-time">
+              {item.time ??
+                (item.priority === 'nice' ? chrome.nice : item.priority === 'must' ? chrome.must : '—')}
+            </span>
+            <div className="hotel-row-body">
+              <strong>{routineItemLabel(item)}</strong>
+              {who && focus === 'all' && <span className="hotel-detail">{chrome.forName(who.name)}</span>}
+              {showDetail && item.product && (
+                <span className="hotel-detail">{chrome.useProduct(item.product)}</span>
+              )}
+              {showDetail && item.notes && <span className="hotel-detail">{item.notes}</span>}
+            </div>
+          </div>
+        );
+      })}
+    </section>
   );
 }

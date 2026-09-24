@@ -1,4 +1,11 @@
-import type { Contact, Handover, Household, RoutineItem } from '../src/household.ts';
+import {
+  DEFAULT_EXPECTATION,
+  durationFromScenario,
+  type Contact,
+  type Handover,
+  type Household,
+  type RoutineItem,
+} from '../src/household.ts';
 import { type CareSubject, EMPTY_SAFETY, type Entry, type Media } from '../src/subject.ts';
 
 export function media(overrides: Partial<Media> & Pick<Media, 'id'>): Media {
@@ -78,17 +85,21 @@ export function household(overrides: Partial<Household> = {}): Household {
 }
 
 export function handover(overrides: Partial<Handover> = {}): Handover {
+  const scenario = overrides.scenario ?? 'fullday';
   return {
     id: 'ho1',
     householdId: 'h1',
     caregiverName: 'Claire',
     caregiverRelationship: 'Nanny',
-    duration: 'fullday',
     language: 'en-GB',
     subjectIds: [],
     importantNotes: [],
     extra: '',
     signOff: 'The Family',
     ...overrides,
+    scenario,
+    duration: durationFromScenario(scenario),
+    expectation: overrides.expectation ?? DEFAULT_EXPECTATION[scenario],
+    tripId: overrides.tripId ?? null,
   };
 }

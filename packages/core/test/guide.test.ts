@@ -163,7 +163,7 @@ test('critical blocks come first, so a ten-second skim hits them', () => {
   const firstNonCritical = doc.blocks.findIndex((b) => !b.critical);
   const lastCritical = doc.blocks.map((b) => b.critical).lastIndexOf(true);
   assert.ok(lastCritical < firstNonCritical, 'a non-critical block appears before a critical one');
-  assert.equal(criticalBlocks(doc).length, 3); // important note, allergy, contacts
+  assert.equal(criticalBlocks(doc).length, 4); // important, allergy, contacts, local emergency
 });
 
 test('an evening handover hides the parts of the day it does not cover', () => {

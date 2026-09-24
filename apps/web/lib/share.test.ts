@@ -53,12 +53,15 @@ const handover: Handover = {
   householdId: 'hh1',
   caregiverName: 'Margaret',
   caregiverRelationship: 'Grandparent',
+  scenario: 'weekend',
   duration: 'fewdays',
+  expectation: 'A few days. Each day is on its own tab.',
   language: 'en',
   subjectIds: [],
   importantNotes: [],
   extra: '',
   signOff: '',
+  tripId: null,
 };
 
 describe('snapshotForShare', () => {

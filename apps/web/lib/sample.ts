@@ -71,25 +71,29 @@ export function loadSample(): Sample {
     householdId: 'hh_sample',
     caregiverName: 'Margaret',
     caregiverRelationship: 'Grandparent',
+    scenario: 'weekend',
     duration: 'fewdays',
+    expectation:
+      'A few days. Each day is on its own tab.',
     language: 'en',
     subjectIds: [],
     importantNotes: ['We land back on Sunday at 18:40. Call any time before that.'],
     extra: '',
     signOff: 'Thank you — Claire',
+    tripId: null,
   };
 
   const household: Household = {
       id: 'hh_sample',
       name: 'Chez Martin',
-      country: 'FR',
+      country: 'France',
       subjects: [
         {
           id: 'sub_lea',
           kind: 'child',
           name: 'Léa',
           descriptor: '3 years',
-          identity: { colourToken: '--id-petrol', symbol: '●' },
+          identity: { colourToken: '--id-dusk', symbol: '●' },
           safety: {
             allergies: 'Kiwi — her throat itches and her lips swell. No kiwi in anything.',
             medication: 'Nothing daily.',
@@ -155,7 +159,7 @@ export function loadSample(): Sample {
           kind: 'pet',
           name: 'Pomme',
           descriptor: 'Labrador, 7',
-          identity: { colourToken: '--id-clay', symbol: '▲' },
+          identity: { colourToken: '--id-terracotta', symbol: '▲' },
           safety: {
             allergies: 'Chicken makes her scratch. Her food is the blue bag only.',
             medication: 'Half a joint tablet with breakfast.',
@@ -182,7 +186,7 @@ export function loadSample(): Sample {
           kind: 'place',
           name: 'The flat',
           descriptor: 'Third floor, no lift',
-          identity: { colourToken: '--id-indigo', symbol: '■' },
+          identity: { colourToken: '--id-sage', symbol: '■' },
           safety: {
             allergies: '',
             medication: '',

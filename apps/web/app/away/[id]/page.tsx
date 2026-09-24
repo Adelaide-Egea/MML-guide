@@ -78,6 +78,8 @@ export default function TripPage() {
       packed: false,
       notes: '',
       leg,
+      comesHome: leg === 'return' || newCategory === 'home-return',
+      bag: 'Shared',
     };
     actions.upsertPackItem(active.id, item);
     setNewLabel('');
