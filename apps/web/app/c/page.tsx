@@ -214,9 +214,11 @@ export default function CaregiverPage() {
         <Timeline
           chrome={chrome}
           items={routine}
+          parentOrder={household.routine}
           subjects={subjects}
           focus={focus}
           nowMinutes={nowMinutes}
+          spine={spineForScenario(handover.scenario)}
         />
       )}
 
@@ -362,19 +364,88 @@ function safetySummary(heading: string, body: string): string {
   return `${lead}. ${first.replace(/\.\s*$/, '')}.`;
 }
 
+function spineForScenario(scenario: Handover['scenario']): 'time' | 'room' | 'bag' {
+  if (scenario === 'cleaner') return 'room';
+  if (scenario === 'goingtoyours') return 'bag';
+  return 'time';
+}
+
 function Timeline({
   chrome,
   items,
+  parentOrder,
   subjects,
   focus,
   nowMinutes,
+  spine,
 }: {
   chrome: ChromeCopy;
   items: readonly RoutineItem[];
+  parentOrder: readonly RoutineItem[];
   subjects: readonly CareSubject[];
   focus: string;
   nowMinutes: number;
+  spine: 'time' | 'room' | 'bag';
 }) {
+  // Packing spine lands in Task 3 — until then show nothing rather than a clock list.
+  if (spine === 'bag') {
+    return null;
+  }
+
+  if (spine === 'room') {
+    const ordered = [...items].sort((a, b) => {
+      const ia = parentOrder.findIndex((r) => r.id === a.id);
+      const ib = parentOrder.findIndex((r) => r.id === b.id);
+      return (ia < 0 ? 9999 : ia) - (ib < 0 ? 9999 : ib);
+    });
+    const groups: { section: string; items: RoutineItem[] }[] = [];
+    const index = new Map<string, number>();
+    for (const item of ordered) {
+      const section = item.section?.trim() ?? '';
+      let at = index.get(section);
+      if (at === undefined) {
+        at = groups.length;
+        index.set(section, at);
+        groups.push({ section, items: [] });
+      }
+      groups[at]!.items.push(item);
+    }
+
+    return (
+      <section className="hotel-timeline" aria-label={chrome.aTypicalDay}>
+        {groups.map((group) => (
+          <div key={group.section || 'ungrouped'} className="hotel-room-group">
+            {group.section ? <h3 className="hotel-room-heading">{group.section}</h3> : null}
+            {group.items.map((item) => {
+              const who = subjects.find((s) => s.id === item.appliesTo);
+              return (
+                <div key={item.id} className="hotel-row hotel-row-future">
+                  <span className="hotel-time">
+                    {item.priority === 'nice'
+                      ? chrome.nice
+                      : item.priority === 'must'
+                        ? chrome.must
+                        : '—'}
+                  </span>
+                  <div className="hotel-row-body">
+                    <strong>{routineItemLabel(item)}</strong>
+                    {who && focus === 'all' && (
+                      <span className="hotel-detail">{chrome.forName(who.name)}</span>
+                    )}
+                    {item.product && (
+                      <span className="hotel-detail">{chrome.useProduct(item.product)}</span>
+                    )}
+                    {item.notes && <span className="hotel-detail">{item.notes}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </section>
+    );
+  }
+
   const timed = items
     .map((item) => ({ item, mins: parseTime(item.time) }))
     .sort((a, b) => (a.mins ?? 9999) - (b.mins ?? 9999));
@@ -394,7 +465,8 @@ function Timeline({
     <section className="hotel-timeline" aria-label={chrome.aTypicalDay}>
       {timed.map(({ item, mins }, index) => {
         const who = subjects.find((s) => s.id === item.appliesTo);
-        const state = mins === null ? 'future' : index < nowIndex ? 'past' : index === nowIndex ? 'now' : 'future';
+        const state =
+          mins === null ? 'future' : index < nowIndex ? 'past' : index === nowIndex ? 'now' : 'future';
         const showDetail = state === 'now' || Boolean(item.notes) || Boolean(item.product);
         return (
           <div key={item.id} className={`hotel-row hotel-row-${state}`}>
