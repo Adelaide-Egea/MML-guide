@@ -14,6 +14,7 @@ import {
 } from '@mml/core';
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
+import { AskField } from '../../../components/AskField.tsx';
 import type { GuideSnapshot } from '../../../lib/share.ts';
 
 type Shown =
@@ -69,10 +70,9 @@ export default function CaregiverAskPage() {
 
   const subjects = subjectsFor(snapshot.household, { ...snapshot.handover, language });
 
-  async function ask(event: React.FormEvent) {
-    event.preventDefault();
-    const asked = question.trim();
-    if (!asked || !snapshot) return;
+  async function runAsk(askedRaw: string) {
+    const asked = askedRaw.trim();
+    if (!asked || !snapshot || busy) return;
     const current = snapshot;
     setBusy(true);
     try {
@@ -115,6 +115,11 @@ export default function CaregiverAskPage() {
     }
   }
 
+  async function ask(event: React.FormEvent) {
+    event.preventDefault();
+    await runAsk(question);
+  }
+
   return (
     <main className="shell">
       <TopBar title={chrome.askTitle} back="/c" />
@@ -128,18 +133,18 @@ export default function CaregiverAskPage() {
         style={{ marginTop: 'var(--space-4)' }}
         lang={language}
       >
-        <div className="field">
-          <label htmlFor="q">{chrome.whatDoYouNeed}</label>
-          <span className="hint">{chrome.askHintCaregiver}</span>
-          <textarea
-            id="q"
-            className="textarea"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder={chrome.askPlaceholder}
-            autoFocus
-          />
-        </div>
+        <AskField
+          value={question}
+          onChange={setQuestion}
+          onSubmitHeard={(heard) => void runAsk(heard)}
+          language={language}
+          chrome={chrome}
+          label={chrome.whatDoYouNeed}
+          hint={chrome.askHintCaregiver}
+          placeholder={chrome.askPlaceholder}
+          disabled={busy}
+          autoFocus
+        />
         <button type="submit" className="btn" disabled={busy || !question.trim()}>
           {busy ? chrome.looking : chrome.ask}
         </button>

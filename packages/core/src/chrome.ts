@@ -63,6 +63,12 @@ export interface ChromeCopy {
   readonly safetyExpand: string;
   /** Country public emergency numbers heading, e.g. "Emergency (France)". */
   readonly localEmergency: (country: string) => string;
+  readonly tapToSpeak: string;
+  readonly listening: string;
+  readonly stopListening: string;
+  readonly speakUnavailable: string;
+  readonly speakDenied: string;
+  readonly speakNoSpeech: string;
 }
 
 const EN: ChromeCopy = {
@@ -73,7 +79,7 @@ const EN: ChromeCopy = {
   looking: 'Looking…',
   askTitle: 'Ask',
   whatDoYouNeed: 'What do you need to know?',
-  askPlaceholder: 'When is bedtime? / Where are the spare nappies?',
+  askPlaceholder: 'Where are the spare nappies? / How much milk at this hour?',
   askHintCaregiver:
     'Answered only from this guide. Ask in your language — the reply follows the toggle above.',
   askHintParent: 'Answered only from what was written in this guide. Ask in whatever language you like.',
@@ -124,6 +130,12 @@ const EN: ChromeCopy = {
   askPlaceholderTonight: 'Ask anything about tonight',
   safetyExpand: 'Show all safety notes',
   localEmergency: (country) => `Emergency (${country})`,
+  tapToSpeak: 'Tap the mic to ask out loud',
+  listening: 'Listening…',
+  stopListening: 'Stop listening',
+  speakUnavailable: 'Voice is not available on this phone. Type your question instead.',
+  speakDenied: 'Microphone permission is off. Type your question, or allow the mic in browser settings.',
+  speakNoSpeech: 'Did not catch that. Tap the mic and try again.',
 };
 
 const FR: ChromeCopy = {
@@ -134,7 +146,7 @@ const FR: ChromeCopy = {
   looking: 'Recherche…',
   askTitle: 'Demander',
   whatDoYouNeed: 'De quoi avez-vous besoin ?',
-  askPlaceholder: 'À quelle heure le coucher ? / Où sont les couches ?',
+  askPlaceholder: 'Où sont les couches ? / Combien de lait à cette heure-ci ?',
   askHintCaregiver:
     'Réponse uniquement à partir de ce guide. Posez la question dans votre langue — la réponse suit le choix ci-dessus.',
   askHintParent:
@@ -188,6 +200,12 @@ const FR: ChromeCopy = {
   askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
   safetyExpand: 'Voir toutes les notes de sécurité',
   localEmergency: (country) => `Urgences (${country})`,
+  tapToSpeak: 'Touchez le micro pour parler',
+  listening: 'Écoute…',
+  stopListening: 'Arrêter d’écouter',
+  speakUnavailable: 'La voix n’est pas disponible sur ce téléphone. Tapez votre question.',
+  speakDenied: 'Le micro est refusé. Tapez votre question, ou autorisez le micro dans le navigateur.',
+  speakNoSpeech: 'Rien entendu. Touchez le micro et réessayez.',
 };
 
 const PT_BR: ChromeCopy = {

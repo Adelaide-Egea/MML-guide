@@ -15,6 +15,7 @@ import {
 import { Breathing } from '../../../../components/Breathing.tsx';
 import { TopBar } from '../../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../../components/LanguageToggle.tsx';
+import { AskField } from '../../../../components/AskField.tsx';
 import { useActions } from '../../../../lib/store.ts';
 import { MediaThumb } from '../../../../components/MediaField.tsx';
 import { useAppState } from '../../../../lib/store.ts';
@@ -50,10 +51,9 @@ export default function AskPage() {
   const language = handover.language || 'en';
   const chrome = chromeFor(language);
 
-  async function ask(event: React.FormEvent) {
-    event.preventDefault();
-    const asked = question.trim();
-    if (!asked) return;
+  async function runAsk(askedRaw: string) {
+    const asked = askedRaw.trim();
+    if (!asked || busy) return;
     track('ask');
 
     setBusy(true);
@@ -100,6 +100,11 @@ export default function AskPage() {
     }
   }
 
+  async function ask(event: React.FormEvent) {
+    event.preventDefault();
+    await runAsk(question);
+  }
+
   return (
     <main className="shell">
       <TopBar title={chrome.askTitle} back={`/guide/${handover.id}`} />
@@ -110,18 +115,18 @@ export default function AskPage() {
       />
 
       <form className="stack" onSubmit={(e) => void ask(e)} style={{ marginTop: 'var(--space-4)' }}>
-        <div className="field">
-          <label htmlFor="q">{chrome.whatDoYouNeed}</label>
-          <span className="hint">{chrome.askHintParent}</span>
-          <textarea
-            id="q"
-            className="textarea"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder={chrome.askPlaceholder}
-            autoFocus
-          />
-        </div>
+        <AskField
+          value={question}
+          onChange={setQuestion}
+          onSubmitHeard={(heard) => void runAsk(heard)}
+          language={language}
+          chrome={chrome}
+          label={chrome.whatDoYouNeed}
+          hint={chrome.askHintParent}
+          placeholder={chrome.askPlaceholder}
+          disabled={busy}
+          autoFocus
+        />
         <button type="submit" className="btn" disabled={busy || !question.trim()}>
           {busy ? chrome.looking : chrome.ask}
         </button>

@@ -641,6 +641,47 @@ a.routine-item {
   max-width: none;
 }
 
+.ask-field {
+  position: relative;
+}
+
+.ask-field-input {
+  padding-right: 56px;
+}
+
+.ask-mic {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.ask-mic:hover,
+.ask-mic:focus-visible {
+  border-color: var(--brand-deep);
+  background: var(--brand-tint);
+}
+
+.ask-mic.is-listening {
+  background: var(--critical-tint);
+  border-color: var(--critical);
+  color: var(--critical);
+}
+
+.ask-mic:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .crown {
   display: flex;
   align-items: center;
