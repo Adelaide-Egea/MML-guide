@@ -8,3 +8,6 @@ __pycache__/
 
 .env.local
 **/.env.local
+
+# Local Supabase dumps — contain household PII, never commit
+archive/legacy-app/supabase/backup-*.json
