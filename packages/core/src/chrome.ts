@@ -84,6 +84,18 @@ export interface ChromeCopy {
   readonly safetyExpand: string;
   /** Sticky dial button — "Call Claire". */
   readonly callName: (name: string) => string;
+  /**
+   * Stock scenario blurbs under the greeting. Remapped when the handover still
+   * holds the English default; custom parent text is left alone.
+   */
+  readonly expectationEvening: string;
+  readonly expectationFullDay: string;
+  readonly expectationWeekend: string;
+  readonly expectationCleaner: string;
+  readonly expectationPetSitter: string;
+  readonly expectationGoingToYours: string;
+  /** Honest line next to safety: allergies stay in the parent's words. */
+  readonly factsAsWritten: string;
   /** Country public emergency numbers heading, e.g. "Emergency (France)". */
   readonly localEmergency: (country: string) => string;
   readonly tapToSpeak: string;
@@ -92,6 +104,10 @@ export interface ChromeCopy {
   readonly speakUnavailable: string;
   readonly speakDenied: string;
   readonly speakNoSpeech: string;
+  readonly printOrSavePdf: string;
+  readonly printGuideFor: (name: string) => string;
+  readonly printIntro: string;
+  readonly printFooter: string;
 }
 
 /** Built-in prompt / section titles seeded in English — display chrome, not parent prose. */
@@ -167,7 +183,7 @@ const FR_ROUTINE_KINDS: Record<RoutineKind, string> = {
 
 const EN: ChromeCopy = {
   languageHint:
-    'Guide language — English or French by default, with a toggle into the languages most common among UK and French carers and cleaners (including Brazilian Portuguese and Tagalog). Safety facts stay in the parent’s words; Ask answers in this language.',
+    'Buttons and labels in English or French. Allergies, contacts and notes stay exactly as the parent wrote them — Ask answers in this language.',
   askAboutAnything: 'Ask about anything',
   ask: 'Ask',
   looking: 'Looking…',
@@ -230,6 +246,14 @@ const EN: ChromeCopy = {
   askPlaceholderTonight: 'Ask anything about tonight',
   safetyExpand: 'Show all safety notes',
   callName: (name) => `Call ${name}`,
+  expectationEvening:
+    "When you arrive the children will already be asleep. You shouldn't need to do anything except be here — here's what to do if they wake.",
+  expectationFullDay: 'A full day. Meals, nap and pickup are below.',
+  expectationWeekend: 'A few days. Everything you need is here.',
+  expectationCleaner: "The house, room by room, in the order I'd walk it.",
+  expectationPetSitter: "Feeding, walks and the vet's number are below.",
+  expectationGoingToYours: 'Everything that came in the bag, and what has to come home.',
+  factsAsWritten: 'As the parent wrote — not translated.',
   localEmergency: (country) => `Emergency (${country})`,
   tapToSpeak: 'Tap the mic to ask out loud',
   listening: 'Listening…',
@@ -245,11 +269,15 @@ const EN: ChromeCopy = {
   inAnEmergency: 'in an emergency',
   routineKinds: ROUTINE_KIND_LABEL,
   entryTitles: {},
+  printOrSavePdf: 'Print or save as PDF',
+  printGuideFor: (name) => `Guide for ${name}`,
+  printIntro: 'Everything they need while you are away — clear, calm, and on one page.',
+  printFooter: 'Domela — the household guide',
 };
 
 const FR: ChromeCopy = {
   languageHint:
-    'Langue du guide — anglais ou français par défaut, avec un bascule vers les langues les plus courantes chez les nounous et femmes de ménage au Royaume-Uni et en France (dont le portugais brésilien et le tagalog). Les faits de sécurité restent dans les mots du parent ; Ask répond dans cette langue.',
+    'Boutons et libellés en anglais ou en français. Allergies, contacts et notes restent exactement comme le parent les a écrits — Ask répond dans cette langue.',
   askAboutAnything: 'Poser une question',
   ask: 'Demander',
   looking: 'Recherche…',
@@ -315,6 +343,14 @@ const FR: ChromeCopy = {
   askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
   safetyExpand: 'Voir toutes les notes de sécurité',
   callName: (name) => `Appeler ${name}`,
+  expectationEvening:
+    'À votre arrivée, les enfants seront déjà endormis. Il n’y a rien à faire sauf être là — voici quoi faire s’ils se réveillent.',
+  expectationFullDay: 'Une journée complète. Repas, sieste et récupération sont ci-dessous.',
+  expectationWeekend: 'Quelques jours. Tout ce qu’il faut est ici.',
+  expectationCleaner: 'La maison, pièce par pièce, dans l’ordre où je la ferais.',
+  expectationPetSitter: 'Repas, promenades et le numéro du véto sont ci-dessous.',
+  expectationGoingToYours: 'Tout ce qui est dans le sac, et ce qui doit rentrer.',
+  factsAsWritten: 'Tel que le parent l’a écrit — non traduit.',
   localEmergency: (country) => `Urgences (${country})`,
   tapToSpeak: 'Touchez le micro pour parler',
   listening: 'Écoute…',
@@ -330,6 +366,10 @@ const FR: ChromeCopy = {
   inAnEmergency: 'en cas d’urgence',
   routineKinds: FR_ROUTINE_KINDS,
   entryTitles: FR_ENTRY_TITLES,
+  printOrSavePdf: 'Imprimer ou enregistrer en PDF',
+  printGuideFor: (name) => `Guide pour ${name}`,
+  printIntro: 'Tout ce qu’il faut pendant votre absence — clair, calme, sur une page.',
+  printFooter: 'Domela — le guide du foyer',
 };
 
 const PT_BR: ChromeCopy = {
@@ -725,4 +765,22 @@ export function localizeGuideHeading(heading: string, chrome: ChromeCopy): strin
     .split(' — ')
     .map((part) => fixed[part] ?? part)
     .join(' — ');
+}
+
+/** Remap a stock English expectation blurb into care chrome.
+ *
+ *  Custom parent sentences are returned unchanged. Only exact matches against
+ *  the built-in English defaults (any scenario) are rewritten.
+ */
+export function localizeExpectation(text: string, chrome: ChromeCopy): string {
+  const trimmed = text.trim();
+  const map: Record<string, string> = {
+    [EN.expectationEvening]: chrome.expectationEvening,
+    [EN.expectationFullDay]: chrome.expectationFullDay,
+    [EN.expectationWeekend]: chrome.expectationWeekend,
+    [EN.expectationCleaner]: chrome.expectationCleaner,
+    [EN.expectationPetSitter]: chrome.expectationPetSitter,
+    [EN.expectationGoingToYours]: chrome.expectationGoingToYours,
+  };
+  return map[trimmed] ?? text;
 }

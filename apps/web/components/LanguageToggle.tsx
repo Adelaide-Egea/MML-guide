@@ -2,7 +2,12 @@
 
 import { CARE_LANGUAGES, chromeFor, matchCareLanguage } from '@mml/core';
 
-/** Toggle for the caregiver's preferred reading / Ask language. */
+/** Toggle for the caregiver's preferred reading / Ask language.
+ *
+ *  Only English and French are offered — those are the languages with complete
+ *  on-screen chrome. Incomplete packs (Tagalog, etc.) stay out of the list so
+ *  we do not promise a translation we cannot deliver.
+ */
 export function LanguageToggle({
   value,
   onChange,
@@ -25,6 +30,7 @@ export function LanguageToggle({
           value={current.tag}
           onChange={(e) => onChange(e.target.value)}
           aria-label={chrome.languageHint}
+          title={chrome.languageHint}
         >
           {CARE_LANGUAGES.map((lang) => (
             <option key={lang.tag} value={lang.tag}>

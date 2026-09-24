@@ -18,6 +18,7 @@ import {
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
+import { PrintFooter, PrintMasthead } from '../../../components/PrintChrome.tsx';
 import { buildShareUrl } from '../../../lib/share.ts';
 import { useActions, useAppState } from '../../../lib/store.ts';
 import { linkifyPhones } from '../../../lib/tel.ts';
@@ -130,10 +131,16 @@ export default function GuidePage() {
   };
 
   return (
-    <main className="shell">
+    <main className="shell guide-print">
       <TopBar title={handover.caregiverName || chrome.guide} back="/" />
 
-      <div className="stack" style={{ marginBottom: 'var(--space-5)' }}>
+      <PrintMasthead
+        chrome={chrome}
+        caregiverName={handover.caregiverName}
+        subjects={subjects}
+      />
+
+      <div className="stack no-print" style={{ marginBottom: 'var(--space-5)' }}>
         <p className="muted">
           {chrome.forName(handover.caregiverName || 'whoever is looking after things')}
           {handover.caregiverRelationship ? (
@@ -147,13 +154,13 @@ export default function GuidePage() {
           value={handover.language}
           onChange={(language) => actions.saveHandover({ ...handover, language })}
         />
-        <div className="row no-print" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-          <Link href={`/guide/${handover.id}/ask`} className="btn">
+        <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+          <Link href={`/guide/${handover.id}/ask`} className="btn btn-secondary">
             {chrome.askAboutAnything}
           </Link>
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn"
             disabled={shareState === 'working'}
             onClick={() => {
               void (async () => {
@@ -256,7 +263,7 @@ export default function GuidePage() {
       )}
 
       {routine.length > 0 && (
-        <section className="card rows no-break" style={{ marginBottom: 'var(--space-5)' }}>
+        <section className="card rows print-schedule" style={{ marginBottom: 'var(--space-5)' }}>
           <div className="rows-head">
             <span className="eyebrow">
               {focused
@@ -309,9 +316,9 @@ export default function GuidePage() {
         </section>
       )}
 
-      <section className="stack">
+      <section className="stack print-notes">
         {rest.map((block) => (
-          <article key={block.id} className="card stack-tight no-break">
+          <article key={block.id} className="card stack-tight print-note">
             <strong>{heading(block)}</strong>
             {block.body && <p className="block-body">{linkifyPhones(block.body)}</p>}
             {block.media.length > 0 && (
@@ -329,14 +336,16 @@ export default function GuidePage() {
       </section>
 
       {handover.signOff && (
-        <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
+        <p className="print-signoff muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
           {handover.signOff}
         </p>
       )}
 
+      <PrintFooter chrome={chrome} />
+
       <div className="row no-print" style={{ marginTop: 'var(--space-6)' }}>
         <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
-          Print or save as PDF
+          {chrome.printOrSavePdf}
         </button>
       </div>
     </main>

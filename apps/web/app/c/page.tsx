@@ -13,7 +13,9 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  localizeExpectation,
   localizeGuideHeading,
+  matchCareLanguage,
   mergeRoutineRows,
   normalizeHandover,
   packingProgress,
@@ -53,7 +55,7 @@ export default function CaregiverPage() {
         }
       }
       setSnapshot(decoded);
-      setLanguage(decoded.handover.language || 'en');
+      setLanguage(matchCareLanguage(decoded.handover.language || 'en').tag);
       window.sessionStorage.setItem(
         'mml.caregiver-snapshot',
         JSON.stringify({
@@ -360,7 +362,7 @@ function Greeting({
   return (
     <div className="hotel-greeting">
       <h1>{chrome.helloName(handover.caregiverName || 'there')}</h1>
-      <p className="hotel-shape">{handover.expectation}</p>
+      <p className="hotel-shape">{localizeExpectation(handover.expectation, chrome)}</p>
     </div>
   );
 }
@@ -406,6 +408,9 @@ function SafetyLine({
           </span>
         )}
       </button>
+      {!open && allergies.length > 0 ? (
+        <p className="hotel-safety-as-written">{chrome.factsAsWritten}</p>
+      ) : null}
       <div className="hotel-safety-body" hidden={!open}>
         {blocks.map((block) => (
           <article key={block.id}>

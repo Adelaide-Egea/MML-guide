@@ -962,6 +962,14 @@ a.routine-item {
   align-self: center;
 }
 
+.hotel-safety-as-written {
+  margin: 0 0 var(--space-2);
+  padding: 0 0 0 calc(1em + var(--space-2));
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+
 .hotel-safety-body {
   padding: 0 0 var(--space-4);
   display: flex;
