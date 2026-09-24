@@ -104,6 +104,10 @@ export interface ChromeCopy {
   readonly speakUnavailable: string;
   readonly speakDenied: string;
   readonly speakNoSpeech: string;
+  readonly printOrSavePdf: string;
+  readonly printGuideFor: (name: string) => string;
+  readonly printIntro: string;
+  readonly printFooter: string;
 }
 
 /** Built-in prompt / section titles seeded in English — display chrome, not parent prose. */
@@ -265,6 +269,10 @@ const EN: ChromeCopy = {
   inAnEmergency: 'in an emergency',
   routineKinds: ROUTINE_KIND_LABEL,
   entryTitles: {},
+  printOrSavePdf: 'Print or save as PDF',
+  printGuideFor: (name) => `Guide for ${name}`,
+  printIntro: 'Everything they need while you are away — clear, calm, and on one page.',
+  printFooter: 'Domela — the household guide',
 };
 
 const FR: ChromeCopy = {
@@ -358,6 +366,10 @@ const FR: ChromeCopy = {
   inAnEmergency: 'en cas d’urgence',
   routineKinds: FR_ROUTINE_KINDS,
   entryTitles: FR_ENTRY_TITLES,
+  printOrSavePdf: 'Imprimer ou enregistrer en PDF',
+  printGuideFor: (name) => `Guide pour ${name}`,
+  printIntro: 'Tout ce qu’il faut pendant votre absence — clair, calme, sur une page.',
+  printFooter: 'Domela — le guide du foyer',
 };
 
 const PT_BR: ChromeCopy = {
