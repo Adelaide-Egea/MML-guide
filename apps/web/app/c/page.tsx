@@ -13,6 +13,7 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  localizeGuideHeading,
   normalizeHandover,
   packingProgress,
   routineItemLabel,
@@ -255,7 +256,7 @@ export default function CaregiverPage() {
               {block.media.slice(0, 1).map((m) => (
                 <MediaThumb key={m.id} media={m} />
               ))}
-              <h3>{block.heading}</h3>
+              <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
               {block.body ? <p>{block.body}</p> : null}
             </article>
           ))}
@@ -266,7 +267,7 @@ export default function CaregiverPage() {
         <section className="hotel-notes">
           {textNotes.map((block) => (
             <article key={block.id} className="hotel-note">
-              <h3>{block.heading}</h3>
+              <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
               {block.body ? <p>{block.body}</p> : null}
             </article>
           ))}
@@ -360,7 +361,9 @@ function SafetyLine({
     blocks.find((b) => b.id.startsWith('allergy:')) ??
     blocks.find((b) => b.id === 'local-emergency') ??
     blocks[0];
-  const summary = first ? safetySummary(first.heading, first.body) : chrome.readThisFirst;
+  const summary = first
+    ? safetySummary(localizeGuideHeading(first.heading, chrome), first.body)
+    : chrome.readThisFirst;
 
   return (
     <section className="hotel-safety">
@@ -373,7 +376,7 @@ function SafetyLine({
       <div className="hotel-safety-body" hidden={!open}>
         {blocks.map((block) => (
           <article key={block.id}>
-            <strong>{block.heading}</strong>
+            <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
             <p>{block.body}</p>
           </article>
         ))}
@@ -544,7 +547,7 @@ function Timeline({
                         : '—'}
                   </span>
                   <div className="hotel-row-body">
-                    <strong>{routineItemLabel(item)}</strong>
+                    <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
                     {who && focus === 'all' && (
                       <span className="hotel-detail">{chrome.forName(who.name)}</span>
                     )}
@@ -591,7 +594,7 @@ function Timeline({
                 (item.priority === 'nice' ? chrome.nice : item.priority === 'must' ? chrome.must : '—')}
             </span>
             <div className="hotel-row-body">
-              <strong>{routineItemLabel(item)}</strong>
+              <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
               {who && focus === 'all' && <span className="hotel-detail">{chrome.forName(who.name)}</span>}
               {showDetail && item.product && (
                 <span className="hotel-detail">{chrome.useProduct(item.product)}</span>

@@ -10,6 +10,7 @@ import {
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
+  localizeGuideHeading,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -116,11 +117,15 @@ export default function GuidePage() {
   const focused = subjects.find((s) => s.id === focus);
 
   // Every heading is "Pomme (Labrador, 7) — Walks", which is right in a whole guide
-  // and pure repetition once the filter above already says Pomme.
-  const heading = (block: GuideBlock) =>
-    focused && block.subjectId === focused.id
-      ? block.heading.split(' — ').slice(1).join(' — ') || block.heading
-      : block.heading;
+  // and pure repetition once the filter above already says Pomme. Known English
+  // prompt titles (Screens, Potty…) remap with the care language; custom titles stay.
+  const heading = (block: GuideBlock) => {
+    const raw =
+      focused && block.subjectId === focused.id
+        ? block.heading.split(' — ').slice(1).join(' — ') || block.heading
+        : block.heading;
+    return localizeGuideHeading(raw, chrome);
+  };
 
   return (
     <main className="shell">
@@ -263,7 +268,7 @@ export default function GuidePage() {
           </div>
           {routine.map((item) => {
             const who = subjects.find((s) => s.id === item.appliesTo);
-            const title = routineItemLabel(item);
+            const title = routineItemLabel(item, chrome.routineKinds);
             return (
               <div key={item.id} className="routine-item">
                 <span className="routine-time">
@@ -403,7 +408,7 @@ function SafetyBlock({
 
   const body = blocks.map((block) => (
     <div key={block.id} className="stack-tight">
-      <strong>{block.heading}</strong>
+      <strong>{localizeGuideHeading(block.heading, chrome)}</strong>
       <p className="critical-body">{block.body}</p>
     </div>
   ));
