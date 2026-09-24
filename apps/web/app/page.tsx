@@ -1,8 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { type SubjectKind, subjectLabel } from '@mml/core';
+import { useMemo, useState } from 'react';
+import {
+  DEFAULT_EXPECTATION,
+  durationFromScenario,
+  guideCoverage,
+  type Handover,
+  type SubjectKind,
+  subjectLabel,
+} from '@mml/core';
 import { Badge } from '../components/Chrome.tsx';
 import { Mark } from '../components/Mark.tsx';
 import { KIND_HINT, KIND_LABEL, useActions, useAppState } from '../lib/store.ts';
@@ -65,7 +72,7 @@ export default function Home() {
         />
       )}
 
-      <Welcome />
+      <Readiness />
 
       {isSample && (
         <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
@@ -229,40 +236,86 @@ export default function Home() {
   );
 }
 
-/** The first thing on the screen, and the reason the screen is not a list of
- *  records. Someone opening this has just remembered they are leaving in an hour;
- *  being greeted rather than queried is most of the difference. */
-function Welcome() {
-  const { household } = useAppState();
-  // The greeting depends on the clock, which the server does not share, so it waits
-  // for the client rather than rendering a guess and correcting it.
-  const [greeting, setGreeting] = useState<string | null>(null);
-  useEffect(() => {
-    const h = new Date().getHours();
-    setGreeting(h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
-  }, []);
+/** Lead with coverage of the latest guide — gaps as chips, not validation errors. */
+function Readiness() {
+  const { household, handovers } = useAppState();
+  const guides = handovers.filter((h) => h.householdId === household.id);
+  const latest = guides[0] ?? null;
 
-  // "Léa, Pomme and The flat" reads as a typo. A place is usually named with its
-  // article, which is right as a title and wrong halfway through a sentence.
-  const names = household.subjects
-    .map((s) => s.name)
-    .filter(Boolean)
-    .map((name, i) => (i === 0 ? name : name.replace(/^(The|Le|La|Les) /, (m) => m.toLowerCase())));
-  const listed =
-    names.length === 0
-      ? null
-      : names.length === 1
-        ? names[0]
-        : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  const draft: Handover = useMemo(
+    () => ({
+      id: 'draft',
+      householdId: household.id,
+      caregiverName: '',
+      caregiverRelationship: '',
+      scenario: 'weekend',
+      duration: durationFromScenario('weekend'),
+      expectation: DEFAULT_EXPECTATION.weekend,
+      language: 'en',
+      subjectIds: [],
+      importantNotes: [],
+      extra: '',
+      signOff: '',
+      tripId: null,
+    }),
+    [household.id],
+  );
+
+  const coverage = guideCoverage(household, latest ?? draft);
+  const remaining = coverage.total - coverage.covered;
+
+  if (household.subjects.length === 0 || coverage.total === 0) {
+    return (
+      <section className="welcome">
+        <p>
+          Everything you&apos;d put in a long text message on the way out of the door. Written once,
+          so it&apos;s still there on Thursday.
+        </p>
+      </section>
+    );
+  }
+
+  function gapHref(gap: string): string {
+    if (gap === 'No emergency number' || gap === 'Country blank' || gap === 'Bedtime blank') {
+      return '/household';
+    }
+    if (gap === 'Caregiver name blank') {
+      return latest ? `/guide/${latest.id}` : '/guide/new';
+    }
+    const name = gap.split(':')[0]?.trim();
+    const subject = household.subjects.find((s) => s.name === name);
+    return subject ? `/subjects/${subject.id}` : '/household';
+  }
 
   return (
-    <section className="welcome">
-      {greeting ? <h2 className="display">{greeting}.</h2> : null}
-      <p>
-        {listed
-          ? `Everything about ${listed}, written once, so it is still there on Thursday.`
-          : "Everything you'd put in a long text message on the way out of the door. Written once, so it's still there on Thursday."}
-      </p>
+    <section className="welcome readiness">
+      <h2 className="display">
+        {coverage.covered} of {coverage.total} things covered
+      </h2>
+      {coverage.gaps.length > 0 ? (
+        <div className="readiness-gaps">
+          {coverage.gaps.map((gap) => (
+            <Link key={gap} href={gapHref(gap)} className="readiness-chip">
+              {gap}
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="muted">Ready to send.</p>
+      )}
+      <div className="row" style={{ gap: 'var(--space-2)', marginTop: 'var(--space-4)' }}>
+        {remaining > 0 ? (
+          <Link href={gapHref(coverage.gaps[0]!)} className="btn">
+            Fill the {remaining} gap{remaining === 1 ? '' : 's'}
+          </Link>
+        ) : null}
+        <Link
+          href={latest ? `/guide/${latest.id}` : '/guide/new'}
+          className={remaining > 0 ? 'btn btn-secondary' : 'btn'}
+        >
+          Send
+        </Link>
+      </div>
     </section>
   );
 }

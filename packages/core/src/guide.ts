@@ -354,3 +354,50 @@ export function criticalBlocks(document: GuideDocument): readonly GuideBlock[] {
 export function guideMedia(document: GuideDocument): readonly Media[] {
   return document.blocks.flatMap((b) => b.media);
 }
+
+/** How complete a handover is before sending — gaps are short phrases for chips.
+ *
+ *  Reuses the same subject scoping and routine filtering as `buildVerifiedGuide`,
+ *  without calling it (that throws when unsafe; coverage must always return).
+ */
+export function guideCoverage(
+  household: Household,
+  handover: Handover,
+): { covered: number; total: number; gaps: readonly string[] } {
+  const subjects = subjectsFor(household, handover);
+  const routine = scopeRoutine(household.routine, handover.duration, subjects);
+  const gaps: string[] = [];
+  let covered = 0;
+  let total = 0;
+
+  const tick = (ok: boolean, gap: string) => {
+    total += 1;
+    if (ok) covered += 1;
+    else gaps.push(gap);
+  };
+
+  tick(household.contacts.some((c) => hasText(c.phone)), 'No emergency number');
+  tick(Boolean(household.country.trim()), 'Country blank');
+
+  for (const subject of subjects) {
+    if (subject.kind === 'child' || subject.kind === 'pet') {
+      // Same fields `assertSafeToRender` insists appear once recorded — here we ask
+      // whether they have been recorded at all.
+      tick(Boolean(allergyText(subject)), `${subject.name}: allergies blank`);
+      tick(Boolean(emergencyText(subject)), `${subject.name}: emergency blank`);
+    }
+    if (subject.kind === 'child') {
+      const bedtime = routine.some(
+        (r) =>
+          r.kind === 'Bedtime' &&
+          (r.appliesTo === subject.id || r.appliesTo === 'all') &&
+          (Boolean(r.time) || hasText(r.notes)),
+      );
+      tick(bedtime, 'Bedtime blank');
+    }
+  }
+
+  tick(Boolean(handover.caregiverName.trim()), 'Caregiver name blank');
+
+  return { covered, total, gaps };
+}

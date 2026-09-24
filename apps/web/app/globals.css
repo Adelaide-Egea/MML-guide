@@ -573,6 +573,30 @@ a.routine-item {
   line-height: 1.55;
 }
 
+.readiness-gaps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.readiness-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunk);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.readiness-chip:hover {
+  background: var(--brand-tint);
+}
+
 .crown {
   display: flex;
   align-items: center;
