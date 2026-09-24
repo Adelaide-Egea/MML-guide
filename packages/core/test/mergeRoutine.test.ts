@@ -3,14 +3,19 @@ import { test } from 'node:test';
 import { mergeRoutineRows, type RoutineItem } from '../src/household.ts';
 
 function item(partial: Partial<RoutineItem> & Pick<RoutineItem, 'id' | 'kind' | 'appliesTo'>): RoutineItem {
-  return {
+  const base: RoutineItem = {
+    id: partial.id,
     time: partial.time ?? null,
+    kind: partial.kind,
+    appliesTo: partial.appliesTo,
     notes: partial.notes ?? '',
-    label: partial.label,
-    section: partial.section,
-    priority: partial.priority,
-    product: partial.product,
-    ...partial,
+  };
+  return {
+    ...base,
+    ...(partial.label !== undefined ? { label: partial.label } : {}),
+    ...(partial.section !== undefined ? { section: partial.section } : {}),
+    ...(partial.priority !== undefined ? { priority: partial.priority } : {}),
+    ...(partial.product !== undefined ? { product: partial.product } : {}),
   };
 }
 
