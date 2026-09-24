@@ -216,7 +216,7 @@ export default function Home() {
 
       {empty && !sampleId && (
         <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
-          Write it once. She can ask it the rest.
+          Write it once. They can ask it the rest.
           <br />
           Want to look around first?{' '}
           <button
@@ -269,7 +269,7 @@ function Readiness() {
       <section className="welcome">
         <p>
           Everything you&apos;d put in a long text message on the way out of the door. Written once,
-          so it&apos;s still there on Thursday.
+          so it&apos;s still there when you need it.
         </p>
       </section>
     );
