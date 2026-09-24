@@ -1,22 +1,14 @@
 // Languages offered for the caregiver / cleaner view of a guide.
 //
-// Official statistics for domestic work are thin (ONS and equivalents often cannot
-// publish language-by-occupation estimates), so this list combines what is published
-// with what researchers and community organisations consistently report for UK and
-// French households — including large undeclared or grey-market groups.
+// Only languages with *complete* on-screen chrome are listed. Offering Tagalog
+// (or Spanish, etc.) while buttons, routine kinds and the Call bar stay English
+// is worse than a short list — it looks broken on the most important lines.
 //
-// Sources informing the set (not a ranking):
-// - UK Rights Lab / Voice of Domestic Workers (2023): Filipino / Tagalog dominant on
-//   Overseas Domestic Worker visas (~55%); survey circulated in EN, ES, PT, TL.
-// - LAWRS and UK Latin American domestic-work research: Spanish and Brazilian /
-//   Portuguese speakers are widely present, often undeclared.
-// - France FEPEM / Observatoire de l'emploi à domicile: Portuguese-born workers ~23%
-//   of immigrant domestic employees; Maghreb (Arabic / French) also large.
-// - Common EU cleaner / nanny corridors: Polish, Romanian.
+// Safety facts and parent-written notes stay in the parent's words in every
+// language. Ask still answers in the selected language via the model.
 //
-// English and French stay first as the household writing languages for Domela's
-// launch markets. The caregiver can toggle into their own language for Ask and for
-// on-screen chrome; safety-critical facts stay in the parent's words.
+// Incomplete chrome packs (pt, es, tl, ar, pl, ro, it) remain in chrome.ts for
+// Ask / future use, but are not offered in the toggle until they are finished.
 
 export interface CareLanguage {
   /** BCP-47 tag stored on the handover. */
@@ -27,9 +19,17 @@ export interface CareLanguage {
   readonly reason: string;
 }
 
+/** Languages the caregiver can pick today — chrome is complete for these. */
 export const CARE_LANGUAGES: readonly CareLanguage[] = [
   { tag: 'en', label: 'English', reason: 'Household writing language (UK / international).' },
   { tag: 'fr', label: 'Français', reason: 'Household writing language (France).' },
+];
+
+/**
+ * Planned caregiver languages — not in the toggle until chrome (routine kinds,
+ * Call, Ask placeholders, greetings) is fully translated.
+ */
+export const FUTURE_CARE_LANGUAGES: readonly CareLanguage[] = [
   {
     tag: 'pt-BR',
     label: 'Português (Brasil)',
@@ -72,7 +72,7 @@ export const CARE_LANGUAGES: readonly CareLanguage[] = [
   },
 ];
 
-/** Resolve a stored or navigator tag to the closest offered language. */
+/** Resolve a stored or navigator tag to an offered language (en or fr). */
 export function matchCareLanguage(tag: string): CareLanguage {
   const lower = tag.trim().toLowerCase();
   const exact = CARE_LANGUAGES.find((l) => l.tag.toLowerCase() === lower);

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { chromeFor, localizeGuideHeading } from '../src/chrome.ts';
+import { chromeFor, localizeExpectation, localizeGuideHeading } from '../src/chrome.ts';
+import { CARE_LANGUAGES, FUTURE_CARE_LANGUAGES, matchCareLanguage } from '../src/languages.ts';
 
 test('chromeFor returns French UI chrome for fr', () => {
   const chrome = chromeFor('fr');
@@ -19,6 +20,9 @@ test('chromeFor returns French UI chrome for fr', () => {
   assert.equal(chrome.inAnEmergency, 'en cas d’urgence');
   assert.equal(chrome.entryTitles.Screens, 'Écrans');
   assert.equal(chrome.entryTitles.Potty, 'Pot');
+  assert.equal(chrome.callName('Adelaide'), 'Appeler Adelaide');
+  assert.match(chrome.expectationEvening, /endormis/);
+  assert.match(chrome.factsAsWritten, /non traduit/i);
 });
 
 test('localizeGuideHeading remaps known English titles for French', () => {
@@ -28,6 +32,27 @@ test('localizeGuideHeading remaps known English titles for French', () => {
   assert.equal(localizeGuideHeading('Elise — Screens', chrome), 'Elise — Écrans');
   assert.equal(localizeGuideHeading('Quiet time', chrome), 'Quiet time');
   assert.equal(localizeGuideHeading('Who to call', chrome), 'Qui appeler');
+});
+
+test('localizeExpectation remaps stock English blurbs only', () => {
+  const chrome = chromeFor('fr');
+  const en = chromeFor('en');
+  assert.equal(localizeExpectation(en.expectationEvening, chrome), chrome.expectationEvening);
+  assert.equal(
+    localizeExpectation('Please water the plants.', chrome),
+    'Please water the plants.',
+  );
+});
+
+test('only English and French are offered in the caregiver toggle', () => {
+  assert.deepEqual(
+    CARE_LANGUAGES.map((l) => l.tag),
+    ['en', 'fr'],
+  );
+  assert.ok(FUTURE_CARE_LANGUAGES.some((l) => l.tag === 'tl'));
+  assert.equal(matchCareLanguage('tl').tag, 'en');
+  assert.equal(matchCareLanguage('fr-FR').tag, 'fr');
+  assert.equal(chromeFor('tl').everyone, 'Everyone');
 });
 
 test('chromeFor falls back to English for unknown tags', () => {
