@@ -14,6 +14,7 @@ import {
   buildVerifiedGuide,
   chromeFor,
   localizeGuideHeading,
+  mergeRoutineRows,
   normalizeHandover,
   packingProgress,
   routineItemLabel,
@@ -565,37 +566,51 @@ function Timeline({
     );
   }
 
-  const timed = items
-    .map((item) => ({ item, mins: parseTime(item.time) }))
+  const timed = mergeRoutineRows(items)
+    .map((row) => ({ ...row, mins: parseTime(row.item.time) }))
     .sort((a, b) => (a.mins ?? 9999) - (b.mins ?? 9999));
 
-  let nowIndex = -1;
-  for (let i = 0; i < timed.length; i += 1) {
-    const mins = timed[i]?.mins ?? null;
-    if (mins === null) continue;
-    if (mins <= nowMinutes) nowIndex = i;
+  // Highlight every row at the current clock slot — two 10:00 snacks (before merge)
+  // or two different kinds at the same minute must both read as "now", not only the
+  // last one in the list. Different bedtimes still take turns as the clock moves.
+  let nowMins: number | null = null;
+  for (const row of timed) {
+    if (row.mins === null) continue;
+    if (row.mins <= nowMinutes) nowMins = row.mins;
   }
-  // If everything is still ahead, highlight the first timed row.
-  if (nowIndex < 0) {
-    nowIndex = timed.findIndex((t) => t.mins !== null);
+  if (nowMins === null) {
+    nowMins = timed.find((t) => t.mins !== null)?.mins ?? null;
   }
 
   return (
     <section className="hotel-timeline" aria-label={chrome.aTypicalDay}>
-      {timed.map(({ item, mins }, index) => {
-        const who = subjects.find((s) => s.id === item.appliesTo);
+      {timed.map(({ item, mins, appliesToIds }) => {
+        const names =
+          focus === 'all' && !appliesToIds.includes('all')
+            ? appliesToIds
+                .map((id) => subjects.find((s) => s.id === id)?.name)
+                .filter((n): n is string => Boolean(n))
+            : [];
         const state =
-          mins === null ? 'future' : index < nowIndex ? 'past' : index === nowIndex ? 'now' : 'future';
+          mins === null
+            ? 'future'
+            : nowMins !== null && mins < nowMins
+              ? 'past'
+              : nowMins !== null && mins === nowMins
+                ? 'now'
+                : 'future';
         const showDetail = state === 'now' || Boolean(item.notes) || Boolean(item.product);
         return (
-          <div key={item.id} className={`hotel-row hotel-row-${state}`}>
+          <div key={appliesToIds.join('-') + ':' + item.id} className={`hotel-row hotel-row-${state}`}>
             <span className="hotel-time">
               {item.time ??
                 (item.priority === 'nice' ? chrome.nice : item.priority === 'must' ? chrome.must : '—')}
             </span>
             <div className="hotel-row-body">
               <strong>{routineItemLabel(item, chrome.routineKinds)}</strong>
-              {who && focus === 'all' && <span className="hotel-detail">{chrome.forName(who.name)}</span>}
+              {names.length > 0 && (
+                <span className="hotel-detail">{chrome.forNames(names)}</span>
+              )}
               {showDetail && item.product && (
                 <span className="hotel-detail">{chrome.useProduct(item.product)}</span>
               )}

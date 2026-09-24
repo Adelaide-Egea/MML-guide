@@ -11,6 +11,7 @@ import {
   buildVerifiedGuide,
   chromeFor,
   localizeGuideHeading,
+  mergeRoutineRows,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -266,11 +267,16 @@ export default function GuidePage() {
                   : chrome.aTypicalDay}
             </span>
           </div>
-          {routine.map((item) => {
-            const who = subjects.find((s) => s.id === item.appliesTo);
+          {mergeRoutineRows(routine).map(({ item, appliesToIds }) => {
+            const names =
+              focus === 'all' && !appliesToIds.includes('all')
+                ? appliesToIds
+                    .map((id) => subjects.find((s) => s.id === id)?.name)
+                    .filter((n): n is string => Boolean(n))
+                : [];
             const title = routineItemLabel(item, chrome.routineKinds);
             return (
-              <div key={item.id} className="routine-item">
+              <div key={appliesToIds.join('-') + ':' + item.id} className="routine-item">
                 <span className="routine-time">
                   {item.time ??
                     (item.priority === 'nice'
@@ -286,9 +292,9 @@ export default function GuidePage() {
                       {item.section}
                     </span>
                   )}
-                  {who && focus === 'all' && (
+                  {names.length > 0 && (
                     <span className="muted" style={{ display: 'block' }}>
-                      {chrome.forName(who.name)}
+                      {chrome.forNames(names)}
                     </span>
                   )}
                   {item.product && (
