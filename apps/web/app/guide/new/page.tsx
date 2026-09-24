@@ -1,27 +1,34 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   DEFAULT_EXPECTATION,
+  chromeFor,
   createTrip,
   durationFromScenario,
+  guideCoverage,
   type Handover,
   type Scenario,
+  SCENARIOS,
 } from '@mml/core';
-import { Badge, TopBar } from '../../../components/Chrome.tsx';
+import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { newId } from '../../../lib/ids.ts';
-import { KIND_LABEL, useActions, useAppState } from '../../../lib/store.ts';
+import { useActions, useAppState } from '../../../lib/store.ts';
 
-const SCENARIO_OPTIONS: readonly { id: Scenario; label: string; hint: string }[] = [
-  { id: 'evening', label: 'Evening sitter', hint: 'After dinner or at bedtime' },
-  { id: 'fullday', label: 'Full day', hint: 'Meals, nap and pickup' },
-  { id: 'weekend', label: 'Weekend', hint: 'A few days in this house' },
-  { id: 'cleaner', label: 'Cleaner', hint: 'The house, room by room' },
-  { id: 'petsitter', label: 'Pet sitter', hint: 'Animals only' },
-  { id: 'goingtoyours', label: 'Going to yours', hint: 'Children travel to the caregiver' },
-];
+const SCENARIO_CARD: Record<
+  Scenario,
+  { label: string; icon: string; hint: string }
+> = {
+  evening: { label: 'Evening sitter', icon: '☽', hint: 'After dinner or bedtime' },
+  fullday: { label: 'Full day', icon: '☀', hint: 'Meals, nap and pickup' },
+  weekend: { label: 'Weekend', icon: '⌂', hint: 'A few days in this house' },
+  cleaner: { label: 'Cleaner', icon: '◇', hint: 'Room by room' },
+  petsitter: { label: 'Pet sitter', icon: '△', hint: 'Animals only' },
+  goingtoyours: { label: 'Going to yours', icon: '→', hint: 'They travel to the caregiver' },
+};
 
 function todayISO(): string {
   const d = new Date();
@@ -35,30 +42,80 @@ function addDaysISO(start: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** Who this scenario is about — chosen by the visit kind, not a multi-select. */
+function subjectIdsForScenario(
+  subjects: readonly { id: string; kind: string }[],
+  scenario: Scenario,
+): readonly string[] {
+  switch (scenario) {
+    case 'cleaner':
+      return subjects.filter((s) => s.kind === 'place').map((s) => s.id);
+    case 'petsitter':
+      return subjects.filter((s) => s.kind === 'pet').map((s) => s.id);
+    case 'goingtoyours':
+      return subjects.filter((s) => s.kind !== 'place').map((s) => s.id);
+    case 'evening':
+    case 'fullday':
+    case 'weekend':
+      return subjects.filter((s) => s.kind === 'child').map((s) => s.id);
+  }
+}
+
+function photoCountIn(subjects: readonly { entries: readonly { media: readonly unknown[] }[] }[]): number {
+  let n = 0;
+  for (const subject of subjects) {
+    for (const entry of subject.entries) n += entry.media.length;
+  }
+  return n;
+}
+
 export default function NewGuide() {
   const router = useRouter();
   const { household } = useAppState();
   const actions = useActions();
+  const chrome = chromeFor('en');
 
+  const [scenario, setScenario] = useState<Scenario | null>(null);
   const [caregiverName, setCaregiverName] = useState('');
-  const [caregiverRelationship, setRelationship] = useState('');
-  const [scenario, setScenario] = useState<Scenario>('weekend');
-  const [subjectIds, setSubjectIds] = useState<readonly string[]>([]);
-  const [note, setNote] = useState('');
   const [language, setLanguage] = useState(
     typeof navigator === 'undefined' ? 'en' : navigator.language,
   );
 
-  function toggle(id: string) {
-    setSubjectIds((ids) => (ids.includes(id) ? ids.filter((s) => s !== id) : [...ids, id]));
-  }
+  const subjectIds = useMemo(
+    () => (scenario ? subjectIdsForScenario(household.subjects, scenario) : []),
+    [household.subjects, scenario],
+  );
 
-  function create(event: React.FormEvent) {
-    event.preventDefault();
-    const travellers =
-      subjectIds.length > 0
-        ? subjectIds
-        : household.subjects.filter((s) => s.kind !== 'place').map((s) => s.id);
+  const previewHandover: Handover | null = useMemo(() => {
+    if (!scenario) return null;
+    return {
+      id: 'preview',
+      householdId: household.id,
+      caregiverName: caregiverName.trim() || 'there',
+      caregiverRelationship: '',
+      scenario,
+      duration: durationFromScenario(scenario),
+      expectation: DEFAULT_EXPECTATION[scenario],
+      language,
+      subjectIds,
+      importantNotes: [],
+      extra: '',
+      signOff: '',
+      tripId: null,
+    };
+  }, [scenario, household.id, caregiverName, language, subjectIds]);
+
+  const coverage = previewHandover
+    ? guideCoverage(household, previewHandover)
+    : { covered: 0, total: 0, gaps: [] as readonly string[] };
+  const photos = photoCountIn(
+    household.subjects.filter((s) => subjectIds.length === 0 || subjectIds.includes(s.id)),
+  );
+
+  function create() {
+    if (!scenario || !previewHandover) return;
+    if (subjectIds.length === 0) return;
+
     let tripId: string | null = null;
     if (scenario === 'goingtoyours') {
       const start = todayISO();
@@ -66,7 +123,7 @@ export default function NewGuide() {
       const trip = createTrip({
         household,
         householdId: household.id,
-        travellerIds: travellers,
+        travellerIds: subjectIds,
         startDate: start,
         endDate: end,
         mode: 'car',
@@ -81,30 +138,118 @@ export default function NewGuide() {
       actions.saveTrip(trip);
       tripId = trip.id;
     }
+
     const handover: Handover = {
+      ...previewHandover,
       id: newId('ho'),
-      householdId: household.id,
       caregiverName: caregiverName.trim(),
-      caregiverRelationship: caregiverRelationship.trim(),
-      scenario,
-      duration: durationFromScenario(scenario),
-      expectation: DEFAULT_EXPECTATION[scenario],
-      language,
-      subjectIds: subjectIds.length === household.subjects.length ? [] : subjectIds,
-      importantNotes: note.trim() ? [note.trim()] : [],
-      extra: '',
-      signOff: '',
       tripId,
     };
     actions.saveHandover(handover);
     router.push(`/guide/${handover.id}`);
   }
 
+  if (!scenario) {
+    return (
+      <main className="shell">
+        <TopBar title="New guide" back="/" />
+        <h2 className="display" style={{ marginBottom: 'var(--space-2)' }}>
+          What kind of visit?
+        </h2>
+        <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
+          One choice. The guide follows from there.
+        </p>
+        <div className="scenario-grid">
+          {SCENARIOS.map((id) => {
+            const card = SCENARIO_CARD[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                className="scenario-card"
+                onClick={() => setScenario(id)}
+              >
+                <span className="scenario-card-icon" aria-hidden="true">
+                  {card.icon}
+                </span>
+                <strong>{card.label}</strong>
+                <span className="muted">{card.hint}</span>
+              </button>
+            );
+          })}
+        </div>
+      </main>
+    );
+  }
+
+  const card = SCENARIO_CARD[scenario];
+  const chipLabel =
+    scenario === 'evening'
+      ? chrome.scenarioEvening
+      : scenario === 'fullday'
+        ? chrome.scenarioFullDay
+        : scenario === 'cleaner'
+          ? chrome.scenarioCleaner
+          : scenario === 'petsitter'
+            ? chrome.scenarioPetSitter
+            : scenario === 'goingtoyours'
+              ? chrome.scenarioGoingToYours
+              : chrome.scenarioWeekend;
+
   return (
     <main className="shell">
       <TopBar title="New guide" back="/" />
 
-      <form className="stack" onSubmit={create}>
+      <button
+        type="button"
+        className="btn btn-quiet btn-inline"
+        style={{ marginBottom: 'var(--space-4)', textDecoration: 'underline' }}
+        onClick={() => setScenario(null)}
+      >
+        Change visit kind
+      </button>
+
+      <section className="hotel-preview card stack" style={{ marginBottom: 'var(--space-5)' }}>
+        <span className="hotel-scenario" style={{ background: 'var(--surface-sunk)', alignSelf: 'flex-start' }}>
+          {chipLabel}
+        </span>
+        <h2 className="display" style={{ fontSize: 'var(--text-xl)' }}>
+          {chrome.helloName(caregiverName.trim() || 'there')}
+        </h2>
+        <p className="hotel-shape">{DEFAULT_EXPECTATION[scenario]}</p>
+        <p className="muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {coverage.total} thing{coverage.total === 1 ? '' : 's'}, {photos} photo
+          {photos === 1 ? '' : 's'}
+        </p>
+        {coverage.gaps.length > 0 ? (
+          <div className="readiness-gaps">
+            {coverage.gaps.map((gap) => {
+              const subject = household.subjects.find((s) => gap.startsWith(`${s.name}:`));
+              const href =
+                gap === 'Caregiver name blank'
+                  ? '#who'
+                  : subject
+                    ? `/subjects/${subject.id}`
+                    : '/household';
+              return (
+                <Link key={gap} href={href} className="readiness-chip">
+                  {gap}
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="muted">Ready to send once you name who it is for.</p>
+        )}
+      </section>
+
+      <form
+        className="stack"
+        onSubmit={(e) => {
+          e.preventDefault();
+          create();
+        }}
+      >
         <div className="field">
           <label htmlFor="who">Who is this for?</label>
           <input
@@ -115,87 +260,16 @@ export default function NewGuide() {
             placeholder="Margaret"
             autoFocus
           />
-        </div>
-
-        <div className="field">
-          <label htmlFor="rel">What are they to you?</label>
-          <input
-            id="rel"
-            className="input"
-            value={caregiverRelationship}
-            onChange={(e) => setRelationship(e.target.value)}
-            placeholder="Grandparent, nanny, cleaner, neighbour"
-          />
-        </div>
-
-        <div className="field">
-          <label>What kind of visit?</label>
-          <div className="chips">
-            {SCENARIO_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                className="chip"
-                aria-pressed={scenario === option.id}
-                onClick={() => setScenario(option.id)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <span className="hint">{SCENARIO_OPTIONS.find((d) => d.id === scenario)?.hint}</span>
-          <span className="hint" style={{ display: 'block', marginTop: 'var(--space-2)' }}>
-            {DEFAULT_EXPECTATION[scenario]}
-          </span>
-        </div>
-
-        <div className="field">
-          <label>What are they looking after?</label>
           <span className="hint">
-            Only what you tick is shared. Someone coming to water the plants does not need to read
-            a child&apos;s medical notes.
+            {card.label}: looking after{' '}
+            {subjectIds.length === 0
+              ? 'nobody yet — add someone who matches this visit'
+              : household.subjects
+                  .filter((s) => subjectIds.includes(s.id))
+                  .map((s) => s.name)
+                  .join(', ')}
+            .
           </span>
-          <div className="stack-tight">
-            {household.subjects.map((subject) => {
-              const on = subjectIds.includes(subject.id);
-              return (
-                <button
-                  key={subject.id}
-                  type="button"
-                  className="card row"
-                  aria-pressed={on}
-                  onClick={() => toggle(subject.id)}
-                  style={{
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    borderColor: on ? 'var(--brand)' : 'var(--hairline)',
-                    background: on ? 'var(--brand-tint)' : 'var(--surface)',
-                  }}
-                >
-                  <Badge subject={subject} size={32} />
-                  <span className="grow">
-                    <strong>{subject.name}</strong>
-                    <span className="muted" style={{ display: 'block' }}>
-                      {KIND_LABEL[subject.kind]}
-                    </span>
-                  </span>
-                  <span aria-hidden="true">{on ? '✓' : ''}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="field">
-          <label htmlFor="note">Anything they must not miss?</label>
-          <span className="hint">Goes at the very top, word for word.</span>
-          <textarea
-            id="note"
-            className="textarea"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="We land back on Sunday at 18:40."
-          />
         </div>
 
         <div className="field">
@@ -208,7 +282,8 @@ export default function NewGuide() {
         </button>
         {subjectIds.length === 0 && (
           <p className="hint" style={{ textAlign: 'center' }}>
-            Pick at least one thing they are looking after.
+            Add a {scenario === 'cleaner' ? 'place' : scenario === 'petsitter' ? 'pet' : 'child'} to
+            this household first.
           </p>
         )}
       </form>

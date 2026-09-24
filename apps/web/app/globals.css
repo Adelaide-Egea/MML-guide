@@ -597,6 +597,50 @@ a.routine-item {
   background: var(--brand-tint);
 }
 
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.scenario-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 112px;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  background: var(--surface-warm);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.scenario-card:hover,
+.scenario-card:focus-visible {
+  border-color: var(--brand-deep);
+  background: var(--brand-tint);
+}
+
+.scenario-card-icon {
+  font-size: var(--text-lg);
+  line-height: 1;
+  color: var(--brand-deep);
+  margin-bottom: var(--space-1);
+}
+
+.scenario-card strong {
+  font-weight: 500;
+  font-size: var(--text-base);
+}
+
+.hotel-preview .hotel-shape {
+  max-width: none;
+}
+
 .crown {
   display: flex;
   align-items: center;
