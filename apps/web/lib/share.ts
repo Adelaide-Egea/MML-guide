@@ -8,8 +8,8 @@
 // consents, photo bytes are compressed and included — anyone with the link can
 // then see them.
 
-import type { Handover, Household, Media } from '@mml/core';
-import { normalizeHandover, subjectsFor } from '@mml/core';
+import type { Handover, Household, Media, Trip } from '@mml/core';
+import { normalizeHandover, normalizeTrip, subjectsFor } from '@mml/core';
 import { getBlob, putBlob } from './media.ts';
 
 /** Practical ceiling for a shareable fragment. Beyond this, most messengers and
@@ -27,6 +27,8 @@ export interface GuideSnapshot {
   readonly v: 1 | 2;
   readonly household: Household;
   readonly handover: Handover;
+  /** Packing list for goingtoyours (and any handover that links a trip). */
+  readonly trip?: Trip | null;
   /** Present only when the parent consented to include photos. Keyed by Media.key. */
   readonly mediaBlobs?: Readonly<Record<string, EmbeddedBlob>>;
 }
@@ -34,6 +36,8 @@ export interface GuideSnapshot {
 export interface ShareOptions {
   /** When true, photo blobs are embedded in the link. Default false. */
   readonly includePhotos?: boolean;
+  /** Trip to embed when the handover is a packing visit. */
+  readonly trip?: Trip | null;
 }
 
 export type ShareBuildResult =
@@ -87,6 +91,7 @@ export function snapshotForShare(
       ),
     },
     handover: normalized,
+    trip: opts.trip ? normalizeTrip(opts.trip) : null,
   };
 }
 
@@ -155,6 +160,7 @@ export async function decodeSnapshot(payload: string): Promise<GuideSnapshot | n
     return {
       ...parsed,
       handover: normalizeHandover(parsed.handover),
+      trip: parsed.trip ? normalizeTrip(parsed.trip) : parsed.trip ?? null,
     };
   } catch {
     return null;
@@ -259,7 +265,10 @@ export async function buildShareUrl(
   opts: ShareOptions = {},
 ): Promise<ShareBuildResult> {
   const includePhotos = opts.includePhotos === true;
-  let snapshot = snapshotForShare(household, handover, { includePhotos });
+  let snapshot = snapshotForShare(household, handover, {
+    includePhotos,
+    trip: opts.trip ?? null,
+  });
   let photoCount = 0;
   let omittedVideos = 0;
 

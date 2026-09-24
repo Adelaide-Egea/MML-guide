@@ -23,6 +23,7 @@ import {
   EMPTY_SAFETY,
   instantiatePreset,
   normalizeHandover,
+  normalizeTrip,
   presetFromRoutine,
 } from '@mml/core';
 import { useCallback, useSyncExternalStore } from 'react';
@@ -123,6 +124,7 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
   const handovers = (parsed.handovers ?? defaults.handovers).map((h) =>
     normalizeHandover(h as Handover),
   );
+  const trips = (parsed.trips ?? defaults.trips).map((t) => normalizeTrip(t as Trip));
 
   if (parsed.households && parsed.households.length > 0) {
     const households = parsed.households;
@@ -134,7 +136,7 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
       households,
       activeId,
       handovers,
-      trips: parsed.trips ?? defaults.trips,
+      trips,
       presets: parsed.presets ?? defaults.presets,
       sampleId:
         parsed.sampleId === undefined
@@ -149,7 +151,7 @@ export function migrate(parsed: Partial<Stored> & StoredV1): Stored {
     households: [household],
     activeId: household.id,
     handovers: (parsed.handovers ?? []).map((h) => normalizeHandover(h as Handover)),
-    trips: parsed.trips ?? [],
+    trips: (parsed.trips ?? []).map((t) => normalizeTrip(t as Trip)),
     presets: parsed.presets ?? [],
     sampleId: parsed.sample ? household.id : parsed.sampleId ?? null,
   };

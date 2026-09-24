@@ -27,7 +27,7 @@ type Focus = 'all' | string;
 
 export default function GuidePage() {
   const { id } = useParams<{ id: string }>();
-  const { households, household: active, handovers } = useAppState();
+  const { households, household: active, handovers, trips } = useAppState();
   const [focus, setFocus] = useState<Focus>('all');
   const [acknowledged, setAcknowledged] = useState(false);
   const [shareState, setShareState] = useState<
@@ -153,7 +153,13 @@ export default function GuidePage() {
                 setShareState('working');
                 setShareNote(null);
                 try {
-                  const result = await buildShareUrl(household, handover, { includePhotos });
+                  const trip = handover.tripId
+                    ? trips.find((t) => t.id === handover.tripId) ?? null
+                    : null;
+                  const result = await buildShareUrl(household, handover, {
+                    includePhotos,
+                    trip,
+                  });
                   if (!result.ok) {
                     setShareState('too-large');
                     setShareNote(

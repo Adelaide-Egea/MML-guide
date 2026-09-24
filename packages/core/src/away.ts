@@ -88,6 +88,10 @@ export interface PackItem {
   readonly packed: boolean;
   readonly notes: string;
   readonly leg: PackLeg;
+  /** Must come back with the children — shown on the return list. */
+  readonly comesHome: boolean;
+  /** Free-text bag group, e.g. "Léa's bag", "Shared". */
+  readonly bag: string;
 }
 
 /** A stretch of the journey. v0 usually has one leg; the shape is ready for multi-leg. */
@@ -121,8 +125,42 @@ export interface Trip {
   readonly legs: readonly TripLeg[];
   readonly items: readonly PackItem[];
   readonly notes: string;
+  /** ISO date when the return list becomes the default view. */
+  readonly returnsOn: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+}
+
+/** Lift older pack rows that predate bag / comesHome. */
+export function normalizePackItem(raw: Partial<PackItem> & Pick<PackItem, 'id' | 'label'>): PackItem {
+  const leg: PackLeg = raw.leg === 'return' ? 'return' : 'outbound';
+  const category = (PACK_CATEGORIES as readonly string[]).includes(raw.category as string)
+    ? (raw.category as PackCategory)
+    : 'other';
+  return {
+    id: raw.id,
+    label: raw.label,
+    category,
+    forSubjectIds: raw.forSubjectIds ?? [],
+    qty: typeof raw.qty === 'number' && raw.qty > 0 ? raw.qty : 1,
+    packed: Boolean(raw.packed),
+    notes: raw.notes ?? '',
+    leg,
+    comesHome:
+      typeof raw.comesHome === 'boolean'
+        ? raw.comesHome
+        : leg === 'return' || category === 'home-return',
+    bag: typeof raw.bag === 'string' && raw.bag.trim() ? raw.bag.trim() : 'Shared',
+  };
+}
+
+/** Lift older trips that predate returnsOn / pack bag fields. */
+export function normalizeTrip(raw: Trip): Trip {
+  return {
+    ...raw,
+    returnsOn: raw.returnsOn ?? raw.endDate ?? null,
+    items: (raw.items ?? []).map((item) => normalizePackItem(item)),
+  };
 }
 
 export interface PackingBuildInput {
@@ -665,16 +703,24 @@ export function buildPackingList(input: PackingBuildInput): readonly PackItem[] 
     ...returnLeg(travellers),
   ];
 
-  return drafts.map((d) => ({
-    id: id(),
-    label: d.label,
-    category: d.category,
-    forSubjectIds: d.forSubjectIds,
-    qty: d.qty,
-    packed: false,
-    notes: d.notes,
-    leg: d.leg,
-  }));
+  return drafts.map((d) => {
+    const who =
+      d.forSubjectIds.length === 0
+        ? null
+        : travellers.find((s) => s.id === d.forSubjectIds[0]) ?? null;
+    return {
+      id: id(),
+      label: d.label,
+      category: d.category,
+      forSubjectIds: d.forSubjectIds,
+      qty: d.qty,
+      packed: false,
+      notes: d.notes,
+      leg: d.leg,
+      comesHome: d.leg === 'return' || d.category === 'home-return',
+      bag: who ? `${who.name}'s bag` : 'Shared',
+    };
+  });
 }
 
 export function createTrip(
@@ -722,6 +768,7 @@ export function createTrip(
     legs: [leg],
     items: buildPackingList(input),
     notes: input.notes ?? '',
+    returnsOn: input.endDate,
     createdAt: now,
     updatedAt: now,
   };

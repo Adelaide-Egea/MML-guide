@@ -346,6 +346,7 @@ export function normalizeHandover(
     extra: raw.extra ?? '',
     signOff: raw.signOff ?? '',
     expectation,
+    tripId: typeof raw.tripId === 'string' ? raw.tripId : null,
   };
 }
 
@@ -378,6 +379,8 @@ export interface Handover {
   readonly importantNotes: readonly string[];
   readonly extra: string;
   readonly signOff: string;
+  /** Linked Away trip when scenario is goingtoyours. */
+  readonly tripId: string | null;
 }
 
 export function subjectsFor(household: Household, handover: Handover): readonly CareSubject[] {

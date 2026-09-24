@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   DEFAULT_EXPECTATION,
+  createTrip,
   durationFromScenario,
   type Handover,
   type Scenario,
@@ -21,6 +22,18 @@ const SCENARIO_OPTIONS: readonly { id: Scenario; label: string; hint: string }[]
   { id: 'petsitter', label: 'Pet sitter', hint: 'Animals only' },
   { id: 'goingtoyours', label: 'Going to yours', hint: 'Children travel to the caregiver' },
 ];
+
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function addDaysISO(start: string, days: number): string {
+  const [y, m, d] = start.split('-').map(Number) as [number, number, number];
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
 
 export default function NewGuide() {
   const router = useRouter();
@@ -42,6 +55,32 @@ export default function NewGuide() {
 
   function create(event: React.FormEvent) {
     event.preventDefault();
+    const travellers =
+      subjectIds.length > 0
+        ? subjectIds
+        : household.subjects.filter((s) => s.kind !== 'place').map((s) => s.id);
+    let tripId: string | null = null;
+    if (scenario === 'goingtoyours') {
+      const start = todayISO();
+      const end = addDaysISO(start, 2);
+      const trip = createTrip({
+        household,
+        householdId: household.id,
+        travellerIds: travellers,
+        startDate: start,
+        endDate: end,
+        mode: 'car',
+        destinationKind: 'family',
+        destinationLabel: caregiverName.trim() || 'Yours',
+        laundryAccess: true,
+        title: `Going to ${caregiverName.trim() || 'yours'}`,
+        tripId: newId('trip'),
+        legId: newId('leg'),
+        id: () => newId('pack'),
+      });
+      actions.saveTrip(trip);
+      tripId = trip.id;
+    }
     const handover: Handover = {
       id: newId('ho'),
       householdId: household.id,
@@ -51,13 +90,11 @@ export default function NewGuide() {
       duration: durationFromScenario(scenario),
       expectation: DEFAULT_EXPECTATION[scenario],
       language,
-      // Empty means every subject. Selecting a subset is a privacy boundary, not a
-      // convenience: someone coming to clean has no business reading a child's
-      // medical notes.
       subjectIds: subjectIds.length === household.subjects.length ? [] : subjectIds,
       importantNotes: note.trim() ? [note.trim()] : [],
       extra: '',
       signOff: '',
+      tripId,
     };
     actions.saveHandover(handover);
     router.push(`/guide/${handover.id}`);

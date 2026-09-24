@@ -61,6 +61,7 @@ const handover: Handover = {
   importantNotes: [],
   extra: '',
   signOff: '',
+  tripId: null,
 };
 
 describe('snapshotForShare', () => {

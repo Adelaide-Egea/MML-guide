@@ -80,6 +80,7 @@ export function loadSample(): Sample {
     importantNotes: ['We land back on Sunday at 18:40. Call any time before that.'],
     extra: '',
     signOff: 'Thank you — Claire',
+    tripId: null,
   };
 
   const household: Household = {

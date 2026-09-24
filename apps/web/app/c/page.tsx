@@ -7,11 +7,14 @@ import {
   type ChromeCopy,
   type GuideBlock,
   type Handover,
+  type PackItem,
   type RoutineItem,
+  type Trip,
   UnsafeGuideError,
   buildVerifiedGuide,
   chromeFor,
   normalizeHandover,
+  packingProgress,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -19,6 +22,7 @@ import { LanguageToggle } from '../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../components/MediaField.tsx';
 import { identityPair } from '../../lib/identity.ts';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
+import { useActions } from '../../lib/store.ts';
 
 /** Caregiver view — a hotel desk card, not a form.
  *
@@ -32,6 +36,7 @@ export default function CaregiverPage() {
   const [focus, setFocus] = useState<'all' | string>('all');
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [nowMinutes, setNowMinutes] = useState(() => minutesNow());
+  const actions = useActions();
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '');
@@ -159,6 +164,21 @@ export default function CaregiverPage() {
   );
   const primary = subjects.find((s) => s.kind === 'child') ?? subjects[0];
   const tint = primary ? identityPair(primary.identity.colourToken).tint : '--id-dusk';
+  const spine = spineForScenario(handover.scenario);
+  const trip = snapshot?.trip ?? null;
+
+  function togglePacked(itemId: string, packed: boolean) {
+    if (!snapshot?.trip) return;
+    const nextTrip: Trip = {
+      ...snapshot.trip,
+      updatedAt: new Date().toISOString(),
+      items: snapshot.trip.items.map((item) =>
+        item.id === itemId ? { ...item, packed } : item,
+      ),
+    };
+    setSnapshot({ ...snapshot, trip: nextTrip });
+    actions.setPackItemPacked(nextTrip.id, itemId, packed);
+  }
 
   return (
     <main className="shell hotel">
@@ -178,7 +198,7 @@ export default function CaregiverPage() {
         />
       )}
 
-      {subjects.length > 1 && (
+      {subjects.length > 1 && spine !== 'bag' && (
         <div className="hotel-focus">
           <button
             type="button"
@@ -210,7 +230,13 @@ export default function CaregiverPage() {
         </div>
       )}
 
-      {routine.length > 0 && (
+      {spine === 'bag' && trip ? (
+        <PackingPanel trip={trip} onToggle={togglePacked} />
+      ) : spine === 'bag' ? (
+        <p className="muted">No packing list was attached to this guide.</p>
+      ) : null}
+
+      {spine !== 'bag' && routine.length > 0 && (
         <Timeline
           chrome={chrome}
           items={routine}
@@ -218,7 +244,7 @@ export default function CaregiverPage() {
           subjects={subjects}
           focus={focus}
           nowMinutes={nowMinutes}
-          spine={spineForScenario(handover.scenario)}
+          spine={spine}
         />
       )}
 
@@ -370,6 +396,96 @@ function spineForScenario(scenario: Handover['scenario']): 'time' | 'room' | 'ba
   return 'time';
 }
 
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function PackingPanel({
+  trip,
+  onToggle,
+}: {
+  trip: Trip;
+  onToggle: (itemId: string, packed: boolean) => void;
+}) {
+  const returnReady = Boolean(trip.returnsOn && todayISO() >= trip.returnsOn);
+  const [returnList, setReturnList] = useState(returnReady);
+
+  useEffect(() => {
+    setReturnList(returnReady);
+  }, [returnReady, trip.id]);
+
+  const visible = returnList
+    ? trip.items.filter((item) => item.comesHome)
+    : trip.items.filter((item) => item.leg !== 'return' || item.comesHome);
+  const progress = packingProgress(visible);
+  const bags: string[] = [];
+  const byBag = new Map<string, PackItem[]>();
+  for (const item of visible) {
+    const bag = item.bag?.trim() || 'Shared';
+    if (!byBag.has(bag)) {
+      bags.push(bag);
+      byBag.set(bag, []);
+    }
+    byBag.get(bag)!.push(item);
+  }
+  const fill = progress.total === 0 ? 0 : (progress.packed / progress.total) * 100;
+
+  return (
+    <section className="hotel-packing" aria-label={returnList ? 'Before they leave' : 'Packing'}>
+      <div className="hotel-pack-progress">
+        <p className="hotel-pack-count">
+          {progress.packed} of {progress.total} packed
+        </p>
+        <div className="hotel-pack-track" aria-hidden="true">
+          <div className="hotel-pack-fill" style={{ width: `${fill}%` }} />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="btn btn-quiet btn-inline"
+        style={{ marginBottom: 'var(--space-4)', textDecoration: 'underline' }}
+        onClick={() => setReturnList((v) => !v)}
+      >
+        {returnList ? 'Show full list' : 'Before they leave'}
+      </button>
+
+      {returnList ? <h2 className="eyebrow">Before they leave</h2> : null}
+
+      {bags.map((bag) => (
+        <div key={bag} className="hotel-pack-bag">
+          <h3 className="hotel-room-heading">{bag}</h3>
+          <ul className="hotel-pack-list">
+            {(byBag.get(bag) ?? []).map((item) => (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className={`hotel-pack-item${item.packed ? ' is-packed' : ''}`}
+                  onClick={() => onToggle(item.id, !item.packed)}
+                  aria-pressed={item.packed}
+                >
+                  <span className="hotel-pack-mark" aria-hidden="true">
+                    {item.packed ? '✓' : '○'}
+                  </span>
+                  <span className="grow">
+                    <strong>
+                      {item.qty > 1 ? `${item.qty}× ` : ''}
+                      {item.label}
+                    </strong>
+                    {item.comesHome && !returnList ? (
+                      <span className="hotel-pack-tag">comes home</span>
+                    ) : null}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 function Timeline({
   chrome,
   items,
@@ -387,7 +503,7 @@ function Timeline({
   nowMinutes: number;
   spine: 'time' | 'room' | 'bag';
 }) {
-  // Packing spine lands in Task 3 — until then show nothing rather than a clock list.
+  // Packing spine is rendered by PackingPanel, not this timeline.
   if (spine === 'bag') {
     return null;
   }

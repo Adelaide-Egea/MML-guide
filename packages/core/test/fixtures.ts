@@ -100,5 +100,6 @@ export function handover(overrides: Partial<Handover> = {}): Handover {
     scenario,
     duration: durationFromScenario(scenario),
     expectation: overrides.expectation ?? DEFAULT_EXPECTATION[scenario],
+    tripId: overrides.tripId ?? null,
   };
 }
