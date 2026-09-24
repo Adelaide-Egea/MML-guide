@@ -240,10 +240,63 @@ export interface RoutineItem {
   readonly product?: string;
 }
 
-/** What to print on a row: a custom "Other" name when set, otherwise the kind label. */
-export function routineItemLabel(item: Pick<RoutineItem, 'kind' | 'label'>): string {
+/** What to print on a row: a custom "Other" name when set, otherwise the kind label.
+ *
+ *  Pass localized `labels` (e.g. `chromeFor(tag).routineKinds`) on caregiver
+ *  surfaces. Custom parent names stay as written.
+ */
+export function routineItemLabel(
+  item: Pick<RoutineItem, 'kind' | 'label'>,
+  labels: Readonly<Record<RoutineKind, string>> = ROUTINE_KIND_LABEL,
+): string {
   if (item.label?.trim()) return item.label.trim();
-  return ROUTINE_KIND_LABEL[item.kind];
+  return labels[item.kind];
+}
+
+/** One caregiver-visible row after collapsing identical slots that only differ by who.
+ *
+ *  Two 10:00 snacks — one for Elise, one for Charlotte — become one row listing both.
+ *  Different notes, labels, or times stay separate. `appliesTo: 'all'` already covers
+ *  everyone and does not list names.
+ */
+export interface MergedRoutineRow {
+  readonly item: RoutineItem;
+  /** Subject ids this row applies to, or `['all']`. Preserves first-seen order. */
+  readonly appliesToIds: readonly string[];
+}
+
+function routineMergeKey(item: RoutineItem): string {
+  return [
+    item.time ?? '',
+    item.kind,
+    item.label?.trim() ?? '',
+    item.notes.trim(),
+    item.section?.trim() ?? '',
+    item.priority ?? '',
+    item.product?.trim() ?? '',
+  ].join('\0');
+}
+
+export function mergeRoutineRows(items: readonly RoutineItem[]): readonly MergedRoutineRow[] {
+  const groups = new Map<string, { item: RoutineItem; appliesToIds: string[] }>();
+  const order: string[] = [];
+  for (const item of items) {
+    const key = routineMergeKey(item);
+    const existing = groups.get(key);
+    if (!existing) {
+      groups.set(key, { item, appliesToIds: [item.appliesTo] });
+      order.push(key);
+      continue;
+    }
+    if (item.appliesTo === 'all' || existing.appliesToIds.includes('all')) {
+      existing.appliesToIds = ['all'];
+      continue;
+    }
+    if (!existing.appliesToIds.includes(item.appliesTo)) {
+      existing.appliesToIds.push(item.appliesTo);
+    }
+  }
+  return order.map((key) => groups.get(key)!);
 }
 
 export interface Household {
@@ -280,7 +333,7 @@ export const DEFAULT_EXPECTATION: Record<Scenario, string> = {
   evening:
     "When you arrive the children will already be asleep. You shouldn't need to do anything except be here — here's what to do if they wake.",
   fullday: 'A full day. Meals, nap and pickup are below.',
-  weekend: 'A few days. Each day is on its own tab.',
+  weekend: 'A few days. Everything you need is here.',
   cleaner: "The house, room by room, in the order I'd walk it.",
   petsitter: "Feeding, walks and the vet's number are below.",
   goingtoyours: 'Everything that came in the bag, and what has to come home.',

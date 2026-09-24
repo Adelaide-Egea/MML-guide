@@ -21,16 +21,17 @@ export const EMERGENCY_COUNTRIES = [
 
 export type EmergencyCountry = (typeof EMERGENCY_COUNTRIES)[number];
 
-/** English labels — service words are localised separately for the caregiver. */
+/** English labels — service words are localised separately for the caregiver.
+ *  Newlines (not middle dots) so each number can sit on its own line and become a tel: link. */
 export const EMERGENCY_NUMBERS: Record<EmergencyCountry, string> = {
-  'United Kingdom': '999 (emergency) · 111 (NHS)',
-  France: '15 (SAMU) · 17 (Police) · 18 (Fire) · 112',
-  Spain: '112 · 061 (ambulance)',
-  Germany: '110 (Police) · 112',
-  Italy: '112 · 118 (ambulance)',
+  'United Kingdom': '999 (emergency)\n111 (NHS)',
+  France: '15 (SAMU)\n17 (Police)\n18 (Fire)\n112',
+  Spain: '112\n061 (ambulance)',
+  Germany: '110 (Police)\n112',
+  Italy: '112\n118 (ambulance)',
   Portugal: '112',
-  Belgium: '101 (Police) · 100 (Ambulance) · 112',
-  Switzerland: '117 (Police) · 144 (Ambulance) · 118 (Fire)',
+  Belgium: '101 (Police)\n100 (Ambulance)\n112',
+  Switzerland: '117 (Police)\n144 (Ambulance)\n118 (Fire)',
   Netherlands: '112',
   USA: '911',
   Canada: '911',

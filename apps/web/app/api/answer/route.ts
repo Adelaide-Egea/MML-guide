@@ -10,6 +10,7 @@
 // — those are answered without a model, by `prepare`, before this is ever called.
 
 import { NextResponse } from 'next/server';
+import { clientIp, isRateLimited } from '../../../lib/ratelimit.ts';
 
 export const runtime = 'nodejs';
 
@@ -49,6 +50,14 @@ function str(value: unknown, cap: number): string {
 }
 
 export async function POST(request: Request) {
+  const limited = await isRateLimited(clientIp(request), 'answer');
+  if (limited.limited) {
+    return NextResponse.json(
+      { error: 'Too many questions from this phone. Try again in an hour.' },
+      { status: 429 },
+    );
+  }
+
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     // 503 rather than 500: the client degrades to showing the matched entries as

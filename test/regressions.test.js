@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { readApp, readFile, loadFunctions } from './harness.js';
-import { extractUserPrompt } from '../api/generate.js';
-import { buildSystemPrompt, durationContext } from '../api/prompt.js';
+import { extractUserPrompt } from '../archive/legacy-app/api/generate.js';
+import { buildSystemPrompt, durationContext } from '../archive/legacy-app/api/prompt.js';
 
 const app = readApp();
 const { childAllergyText, esc, parseInlineBold } = loadFunctions(app, [

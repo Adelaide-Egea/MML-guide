@@ -74,7 +74,7 @@ export function loadSample(): Sample {
     scenario: 'weekend',
     duration: 'fewdays',
     expectation:
-      'A few days. Each day is on its own tab.',
+      'A few days. Everything you need is here.',
     language: 'en',
     subjectIds: [],
     importantNotes: ['We land back on Sunday at 18:40. Call any time before that.'],

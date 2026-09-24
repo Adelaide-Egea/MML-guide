@@ -3,7 +3,11 @@
 // Safety facts stay in the parent's words. Ask replies follow the selected
 // language via the model. This table only covers on-screen chrome so a French
 // carer is not staring at English buttons after tapping Français.
+//
+// System headings baked into the guide ("Who to call", "Name — allergies") and
+// routine kind labels ("Snack", "Other") are chrome too — not parent prose.
 
+import { ROUTINE_KIND_LABEL, type RoutineKind } from './household.ts';
 import { matchCareLanguage } from './languages.ts';
 
 export interface ChromeCopy {
@@ -45,9 +49,26 @@ export interface ChromeCopy {
   readonly notInGuide: string;
   readonly notInGuideHint: string;
   readonly assistantUnavailable: string;
+  /** Contacts block heading — not the parent's relationship labels. */
+  readonly whoToCall: string;
+  readonly important: string;
+  readonly anythingElse: string;
+  /** Suffix after "Name — …" on safety fact headings. */
+  readonly allergies: string;
+  readonly medication: string;
+  readonly inAnEmergency: string;
+  /** Kind labels for routine rows when the parent did not set a custom name. */
+  readonly routineKinds: Readonly<Record<RoutineKind, string>>;
+  /**
+   * English default entry / section titles → localized display.
+   * Only exact matches remap; custom parent titles stay as written.
+   */
+  readonly entryTitles: Readonly<Record<string, string>>;
   readonly whileYouAreHereFor: (name: string) => string;
   readonly aTypicalDayFor: (name: string) => string;
   readonly forName: (name: string) => string;
+  /** Several children on one merged routine row — e.g. "For Elise and Charlotte". */
+  readonly forNames: (names: readonly string[]) => string;
   readonly useProduct: (product: string) => string;
   readonly helloName: (name: string) => string;
   readonly scenarioEvening: string;
@@ -61,6 +82,8 @@ export interface ChromeCopy {
   readonly shapeWeekend: string;
   readonly askPlaceholderTonight: string;
   readonly safetyExpand: string;
+  /** Sticky dial button — "Call Claire". */
+  readonly callName: (name: string) => string;
   /** Country public emergency numbers heading, e.g. "Emergency (France)". */
   readonly localEmergency: (country: string) => string;
   readonly tapToSpeak: string;
@@ -70,6 +93,77 @@ export interface ChromeCopy {
   readonly speakDenied: string;
   readonly speakNoSpeech: string;
 }
+
+/** Built-in prompt / section titles seeded in English — display chrome, not parent prose. */
+const FR_ENTRY_TITLES: Record<string, string> = {
+  Screens: 'Écrans',
+  'Screen time': 'Écrans',
+  Potty: 'Pot',
+  'Potty / toilet': 'Pot / toilettes',
+  Food: 'Repas',
+  Sleep: 'Sommeil',
+  Bedtime: 'Coucher',
+  Nappies: 'Couches',
+  'Nappies & toilet': 'Couches et toilettes',
+  'Nappies / toilet': 'Couches / toilettes',
+  'Milk & bottles': 'Lait et biberons',
+  'Likes & comfort': 'Goûts et réconfort',
+  'If they are upset': 'S’ils sont contrariés',
+  'If upset': 'Si contrarié',
+  'Nursery / preschool': 'Crèche / maternelle',
+  Nursery: 'Crèche',
+  'Out of the house': 'Sorties',
+  'Out & about': 'Dehors',
+  School: 'École',
+  Activities: 'Activités',
+  Independence: 'Autonomie',
+  Walks: 'Promenades',
+  Meals: 'Repas',
+  Comfort: 'Réconfort',
+  Health: 'Santé',
+  Cleaning: 'Ménage',
+  'House rules': 'Règles de la maison',
+  'Keys & access': 'Clés et accès',
+  Routine: 'Routine',
+  Clothing: 'Vêtements',
+};
+
+const FR_ROUTINE_KINDS: Record<RoutineKind, string> = {
+  Breakfast: 'Petit-déjeuner',
+  Snack: 'Goûter',
+  Lunch: 'Déjeuner',
+  Dinner: 'Dîner',
+  Feed: 'Repas',
+  Bottle: 'Biberon',
+  Nappy: 'Couche',
+  Nap: 'Sieste',
+  Bath: 'Bain',
+  Bedtime: 'Coucher',
+  School: 'École',
+  Walk: 'Promenade',
+  Litter: 'Litière',
+  Activity: 'Activité',
+  Medication: 'Médicaments',
+  Bins: 'Poubelles',
+  Plants: 'Plantes',
+  Post: 'Courrier',
+  Laundry: 'Lessive',
+  Sheets: 'Draps',
+  Towels: 'Serviettes',
+  TeaTowels: 'Torchons',
+  ToiletPaper: 'Papier toilette',
+  Kitchen: 'Cuisine',
+  Bathroom: 'Salle de bain',
+  Floors: 'Sols',
+  Surfaces: 'Surfaces',
+  Oven: 'Four',
+  Fridge: 'Frigo',
+  Shower: 'Douche',
+  Dusting: 'Dépoussiérage',
+  Vacuum: 'Aspirateur',
+  Restock: 'Réapprovisionner',
+  Other: 'Autre',
+};
 
 const EN: ChromeCopy = {
   languageHint:
@@ -116,6 +210,12 @@ const EN: ChromeCopy = {
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `For ${names[0]}`;
+    if (names.length === 2) return `For ${names[0]} and ${names[1]}`;
+    return `For ${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+  },
   useProduct: (product) => `Use ${product}`,
   helloName: (name) => `Hello ${name}.`,
   scenarioEvening: 'Evening sitter',
@@ -129,6 +229,7 @@ const EN: ChromeCopy = {
   shapeWeekend: 'A few days — everything you need is here.',
   askPlaceholderTonight: 'Ask anything about tonight',
   safetyExpand: 'Show all safety notes',
+  callName: (name) => `Call ${name}`,
   localEmergency: (country) => `Emergency (${country})`,
   tapToSpeak: 'Tap the mic to ask out loud',
   listening: 'Listening…',
@@ -136,6 +237,14 @@ const EN: ChromeCopy = {
   speakUnavailable: 'Voice is not available on this phone. Type your question instead.',
   speakDenied: 'Microphone permission is off. Type your question, or allow the mic in browser settings.',
   speakNoSpeech: 'Did not catch that. Tap the mic and try again.',
+  whoToCall: 'Who to call',
+  important: 'Important',
+  anythingElse: 'Anything else',
+  allergies: 'allergies',
+  medication: 'medication',
+  inAnEmergency: 'in an emergency',
+  routineKinds: ROUTINE_KIND_LABEL,
+  entryTitles: {},
 };
 
 const FR: ChromeCopy = {
@@ -186,6 +295,12 @@ const FR: ChromeCopy = {
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Pour ${names[0]}`;
+    if (names.length === 2) return `Pour ${names[0]} et ${names[1]}`;
+    return `Pour ${names.slice(0, -1).join(', ')} et ${names.at(-1)}`;
+  },
   useProduct: (product) => `Utiliser ${product}`,
   helloName: (name) => `Bonjour ${name}.`,
   scenarioEvening: 'Soirée',
@@ -199,6 +314,7 @@ const FR: ChromeCopy = {
   shapeWeekend: 'Quelques jours — tout ce qu’il faut est ici.',
   askPlaceholderTonight: 'Demandez ce que vous voulez sur ce soir',
   safetyExpand: 'Voir toutes les notes de sécurité',
+  callName: (name) => `Appeler ${name}`,
   localEmergency: (country) => `Urgences (${country})`,
   tapToSpeak: 'Touchez le micro pour parler',
   listening: 'Écoute…',
@@ -206,6 +322,14 @@ const FR: ChromeCopy = {
   speakUnavailable: 'La voix n’est pas disponible sur ce téléphone. Tapez votre question.',
   speakDenied: 'Le micro est refusé. Tapez votre question, ou autorisez le micro dans le navigateur.',
   speakNoSpeech: 'Rien entendu. Touchez le micro et réessayez.',
+  whoToCall: 'Qui appeler',
+  important: 'Important',
+  anythingElse: 'Autre chose',
+  allergies: 'allergies',
+  medication: 'médicaments',
+  inAnEmergency: 'en cas d’urgence',
+  routineKinds: FR_ROUTINE_KINDS,
+  entryTitles: FR_ENTRY_TITLES,
 };
 
 const PT_BR: ChromeCopy = {
@@ -245,6 +369,12 @@ const PT_BR: ChromeCopy = {
   whileYouAreHereFor: (name) => `Enquanto você está aqui para ${name}`,
   aTypicalDayFor: (name) => `Um dia típico para ${name}`,
   forName: (name) => `Para ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Para ${names[0]}`;
+    if (names.length === 2) return `Para ${names[0]} e ${names[1]}`;
+    return `Para ${names.slice(0, -1).join(', ')} e ${names.at(-1)}`;
+  },
   useProduct: (product) => `Usar ${product}`,
   scenarioCleaner: 'Limpeza',
   scenarioPetSitter: 'Cuidador de animais',
@@ -301,6 +431,12 @@ const ES: ChromeCopy = {
   whileYouAreHereFor: (name) => `Mientras está aquí para ${name}`,
   aTypicalDayFor: (name) => `Un día típico para ${name}`,
   forName: (name) => `Para ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Para ${names[0]}`;
+    if (names.length === 2) return `Para ${names[0]} y ${names[1]}`;
+    return `Para ${names.slice(0, -1).join(', ')} y ${names.at(-1)}`;
+  },
   useProduct: (product) => `Usar ${product}`,
   scenarioCleaner: 'Limpieza',
   scenarioPetSitter: 'Cuidador de mascotas',
@@ -344,6 +480,12 @@ const TL: ChromeCopy = {
   whileYouAreHereFor: (name) => `Habang nandito kayo para kay ${name}`,
   aTypicalDayFor: (name) => `Isang karaniwang araw para kay ${name}`,
   forName: (name) => `Para kay ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Para kay ${names[0]}`;
+    if (names.length === 2) return `Para kay ${names[0]} at ${names[1]}`;
+    return `Para kay ${names.slice(0, -1).join(', ')} at ${names.at(-1)}`;
+  },
   useProduct: (product) => `Gamitin ang ${product}`,
   scenarioCleaner: 'Tagalinis',
   scenarioPetSitter: 'Tagapag-alaga ng hayop',
@@ -386,6 +528,12 @@ const AR: ChromeCopy = {
   whileYouAreHereFor: (name) => `أثناء وجودك هنا من أجل ${name}`,
   aTypicalDayFor: (name) => `يوم عادي لـ ${name}`,
   forName: (name) => `لـ ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `لـ ${names[0]}`;
+    if (names.length === 2) return `لـ ${names[0]} و ${names[1]}`;
+    return `لـ ${names.slice(0, -1).join(', ')} و ${names.at(-1)}`;
+  },
   useProduct: (product) => `استخدم ${product}`,
   scenarioCleaner: 'تنظيف',
   scenarioPetSitter: 'مجالسة حيوانات',
@@ -429,6 +577,12 @@ const PL: ChromeCopy = {
   whileYouAreHereFor: (name) => `Gdy tu jesteś dla ${name}`,
   aTypicalDayFor: (name) => `Typowy dzień dla ${name}`,
   forName: (name) => `Dla ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Dla ${names[0]}`;
+    if (names.length === 2) return `Dla ${names[0]} i ${names[1]}`;
+    return `Dla ${names.slice(0, -1).join(', ')} i ${names.at(-1)}`;
+  },
   useProduct: (product) => `Użyj ${product}`,
   scenarioCleaner: 'Sprzątanie',
   scenarioPetSitter: 'Opieka nad zwierzakiem',
@@ -472,6 +626,12 @@ const RO: ChromeCopy = {
   whileYouAreHereFor: (name) => `Cât ești aici pentru ${name}`,
   aTypicalDayFor: (name) => `O zi tipică pentru ${name}`,
   forName: (name) => `Pentru ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Pentru ${names[0]}`;
+    if (names.length === 2) return `Pentru ${names[0]} și ${names[1]}`;
+    return `Pentru ${names.slice(0, -1).join(', ')} și ${names.at(-1)}`;
+  },
   useProduct: (product) => `Folosește ${product}`,
   scenarioCleaner: 'Curățenie',
   scenarioPetSitter: 'Îngrijire animale',
@@ -515,6 +675,12 @@ const IT: ChromeCopy = {
   whileYouAreHereFor: (name) => `Mentre sei qui per ${name}`,
   aTypicalDayFor: (name) => `Una giornata tipo per ${name}`,
   forName: (name) => `Per ${name}`,
+  forNames: (names) => {
+    if (names.length === 0) return '';
+    if (names.length === 1) return `Per ${names[0]}`;
+    if (names.length === 2) return `Per ${names[0]} e ${names[1]}`;
+    return `Per ${names.slice(0, -1).join(', ')} e ${names.at(-1)}`;
+  },
   useProduct: (product) => `Usa ${product}`,
   scenarioCleaner: 'Pulizie',
   scenarioPetSitter: 'Pet sitter',
@@ -538,4 +704,25 @@ const BY_TAG: Record<string, ChromeCopy> = {
 export function chromeFor(tag: string): ChromeCopy {
   const matched = matchCareLanguage(tag).tag;
   return BY_TAG[matched] ?? EN;
+}
+
+/** Remap known English system / prompt titles inside a guide heading.
+ *
+ *  Custom parent titles are left alone. Only exact segment matches against
+ *  `chrome.entryTitles` (and the fixed chrome headings) are rewritten.
+ */
+export function localizeGuideHeading(heading: string, chrome: ChromeCopy): string {
+  const fixed: Record<string, string> = {
+    'Who to call': chrome.whoToCall,
+    Important: chrome.important,
+    'Anything else': chrome.anythingElse,
+    allergies: chrome.allergies,
+    medication: chrome.medication,
+    'in an emergency': chrome.inAnEmergency,
+    ...chrome.entryTitles,
+  };
+  return heading
+    .split(' — ')
+    .map((part) => fixed[part] ?? part)
+    .join(' — ');
 }

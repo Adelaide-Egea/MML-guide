@@ -100,6 +100,22 @@ test('every subject with an allergy gets their own block', () => {
   assert.ok(doc.blocks.some((b) => b.id === 'allergy:c2' && b.body === 'Dairy'));
 });
 
+test('French handover localizes system headings, not parent fact bodies', () => {
+  const home = household({
+    subjects: [withPeanuts],
+    contacts: [{ id: 'p1', name: 'Adelaide', phone: '07950', relationship: 'Mom' }],
+  });
+  const doc = buildVerifiedGuide(home, handover({ language: 'fr' }));
+
+  const allergy = doc.blocks.find((b) => b.id === 'allergy:c1');
+  assert.equal(allergy?.heading, 'Mia — allergies');
+  assert.equal(allergy?.body, 'Peanuts');
+
+  const contacts = doc.blocks.find((b) => b.id === 'contacts');
+  assert.equal(contacts?.heading, 'Qui appeler');
+  assert.match(contacts?.body ?? '', /Adelaide \(Mom\)/);
+});
+
 // ── Any handover, not only a child ───────────────────────────────────────────
 
 test('a pet and a place produce a guide the same way a child does', () => {
