@@ -6,6 +6,7 @@ import {
   type Candidate,
   UnsafeAnswerError,
   acceptModelAnswer,
+  guideSnippets,
   modelContext,
   prepare,
   retrieve,
@@ -410,10 +411,47 @@ test('a TV / screen-time question finds the Screens entry, not a blank refusal',
     prepared,
     { body: 'NOT_IN_GUIDE', citedEntryIds: [] },
     'en',
+    'Can elise Watch tv',
   );
   assert.equal(answer.kind, 'grounded');
   assert.match(answer.body, /screen time/i);
   assert.equal(answer.citations[0]?.entryId, 'elise-screens');
+});
+
+test('diaper cream finds Nappies and guideSnippets keep bullets not night sleep', () => {
+  const henry: CareSubject = {
+    id: 'henry',
+    kind: 'child',
+    name: 'Henry',
+    descriptor: '3.5 months',
+    identity: { colourToken: 'id-teal', symbol: '●' },
+    safety: { ...EMPTY_SAFETY },
+    entries: [
+      entry({
+        id: 'henry-nappies',
+        topic: 'routine',
+        title: 'Nappies',
+        body:
+          'He wears size 3. Watch out for pee. He uses wet wipes for poo and diapering lotion for pee. The diapering lotion is a yellow liquid in a purple/pink squeeze bottle. Change every two hours.',
+      }),
+      entry({
+        id: 'henry-sleep',
+        topic: 'sleep',
+        title: 'Night Sleep',
+        body:
+          'He generally sleeps 7:30-8am. Because we are in a new environment, he may wake 1-2x. Offer a 4oz bottle the first time.',
+      }),
+    ],
+  };
+
+  const hits = retrieve([henry], 'What diaper cream do I use');
+  assert.equal(hits[0]?.entry.id, 'henry-nappies');
+
+  const snippets = guideSnippets('What diaper cream do I use', hits);
+  assert.equal(snippets.length, 1);
+  assert.equal(snippets[0]?.entryId, 'henry-nappies');
+  assert.ok(snippets[0]!.bullets.some((b) => /lotion|cream|yellow|bottle/i.test(b)));
+  assert.ok(!snippets.some((s) => s.entryId === 'henry-sleep'));
 });
 
 test('a well-formed model answer is accepted and keeps its provenance', () => {

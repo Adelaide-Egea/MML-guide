@@ -8,6 +8,7 @@ import {
   type Prepared,
   acceptModelAnswer,
   chromeFor,
+  guideSnippets,
   modelContext,
   prepare,
   subjectsFor,
@@ -98,7 +99,7 @@ export default function CaregiverAskPage() {
         });
         if (!response.ok) throw new Error(String(response.status));
         const model = (await response.json()) as { body: string; citedEntryIds: string[] };
-        const answer = acceptModelAnswer(prepared, model, language);
+        const answer = acceptModelAnswer(prepared, model, language, asked);
         // If the model still refuses despite retrieval finding entries, show the
         // parent's words rather than a blank wall — the caregiver asked for a reason.
         if (answer.kind === 'refusal' && prepared.candidates.length > 0) {
@@ -175,10 +176,14 @@ export default function CaregiverAskPage() {
           ) : (
             <article className="card stack-tight">
               <p className="muted">{chrome.assistantUnavailable}</p>
-              {shown.candidates.map((c) => (
-                <div key={c.entry.id} className="stack-tight">
-                  <strong>{c.entry.title}</strong>
-                  <p className="block-body">{c.entry.body}</p>
+              {guideSnippets(shown.question, shown.candidates).map((snippet) => (
+                <div key={snippet.entryId} className="stack-tight">
+                  <strong>{snippet.title}</strong>
+                  <ul className="note-bullets">
+                    {snippet.bullets.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </article>

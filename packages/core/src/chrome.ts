@@ -233,7 +233,7 @@ const EN: ChromeCopy = {
   notInGuide: 'That is not in the guide.',
   notInGuideHint:
     'Rather than guess, this says nothing. If it matters, call the number under “who to call”.',
-  assistantUnavailable: 'The assistant is unavailable, so here is what was written — unchanged.',
+  assistantUnavailable: 'Couldn’t reach the assistant — closest notes from the guide:',
   whileYouAreHereFor: (name) => `While you are here for ${name}`,
   aTypicalDayFor: (name) => `A typical day for ${name}`,
   forName: (name) => `For ${name}`,
@@ -340,7 +340,7 @@ const FR: ChromeCopy = {
   notInGuide: 'Ce n’est pas dans le guide.',
   notInGuideHint:
     'Plutôt que d’inventer, ceci ne dit rien. Si c’est important, appelez le numéro sous « qui appeler ».',
-  assistantUnavailable: 'L’assistant est indisponible, voici donc ce qui a été écrit — inchangé.',
+  assistantUnavailable: 'Assistant injoignable — notes les plus proches du guide :',
   whileYouAreHereFor: (name) => `Pendant que vous êtes là pour ${name}`,
   aTypicalDayFor: (name) => `Une journée type pour ${name}`,
   forName: (name) => `Pour ${name}`,
