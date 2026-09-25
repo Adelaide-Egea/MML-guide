@@ -19,6 +19,7 @@ import {
   mergeRoutineRows,
   normalizeHandover,
   packingProgress,
+  recapLines,
   routineItemLabel,
   subjectsFor,
 } from '@mml/core';
@@ -41,6 +42,8 @@ export default function CaregiverPage() {
   const [focus, setFocus] = useState<'all' | string>('all');
   const [safetyOpen, setSafetyOpen] = useState(false);
   const [nowMinutes, setNowMinutes] = useState(() => minutesNow());
+  /** When the parent approved bullet recaps, caregiver picks bullets or full notes. */
+  const [notesMode, setNotesMode] = useState<'recap' | 'full'>('recap');
   const actions = useActions();
 
   useEffect(() => {
@@ -164,6 +167,7 @@ export default function CaregiverPage() {
   const notes = guide.blocks.filter((b) => !b.critical && inFocus(b) && (b.body || b.media.length));
   const photoNotes = notes.filter((b) => b.media.length > 0);
   const textNotes = notes.filter((b) => b.media.length === 0 && b.body);
+  const hasRecaps = notes.some((b) => Boolean(b.recap?.trim()));
   const routine = guide.routine.filter(
     (r) => focus === 'all' || r.appliesTo === focus || r.appliesTo === 'all',
   );
@@ -261,7 +265,7 @@ export default function CaregiverPage() {
                 <MediaThumb key={m.id} media={m} />
               ))}
               <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
-              {block.body ? <p>{linkifyPhones(block.body)}</p> : null}
+              <NoteBody block={block} mode={hasRecaps ? notesMode : 'full'} />
             </article>
           ))}
         </section>
@@ -269,10 +273,30 @@ export default function CaregiverPage() {
 
       {textNotes.length > 0 && (
         <section className="hotel-notes">
+          {hasRecaps ? (
+            <div className="hotel-notes-mode" role="group" aria-label="Notes display">
+              <button
+                type="button"
+                className="chip"
+                aria-pressed={notesMode === 'recap'}
+                onClick={() => setNotesMode('recap')}
+              >
+                {chrome.notesAsBullets}
+              </button>
+              <button
+                type="button"
+                className="chip"
+                aria-pressed={notesMode === 'full'}
+                onClick={() => setNotesMode('full')}
+              >
+                {chrome.notesAsFull}
+              </button>
+            </div>
+          ) : null}
           {textNotes.map((block) => (
             <article key={block.id} className="hotel-note">
               <h3>{localizeGuideHeading(block.heading, chrome)}</h3>
-              {block.body ? <p>{linkifyPhones(block.body)}</p> : null}
+              <NoteBody block={block} mode={hasRecaps ? notesMode : 'full'} />
             </article>
           ))}
         </section>
@@ -310,6 +334,30 @@ export default function CaregiverPage() {
       </div>
     </main>
   );
+}
+
+function NoteBody({
+  block,
+  mode,
+}: {
+  block: GuideBlock;
+  mode: 'recap' | 'full';
+}) {
+  const preferRecap = mode === 'recap' && block.recap?.trim();
+  if (preferRecap) {
+    const lines = recapLines(block.recap!);
+    if (lines.length > 0) {
+      return (
+        <ul className="note-bullets">
+          {lines.map((line) => (
+            <li key={line}>{linkifyPhones(line)}</li>
+          ))}
+        </ul>
+      );
+    }
+  }
+  if (!block.body) return null;
+  return <p>{linkifyPhones(block.body)}</p>;
 }
 
 function minutesNow(): number {

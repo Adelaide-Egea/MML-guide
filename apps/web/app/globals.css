@@ -1221,6 +1221,13 @@ a.routine-item {
   margin-bottom: var(--space-5);
 }
 
+.hotel-notes-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
 .hotel-note h3 {
   font-family: var(--font-ui);
   font-size: var(--text-sm);
@@ -1232,6 +1239,18 @@ a.routine-item {
   font-size: var(--text-sm);
   color: var(--ink-muted);
   line-height: 1.5;
+}
+
+.note-bullets {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.note-bullets li + li {
+  margin-top: 0.35rem;
 }
 
 .hotel-signoff {

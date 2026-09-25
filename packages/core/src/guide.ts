@@ -54,6 +54,8 @@ export interface GuideBlock {
    *  up unseen at the bottom of a screen. */
   readonly media: readonly Media[];
   readonly subjectId?: string;
+  /** Parent-approved bullet recap. Full `body` stays; caregiver can prefer either. */
+  readonly recap?: string;
 }
 
 export interface GuideDocument {
@@ -70,9 +72,15 @@ function factBlock(
   id: string,
   heading: string,
   body: string,
-  options: { critical?: boolean; subjectId?: string; media?: readonly Media[] } = {},
+  options: {
+    critical?: boolean;
+    subjectId?: string;
+    media?: readonly Media[];
+    recap?: string;
+  } = {},
 ): GuideBlock {
   const critical = options.critical ?? false;
+  const recap = options.recap?.trim();
   return {
     id,
     heading,
@@ -84,6 +92,7 @@ function factBlock(
     enrichable: !critical,
     media: options.media ?? [],
     ...(options.subjectId ? { subjectId: options.subjectId } : {}),
+    ...(recap ? { recap } : {}),
   };
 }
 
@@ -214,10 +223,12 @@ export function buildGuide(
     for (const entry of subject.entries) {
       if (!hasText(entry.body) && entry.media.length === 0) continue;
       const title = chrome.entryTitles[entry.title] ?? entry.title;
+      const approved = handover.entryRecaps[entry.id]?.trim();
       blocks.push(
         factBlock(`entry:${entry.id}`, `${subjectLabel(subject)} — ${title}`, entry.body.trim(), {
           subjectId: subject.id,
           media: entry.media,
+          ...(approved ? { recap: approved } : {}),
         }),
       );
     }

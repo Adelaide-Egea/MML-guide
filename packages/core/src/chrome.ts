@@ -96,6 +96,17 @@ export interface ChromeCopy {
   readonly expectationGoingToYours: string;
   /** Honest line next to safety: allergies stay in the parent's words. */
   readonly factsAsWritten: string;
+  /** Parent: draft bullet recaps before sending. */
+  readonly bulletRecapTitle: string;
+  readonly bulletRecapHint: string;
+  readonly bulletRecapApprove: string;
+  readonly bulletRecapApproved: string;
+  readonly bulletRecapClear: string;
+  readonly bulletRecapDraft: string;
+  readonly bulletRecapFullLabel: string;
+  /** Caregiver: switch between approved bullets and full notes. */
+  readonly notesAsBullets: string;
+  readonly notesAsFull: string;
   /** Country public emergency numbers heading, e.g. "Emergency (France)". */
   readonly localEmergency: (country: string) => string;
   readonly tapToSpeak: string;
@@ -254,6 +265,16 @@ const EN: ChromeCopy = {
   expectationPetSitter: "Feeding, walks and the vet's number are below.",
   expectationGoingToYours: 'Everything that came in the bag, and what has to come home.',
   factsAsWritten: 'As the parent wrote — not translated.',
+  bulletRecapTitle: 'Bullet recap for the caregiver',
+  bulletRecapHint:
+    'Long notes become short bullets. You approve them before sending — the caregiver can still open the full text.',
+  bulletRecapApprove: 'Approve recap',
+  bulletRecapApproved: 'Recap approved. The caregiver can switch between bullets and full notes.',
+  bulletRecapClear: 'Use full notes only',
+  bulletRecapDraft: 'Draft from your notes',
+  bulletRecapFullLabel: 'Full note',
+  notesAsBullets: 'Bullets',
+  notesAsFull: 'Full notes',
   localEmergency: (country) => `Emergency (${country})`,
   tapToSpeak: 'Tap the mic to ask out loud',
   listening: 'Listening…',
@@ -351,6 +372,17 @@ const FR: ChromeCopy = {
   expectationPetSitter: 'Repas, promenades et le numéro du véto sont ci-dessous.',
   expectationGoingToYours: 'Tout ce qui est dans le sac, et ce qui doit rentrer.',
   factsAsWritten: 'Tel que le parent l’a écrit — non traduit.',
+  bulletRecapTitle: 'Résumé en puces pour le caregiver',
+  bulletRecapHint:
+    'Les longues notes deviennent de courtes puces. Vous les validez avant d’envoyer — le caregiver peut encore ouvrir le texte complet.',
+  bulletRecapApprove: 'Valider le résumé',
+  bulletRecapApproved:
+    'Résumé validé. Le caregiver peut basculer entre les puces et les notes complètes.',
+  bulletRecapClear: 'Notes complètes seulement',
+  bulletRecapDraft: 'Brouillon depuis vos notes',
+  bulletRecapFullLabel: 'Note complète',
+  notesAsBullets: 'Puces',
+  notesAsFull: 'Notes complètes',
   localEmergency: (country) => `Urgences (${country})`,
   tapToSpeak: 'Touchez le micro pour parler',
   listening: 'Écoute…',
