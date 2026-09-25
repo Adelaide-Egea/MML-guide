@@ -182,15 +182,41 @@ test('critical blocks come first, so a ten-second skim hits them', () => {
   assert.equal(criticalBlocks(doc).length, 4); // important, allergy, contacts, local emergency
 });
 
-test('an evening handover hides the parts of the day it does not cover', () => {
+test('an evening handover hides morning slots by time, not by kind', () => {
+  // Snack at 10:00 used to survive a kind-whitelist while Breakfast/Lunch vanished.
+  // Evening is clock-based: keep mid-afternoon through overnight.
   const routine = [
-    routineItem({ id: 'r1', time: '08:00', kind: 'School' }),
-    routineItem({ id: 'r2', time: '17:30', kind: 'Dinner' }),
-    routineItem({ id: 'r3', time: '19:00', kind: 'Bedtime' }),
+    routineItem({ id: 'r1', time: '07:00', kind: 'Breakfast' }),
+    routineItem({ id: 'r2', time: '10:00', kind: 'Snack' }),
+    routineItem({ id: 'r3', time: '13:00', kind: 'Lunch' }),
+    routineItem({ id: 'r4', time: '16:00', kind: 'Snack' }),
+    routineItem({ id: 'r5', time: '18:30', kind: 'Bath' }),
+    routineItem({ id: 'r6', time: '19:00', kind: 'Dinner' }),
+    routineItem({ id: 'r7', time: '23:00', kind: 'Snack' }),
+    routineItem({ id: 'r8', time: '08:00', kind: 'School' }),
+    routineItem({ id: 'r9', time: '19:30', kind: 'Breakfast' }), // evening bottle, odd label
   ];
 
-  assert.deepEqual(scopeRoutine(routine, 'evening').map((r) => r.id), ['r2', 'r3']);
-  assert.deepEqual(scopeRoutine(routine, 'fullday').map((r) => r.id), ['r1', 'r2', 'r3']);
+  assert.deepEqual(scopeRoutine(routine, 'evening').map((r) => r.id), [
+    'r4',
+    'r5',
+    'r6',
+    'r9',
+    'r7',
+  ]);
+  assert.deepEqual(
+    scopeRoutine(routine, 'fullday').map((r) => r.id),
+    ['r1', 'r8', 'r2', 'r3', 'r4', 'r5', 'r6', 'r9', 'r7'],
+  );
+});
+
+test('evening keeps untimed items and place checklist rows', () => {
+  const routine = [
+    routineItem({ id: 'r1', time: '10:00', kind: 'Snack' }),
+    routineItem({ id: 'r2', time: null, kind: 'Medication' }),
+    routineItem({ id: 'r3', time: '09:00', kind: 'Bins', appliesTo: 'h-flat' }),
+  ];
+  assert.deepEqual(scopeRoutine(routine, 'evening').map((r) => r.id), ['r3', 'r2']);
 });
 
 test('the routine is filtered to the subjects in scope', () => {

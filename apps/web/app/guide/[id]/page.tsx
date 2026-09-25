@@ -17,6 +17,7 @@ import {
 } from '@mml/core';
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
+import { BulletRecapEditor } from '../../../components/BulletRecapEditor.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
 import { PrintFooter, PrintMasthead } from '../../../components/PrintChrome.tsx';
 import { buildShareUrl } from '../../../lib/share.ts';
@@ -153,6 +154,12 @@ export default function GuidePage() {
         <LanguageToggle
           value={handover.language}
           onChange={(language) => actions.saveHandover({ ...handover, language })}
+        />
+        <BulletRecapEditor
+          chrome={chrome}
+          handover={handover}
+          blocks={rest}
+          onSave={(entryRecaps) => actions.saveHandover({ ...handover, entryRecaps })}
         />
         <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
           <Link href={`/guide/${handover.id}/ask`} className="btn btn-secondary">

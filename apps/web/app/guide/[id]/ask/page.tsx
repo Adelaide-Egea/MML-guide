@@ -8,6 +8,7 @@ import {
   type Prepared,
   acceptModelAnswer,
   chromeFor,
+  guideSnippets,
   modelContext,
   prepare,
   subjectsFor,
@@ -82,7 +83,7 @@ export default function AskPage() {
         });
         if (!response.ok) throw new Error(String(response.status));
         const model = (await response.json()) as { body: string; citedEntryIds: string[] };
-        const answer = acceptModelAnswer(prepared, model, language);
+        const answer = acceptModelAnswer(prepared, model, language, asked);
         if (answer.kind === 'refusal' && prepared.candidates.length > 0) {
           setShown({ question: asked, kind: 'degraded', candidates: prepared.candidates });
         } else {
@@ -90,8 +91,7 @@ export default function AskPage() {
         }
       } catch {
         // The assistant being unavailable must not mean no answer. Retrieval is
-        // deterministic and already ran, so the matched entries are shown exactly as
-        // the parent wrote them.
+        // deterministic and already ran — show the closest sentences as bullets.
         setShown({ question: asked, kind: 'degraded', candidates: prepared.candidates });
       }
     } finally {
@@ -153,7 +153,11 @@ export default function AskPage() {
           {shown.kind === 'answer' ? (
             <AnswerView answer={shown.answer} chrome={chrome} />
           ) : (
-            <FromTheGuide candidates={shown.candidates} chrome={chrome} />
+            <FromTheGuide
+              question={shown.question}
+              candidates={shown.candidates}
+              chrome={chrome}
+            />
           )}
         </section>
       )}
@@ -161,34 +165,29 @@ export default function AskPage() {
   );
 }
 
-/** What the guide says, with no model involved. Also what the whole product falls
- *  back to during a provider outage, which is why the AI is an improvement to this
- *  rather than a dependency of it. */
+/** Closest notes from the guide when the model is down — bullets, not chapters. */
 function FromTheGuide({
+  question,
   candidates,
   chrome,
 }: {
+  question: string;
   candidates: readonly Candidate[];
   chrome: ReturnType<typeof chromeFor>;
 }) {
+  const snippets = guideSnippets(question, candidates);
   return (
     <div className="answer stack-tight">
       <p className="muted">{chrome.assistantUnavailable}</p>
-      {candidates.map((candidate) => (
-        <div key={candidate.entry.id} className="stack-tight" style={{ marginTop: 'var(--space-3)' }}>
-          <strong>{candidate.entry.title}</strong>
-          <p className="block-body">{candidate.entry.body}</p>
-          <span className="citation">
-            {candidate.subjectName}
-            {candidate.entry.writtenBy ? ` · written by ${candidate.entry.writtenBy}` : ''}
-          </span>
-          {candidate.entry.media.length > 0 && (
-            <div className="media-grid">
-              {candidate.entry.media.map((m) => (
-                <MediaThumb key={m.id} media={m} />
-              ))}
-            </div>
-          )}
+      {snippets.map((snippet) => (
+        <div key={snippet.entryId} className="stack-tight" style={{ marginTop: 'var(--space-3)' }}>
+          <strong>{snippet.title}</strong>
+          <ul className="note-bullets">
+            {snippet.bullets.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <span className="citation">{snippet.subjectName}</span>
         </div>
       ))}
     </div>

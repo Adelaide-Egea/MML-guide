@@ -112,6 +112,18 @@ const TERM_SYNONYMS: ReadonlyMap<string, readonly string[]> = new Map([
   ['dessin', ['screen']],
   ['watch', ['screen']], // "can she watch …" almost always means screens here
   ['regarder', ['screen']],
+  // Nappies / diapers — US and UK caregivers use different words for the same shelf.
+  ['diaper', ['nappy', 'nappies']],
+  ['diapers', ['nappy', 'nappies']],
+  ['nappy', ['diaper', 'diapers']],
+  ['nappies', ['diaper', 'diapers']],
+  ['cream', ['lotion', 'ointment']],
+  ['lotion', ['cream', 'ointment']],
+  ['ointment', ['cream', 'lotion']],
+  ['wipe', ['wipes', 'nappy', 'diaper']],
+  ['wipes', ['wipe', 'nappy', 'diaper']],
+  ['couche', ['nappy', 'diaper']],
+  ['couches', ['nappy', 'diaper']],
 ]);
 
 function expandTerm(token: string): readonly string[] {
@@ -248,6 +260,10 @@ const TOPIC_WORDS: Record<string, readonly string[]> = {
   routine: [
     'time', 'when', 'schedule', 'routine', 'day', 'timetable', 'hour', 'usual',
     'heure', 'horaire', 'journee', 'quand', 'habitude',
+    // Nappies live under routine in the baby prompts — without these, "diaper cream"
+    // never boosts the Nappies entry over night-sleep notes that share a stray word.
+    'nappy', 'nappies', 'diaper', 'diapers', 'cream', 'lotion', 'wipe', 'wipes',
+    'rash', 'change', 'changing', 'couche', 'couches',
   ],
   meals: [
     'eat', 'food', 'feed', 'meal', 'dinner', 'lunch', 'breakfast', 'snack', 'hungry',
@@ -431,6 +447,78 @@ export function retrieve(
   return scored
     .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id))
     .slice(0, limit);
+}
+
+/** One focused note when the assistant cannot rewrite — parent's words, not a wall. */
+export interface GuideSnippet {
+  readonly entryId: string;
+  readonly title: string;
+  readonly subjectName: string;
+  /** Short bullets drawn from the matched entry, still in the parent's words. */
+  readonly bullets: readonly string[];
+}
+
+/** Split a note into sentences without inventing wording. */
+function sentencesOf(body: string): readonly string[] {
+  return body
+    .split(/\n+|(?<=[.!?])\s+/)
+    .map((s) => s.replace(/^[-•*]\s+/, '').trim())
+    .filter((s) => s.length > 0);
+}
+
+function sentenceScore(sentence: string, asked: readonly string[]): number {
+  const bag = new Set(terms(sentence));
+  let score = 0;
+  for (const term of asked) if (bag.has(term)) score += 1;
+  return score;
+}
+
+/** Offline fallback for Ask: the closest sentences, as bullets — not whole chapters.
+ *
+ *  Keeps the product working when the model is down, without dumping every retrieved
+ *  entry in full. Still the parent's words; just the lines that match the question.
+ */
+export function guideSnippets(
+  question: string,
+  candidates: readonly Candidate[],
+  limit = 2,
+): readonly GuideSnippet[] {
+  const asked = terms(question);
+  if (candidates.length === 0) return [];
+
+  const ranked = [...candidates].sort(
+    (a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id),
+  );
+  const top = ranked[0]!;
+  const picked: Candidate[] = [top];
+  for (const next of ranked.slice(1)) {
+    if (picked.length >= limit) break;
+    // A second entry only joins when it is nearly as relevant — otherwise Night Sleep
+    // rides along with Nappies on a cream question.
+    if (next.score >= Math.max(2, top.score * 0.7)) picked.push(next);
+  }
+
+  return picked.map((candidate) => {
+    const lines = sentencesOf(candidate.entry.body);
+    const scored = lines
+      .map((line) => ({ line, score: sentenceScore(line, asked) }))
+      .filter((row) => row.score > 0)
+      .sort((a, b) => b.score - a.score || a.line.length - b.line.length);
+
+    let bullets = scored.slice(0, 3).map((row) => row.line);
+    if (bullets.length === 0) {
+      // No shared terms inside sentences (title/topic carried the match) — take the
+      // first couple of lines rather than the whole paragraph.
+      bullets = lines.slice(0, Math.min(2, lines.length));
+    }
+
+    return {
+      entryId: candidate.entry.id,
+      title: candidate.entry.title,
+      subjectName: candidate.subjectName,
+      bullets,
+    };
+  });
 }
 
 // ── The answer ───────────────────────────────────────────────────────────────
@@ -627,6 +715,7 @@ export function acceptModelAnswer(
   prepared: Prepared,
   model: ModelAnswer,
   readerLanguage: string,
+  question = '',
 ): Answer {
   if (prepared.route !== 'model') return prepared.answer;
 
@@ -643,9 +732,15 @@ export function acceptModelAnswer(
   if (model.body.trim() === refusal(readerLanguage).body) {
     const top = prepared.candidates[0];
     if (top && top.score >= 5 && hasText(top.entry.body)) {
+      const snippets = guideSnippets(question || top.entry.title, prepared.candidates, 1);
+      const bullets = snippets[0]?.bullets ?? [];
+      const body =
+        bullets.length > 0
+          ? bullets.map((b) => `• ${b}`).join('\n')
+          : top.entry.body.trim();
       return {
         kind: 'grounded',
-        body: top.entry.body.trim(),
+        body,
         language: readerLanguage,
         citations: [citationFor(top)],
       };

@@ -102,6 +102,7 @@ export default function NewGuide() {
       extra: '',
       signOff: '',
       tripId: null,
+      entryRecaps: {},
     };
   }, [scenario, household.id, caregiverName, language, subjectIds]);
 

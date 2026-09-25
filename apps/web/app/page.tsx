@@ -257,6 +257,7 @@ function Readiness() {
       extra: '',
       signOff: '',
       tripId: null,
+      entryRecaps: {},
     }),
     [household.id],
   );

@@ -400,7 +400,21 @@ export function normalizeHandover(
     signOff: raw.signOff ?? '',
     expectation,
     tripId: typeof raw.tripId === 'string' ? raw.tripId : null,
+    entryRecaps: normalizeEntryRecaps(raw.entryRecaps),
   };
+}
+
+/** Parent-approved bullet lists keyed by entry id. Empty strings are dropped. */
+function normalizeEntryRecaps(raw: unknown): Readonly<Record<string, string>> {
+  if (!raw || typeof raw !== 'object') return {};
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof value !== 'string') continue;
+    const trimmed = value.trim();
+    if (!trimmed || !key.trim()) continue;
+    out[key.trim()] = trimmed;
+  }
+  return out;
 }
 
 /** One occasion: this caregiver, this stretch of time, these subjects.
@@ -434,6 +448,12 @@ export interface Handover {
   readonly signOff: string;
   /** Linked Away trip when scenario is goingtoyours. */
   readonly tripId: string | null;
+  /**
+   * Parent-approved bullet recaps for long entry notes, keyed by entry id.
+   * Full entry bodies stay on the household; the caregiver can switch between
+   * bullets and the full text. Absent or empty means “full notes only”.
+   */
+  readonly entryRecaps: Readonly<Record<string, string>>;
 }
 
 export function subjectsFor(household: Household, handover: Handover): readonly CareSubject[] {

@@ -81,6 +81,7 @@ export function loadSample(): Sample {
     extra: '',
     signOff: 'Thank you — Claire',
     tripId: null,
+    entryRecaps: {},
   };
 
   const household: Household = {

@@ -55,6 +55,8 @@ export interface GuideBlock {
    *  up unseen at the bottom of a screen. */
   readonly media: readonly Media[];
   readonly subjectId?: string;
+  /** Parent-approved bullet recap. Full `body` stays; caregiver can prefer either. */
+  readonly recap?: string;
 }
 
 export interface GuideDocument {
@@ -71,9 +73,15 @@ function factBlock(
   id: string,
   heading: string,
   body: string,
-  options: { critical?: boolean; subjectId?: string; media?: readonly Media[] } = {},
+  options: {
+    critical?: boolean;
+    subjectId?: string;
+    media?: readonly Media[];
+    recap?: string;
+  } = {},
 ): GuideBlock {
   const critical = options.critical ?? false;
+  const recap = options.recap?.trim();
   return {
     id,
     heading,
@@ -85,30 +93,50 @@ function factBlock(
     enrichable: !critical,
     media: options.media ?? [],
     ...(options.subjectId ? { subjectId: options.subjectId } : {}),
+    ...(recap ? { recap } : {}),
   };
 }
 
-const DURATION_SCOPE: Record<Handover['duration'], readonly RoutineItem['kind'][]> = {
-  evening: ['Dinner', 'Bath', 'Bedtime', 'Medication', 'Snack', 'Feed', 'Walk'],
-  fullday: [],
-  fewdays: [],
-};
+/** Minutes from midnight for a 24-hour `HH:MM`, or null when untimed / unparseable. */
+function minutesOf(time: string | null): number | null {
+  if (!time) return null;
+  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+/** Evening window: mid-afternoon through overnight.
+ *
+ *  Kind-whitelisting used to keep a 10:00 Snack (Snack was “evening-ish”) while
+ *  dropping Breakfast/Lunch — so morning bottles showed up on an evening sitter
+ *  card. Scope by clock time instead: morning school runs and 10am snacks fall
+ *  away; 16:00 onward and overnight wakes stay; an evening bottle labelled
+ *  Breakfast still shows.
+ *
+ *  Place checklist items are never evening-scoped away.
+ */
+const EVENING_FROM_MINUTES = 15 * 60; // 15:00
+const EVENING_OVERNIGHT_UNTIL = 5 * 60; // 05:00
+
+function inEveningWindow(time: string | null): boolean {
+  const mins = minutesOf(time);
+  // Untimed must-dos (meds, “if they wake”) still belong on an evening guide.
+  if (mins === null) return true;
+  return mins >= EVENING_FROM_MINUTES || mins < EVENING_OVERNIGHT_UNTIL;
+}
 
 /** Routine items relevant to the occasion. An evening sitter does not need the
- *  school run, and showing it makes the things they *do* need harder to find.
- *
- *  Place checklist items are never evening-scoped away: a cleaner coming for the
- *  evening still needs the bins and the shower, and those kinds are not dinner-through-bedtime.
+ *  school run or the 10am snack, and showing them makes tonight harder to find.
  */
 export function scopeRoutine(
   routine: readonly RoutineItem[],
   duration: Handover['duration'],
   subjects?: readonly CareSubject[],
 ): readonly RoutineItem[] {
-  const kinds = DURATION_SCOPE[duration];
-  let scoped = kinds.length
-    ? routine.filter((item) => kinds.includes(item.kind) || isPlaceRoutineKind(item.kind))
-    : routine;
+  let scoped =
+    duration === 'evening'
+      ? routine.filter((item) => inEveningWindow(item.time) || isPlaceRoutineKind(item.kind))
+      : routine;
 
   if (subjects) {
     const ids = new Set(subjects.map((s) => s.id));
@@ -221,10 +249,12 @@ export function buildGuide(
     for (const entry of subject.entries) {
       if (!hasText(entry.body) && entry.media.length === 0) continue;
       const title = chrome.entryTitles[entry.title] ?? entry.title;
+      const approved = handover.entryRecaps[entry.id]?.trim();
       blocks.push(
         factBlock(`entry:${entry.id}`, `${subjectLabel(subject)} — ${title}`, entry.body.trim(), {
           subjectId: subject.id,
           media: entry.media,
+          ...(approved ? { recap: approved } : {}),
         }),
       );
     }
