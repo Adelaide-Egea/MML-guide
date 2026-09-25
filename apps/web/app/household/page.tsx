@@ -147,7 +147,7 @@ export default function HouseholdPage() {
           <p className="muted">
             {household.subjects.length > 0 && household.subjects.every((s) => s.kind === 'place')
               ? 'Optional. A cleaner only needs the checklist for the day they come — start from a preset on the place page.'
-              : 'Optional. Whatever you add here is what the caregiver sees on the guide.'}
+              : 'Optional. An evening sitter sees from mid-afternoon on — morning slots stay here for full-day visits.'}
           </p>
         )}
 

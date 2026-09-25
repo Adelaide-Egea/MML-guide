@@ -27,6 +27,7 @@ import {
   type Handover,
   type Household,
   type RoutineItem,
+  isPlaceRoutineKind,
   subjectsFor,
 } from './household.ts';
 
@@ -96,21 +97,46 @@ function factBlock(
   };
 }
 
-/** Routine items for the guide.
+/** Minutes from midnight for a 24-hour `HH:MM`, or null when untimed / unparseable. */
+function minutesOf(time: string | null): number | null {
+  if (!time) return null;
+  const m = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+/** Evening window: mid-afternoon through overnight.
  *
- *  Evening used to whitelist kinds (Dinner/Bath/Snack/…) and silently drop anything
- *  else — so a parent’s Breakfast and Lunch vanished from the caregiver card while
- *  a mid-morning Snack stayed. The guide must show what was entered; occasion
- *  filtering is subject-based only (children vs place vs pets).
+ *  Kind-whitelisting used to keep a 10:00 Snack (Snack was “evening-ish”) while
+ *  dropping Breakfast/Lunch — so morning bottles showed up on an evening sitter
+ *  card. Scope by clock time instead: morning school runs and 10am snacks fall
+ *  away; 16:00 onward and overnight wakes stay; an evening bottle labelled
+ *  Breakfast still shows.
  *
- *  Full-day and multi-day handovers already passed the routine through unchanged.
+ *  Place checklist items are never evening-scoped away.
+ */
+const EVENING_FROM_MINUTES = 15 * 60; // 15:00
+const EVENING_OVERNIGHT_UNTIL = 5 * 60; // 05:00
+
+function inEveningWindow(time: string | null): boolean {
+  const mins = minutesOf(time);
+  // Untimed must-dos (meds, “if they wake”) still belong on an evening guide.
+  if (mins === null) return true;
+  return mins >= EVENING_FROM_MINUTES || mins < EVENING_OVERNIGHT_UNTIL;
+}
+
+/** Routine items relevant to the occasion. An evening sitter does not need the
+ *  school run or the 10am snack, and showing them makes tonight harder to find.
  */
 export function scopeRoutine(
   routine: readonly RoutineItem[],
-  _duration: Handover['duration'],
+  duration: Handover['duration'],
   subjects?: readonly CareSubject[],
 ): readonly RoutineItem[] {
-  let scoped: readonly RoutineItem[] = routine;
+  let scoped =
+    duration === 'evening'
+      ? routine.filter((item) => inEveningWindow(item.time) || isPlaceRoutineKind(item.kind))
+      : routine;
 
   if (subjects) {
     const ids = new Set(subjects.map((s) => s.id));
