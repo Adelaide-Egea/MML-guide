@@ -182,15 +182,25 @@ test('critical blocks come first, so a ten-second skim hits them', () => {
   assert.equal(criticalBlocks(doc).length, 4); // important, allergy, contacts, local emergency
 });
 
-test('an evening handover hides the parts of the day it does not cover', () => {
+test('an evening handover keeps the authored routine, including Breakfast and Lunch', () => {
+  // Kind-whitelisting used to drop Breakfast/Lunch while keeping Snack — the guide
+  // no longer matched what the parent typed. Show every authored row.
   const routine = [
-    routineItem({ id: 'r1', time: '08:00', kind: 'School' }),
-    routineItem({ id: 'r2', time: '17:30', kind: 'Dinner' }),
-    routineItem({ id: 'r3', time: '19:00', kind: 'Bedtime' }),
+    routineItem({ id: 'r1', time: '07:00', kind: 'Breakfast' }),
+    routineItem({ id: 'r2', time: '10:00', kind: 'Snack' }),
+    routineItem({ id: 'r3', time: '13:00', kind: 'Lunch' }),
+    routineItem({ id: 'r4', time: '17:30', kind: 'Dinner' }),
+    routineItem({ id: 'r5', time: '19:00', kind: 'Bedtime' }),
   ];
 
-  assert.deepEqual(scopeRoutine(routine, 'evening').map((r) => r.id), ['r2', 'r3']);
-  assert.deepEqual(scopeRoutine(routine, 'fullday').map((r) => r.id), ['r1', 'r2', 'r3']);
+  assert.deepEqual(
+    scopeRoutine(routine, 'evening').map((r) => r.id),
+    ['r1', 'r2', 'r3', 'r4', 'r5'],
+  );
+  assert.deepEqual(
+    scopeRoutine(routine, 'fullday').map((r) => r.id),
+    ['r1', 'r2', 'r3', 'r4', 'r5'],
+  );
 });
 
 test('the routine is filtered to the subjects in scope', () => {

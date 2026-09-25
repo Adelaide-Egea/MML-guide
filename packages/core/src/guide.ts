@@ -27,7 +27,6 @@ import {
   type Handover,
   type Household,
   type RoutineItem,
-  isPlaceRoutineKind,
   subjectsFor,
 } from './household.ts';
 
@@ -88,27 +87,21 @@ function factBlock(
   };
 }
 
-const DURATION_SCOPE: Record<Handover['duration'], readonly RoutineItem['kind'][]> = {
-  evening: ['Dinner', 'Bath', 'Bedtime', 'Medication', 'Snack', 'Feed', 'Walk'],
-  fullday: [],
-  fewdays: [],
-};
-
-/** Routine items relevant to the occasion. An evening sitter does not need the
- *  school run, and showing it makes the things they *do* need harder to find.
+/** Routine items for the guide.
  *
- *  Place checklist items are never evening-scoped away: a cleaner coming for the
- *  evening still needs the bins and the shower, and those kinds are not dinner-through-bedtime.
+ *  Evening used to whitelist kinds (Dinner/Bath/Snack/…) and silently drop anything
+ *  else — so a parent’s Breakfast and Lunch vanished from the caregiver card while
+ *  a mid-morning Snack stayed. The guide must show what was entered; occasion
+ *  filtering is subject-based only (children vs place vs pets).
+ *
+ *  Full-day and multi-day handovers already passed the routine through unchanged.
  */
 export function scopeRoutine(
   routine: readonly RoutineItem[],
-  duration: Handover['duration'],
+  _duration: Handover['duration'],
   subjects?: readonly CareSubject[],
 ): readonly RoutineItem[] {
-  const kinds = DURATION_SCOPE[duration];
-  let scoped = kinds.length
-    ? routine.filter((item) => kinds.includes(item.kind) || isPlaceRoutineKind(item.kind))
-    : routine;
+  let scoped: readonly RoutineItem[] = routine;
 
   if (subjects) {
     const ids = new Set(subjects.map((s) => s.id));

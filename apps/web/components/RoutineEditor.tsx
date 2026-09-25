@@ -79,7 +79,7 @@ export function RoutineEditor({ subject }: { subject: CareSubject }) {
         <p className="muted">
           {place
             ? 'Optional. Start from a cleaner, change-and-restock, or deep-clean preset — a checklist for the visit, not a timed day.'
-            : 'Optional, and quick to start from a preset. An evening sitter is only shown the evening, so filling in the whole day costs them nothing.'}
+            : 'Optional, and quick to start from a preset. Whatever you add here is what the caregiver sees.'}
         </p>
       )}
 
