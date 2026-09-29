@@ -1,61 +1,41 @@
 import { NextResponse } from 'next/server';
+import { isAdminRequest } from '../../../lib/admin-auth.ts';
+import { parseUsageInput, readUsageStats, recordUsage } from '../../../lib/usage.ts';
+import { usageStore } from '../../../lib/usage-store.ts';
 
-/** In-memory aggregate counters for this server instance.
- *  Durable trail: set TRIAL_WEBHOOK_URL (Discord/Slack/Zapier) — only event + trial code.
- *  Read totals: GET /api/trial?secret=TRIAL_SECRET
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+/** Anonymous usage beacon. Body: { event, device, role, trial, ref, path }.
+ *  Stored in Upstash Redis when connected (lib/usage-store.ts), else in memory.
+ *  Optional durable trail: TRIAL_WEBHOOK_URL (Discord/Slack/Zapier) — event + tester code only.
  */
-
-type EventName = 'open' | 'guide' | 'ask' | 'welcome_home' | 'sample';
-
-const ALLOWED = new Set<EventName>(['open', 'guide', 'ask', 'welcome_home', 'sample']);
-
-const globalStore = globalThis as unknown as {
-  __domelaTrial?: { counts: Record<string, number>; byTrial: Record<string, Record<string, number>> };
-};
-
-function store() {
-  if (!globalStore.__domelaTrial) {
-    globalStore.__domelaTrial = { counts: {}, byTrial: {} };
-  }
-  return globalStore.__domelaTrial;
-}
-
 export async function POST(req: Request) {
-  let payload: { event?: string; trial?: string | null; path?: string };
+  let body: unknown;
   try {
-    payload = await req.json();
+    body = await req.json();
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  const event = payload.event as EventName;
-  if (!ALLOWED.has(event)) {
-    return NextResponse.json({ ok: false, error: 'unknown event' }, { status: 400 });
-  }
+  const input = parseUsageInput(body);
+  if (!input) return NextResponse.json({ ok: false, error: 'bad event' }, { status: 400 });
 
-  // Refuse anything that looks like content
-  if (payload.path && payload.path.length > 64) {
-    return NextResponse.json({ ok: false }, { status: 400 });
-  }
-
-  const s = store();
-  s.counts[event] = (s.counts[event] ?? 0) + 1;
-  const trial = typeof payload.trial === 'string' ? payload.trial.slice(0, 32) : '';
-  if (trial) {
-    s.byTrial[trial] ??= {};
-    s.byTrial[trial][event] = (s.byTrial[trial][event] ?? 0) + 1;
+  try {
+    await recordUsage(usageStore(), input);
+  } catch {
+    // Counting must never break the app.
   }
 
   const webhook = process.env.TRIAL_WEBHOOK_URL;
-  if (webhook) {
+  if (webhook && input.trial) {
     void fetch(webhook, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        text: `Domela trial: ${event}${trial ? ` (${trial})` : ''}`,
-        event,
-        trial: trial || null,
-        path: payload.path ?? null,
+        text: `Domela tester ${input.trial}: ${input.event}`,
+        event: input.event,
+        trial: input.trial,
         at: new Date().toISOString(),
       }),
     }).catch(() => {});
@@ -64,17 +44,11 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true });
 }
 
+/** JSON version of the dashboard, for the admin only. */
 export async function GET(req: Request) {
-  const secret = process.env.TRIAL_SECRET;
-  const url = new URL(req.url);
-  if (!secret || url.searchParams.get('secret') !== secret) {
+  if (!(await isAdminRequest(req))) {
     return NextResponse.json({ ok: false, error: 'unauthorized' }, { status: 401 });
   }
-  const s = store();
-  return NextResponse.json({
-    ok: true,
-    note: 'In-memory counts reset on cold start. Set TRIAL_WEBHOOK_URL for a durable trail.',
-    counts: s.counts,
-    byTrial: s.byTrial,
-  });
+  const stats = await readUsageStats(usageStore());
+  return NextResponse.json({ ok: true, stats });
 }

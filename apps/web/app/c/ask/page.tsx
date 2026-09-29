@@ -17,6 +17,7 @@ import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { AskField } from '../../../components/AskField.tsx';
 import type { GuideSnapshot } from '../../../lib/share.ts';
+import { track } from '../../../lib/trial.ts';
 
 type Shown =
   | { readonly question: string; readonly kind: 'answer'; readonly answer: Answer }
@@ -76,6 +77,7 @@ export default function CaregiverAskPage() {
     if (!asked || !snapshot || busy) return;
     const current = snapshot;
     setBusy(true);
+    track('ask');
     try {
       const prepared: Prepared = prepare(
         subjects,

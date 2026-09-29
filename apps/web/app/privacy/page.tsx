@@ -38,6 +38,11 @@ export default function PrivacyPage() {
         <ul className="plain-list">
           <li>No account. No email required to use the app.</li>
           <li>No sale of data. No advertising profiles.</li>
+          <li>
+            We count anonymous usage so we know the app works: which screens are opened and when a
+            guide is created or sent. Each browser gets a random number instead of a name. We never
+            send names, guide text, photos or questions with these counts.
+          </li>
           <li>No uploading of photos or guide text to Domela servers in ordinary use.</li>
           <li>
             Caregiver links are short private links that expire after 14 days. The guide for that

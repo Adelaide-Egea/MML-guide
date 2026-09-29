@@ -14,6 +14,7 @@ import { Badge } from '../components/Chrome.tsx';
 import { Mark } from '../components/Mark.tsx';
 import { KIND_HINT, KIND_LABEL, useActions, useAppState } from '../lib/store.ts';
 import { loadSample } from '../lib/sample.ts';
+import { track } from '../lib/trial.ts';
 
 const KINDS: readonly SubjectKind[] = ['child', 'pet', 'place'];
 
@@ -67,6 +68,7 @@ export default function Home() {
           onSample={() => {
             const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
             actions.addSample(sample, handover, presets, sampleTrips);
+            track('sample');
             setSwitching(false);
           }}
         />
@@ -226,6 +228,7 @@ export default function Home() {
             onClick={() => {
               const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
               actions.addSample(sample, handover, presets, sampleTrips);
+              track('sample');
             }}
           >
             See an example

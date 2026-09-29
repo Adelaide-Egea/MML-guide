@@ -202,6 +202,7 @@ export default function GuidePage() {
                     note = `${note} Could not shorten the link, so this one is long. It still works.`;
                   }
                   setShareNote(note);
+                  track('share');
                   if (navigator.share) {
                     await navigator.share({
                       title: `Guide for ${handover.caregiverName || 'caregiver'}`,
@@ -351,7 +352,14 @@ export default function GuidePage() {
       <PrintFooter chrome={chrome} />
 
       <div className="row no-print" style={{ marginTop: 'var(--space-6)' }}>
-        <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => {
+            track('print');
+            window.print();
+          }}
+        >
           {chrome.printOrSavePdf}
         </button>
       </div>
