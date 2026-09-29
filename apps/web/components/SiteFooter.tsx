@@ -13,7 +13,7 @@ export function SiteFooter() {
         {' · '}
         <Link href="/data">Your data</Link>
       </p>
-      <a href={SUPPORT_MAILTO} className="btn btn-secondary site-footer-contact">
+      <a href={SUPPORT_MAILTO} className="btn btn-secondary btn-inline site-footer-contact">
         Contact me
       </a>
       <p className="muted site-footer-contact-hint">Having difficulty with the app? Send a note.</p>
