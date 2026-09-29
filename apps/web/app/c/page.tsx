@@ -29,6 +29,7 @@ import { identityPair } from '../../lib/identity.ts';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
 import { useActions } from '../../lib/store.ts';
 import { linkifyPhones, telHref } from '../../lib/tel.ts';
+import { track } from '../../lib/trial.ts';
 
 /** Caregiver view — a hotel desk card, not a form.
  *
@@ -59,6 +60,7 @@ export default function CaregiverPage() {
       }
       setSnapshot(decoded);
       setLanguage(matchCareLanguage(decoded.handover.language || 'en').tag);
+      track('caregiver_open', { ref: decoded.handover.id });
       window.sessionStorage.setItem(
         'mml.caregiver-snapshot',
         JSON.stringify({

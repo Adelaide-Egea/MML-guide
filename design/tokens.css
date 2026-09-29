@@ -37,6 +37,10 @@
   --critical: #9e3a2f; /* 6.02:1 on linen. Safety only, always with icon */
   --critical-tint: #f7e8e4;
 
+  /* ---- Admin charts only. Validated for colour-blind separation + 3:1 on white. ---- */
+  --viz-parent: #3b6fb0;
+  --viz-caregiver: #c07d24;
+
   /* ---- Subject identity — tint background, dark text from the same family.
    *      No white-on-colour anywhere: at these saturations it fails AA. ---- */
   --id-dusk: #e4eaf0;
@@ -118,6 +122,9 @@
   --done-tint: #1e3228;
   --critical: #e8877a;
   --critical-tint: #3a2320;
+
+  --viz-parent: #4f86d0;
+  --viz-caregiver: #c98424;
 
   --id-dusk: #26313d;
   --id-dusk-ink: #bcd0e4;

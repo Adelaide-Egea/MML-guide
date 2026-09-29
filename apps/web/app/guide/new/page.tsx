@@ -17,6 +17,7 @@ import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { newId } from '../../../lib/ids.ts';
 import { useActions, useAppState } from '../../../lib/store.ts';
+import { track } from '../../../lib/trial.ts';
 
 const SCENARIO_CARD: Record<
   Scenario,
@@ -147,6 +148,7 @@ export default function NewGuide() {
       tripId,
     };
     actions.saveHandover(handover);
+    track('guide_created');
     router.push(`/guide/${handover.id}`);
   }
 
