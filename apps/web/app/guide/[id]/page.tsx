@@ -188,6 +188,7 @@ export default function GuidePage() {
                     );
                     return;
                   }
+                  track('share');
                   let note =
                     includePhotos && result.omittedVideos > 0
                       ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone; they are too large for a link.`
@@ -351,7 +352,14 @@ export default function GuidePage() {
       <PrintFooter chrome={chrome} />
 
       <div className="row no-print" style={{ marginTop: 'var(--space-6)' }}>
-        <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => {
+            track('print');
+            window.print();
+          }}
+        >
           {chrome.printOrSavePdf}
         </button>
       </div>

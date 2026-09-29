@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { track } from '../../../lib/trial.ts';
 import { useMemo, useState } from 'react';
 import {
   DEFAULT_EXPECTATION,
@@ -147,6 +148,7 @@ export default function NewGuide() {
       tripId,
     };
     actions.saveHandover(handover);
+    track('guide_created');
     router.push(`/guide/${handover.id}`);
   }
 

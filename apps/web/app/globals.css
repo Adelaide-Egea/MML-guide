@@ -1336,3 +1336,313 @@ a.routine-item {
   color: var(--ink-muted);
 }
 
+
+/* ---------------------------------------------------------------------------
+   /admin — private usage dashboard. Tokens only; chart hues are --viz-*.
+   --------------------------------------------------------------------------- */
+
+.admin {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  display: grid;
+  gap: var(--space-5);
+}
+
+.admin h1 {
+  font-size: 32px;
+}
+
+.admin h2 {
+  font-size: 20px;
+}
+
+.admin-login {
+  max-width: 420px;
+}
+
+.admin-label {
+  font-weight: 500;
+}
+
+.admin-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.admin-head p {
+  margin-top: var(--space-2);
+  max-width: 60ch;
+  font-size: var(--text-sm);
+}
+
+.admin-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  white-space: nowrap;
+}
+
+.admin-warning {
+  background: var(--brand-tint);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.admin-error {
+  color: var(--critical);
+  font-size: var(--text-sm);
+}
+
+.admin-empty {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-4) 0;
+}
+
+.admin-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-3);
+}
+
+.admin-tile {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.admin-tile-label {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-tile-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-tile-note {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-card > p {
+  font-size: var(--text-sm);
+}
+
+.admin-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.admin-swatch-parent {
+  background: var(--viz-parent);
+}
+
+.admin-swatch-caregiver {
+  background: var(--viz-caregiver);
+}
+
+.admin-legend {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.admin-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-chart-frame {
+  position: relative;
+  overflow-x: auto;
+}
+
+.admin-chart-frame svg {
+  width: 100%;
+  min-width: 560px;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.admin-grid {
+  stroke: var(--hairline);
+  stroke-width: 1;
+}
+
+.admin-axis {
+  fill: var(--ink-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-end-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.admin-line-parent {
+  stroke: var(--viz-parent);
+}
+
+.admin-line-caregiver {
+  stroke: var(--viz-caregiver);
+}
+
+.admin-dot {
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.admin-dot-parent {
+  fill: var(--viz-parent);
+}
+
+.admin-dot-caregiver {
+  fill: var(--viz-caregiver);
+}
+
+.admin-crosshair {
+  stroke: var(--hairline-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.admin-tooltip {
+  position: absolute;
+  top: 0;
+  background: var(--paper);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  display: grid;
+  gap: 2px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+}
+
+.admin-tooltip span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-details summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--brand-deep);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+
+.admin-table thead th {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.admin-table tbody th {
+  font-weight: 500;
+}
+
+.admin-funnel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-funnel li {
+  display: grid;
+  grid-template-columns: 190px 1fr 190px;
+  gap: var(--space-3);
+  align-items: center;
+  font-size: var(--text-sm);
+}
+
+.admin-funnel-track {
+  height: 12px;
+  background: var(--surface-sunk);
+  border-radius: 0 4px 4px 0;
+  overflow: hidden;
+}
+
+.admin-funnel-bar {
+  display: block;
+  height: 100%;
+  background: var(--ink-muted);
+  border-radius: 0 4px 4px 0;
+}
+
+.admin-funnel-value {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .admin-funnel li {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+}
