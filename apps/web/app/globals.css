@@ -768,6 +768,19 @@ a.routine-item {
   padding: 12px 4px;
 }
 
+.site-footer a.site-footer-contact {
+  display: inline-flex;
+  width: auto;
+  margin-top: var(--space-4);
+  text-decoration: none;
+  padding: 0 var(--space-5);
+}
+
+.site-footer-contact-hint {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+}
+
 .read .lede {
   font-size: var(--text-lg);
   color: var(--ink-muted);
