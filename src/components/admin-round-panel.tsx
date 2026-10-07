@@ -92,11 +92,10 @@ export function AdminRoundPanel({
             dates={round.dates}
             votes={votes}
             members={members}
+            picks={picks}
+            places={meetingPlaces(group, options)}
             isAdmin
           />
-        )}
-        {!isDay && (
-          <PlaceTally places={meetingPlaces(group, options)} picks={picks} />
         )}
       </div>
     );
@@ -207,6 +206,8 @@ export function AdminRoundPanel({
                   dates={round.dates}
                   votes={votes}
                   members={members}
+                  picks={picks}
+                  places={meetingPlaces(group, options)}
                   isAdmin
                   onChoose={(date) =>
                     startTransition(async () => {
@@ -737,38 +738,3 @@ function dateProgress(
     }));
 }
 
-function PlaceTally({
-  places,
-  picks,
-}: {
-  places: { id: string; title: string; area: string }[];
-  picks: { member_id: string; option_id: string }[];
-}) {
-  if (places.length === 0) return null;
-  const grouped = new Map<string, typeof places>();
-  for (const place of places) {
-    const list = grouped.get(place.area) ?? [];
-    list.push(place);
-    grouped.set(place.area, list);
-  }
-  return (
-    <div className="mt-3">
-      <p className="text-sm font-semibold">Places they&apos;d like</p>
-      <ul className="mt-1 space-y-1 text-sm text-[var(--muted)]">
-        {[...grouped.entries()].map(([area, spots]) => (
-          <li key={area}>
-            <p className="mt-2 font-semibold text-[var(--foreground)]">{area}</p>
-            {spots.map((place) => (
-              <p key={place.id} className="flex justify-between gap-3">
-                <span>{place.title}</span>
-                <span className="font-mono">
-                  {picks.filter((pick) => pick.option_id === place.id).length}
-                </span>
-              </p>
-            ))}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}

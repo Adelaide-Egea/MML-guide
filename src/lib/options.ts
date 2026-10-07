@@ -111,6 +111,29 @@ export function meetingPlaces(group: Group, options: Option[]): MeetingPlace[] {
     });
 }
 
+/** Top places among mums who are free on a given date. */
+export function rankPlacesForDate(
+  places: MeetingPlace[],
+  picks: { member_id: string; option_id: string }[],
+  freeMemberIds: Iterable<string>,
+  limit = 3,
+): { place: MeetingPlace; count: number }[] {
+  const free = new Set(freeMemberIds);
+  const counts = new Map<string, number>();
+  for (const pick of picks) {
+    if (!free.has(pick.member_id)) continue;
+    counts.set(pick.option_id, (counts.get(pick.option_id) ?? 0) + 1);
+  }
+  return places
+    .map((place) => ({ place, count: counts.get(place.id) ?? 0 }))
+    .filter((row) => row.count > 0)
+    .sort(
+      (a, b) =>
+        b.count - a.count || a.place.title.localeCompare(b.place.title, "en"),
+    )
+    .slice(0, limit);
+}
+
 /** Distinct meeting areas from this group's places. */
 export function meetingAreas(options: Option[], groupId: string): string[] {
   const names = new Set<string>();
