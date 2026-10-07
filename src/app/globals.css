@@ -1,0 +1,499 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+/*
+  Design tokens live in src/lib/theme.ts.
+  These variables are the runtime copy every screen reads.
+*/
+:root {
+  --background: #F4EEE6;
+  --background-elevated: #FFFFFF;
+  --foreground: #2B2233;
+  --muted: #8A8178;
+  --border: #E6DFD5;
+  --accent: #2B2233;
+  --accent-soft: #F4EEE6;
+  --accent-fg: #FFFFFF;
+  --gold: #C99A3E;
+  --gold-soft: #F4EEE6;
+  --winner: #2B2233;
+  --winner-fg: #F4EEE6;
+  --ticket: #FFFFFF;
+  --ticket-stub: #F4EEE6;
+  --danger: #9B2D4A;
+  --focus: #C99A3E;
+  --chip-outline: #E6DFD5;
+  --ink: #2B2233;
+  --linen: #F4EEE6;
+  --line: #E6DFD5;
+  --grey: #8A8178;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-winner: var(--winner);
+  --color-winner-fg: var(--winner-fg);
+  --color-ticket: var(--ticket);
+  --color-ticket-stub: var(--ticket-stub);
+  --color-danger: var(--danger);
+  --color-ink: var(--ink);
+  --color-linen: var(--linen);
+  --color-line: var(--line);
+  --color-grey: var(--grey);
+  --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-fraunces);
+  --font-mono: var(--font-dm-sans);
+  --radius-xl: 14px;
+  --radius-2xl: 14px;
+  --radius-3xl: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  color-scheme: light;
+}
+
+body {
+  background: var(--linen);
+  color: var(--ink);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.45;
+  min-height: 100dvh;
+}
+
+[class*="shadow"] {
+  box-shadow: none !important;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.font-mono,
+time,
+.tabular {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.breathe-orb {
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  background: color-mix(in oklab, var(--gold) 18%, white);
+  animation: breathe 8s ease-in-out infinite;
+}
+
+.breathe-orb--sm {
+  width: 48px;
+  height: 48px;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.82);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe-orb {
+    animation: none;
+  }
+}
+
+
+/* Soft seasonal motifs (CSS-only, no emojis) */
+[data-season="spring"] {
+  --season-motif: radial-gradient(
+      circle at 20% 30%,
+      color-mix(in oklab, var(--accent) 16%, transparent) 0 2px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at 70% 60%,
+      color-mix(in oklab, var(--gold) 18%, transparent) 0 1.5px,
+      transparent 2.5px
+    );
+}
+
+[data-season="summer"] {
+  --season-motif: repeating-linear-gradient(
+    -18deg,
+    transparent 0 14px,
+    color-mix(in oklab, var(--glow-a) 6%, transparent) 14px 15px
+  );
+}
+
+[data-season="autumn"] {
+  --season-motif: radial-gradient(
+      ellipse 40px 18px at 30% 40%,
+      color-mix(in oklab, var(--glow-a) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 28px 14px at 75% 70%,
+      color-mix(in oklab, var(--gold) 12%, transparent),
+      transparent 60%
+    );
+}
+
+[data-season="winter"] {
+  --season-motif: radial-gradient(
+      circle at 25% 25%,
+      color-mix(in oklab, white 55%, transparent) 0 1px,
+      transparent 2px
+    ),
+    radial-gradient(
+      circle at 70% 55%,
+      color-mix(in oklab, white 40%, transparent) 0 1.5px,
+      transparent 2.5px
+    ),
+    radial-gradient(
+      circle at 45% 80%,
+      color-mix(in oklab, var(--gold) 30%, transparent) 0 1px,
+      transparent 2px
+    );
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.font-mono,
+time,
+.tabular {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  body::before {
+    opacity: 0.15;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes season-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 24px 0 color-mix(in oklab, var(--accent) 18%, transparent);
+  }
+}
+
+@keyframes season-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.7;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease-out both;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+.season-dot {
+  animation: season-dot 2.4s ease-in-out infinite;
+}
+
+.ticket-perforation {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 6px,
+    var(--border) 6px,
+    var(--border) 10px
+  );
+  background-size: 2px 14px;
+  background-repeat: repeat-y;
+  background-position: center;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--border) 60%, transparent),
+    color-mix(in oklab, var(--border) 20%, transparent),
+    color-mix(in oklab, var(--border) 60%, transparent)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 0.75rem;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* —— Seasonal cheer (passive, decorative) —— */
+.seasonal-cheer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  transition: opacity 1.2s ease;
+}
+
+.seasonal-cheer--fade {
+  opacity: 0;
+}
+
+.cheer-leaf,
+.cheer-flake,
+.cheer-petal,
+.cheer-spark {
+  position: absolute;
+  top: -12%;
+  opacity: 0.55;
+  will-change: transform;
+}
+
+.cheer-leaf {
+  width: 12px;
+  height: 12px;
+  border-radius: 0 70% 0 70%;
+  animation-name: cheer-fall-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.cheer-leaf--1 {
+  background: color-mix(in oklab, var(--accent) 75%, #d4a017);
+}
+.cheer-leaf--2 {
+  background: color-mix(in oklab, #c45c26 80%, var(--gold));
+  width: 10px;
+  height: 14px;
+}
+.cheer-leaf--3 {
+  background: color-mix(in oklab, var(--gold) 70%, #8b4513);
+  width: 9px;
+  height: 11px;
+}
+
+.cheer-flake {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in oklab, white 70%, var(--gold));
+  box-shadow: 0 0 4px color-mix(in oklab, white 40%, transparent);
+  animation-name: cheer-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.cheer-petal {
+  width: 10px;
+  height: 8px;
+  border-radius: 60% 0 60% 0;
+  background: color-mix(in oklab, var(--accent) 55%, white);
+  animation-name: cheer-fall-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.cheer-spark {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  animation-name: cheer-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  opacity: 0.45;
+}
+
+@keyframes cheer-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(18px, 110vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes cheer-fall-spin {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate3d(40px, 110vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cheer-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 20vh, 0) scale(0.8);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(12px, 55vh, 0) scale(1.1);
+    opacity: 0.55;
+  }
+}
+
+/* Tiny Christmas tree — bottom-right corner */
+.seasonal-cheer--festive .cheer-tree {
+  position: absolute;
+  right: 14px;
+  bottom: 18px;
+  width: 36px;
+  height: 48px;
+  opacity: 0.85;
+}
+
+.cheer-tree-top,
+.cheer-tree-mid,
+.cheer-tree-base {
+  display: block;
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid #2f6b3a;
+}
+
+.cheer-tree-top {
+  border-left-width: 8px;
+  border-right-width: 8px;
+  border-bottom-width: 12px;
+}
+
+.cheer-tree-mid {
+  margin-top: -4px;
+  border-left-width: 12px;
+  border-right-width: 12px;
+  border-bottom-width: 14px;
+}
+
+.cheer-tree-base {
+  margin-top: -5px;
+  border-left-width: 16px;
+  border-right-width: 16px;
+  border-bottom-width: 16px;
+}
+
+.cheer-tree-trunk {
+  display: block;
+  margin: 0 auto;
+  width: 6px;
+  height: 8px;
+  background: #6b3f22;
+  border-radius: 1px;
+}
+
+.cheer-tree-star {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  animation: season-dot 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-cheer {
+    display: none;
+  }
+}

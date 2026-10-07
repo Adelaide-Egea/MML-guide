@@ -1,0 +1,80 @@
+Mums' Night Out — upload this folder to the EXISTING Vercel project
+===================================================================
+
+This zip is the last production snapshot that already ran on:
+  https://mums-night-out.vercel.app
+
+It is commit 7ffc2f8 (organiser results / hide waiting line).
+It does NOT include later "place rankings" work that only exists in
+the Cursor Origin repo (commit 529ee87), which this agent could not copy.
+
+Do NOT create a new Vercel project. Use the existing one:
+  Team:    mml-guide
+  Project: mums-night-out
+  URL:     https://mums-night-out.vercel.app
+
+Env vars are already set on that Vercel project. You should not need
+to type secrets again.
+
+
+METHOD A — easiest if you have a GitHub account (no Terminal)
+-------------------------------------------------------------
+1. Unzip this file. You should see package.json inside the folder
+   (not another nested zip).
+2. Go to https://github.com/new
+   - Repository name: mums-night-out
+   - Private
+   - Create repository
+3. On the empty repo page, click "uploading an existing file"
+   (or Add file → Upload files).
+4. Drag EVERYTHING inside the unzipped folder onto GitHub
+   (package.json, src, public, …). Click Commit changes.
+5. Go to https://vercel.com/login and sign in.
+6. Switch to the team "mml-guide" (top-left).
+7. Open the existing project:
+   https://vercel.com/mml-guide/mums-night-out
+8. Settings → Git → Connect Git Repository → choose the GitHub
+   repo you just created. Confirm it deploys the root folder
+   (where package.json is). Framework: Next.js.
+9. Deployments → click Deploy / Redeploy production.
+10. Open https://mums-night-out.vercel.app and hard-refresh.
+
+
+METHOD B — Terminal on your laptop (most reliable)
+--------------------------------------------------
+1. Unzip this file.
+2. Install Node.js LTS from https://nodejs.org if you do not have it.
+3. Open Terminal and go into the unzipped folder, for example:
+
+     cd ~/Downloads/mums-night-out-vercel-upload
+
+   You must be in the folder that contains package.json.
+
+4. Log in to Vercel in the browser:
+
+     npx vercel login
+
+5. Deploy to the existing production project:
+
+     npx vercel deploy --prod --yes --scope mml-guide
+
+   This folder already contains .vercel/project.json pointing at
+   project mums-night-out, so it should not create a new site.
+
+6. When it finishes, open https://mums-night-out.vercel.app
+
+
+If Vercel asks "Set up and deploy" / "Link to existing project"
+---------------------------------------------------------------
+Choose:
+  - Scope / team: mml-guide
+  - Link to existing project: YES
+  - Project name: mums-night-out
+  - Root directory: ./  (leave default)
+
+
+Do not change
+-------------
+- Do not create a second project named mums-night-out-2
+- Do not overwrite env vars unless the site cannot talk to Supabase
+- Production site URL should stay https://mums-night-out.vercel.app
