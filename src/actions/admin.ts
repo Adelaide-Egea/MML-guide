@@ -100,6 +100,7 @@ export async function extendVoting(
   await store.updateRound(groupId, round.id, {
     closes_at: closes.toISOString(),
     status: "voting",
+    presence_open: false,
   });
   revalidateAdmin(groupId, group.invite_token);
   return { ok: true as const };
@@ -181,6 +182,7 @@ export async function changeDate(groupId: GroupId, roundId?: string) {
     chosen_option_id: null,
     status: "voting",
     closes_at: new Date().toISOString(),
+    presence_open: false,
   });
   revalidateAdmin(groupId, group.invite_token);
   return { ok: true as const };
@@ -195,6 +197,26 @@ export async function changePlan(groupId: GroupId, roundId?: string) {
     chosen_option_id: null,
     status: "pick",
   });
+  revalidateAdmin(groupId, group.invite_token);
+  return { ok: true as const };
+}
+
+export async function setPresenceOpen(
+  groupId: GroupId,
+  open: boolean,
+  roundId?: string,
+) {
+  await requireAdmin();
+  const group = await requireGroup(groupId);
+  const round = await resolveRound(groupId, roundId);
+  if (!round) return { ok: false as const, error: "No open round." };
+  if (!round.chosen_date) {
+    return { ok: false as const, error: "Choose the date first." };
+  }
+  if (round.status !== "pick" && round.status !== "decided") {
+    return { ok: false as const, error: "Choose the date first." };
+  }
+  await store.updateRound(groupId, round.id, { presence_open: open });
   revalidateAdmin(groupId, group.invite_token);
   return { ok: true as const };
 }
@@ -495,6 +517,24 @@ export async function getDecidedMessage(groupId: GroupId, roundId?: string) {
   const option = await store.getOption(groupId, round.chosen_option_id);
   if (!option) return { ok: false as const, error: "Option missing." };
   const text = `It's on! 🎭 ${option.title}${option.venue ? ` at ${option.venue}` : ""} — ${formatLongDate(round.chosen_date)}, ${formatFromTime(group.start_time)}. ${group.arrival_note ?? ""} Details: ${link}`;
+  return { ok: true as const, text };
+}
+
+export async function getPresenceMessage(groupId: GroupId, roundId?: string) {
+  await requireAdmin();
+  const group = await requireGroup(groupId);
+  const round = await resolveRound(groupId, roundId);
+  if (!round?.chosen_date) {
+    return { ok: false as const, error: "Choose a date first." };
+  }
+  const { formatLongDate } = await import("@/lib/dates");
+  const link = groupInviteUrl(group, round.kind);
+  const dateLabel = formatLongDate(round.chosen_date);
+  if (round.kind === "day") {
+    const text = `It's ${dateLabel} for the ${group.name} day walk. Add yourself if you can make it — mornings or afternoons. ${link}`;
+    return { ok: true as const, text };
+  }
+  const text = `It's ${dateLabel} for our ${group.name} night out. Add your name if you can make it (the other dates stay closed). ${link}`;
   return { ok: true as const, text };
 }
 

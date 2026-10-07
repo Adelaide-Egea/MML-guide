@@ -209,6 +209,7 @@ export const memoryDb = {
       dates: data.dates,
       chosen_date: null,
       chosen_option_id: null,
+      presence_open: false,
       meeting_point: data.meeting_point ?? null,
       pushchair_friendly: data.pushchair_friendly ?? null,
       coffee_stop: data.coffee_stop ?? null,
@@ -227,6 +228,7 @@ export const memoryDb = {
         | "chosen_date"
         | "chosen_option_id"
         | "dates"
+        | "presence_open"
         | "meeting_point"
         | "pushchair_friendly"
         | "coffee_stop"

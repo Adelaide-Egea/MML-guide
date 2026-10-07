@@ -54,6 +54,7 @@ function normalizeRound(row: Round | null): Round | null {
   return {
     ...row,
     kind: row.kind === "day" ? "day" : "evening",
+    presence_open: Boolean(row.presence_open),
     meeting_point: row.meeting_point ?? null,
     pushchair_friendly:
       row.pushchair_friendly === null || row.pushchair_friendly === undefined
@@ -251,6 +252,7 @@ export const store = {
         | "chosen_date"
         | "chosen_option_id"
         | "dates"
+        | "presence_open"
         | "meeting_point"
         | "pushchair_friendly"
         | "coffee_stop"

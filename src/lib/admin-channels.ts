@@ -140,7 +140,11 @@ function roundStatus(round: Round | null, now: Date): string | null {
       ? "Voting closed"
       : `Closes ${formatClosesExact(round.closes_at)}`;
   }
-  if (round.status === "pick") return "Pick the plan";
-  if (round.status === "decided") return "It's on";
+  if (round.status === "pick") {
+    return round.presence_open ? "Taking names" : "Pick the plan";
+  }
+  if (round.status === "decided") {
+    return round.presence_open ? "Taking names" : "It's on";
+  }
   return null;
 }

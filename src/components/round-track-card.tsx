@@ -20,7 +20,7 @@ import type {
   Round,
   SlotVote,
 } from "@/lib/types";
-import { isFreeEnough, votingStep } from "@/lib/types";
+import { isFreeEnough, isPresenceOpen, votingStep } from "@/lib/types";
 
 export async function RoundTrackCard({
   token,
@@ -53,6 +53,38 @@ export async function RoundTrackCard({
   const places = isDay ? [] : meetingPlaces(group, options);
   const votingOpen =
     round.status === "voting" && new Date(round.closes_at) > new Date();
+  const takingNames = isPresenceOpen(round);
+  const presenceHeadline = isDay
+    ? "the date is set — add yourself if you can make it"
+    : "the date is set — add your name if you can make it";
+  const presenceCard =
+    takingNames && round.chosen_date ? (
+      isDay ? (
+        <VoteDaySlots
+          token={token}
+          roundId={round.id}
+          dates={[round.chosen_date]}
+          closesAt={round.closes_at}
+          locked={false}
+          members={members}
+          slots={slotVotes}
+          memberId={member.id}
+          headline={presenceHeadline}
+        />
+      ) : (
+        <VoteDates
+          token={token}
+          roundId={round.id}
+          dates={[round.chosen_date]}
+          closesAt={round.closes_at}
+          locked={false}
+          members={members}
+          votes={votes}
+          memberId={member.id}
+          headline={presenceHeadline}
+        />
+      )
+    ) : null;
 
   let nightTicket: React.ReactNode = null;
   if (
@@ -149,29 +181,38 @@ export async function RoundTrackCard({
         ) : step === 2 ? (
           <ResultsView dates={round.dates} votes={votes} members={members} />
         ) : step === 3 && round.chosen_date && !isDay ? (
-          <PickPlan
-            token={token}
-            roundId={round.id}
-            group={group}
-            chosenDate={round.chosen_date}
-            freeNames={votes
-              .filter(
-                (v) => v.date === round.chosen_date && isFreeEnough(v),
-              )
-              .map(
-                (v) =>
-                  members.find((m) => m.id === v.member_id)?.first_name ?? "?",
-              )}
-            options={options}
-            picks={picks}
-            comments={comments}
-            members={members}
-            memberId={member.id}
-          />
+          <div className="space-y-6">
+            {presenceCard}
+            <PickPlan
+              token={token}
+              roundId={round.id}
+              group={group}
+              chosenDate={round.chosen_date}
+              freeNames={votes
+                .filter(
+                  (v) => v.date === round.chosen_date && isFreeEnough(v),
+                )
+                .map(
+                  (v) =>
+                    members.find((m) => m.id === v.member_id)?.first_name ?? "?",
+                )}
+              options={options}
+              picks={picks}
+              comments={comments}
+              members={members}
+              memberId={member.id}
+            />
+          </div>
         ) : step === 4 && isDay && round.chosen_date ? (
-          <DayWalkBooked round={round} />
+          <div className="space-y-6">
+            {presenceCard}
+            <DayWalkBooked round={round} />
+          </div>
         ) : (
-          nightTicket
+          <div className="space-y-6">
+            {presenceCard}
+            {nightTicket}
+          </div>
         )}
       </div>
     </section>

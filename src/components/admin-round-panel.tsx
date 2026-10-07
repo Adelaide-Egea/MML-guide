@@ -11,8 +11,10 @@ import {
   finishRound,
   getDecidedMessage,
   getPickMessage,
+  getPresenceMessage,
   getWhatsAppVoteMessage,
   openVoting,
+  setPresenceOpen,
 } from "@/actions/admin";
 import { ConfirmButton } from "@/components/confirm-button";
 import { CopyButton } from "@/components/copy-button";
@@ -231,11 +233,21 @@ export function AdminRoundPanel({
                   Reopen 12h
                 </button>
               </div>
+              <p className="text-sm text-[var(--muted)]">
+                After you pick the date, you can open just that night so people
+                can still add their name.
+              </p>
             </div>
           )}
 
           {step === 3 && round.chosen_date && !isDay && (
             <div className="space-y-3 rounded-2xl border border-[var(--border)] p-3 sm:p-4">
+              <PresenceControls
+                groupId={group.id}
+                roundId={round.id}
+                date={round.chosen_date}
+                open={round.presence_open}
+              />
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <ConfirmButton
                   label="Change date"
@@ -292,6 +304,7 @@ export function AdminRoundPanel({
                 meetingPoint={round.meeting_point}
                 pushchairFriendly={round.pushchair_friendly}
                 coffeeStop={round.coffee_stop}
+                presenceOpen={round.presence_open}
               />
             ) : round.chosen_option_id ? (
               <DecidedAdmin
@@ -299,6 +312,7 @@ export function AdminRoundPanel({
                 roundId={round.id}
                 option={options.find((o) => o.id === round.chosen_option_id)!}
                 date={round.chosen_date}
+                presenceOpen={round.presence_open}
               />
             ) : null
           )}
@@ -338,6 +352,7 @@ function DayDecidedAdmin({
   meetingPoint,
   pushchairFriendly,
   coffeeStop,
+  presenceOpen,
 }: {
   groupId: Group["id"];
   roundId: string;
@@ -345,10 +360,17 @@ function DayDecidedAdmin({
   meetingPoint?: string | null;
   pushchairFriendly?: boolean | null;
   coffeeStop?: string | null;
+  presenceOpen: boolean;
 }) {
   const router = useRouter();
   return (
     <div className="space-y-3 rounded-2xl border border-[var(--border)] p-3 sm:p-4">
+      <PresenceControls
+        groupId={groupId}
+        roundId={roundId}
+        date={date}
+        open={presenceOpen}
+      />
       <h3 className="font-display text-title">Day walk locked in</h3>
       <p className="font-mono text-sm">{formatLongDate(date)}</p>
       <dl className="space-y-1 text-sm">
@@ -685,16 +707,24 @@ function DecidedAdmin({
   roundId,
   option,
   date,
+  presenceOpen,
 }: {
   group: Group;
   roundId: string;
   option: Option;
   date: string;
+  presenceOpen: boolean;
 }) {
   const router = useRouter();
 
   return (
     <div className="space-y-3 rounded-2xl border border-[var(--border)] p-3 sm:p-4">
+      <PresenceControls
+        groupId={group.id}
+        roundId={roundId}
+        date={date}
+        open={presenceOpen}
+      />
       <BigNightTicket
         title={option.title}
         venue={option.venue}
@@ -732,6 +762,58 @@ function DecidedAdmin({
             router.refresh();
           }}
         />
+      </div>
+    </div>
+  );
+}
+
+function PresenceControls({
+  groupId,
+  roundId,
+  date,
+  open,
+}: {
+  groupId: Group["id"];
+  roundId: string;
+  date: string;
+  open: boolean;
+}) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+  return (
+    <div className="space-y-2 rounded-xl border border-[var(--border)] p-3">
+      <p className="text-sm font-semibold">
+        {open
+          ? `Taking names on ${formatLongDate(date)}`
+          : "Open the final choice"}
+      </p>
+      <p className="text-sm text-[var(--muted)]">
+        {open
+          ? "The rest of the poll stays closed. People can still say if they're coming."
+          : "Open only this date so people can add themselves without reopening the whole poll."}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="min-h-11 rounded-xl border border-[var(--border)] px-4 text-sm font-medium"
+          onClick={() =>
+            startTransition(async () => {
+              await setPresenceOpen(groupId, !open, roundId);
+              router.refresh();
+            })
+          }
+        >
+          {open ? "Stop taking names" : "Open the final choice"}
+        </button>
+        {open && (
+          <CopyButton
+            label="Copy message"
+            getText={async () => {
+              const res = await getPresenceMessage(groupId, roundId);
+              return res.ok ? res.text : null;
+            }}
+          />
+        )}
       </div>
     </div>
   );

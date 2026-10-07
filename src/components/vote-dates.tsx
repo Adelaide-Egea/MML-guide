@@ -38,6 +38,7 @@ export function VoteDates({
   members,
   votes,
   memberId,
+  headline,
 }: {
   token: string;
   roundId: string;
@@ -47,6 +48,8 @@ export function VoteDates({
   members: MemberLite[];
   votes: VoteLite[];
   memberId: string;
+  /** Overrides the usual “voting closes …” line (used for final-choice RSVP). */
+  headline?: string;
 }) {
   const toast = useToast();
   const [liveVotes, setLiveVotes] = useState(votes);
@@ -117,14 +120,14 @@ export function VoteDates({
   }
 
   const closesLabel = formatClosesExact(closesAt);
-  const closed = locked || new Date(closesAt) <= new Date();
 
   return (
     <div className="space-y-4">
       <p className="text-body font-semibold text-[var(--ink)]">
         {repliedCount} of {members.length} replied
         {" · "}
-        {closed ? "voting closed" : `voting closes ${closesLabel}`}
+        {headline ??
+          (locked ? "voting closed" : `voting closes ${closesLabel}`)}
       </p>
 
       <div className="space-y-3">

@@ -49,6 +49,11 @@ export interface Round {
   dates: string[];
   chosen_date: string | null;
   chosen_option_id: string | null;
+  /**
+   * After the poll closes and a date is chosen, reopen just that date
+   * so people can still add their name. The rest of the poll stays closed.
+   */
+  presence_open: boolean;
   /** Day walks — shown on the walk card */
   meeting_point: string | null;
   pushchair_friendly: boolean | null;
@@ -165,6 +170,32 @@ export function votingStep(round: Round | null, now = new Date()): Step {
   if (round.status === "pick") return 3;
   if (round.status === "decided") return 4;
   return 1;
+}
+
+/** Full date poll is still collecting Yes / If needed / Can't. */
+export function isVotingOpen(round: Round, now = new Date()): boolean {
+  return round.status === "voting" && new Date(round.closes_at) > now;
+}
+
+/** Organiser has opened just the chosen date for late RSVPs. */
+export function isPresenceOpen(round: Round): boolean {
+  return Boolean(
+    round.presence_open &&
+      round.chosen_date &&
+      (round.status === "pick" || round.status === "decided"),
+  );
+}
+
+/** Members may set availability on this date (full poll or final-choice RSVP). */
+export function canReplyOnDate(
+  round: Round,
+  date: string,
+  now = new Date(),
+): boolean {
+  if (round.status === "done" || round.status === "cancelled") return false;
+  if (!round.dates.includes(date)) return false;
+  if (isVotingOpen(round, now)) return true;
+  return isPresenceOpen(round) && round.chosen_date === date;
 }
 
 /** Weekday 0=Sun … 6=Sat for a yyyy-MM-dd date (UTC noon safe). */

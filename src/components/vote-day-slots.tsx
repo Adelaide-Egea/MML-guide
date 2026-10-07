@@ -23,6 +23,7 @@ export function VoteDaySlots({
   members,
   slots,
   memberId,
+  headline,
 }: {
   token: string;
   roundId: string;
@@ -32,6 +33,7 @@ export function VoteDaySlots({
   members: MemberLite[];
   slots: SlotLite[];
   memberId: string;
+  headline?: string;
 }) {
   const toast = useToast();
   const [, startTransition] = useTransition();
@@ -85,7 +87,10 @@ export function VoteDaySlots({
       <p className="text-body font-semibold text-[var(--ink)]">
         {answered.size} of {members.length} replied
         {" · "}
-        {locked ? "voting closed" : `voting closes ${formatClosesExact(closesAt)}`}
+        {headline ??
+          (locked
+            ? "voting closed"
+            : `voting closes ${formatClosesExact(closesAt)}`)}
       </p>
 
       <div className="space-y-3">

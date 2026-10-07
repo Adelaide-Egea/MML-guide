@@ -10,8 +10,14 @@ import {
 import { resolveGroupByToken } from "@/lib/group-access";
 import { normalizePhone } from "@/lib/phone";
 import { store } from "@/lib/store";
-import type { GroupId, RoundKind } from "@/lib/types";
-import { memberChannel } from "@/lib/types";
+import {
+  canReplyOnDate,
+  isVotingOpen,
+  memberChannel,
+  type GroupId,
+  type RoundKind,
+} from "@/lib/types";
+
 import { groupVanityPaths } from "@/lib/invite-paths";
 import { revalidatePath } from "next/cache";
 
@@ -219,14 +225,18 @@ export async function toggleSlotVote(
     return { ok: false as const, error: "Tell us who you are first." };
   }
   const round = await store.getRound(group.id, roundId);
-  if (!round || round.status !== "voting" || round.kind !== "day") {
+  if (!round || round.kind !== "day") {
     return { ok: false as const, error: "Voting isn't open right now." };
   }
-  if (new Date(round.closes_at) <= new Date()) {
-    return { ok: false as const, error: "Voting has closed." };
-  }
-  if (!round.dates.includes(date)) {
-    return { ok: false as const, error: "That date isn't on this round." };
+  if (!canReplyOnDate(round, date)) {
+    return {
+      ok: false as const,
+      error: round.presence_open
+        ? "Only the chosen date is open."
+        : new Date(round.closes_at) <= new Date()
+          ? "Voting has closed."
+          : "Voting isn't open right now.",
+    };
   }
   try {
     await store.setSlotVote(
@@ -369,7 +379,7 @@ export async function setDateAvailability(
 ) {
   const group = await resolveGroupByToken(token);
   const round = await store.getRound(group.id, roundId);
-  if (!round || round.status !== "voting") {
+  if (!round) {
     return { ok: false as const, error: "Voting isn't open right now." };
   }
   const memberId = await actingMemberId(
@@ -379,11 +389,15 @@ export async function setDateAvailability(
   if (!memberId) {
     return { ok: false as const, error: "Tell us who you are first." };
   }
-  if (new Date(round.closes_at) <= new Date()) {
-    return { ok: false as const, error: "Voting has closed." };
-  }
-  if (!round.dates.includes(date)) {
-    return { ok: false as const, error: "That date isn't on this round." };
+  if (!canReplyOnDate(round, date)) {
+    return {
+      ok: false as const,
+      error: round.presence_open
+        ? "Only the chosen date is open."
+        : new Date(round.closes_at) <= new Date()
+          ? "Voting has closed."
+          : "Voting isn't open right now.",
+    };
   }
   if (!["yes", "if_needed", "cant"].includes(availability)) {
     return { ok: false as const, error: "Pick Yes, If needed, or Can't." };
@@ -396,6 +410,7 @@ export async function setDateAvailability(
       date,
       availability,
     );
+    if (!isVotingOpen(round)) revalidateMemberPaths(group, token);
     return { ok: true as const };
   } catch {
     return {
