@@ -40,7 +40,7 @@ export default async function AdminDashboard({
         id={`panel-${current}`}
         aria-labelledby={`tab-${current}`}
       >
-        {current === "todo" && <ToDo channels={open} />}
+        {current === "todo" && <ToDo open={open} all={channels} />}
         {current === "traffic" && (
           <Traffic channels={channels} longLinks={longLinks} />
         )}
@@ -56,58 +56,70 @@ export default async function AdminDashboard({
   );
 }
 
-function ToDo({ channels }: { channels: AdminChannel[] }) {
-  if (channels.length === 0) {
-    return <p className="text-body text-[var(--ink)]">No poll open.</p>;
+function ToDo({
+  open,
+  all,
+}: {
+  open: AdminChannel[];
+  all: AdminChannel[];
+}) {
+  const idle = all.filter((channel) => !channel.hasRound);
+  if (open.length === 0 && idle.length === 0) {
+    return <p className="text-small text-[var(--grey)]">No poll open.</p>;
   }
   return (
-    <div className="flex flex-col gap-4">
-      {channels.map((channel) => (
-        <article
-          key={channel.key}
-          className="rounded-card border border-[var(--line)] bg-white p-4"
-        >
-          <h2 className="font-display text-title text-[var(--ink)]">{channel.title}</h2>
-          {channel.statusLine && (
-            <p className="mt-1 text-body text-[var(--ink)]">{channel.statusLine}</p>
-          )}
-          {channel.showChase && channel.unfinished.length > 0 && (
-            <ul className="mt-4 flex flex-col gap-2">
-              {channel.unfinished.map((line) => (
-                <li key={`${line.name}-${line.detail}`} className="text-body">
-                  <span className="font-semibold">{line.name}</span>
-                  <span className="text-[var(--grey)]"> · {shortDetail(line.detail)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {channel.showChase &&
-            channel.unfinished.length === 0 &&
-            channel.quietPlaces.length === 0 && (
-              <p className="mt-4 text-body text-[var(--grey)]">Done</p>
-            )}
-          {channel.quietPlaces.length > 0 && (
-            <div className="mt-4">
-              <p className="text-small font-semibold text-[var(--grey)]">No votes</p>
-              <ul className="mt-2 flex flex-col gap-2">
-                {channel.quietPlaces.flatMap((area) =>
-                  area.places.map((place) => (
-                    <li key={`${area.area}-${place}`} className="text-body">
-                      <span className="font-semibold">{place}</span>
-                      <span className="block text-small text-[var(--grey)]">{area.area}</span>
-                    </li>
-                  )),
-                )}
-              </ul>
-            </div>
-          )}
-          <Link
-            href={channel.adminPath}
-            className="mt-4 flex min-h-tap items-center justify-center rounded-card bg-[var(--ink)] text-body font-semibold text-white"
+    <div className="flex flex-col gap-2">
+      {open.map((channel) => {
+        const names = channel.showChase
+          ? channel.unfinished.map((line) => line.name)
+          : [];
+        const quietCount = channel.quietPlaces.reduce(
+          (n, area) => n + area.places.length,
+          0,
+        );
+        return (
+          <article
+            key={channel.key}
+            className="flex items-start justify-between gap-3 rounded-card border border-[var(--line)] bg-white px-3 py-2"
           >
-            Open
-          </Link>
-        </article>
+            <div className="min-w-0">
+              <p className="text-small font-semibold text-[var(--ink)]">
+                {channel.title}
+              </p>
+              {channel.statusLine && (
+                <p className="text-small text-[var(--grey)]">{channel.statusLine}</p>
+              )}
+              {names.length > 0 && (
+                <p className="mt-0.5 text-small text-[var(--grey)]">
+                  {names.join(", ")}
+                </p>
+              )}
+              {channel.showChase && names.length === 0 && quietCount === 0 && (
+                <p className="text-small text-[var(--grey)]">Done</p>
+              )}
+              {quietCount > 0 && (
+                <p className="text-small text-[var(--grey)]">
+                  {quietCount} place{quietCount === 1 ? "" : "s"} with no votes
+                </p>
+              )}
+            </div>
+            <Link
+              href={channel.adminPath}
+              className="shrink-0 pt-0.5 text-small font-semibold text-[var(--ink)]"
+            >
+              Open
+            </Link>
+          </article>
+        );
+      })}
+      {idle.map((channel) => (
+        <Link
+          key={channel.key}
+          href={`${channel.adminPath}?tab=poll&plan=${channel.kind}`}
+          className="flex min-h-11 items-center justify-center rounded-card border border-[var(--line)] bg-white px-3 text-small font-semibold"
+        >
+          Plan {channel.title}
+        </Link>
       ))}
     </div>
   );
@@ -181,13 +193,3 @@ function opensLine(channel: AdminChannel): string {
   return `${week} · ${today}`;
 }
 
-function shortDetail(detail: string): string {
-  const halfway = detail.match(/stopped halfway through the dates \((.+)\)/);
-  if (halfway) return halfway[1] ?? detail;
-  if (detail === "hasn't answered any dates" || detail === "hasn't marked a time yet") {
-    return "not started";
-  }
-  if (detail === "answered the dates and hasn't chosen a place") return "no place";
-  if (detail === "opened the link and didn't add a name") return "no name";
-  return detail;
-}

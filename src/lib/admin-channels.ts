@@ -3,12 +3,13 @@ import { formatClosesExact, formatFromTime } from "@/lib/dates";
 import { groupChannelLinks, groupInviteUrl } from "@/lib/invite-paths";
 import { meetingPlaces } from "@/lib/options";
 import { store } from "@/lib/store";
-import type { GroupId, Round, Visit } from "@/lib/types";
+import type { GroupId, Round, RoundKind, Visit } from "@/lib/types";
 import { memberChannel } from "@/lib/types";
 
 export type AdminChannel = {
   key: string;
   groupId: GroupId;
+  kind: RoundKind;
   title: string;
   path: string;
   adminPath: string;
@@ -87,6 +88,7 @@ export async function loadAdminHome(): Promise<{
         return {
           key: `${group.id}-${link.channel}`,
           groupId: group.id,
+          kind: link.channel,
           title: `${group.name} · ${link.label}`,
           path: link.path,
           adminPath: `/admin/${group.id}`,

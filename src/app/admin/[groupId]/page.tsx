@@ -22,7 +22,7 @@ export default async function AdminGroupPage({
   searchParams,
 }: {
   params: Promise<{ groupId: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; plan?: string }>;
 }) {
   await requireAdmin();
   const { groupId: raw } = await params;
@@ -30,7 +30,7 @@ export default async function AdminGroupPage({
   const groupId = raw as GroupId;
   const group = await store.getGroupById(groupId);
   if (!group) notFound();
-  const { tab } = await searchParams;
+  const { tab, plan } = await searchParams;
   const current = pickTab(
     tab,
     TABS.map((item) => item.id),
@@ -86,6 +86,9 @@ export default async function AdminGroupPage({
                 picks={[]}
                 options={options}
                 token={group.invite_token}
+                launchPreferredKind={
+                  plan === "day" || plan === "evening" ? plan : "evening"
+                }
               />
             ) : (
               await Promise.all(
@@ -122,12 +125,18 @@ export default async function AdminGroupPage({
                 picks={[]}
                 options={options}
                 token={group.invite_token}
-                launchPreferredKind={canLaunchDay ? "day" : "evening"}
+                launchPreferredKind={
+                  plan === "day" || plan === "evening"
+                    ? plan
+                    : canLaunchEvening
+                      ? "evening"
+                      : "day"
+                }
                 launchLockedKinds={[
                   ...(canLaunchEvening ? [] : (["evening"] as const)),
                   ...(canLaunchDay ? [] : (["day"] as const)),
                 ]}
-                startCollapsed
+                startCollapsed={plan !== "day" && plan !== "evening"}
               />
             )}
           </div>

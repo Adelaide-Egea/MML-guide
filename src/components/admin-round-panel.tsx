@@ -420,15 +420,39 @@ function LaunchPanel({
   const [dates, setDates] = useState<string[] | null>(null);
   const preview = dates ?? generated;
   if (!plannerOpen) {
-    const label = initialKind === "day" ? "Plan a day walk" : "Plan a night out";
+    const nightOk = !lockedKinds.includes("evening");
+    const dayOk = group.supports_day_meetups && !lockedKinds.includes("day");
     return (
-      <button
-        type="button"
-        className="flex min-h-tap w-full items-center justify-center rounded-card border border-[var(--line)] bg-white text-body font-semibold"
-        onClick={() => setPlannerOpen(true)}
-      >
-        {label}
-      </button>
+      <div className="flex flex-col gap-2">
+        {nightOk && (
+          <button
+            type="button"
+            className="flex min-h-11 w-full items-center justify-center rounded-card border border-[var(--line)] bg-white text-small font-semibold"
+            onClick={() => {
+              setKind("evening");
+              setEvenings(group.evenings);
+              setDates(null);
+              setPlannerOpen(true);
+            }}
+          >
+            Plan a night out
+          </button>
+        )}
+        {dayOk && (
+          <button
+            type="button"
+            className="flex min-h-11 w-full items-center justify-center rounded-card border border-[var(--line)] bg-white text-small font-semibold"
+            onClick={() => {
+              setKind("day");
+              setEvenings([1, 2, 3, 4, 5]);
+              setDates(null);
+              setPlannerOpen(true);
+            }}
+          >
+            Plan a day walk
+          </button>
+        )}
+      </div>
     );
   }
 
