@@ -441,9 +441,10 @@ function LaunchPanel({
   );
   const [dates, setDates] = useState<string[] | null>(null);
   const preview = dates ?? generated;
+  const nightOk = !lockedKinds.includes("evening");
+  const dayOk = group.supports_day_meetups && !lockedKinds.includes("day");
+  const showKindToggle = nightOk && dayOk;
   if (!plannerOpen) {
-    const nightOk = !lockedKinds.includes("evening");
-    const dayOk = group.supports_day_meetups && !lockedKinds.includes("day");
     return (
       <div className="flex flex-col gap-2">
         {nightOk && (
@@ -480,10 +481,21 @@ function LaunchPanel({
 
   return (
     <div className="space-y-4 rounded-2xl border border-[var(--border)] p-3 sm:p-4">
-      <h3 className="font-display text-xl">
-        {kind === "day" ? "Plan a day walk" : "Plan the next night out"}
-      </h3>
-      {group.supports_day_meetups && (
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-display text-xl">
+          {kind === "day" ? "Plan a day walk" : "Plan the next night out"}
+        </h3>
+        {startCollapsed && (
+          <button
+            type="button"
+            className="min-h-11 shrink-0 rounded-xl px-3 text-sm font-semibold text-[var(--grey)]"
+            onClick={() => setPlannerOpen(false)}
+          >
+            Close
+          </button>
+        )}
+      </div>
+      {showKindToggle && (
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"

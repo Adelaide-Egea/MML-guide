@@ -91,53 +91,51 @@ export default async function AdminGroupPage({
                 }
               />
             ) : (
-              await Promise.all(
-                rounds.map(async (round) => {
-                  const votes = await store.listDateVotes(groupId, round.id);
-                  const slotVotes =
-                    round.kind === "day"
-                      ? await store.listSlotVotes(groupId, round.id)
-                      : [];
-                  const picks = await store.listOptionPicks(groupId, round.id);
-                  return (
-                    <AdminRoundPanel
-                      key={round.id}
-                      group={group}
-                      round={round}
-                      members={activeMembers}
-                      votes={votes}
-                      slotVotes={slotVotes}
-                      picks={picks}
-                      options={options}
-                      token={group.invite_token}
-                    />
-                  );
-                }),
-              )
-            )}
-            {(canLaunchEvening || canLaunchDay) && rounds.length > 0 && (
-              <AdminRoundPanel
-                group={group}
-                round={null}
-                members={activeMembers}
-                votes={[]}
-                slotVotes={[]}
-                picks={[]}
-                options={options}
-                token={group.invite_token}
-                launchPreferredKind={
-                  plan === "day" || plan === "evening"
-                    ? plan
-                    : canLaunchEvening
-                      ? "evening"
-                      : "day"
-                }
-                launchLockedKinds={[
-                  ...(canLaunchEvening ? [] : (["evening"] as const)),
-                  ...(canLaunchDay ? [] : (["day"] as const)),
-                ]}
-                startCollapsed={plan !== "day" && plan !== "evening"}
-              />
+              <>
+                {(canLaunchEvening || canLaunchDay) && (
+                  <AdminRoundPanel
+                    group={group}
+                    round={null}
+                    members={activeMembers}
+                    votes={[]}
+                    slotVotes={[]}
+                    picks={[]}
+                    options={options}
+                    token={group.invite_token}
+                    launchPreferredKind={
+                      canLaunchEvening ? "evening" : "day"
+                    }
+                    launchLockedKinds={[
+                      ...(canLaunchEvening ? [] : (["evening"] as const)),
+                      ...(canLaunchDay ? [] : (["day"] as const)),
+                    ]}
+                    startCollapsed
+                  />
+                )}
+                {await Promise.all(
+                  rounds.map(async (round) => {
+                    const votes = await store.listDateVotes(groupId, round.id);
+                    const slotVotes =
+                      round.kind === "day"
+                        ? await store.listSlotVotes(groupId, round.id)
+                        : [];
+                    const picks = await store.listOptionPicks(groupId, round.id);
+                    return (
+                      <AdminRoundPanel
+                        key={round.id}
+                        group={group}
+                        round={round}
+                        members={activeMembers}
+                        votes={votes}
+                        slotVotes={slotVotes}
+                        picks={picks}
+                        options={options}
+                        token={group.invite_token}
+                      />
+                    );
+                  }),
+                )}
+              </>
             )}
           </div>
         )}
