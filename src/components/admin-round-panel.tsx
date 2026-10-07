@@ -13,6 +13,7 @@ import {
   getPickMessage,
   getPresenceMessage,
   getWhatsAppVoteMessage,
+  openFinalChoice,
   openVoting,
   setPresenceOpen,
 } from "@/actions/admin";
@@ -202,6 +203,12 @@ export function AdminRoundPanel({
                       router.refresh();
                     })
                   }
+                  onOpenFinal={(date) =>
+                    startTransition(async () => {
+                      await openFinalChoice(group.id, date, round.id);
+                      router.refresh();
+                    })
+                  }
                 />
               ) : (
                 <ResultsView
@@ -214,6 +221,12 @@ export function AdminRoundPanel({
                   onChoose={(date) =>
                     startTransition(async () => {
                       await chooseDate(group.id, date, round.id);
+                      router.refresh();
+                    })
+                  }
+                  onOpenFinal={(date) =>
+                    startTransition(async () => {
+                      await openFinalChoice(group.id, date, round.id);
                       router.refresh();
                     })
                   }
@@ -233,10 +246,6 @@ export function AdminRoundPanel({
                   Reopen 12h
                 </button>
               </div>
-              <p className="text-sm text-[var(--muted)]">
-                After you pick the date, you can open just that night so people
-                can still add their name.
-              </p>
             </div>
           )}
 
@@ -328,11 +337,13 @@ function DayResultsBlock({
   slots,
   members,
   onChoose,
+  onOpenFinal,
 }: {
   dates: string[];
   slots: { member_id: string; date: string; slot: "morning" | "afternoon" }[];
   members: Member[];
   onChoose: (date: string) => void;
+  onOpenFinal?: (date: string) => void;
 }) {
   return (
     <DayResultsView
@@ -341,6 +352,7 @@ function DayResultsBlock({
       members={members}
       isAdmin
       onChoose={onChoose}
+      onOpenFinal={onOpenFinal}
     />
   );
 }

@@ -7,12 +7,14 @@ export function DayResultsView({
   members,
   isAdmin,
   onChoose,
+  onOpenFinal,
 }: {
   dates: string[];
   slots: { member_id: string; date: string; slot: DaySlot }[];
   members: { id: string; first_name: string }[];
   isAdmin?: boolean;
   onChoose?: (date: string) => void;
+  onOpenFinal?: (date: string) => void;
 }) {
   const rows = dates.map((date) => {
     const morning = new Set(
@@ -47,11 +49,24 @@ export function DayResultsView({
             </p>
           </>
         )}
-        {!isAdmin && (
+        {isAdmin && onOpenFinal && winners.length === 1 ? (
+          <>
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded-xl bg-white/15 px-4 text-sm font-semibold"
+              onClick={() => onOpenFinal(winners[0].date)}
+            >
+              Open the final choice
+            </button>
+            <p className="mt-2 text-sm opacity-70">
+              People can add themselves on this day only.
+            </p>
+          </>
+        ) : !isAdmin ? (
           <p className="mt-4 text-sm opacity-70">
             The organiser is choosing the day.
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="space-y-2">

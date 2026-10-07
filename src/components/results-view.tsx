@@ -72,6 +72,7 @@ export function ResultsView({
   places = [],
   isAdmin,
   onChoose,
+  onOpenFinal,
 }: {
   dates: string[];
   votes: VoteLite[];
@@ -80,6 +81,7 @@ export function ResultsView({
   places?: MeetingPlace[];
   isAdmin?: boolean;
   onChoose?: (date: string) => void;
+  onOpenFinal?: (date: string) => void;
 }) {
   const memberMap = new Map(members.map((m) => [m.id, m.first_name]));
   const counts = dates.map((date) => {
@@ -155,11 +157,25 @@ export function ResultsView({
           </>
         )}
         <PlaceRanks rows={winnerRanks} inverted />
-        {!isAdmin && (
+        {isAdmin && onOpenFinal && winners.length === 1 ? (
+          <>
+            <button
+              type="button"
+              className="mt-4 min-h-11 w-full rounded-xl bg-white/15 px-4 text-sm font-semibold"
+              onClick={() => onOpenFinal(winners[0].date)}
+            >
+              Open the final choice
+            </button>
+            <p className="mt-2 text-sm opacity-70">
+              People can add themselves on this date only. The other nights stay
+              closed.
+            </p>
+          </>
+        ) : !isAdmin ? (
           <p className="mt-4 text-sm opacity-70">
             The organiser is choosing the date.
           </p>
-        )}
+        ) : null}
       </div>
 
       <div className="space-y-4">

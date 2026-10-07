@@ -201,6 +201,27 @@ export async function changePlan(groupId: GroupId, roundId?: string) {
   return { ok: true as const };
 }
 
+export async function openFinalChoice(
+  groupId: GroupId,
+  date: string,
+  roundId?: string,
+) {
+  await requireAdmin();
+  const group = await requireGroup(groupId);
+  const round = await resolveRound(groupId, roundId);
+  if (!round) return { ok: false as const, error: "No open round." };
+  if (!round.dates.includes(date)) {
+    return { ok: false as const, error: "That date isn't in this round." };
+  }
+  await store.updateRound(groupId, round.id, {
+    chosen_date: date,
+    status: round.kind === "day" ? "decided" : "pick",
+    presence_open: true,
+  });
+  revalidateAdmin(groupId, group.invite_token);
+  return { ok: true as const };
+}
+
 export async function setPresenceOpen(
   groupId: GroupId,
   open: boolean,
