@@ -220,18 +220,18 @@ export default function Home() {
         <p className="muted" style={{ marginTop: 'var(--space-6)', textAlign: 'center' }}>
           Write it once. They can ask it the rest.
           <br />
-          Want to look around first?{' '}
+          <br />
           <button
             type="button"
-            className="btn btn-quiet btn-inline"
-            style={{ textDecoration: 'underline' }}
+            className="btn btn-secondary"
+            style={{ marginTop: 'var(--space-3)' }}
             onClick={() => {
               const { household: sample, handover, presets, trips: sampleTrips } = loadSample();
               actions.addSample(sample, handover, presets, sampleTrips);
               track('sample');
             }}
           >
-            See an example
+            See an example guide
           </button>
         </p>
       )}
@@ -271,9 +271,10 @@ function Readiness() {
   if (household.subjects.length === 0 || coverage.total === 0) {
     return (
       <section className="welcome">
+        <h1 className="display welcome-title">Leave the house without the long text message.</h1>
         <p>
-          Everything you&apos;d put in a long text message on the way out of the door. Written once,
-          so it&apos;s still there when you need it.
+          Write the routines once, with photos. Send one link to the babysitter, grandparent or pet
+          sitter. Free, and no account needed.
         </p>
       </section>
     );

@@ -1,0 +1,8 @@
+# Keeps Cursor from reading big files it doesn't need (saves usage)
+archive/
+handoff/
+**/*.zip
+node_modules/
+**/.next/
+package-lock.json
+design/fonts/

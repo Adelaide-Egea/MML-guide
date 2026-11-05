@@ -243,6 +243,10 @@ export default function GuidePage() {
             </span>
           </span>
         </label>
+        <p className="hint no-print">
+          The link holds this guide for 14 days, including any health details you wrote, such as
+          allergies or medicines. Only send it to the person who is looking after them.
+        </p>
         <p className="hint no-print" aria-live="polite">
           {shareState === 'working'
             ? chrome.preparingLink

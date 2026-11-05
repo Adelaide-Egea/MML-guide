@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { TopBar } from '../../components/Chrome.tsx';
 
+// Who is responsible for the data (UK GDPR art. 13). Set both in Vercel → Settings → Environment Variables.
+const CONTROLLER = process.env.DOMELA_CONTROLLER_NAME ?? '';
+const CONTACT = process.env.DOMELA_CONTACT_EMAIL ?? '';
+
 export const metadata = {
   title: 'Privacy — Domela',
   description: 'What Domela stores, what it does not, and what never leaves your device.',
@@ -58,13 +62,30 @@ export default function PrivacyPage() {
       </section>
 
       <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
+        <h2>Health details</h2>
+        <p>
+          You may write health details into a guide, such as a child’s allergies, medicines or an
+          inhaler. That is sensitive information, so treat it with care:
+        </p>
+        <ul className="plain-list">
+          <li>It stays on your device unless you send a caregiver link.</li>
+          <li>
+            A caregiver link holds the guide, including any health details in it, for 14 days so the
+            person looking after them can read it. Only send it to that person.
+          </li>
+          <li>Ask never sends safety notes to the AI provider.</li>
+          <li>Write only what the caregiver needs to know.</li>
+        </ul>
+      </section>
+
+      <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
         <h2>Ask (optional)</h2>
         <p>
           If you use <strong>Ask</strong>, the question and the selected guide
-          snippets needed to answer it are sent to an AI provider so an answer can
-          be written. Safety fields are excluded from that request. If Ask is not
-          configured, nothing is sent and the app still works offline for reading
-          the guide.
+          snippets needed to answer it are sent to our AI provider, Anthropic, so an
+          answer can be written. Answers come only from what is in the guide. Safety
+          fields are excluded from that request. If Ask is not configured, nothing is
+          sent and the app still works offline for reading the guide.
         </p>
       </section>
 
@@ -77,6 +98,19 @@ export default function PrivacyPage() {
           An optional trial code from your invite link may be included so we can
           see whether that household opened the app more than once — still without
           reading what is inside it.
+        </p>
+      </section>
+
+      <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
+        <h2>Who runs Domela</h2>
+        <p>
+          {CONTROLLER ? `Domela is run by ${CONTROLLER}, who is responsible for this data.` : 'Domela is run by its founder, who is responsible for this data.'}{' '}
+          {CONTACT ? (
+            <>
+              Questions, or want something deleted? Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
+            </>
+          ) : null}{' '}
+          You can also complain to the Information Commissioner’s Office (ico.org.uk).
         </p>
       </section>
 

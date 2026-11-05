@@ -1,0 +1,4 @@
+# Readable on request, but not searched by default
+DOMELA-UI-AND-PDF-FOR-CLAUDE.md
+docs/
+design/*.md
