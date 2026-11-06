@@ -155,12 +155,12 @@ export default function NewGuide() {
   if (!scenario) {
     return (
       <main className="shell">
-        <TopBar title="New guide" back="/" />
+        <TopBar title="Send to someone" back="/" />
         <h2 className="display" style={{ marginBottom: 'var(--space-2)' }}>
           What kind of visit?
         </h2>
         <p className="muted" style={{ marginBottom: 'var(--space-5)' }}>
-          One choice. The guide follows from there.
+          One choice. Your notes fill in the rest. Then you send one link.
         </p>
         <div className="scenario-grid">
           {SCENARIOS.map((id) => {
@@ -201,7 +201,7 @@ export default function NewGuide() {
 
   return (
     <main className="shell">
-      <TopBar title="New guide" back="/" />
+      <TopBar title="Send to someone" back="/" />
 
       <button
         type="button"
@@ -281,7 +281,7 @@ export default function NewGuide() {
         </div>
 
         <button type="submit" className="btn" disabled={subjectIds.length === 0}>
-          Make the guide
+          Next: send the link
         </button>
         {subjectIds.length === 0 && (
           <p className="hint" style={{ textAlign: 'center' }}>

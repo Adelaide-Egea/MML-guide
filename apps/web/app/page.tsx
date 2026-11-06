@@ -168,7 +168,10 @@ export default function Home() {
 
       {!empty && (
         <section className="stack" style={{ marginTop: 'var(--space-6)' }}>
-          <h2 className="eyebrow">Guides</h2>
+          <h2 className="eyebrow">Send to someone</h2>
+          <p className="muted">
+            Pick the visit and who it is for. Your notes fill it in, then you send one link.
+          </p>
           {guides.length > 0 && (
             <div className="card rows">
               {guides.map((handover) => (
@@ -186,7 +189,7 @@ export default function Home() {
             </div>
           )}
           <Link href="/guide/new" className="btn">
-            Create a guide
+            {guides.length > 0 ? 'Send to someone new' : 'Send to a caregiver'}
           </Link>
           <Link href="/household" className="btn btn-secondary">
             Contacts and daily routine
