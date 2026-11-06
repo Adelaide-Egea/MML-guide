@@ -21,6 +21,13 @@ import { BulletRecapEditor } from '../../../components/BulletRecapEditor.tsx';
 import { MediaThumb } from '../../../components/MediaField.tsx';
 import { PrintFooter, PrintMasthead } from '../../../components/PrintChrome.tsx';
 import { buildShareUrl } from '../../../lib/share.ts';
+import {
+  caregiverMessage,
+  isShareCancel,
+  mailHref,
+  smsHref,
+  whatsappHref,
+} from '../../../lib/send-link.ts';
 import { useActions, useAppState } from '../../../lib/store.ts';
 import { linkifyPhones } from '../../../lib/tel.ts';
 import { track } from '../../../lib/trial.ts';
@@ -36,8 +43,12 @@ export default function GuidePage() {
   const [focus, setFocus] = useState<Focus>('all');
   const [acknowledged, setAcknowledged] = useState(false);
   const [shareState, setShareState] = useState<
-    'idle' | 'working' | 'copied' | 'failed' | 'too-large'
+    'idle' | 'working' | 'ready' | 'failed' | 'too-large'
   >('idle');
+  /** The finished caregiver link. Shown with tap-again buttons, because phones
+   *  refuse to open the share sheet once the first tap has "expired". */
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   /** Explicit opt-in: photos only travel with the link when the parent ticks this. */
   const [includePhotos, setIncludePhotos] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
@@ -173,52 +184,57 @@ export default function GuidePage() {
               void (async () => {
                 setShareState('working');
                 setShareNote(null);
+                setShareUrl(null);
+                setCopied(false);
+                let result: Awaited<ReturnType<typeof buildShareUrl>>;
                 try {
                   const trip = handover.tripId
                     ? trips.find((t) => t.id === handover.tripId) ?? null
                     : null;
-                  const result = await buildShareUrl(household, handover, {
+                  result = await buildShareUrl(household, handover, {
                     includePhotos,
                     trip,
                   });
-                  if (!result.ok) {
-                    setShareState('too-large');
-                    setShareNote(
-                      'Those photos make the link too big to send. Untick photos and send the text, or remove a few pictures and try again.',
-                    );
-                    return;
-                  }
-                  let note =
-                    includePhotos && result.omittedVideos > 0
-                      ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone; they are too large for a link.`
-                      : includePhotos
-                        ? result.photoCount === 0
-                          ? 'No photos on this guide yet. The link is text only.'
-                          : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`
-                        : 'Text only. Photos stayed on this phone.';
-                  if (result.short) {
-                    note = `${note} Short link ready for WhatsApp. Expires in 14 days.`;
-                  } else {
-                    note = `${note} Could not shorten the link, so this one is long. It still works.`;
-                  }
-                  setShareNote(note);
-                  track('share');
-                  if (navigator.share) {
-                    await navigator.share({
-                      title: `Guide for ${handover.caregiverName || 'caregiver'}`,
-                      text: 'Everything they need while you are not there.',
-                      url: result.url,
-                    });
-                    setShareState('copied');
-                    setShareNote(`Sent. ${note}`);
-                  } else {
-                    await navigator.clipboard.writeText(result.url);
-                    setShareState('copied');
-                    setShareNote(`Sent. ${note}`);
-                  }
                 } catch {
                   setShareState('failed');
-                  setShareNote(null);
+                  return;
+                }
+                if (!result.ok) {
+                  setShareState('too-large');
+                  setShareNote(
+                    'Those photos make the link too big to send. Untick photos and send the text, or remove a few pictures and try again.',
+                  );
+                  return;
+                }
+                let note =
+                  includePhotos && result.omittedVideos > 0
+                    ? `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Short videos stay on this phone; they are too large for a link.`
+                    : includePhotos
+                      ? result.photoCount === 0
+                        ? 'No photos on this guide yet. The link is text only.'
+                        : `${result.photoCount} photo${result.photoCount === 1 ? '' : 's'} included. Anyone with the link can see them.`
+                      : 'Text only. Photos stayed on this phone.';
+                note = result.short
+                  ? `${note} Expires in 14 days.`
+                  : `${note} Could not shorten the link, so this one is long. It still works.`;
+                // The link exists now, so this is never a failure from here on.
+                setShareUrl(result.url);
+                setShareState('ready');
+                setShareNote(`Link ready. Choose how to send it. ${note}`);
+                track('share');
+                // Android usually still allows the share sheet here. iPhone usually
+                // refuses (the tap has expired); the buttons below cover that.
+                if (typeof navigator.share === 'function') {
+                  try {
+                    await navigator.share({
+                      title: `Guide for ${handover.caregiverName || 'caregiver'}`,
+                      text: 'Everything you need while I am out.',
+                      url: result.url,
+                    });
+                    setShareNote(`Sent. ${note}`);
+                  } catch {
+                    // Refused or closed. The send buttons are on screen.
+                  }
                 }
               })();
             }}
@@ -226,6 +242,92 @@ export default function GuidePage() {
             {chrome.sendToCaregiver}
           </button>
         </div>
+        {shareUrl ? (
+          <div className="stack no-print" style={{ gap: 'var(--space-2)' }}>
+            <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+              {typeof navigator !== 'undefined' && typeof navigator.share === 'function' ? (
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    void navigator
+                      .share({
+                        title: `Guide for ${handover.caregiverName || 'caregiver'}`,
+                        url: shareUrl,
+                      })
+                      .catch((error: unknown) => {
+                        if (!isShareCancel(error)) {
+                          setShareNote('Your phone blocked the share menu. Use WhatsApp, Text or Copy link.');
+                        }
+                      });
+                  }}
+                >
+                  Share link
+                </button>
+              ) : null}
+              <a
+                className="btn btn-secondary"
+                href={whatsappHref(caregiverMessage(handover.caregiverName ?? '', shareUrl))}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+              <a
+                className="btn btn-secondary"
+                href={smsHref(caregiverMessage(handover.caregiverName ?? '', shareUrl))}
+              >
+                Text message
+              </a>
+              <a
+                className="btn btn-secondary"
+                href={mailHref(
+                  `Guide for ${handover.caregiverName || 'you'}`,
+                  caregiverMessage(handover.caregiverName ?? '', shareUrl),
+                )}
+              >
+                Email
+              </a>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  void (async () => {
+                    try {
+                      await navigator.clipboard.writeText(shareUrl);
+                      setCopied(true);
+                      return;
+                    } catch {
+                      // Older phones and in-app browsers: fall back to selecting the box.
+                    }
+                    const box = document.getElementById('caregiver-link') as HTMLInputElement | null;
+                    box?.focus();
+                    box?.select();
+                    let ok = false;
+                    try {
+                      ok = document.execCommand('copy');
+                    } catch {
+                      ok = false;
+                    }
+                    if (ok) setCopied(true);
+                    else setShareNote('Press and hold the link below, then tap Copy.');
+                  })();
+                }}
+              >
+                {copied ? 'Copied' : 'Copy link'}
+              </button>
+            </div>
+            <input
+              id="caregiver-link"
+              type="text"
+              readOnly
+              value={shareUrl}
+              aria-label="Caregiver link"
+              style={{ borderRadius: 'var(--radius)' }}
+              onFocus={(e) => e.currentTarget.select()}
+            />
+          </div>
+        ) : null}
         <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
           <input
             type="checkbox"
@@ -234,6 +336,8 @@ export default function GuidePage() {
               setIncludePhotos(e.target.checked);
               setShareState('idle');
               setShareNote(null);
+              setShareUrl(null);
+              setCopied(false);
             }}
           />
           <span>
