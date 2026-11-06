@@ -166,16 +166,7 @@ export default function GuidePage() {
           value={handover.language}
           onChange={(language) => actions.saveHandover({ ...handover, language })}
         />
-        <BulletRecapEditor
-          chrome={chrome}
-          handover={handover}
-          blocks={rest}
-          onSave={(entryRecaps) => actions.saveHandover({ ...handover, entryRecaps })}
-        />
         <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-          <Link href={`/guide/${handover.id}/ask`} className="btn btn-secondary">
-            {chrome.askAboutAnything}
-          </Link>
           <button
             type="button"
             className="btn"
@@ -241,6 +232,9 @@ export default function GuidePage() {
           >
             {chrome.sendToCaregiver}
           </button>
+          <Link href={`/guide/${handover.id}/ask`} className="btn btn-secondary">
+            {chrome.askAboutAnything}
+          </Link>
         </div>
         {shareUrl ? (
           <div className="stack no-print" style={{ gap: 'var(--space-2)' }}>
@@ -362,6 +356,12 @@ export default function GuidePage() {
                   ? shareNote
                   : chrome.sendHint}
         </p>
+        <BulletRecapEditor
+          chrome={chrome}
+          handover={handover}
+          blocks={rest}
+          onSave={(entryRecaps) => actions.saveHandover({ ...handover, entryRecaps })}
+        />
       </div>
 
       <SafetyBlock
