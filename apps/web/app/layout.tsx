@@ -35,6 +35,8 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: light)', color: '#f6f1e9' },
     { media: '(prefers-color-scheme: dark)', color: '#1a201d' },
   ],
+  /* So env(safe-area-inset-*) is real on iPhone, not 0. */
+  viewportFit: 'cover',
 };
 
 const THEME_SCRIPT = `
@@ -57,8 +59,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }`}</style>
       </head>
       <body>
+        <a className="skip-link" href="#content">
+          Skip to content
+        </a>
         <TrialBeacon />
-        {children}
+        <div id="content">{children}</div>
         <SiteFooter />
       </body>
     </html>

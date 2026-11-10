@@ -11,7 +11,14 @@ const COLOURS: readonly { token: string; label: string }[] = [
   { token: '--id-plum', label: 'Plum' },
 ];
 
-const SHAPES: readonly string[] = ['●', '▲', '■', '◆', '★', '✚'];
+const SHAPES: readonly { symbol: string; label: string }[] = [
+  { symbol: '●', label: 'Circle' },
+  { symbol: '▲', label: 'Triangle' },
+  { symbol: '■', label: 'Square' },
+  { symbol: '◆', label: 'Diamond' },
+  { symbol: '★', label: 'Star' },
+  { symbol: '✚', label: 'Cross' },
+];
 
 const EMOJIS: Record<SubjectKind, readonly string[]> = {
   child: ['👧', '👦', '👶', '🧒', '⭐', '🌙', '🐻', '🐰', '🦊', '🦋', '🌈', '⚽'],
@@ -50,11 +57,15 @@ export function IdentityPicker({
         ))}
       </div>
       <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-        {[...SHAPES, ...emojis].map((symbol) => (
+        {[
+          ...SHAPES,
+          ...emojis.map((symbol) => ({ symbol, label: `Emoji ${symbol}` })),
+        ].map(({ symbol, label }) => (
           <button
             key={symbol}
             type="button"
             className="identity-glyph"
+            aria-label={label}
             aria-pressed={subject.identity.symbol === symbol}
             onClick={() => onChange({ ...subject.identity, symbol })}
           >

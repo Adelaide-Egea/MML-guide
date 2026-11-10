@@ -73,7 +73,7 @@
   --font-display: 'Fraunces', 'Newsreader', Georgia, serif;
   --font-ui: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --text-xs: 13px;
+  --text-xs: 14px; /* same floor as --ink-muted: never below 14px */
   --text-sm: 14px;
   --text-base: 16px;
   --text-read: 17px;

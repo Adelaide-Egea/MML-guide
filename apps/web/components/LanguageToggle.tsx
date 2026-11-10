@@ -45,7 +45,7 @@ export function LanguageToggle({
   return (
     <div className="stack-tight no-print">
       <span className="hint">{chrome.languageHint}</span>
-      <div className="chips" style={{ flexWrap: 'wrap' }}>
+      <div className="chips" role="group" aria-label={chrome.languageHint} style={{ flexWrap: 'wrap' }}>
         {CARE_LANGUAGES.map((lang) => (
           <button
             key={lang.tag}
