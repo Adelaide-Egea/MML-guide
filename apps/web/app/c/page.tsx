@@ -192,7 +192,7 @@ export default function CaregiverPage() {
   }
 
   return (
-    <main className="shell hotel">
+    <main className="shell hotel" lang={language}>
       <header className="hotel-top">
         <ScenarioChip chrome={chrome} handover={handover} tint={tint} />
         <LanguageToggle value={language} onChange={setLanguage} compact />
@@ -446,7 +446,13 @@ function SafetyLine({
 
   return (
     <section className="hotel-safety">
-      <button type="button" className="hotel-safety-line" onClick={onToggle} aria-expanded={open}>
+      <button
+        type="button"
+        className="hotel-safety-line"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls="hotel-safety-body"
+      >
         <span className="hotel-safety-icon" aria-hidden="true">
           ⚠
         </span>
@@ -461,7 +467,7 @@ function SafetyLine({
       {!open && allergies.length > 0 ? (
         <p className="hotel-safety-as-written">{chrome.factsAsWritten}</p>
       ) : null}
-      <div className="hotel-safety-body" hidden={!open}>
+      <div id="hotel-safety-body" className="hotel-safety-body" hidden={!open}>
         {blocks.map((block) => (
           <article key={block.id}>
             <strong>{localizeGuideHeading(block.heading, chrome)}</strong>

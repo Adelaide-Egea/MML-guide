@@ -72,10 +72,27 @@ select {
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
 
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -40px;
+  z-index: 100;
+  padding: var(--space-2) var(--space-3);
+  background: var(--brand);
+  color: var(--on-brand);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.skip-link:focus {
+  top: var(--space-3);
+}
+
 .shell {
   max-width: 560px;
   margin: 0 auto;
-  padding: var(--space-4) var(--space-4) var(--space-7);
+  padding: var(--space-4) max(var(--space-4), env(safe-area-inset-right))
+    var(--space-7) max(var(--space-4), env(safe-area-inset-left));
   min-height: 100dvh;
 }
 
@@ -96,6 +113,10 @@ select {
   letter-spacing: -0.01em;
 }
 
+.topbar .btn-quiet {
+  min-width: 44px;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -112,6 +133,26 @@ select {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.row-wrap > .btn {
+  flex: 1 1 10rem;
+  width: auto;
+}
+
+input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  margin: 11px 0;
+  flex: none;
+  accent-color: var(--brand-deep);
 }
 
 .spread {
@@ -186,8 +227,8 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex: none;
   border-radius: 50%;
   border: 1px solid transparent;
@@ -216,6 +257,7 @@ select {
   text-align: left;
   background: transparent;
   border: 0;
+  min-height: 44px;
   padding: var(--space-2) 0;
   cursor: pointer;
 }
@@ -256,7 +298,7 @@ select {
   background: transparent;
   color: var(--ink-muted);
   border-color: transparent;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--space-3);
   width: auto;
 }
@@ -265,7 +307,7 @@ select {
   background: transparent;
   color: var(--critical);
   border-color: transparent;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 var(--space-3);
   width: auto;
 }
@@ -331,7 +373,8 @@ select {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-3);
   border-radius: 999px;
   background: var(--surface-sunk);
   border: 1px solid var(--hairline);
@@ -433,6 +476,7 @@ select {
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  min-height: 44px;
   text-align: left;
   font-size: var(--text-sm);
   font-weight: 600;
@@ -714,8 +758,9 @@ a.routine-item {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  max-width: 60%;
-  padding: var(--space-1) var(--space-3);
+  max-width: 70%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
   border-radius: 999px;
   border: 1px solid var(--hairline-strong);
   background: transparent;
@@ -726,6 +771,7 @@ a.routine-item {
 
 .house-option {
   width: 100%;
+  min-height: 44px;
   text-align: left;
   background: transparent;
   border: 0;
@@ -823,8 +869,8 @@ a.routine-item {
 
 /* Identity picker — colour swatches and glyph/emoji marks */
 .identity-swatch {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   border: 2px solid transparent;
   padding: 0;
@@ -835,8 +881,8 @@ a.routine-item {
   box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
 }
 .identity-glyph {
-  min-width: 36px;
-  height: 36px;
+  min-width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--hairline);
   background: var(--surface);
@@ -941,6 +987,7 @@ a.routine-item {
   align-items: flex-start;
   gap: var(--space-2);
   width: 100%;
+  min-height: 44px;
   padding: var(--space-3) 0;
   border: 0;
   background: transparent;
@@ -1289,12 +1336,13 @@ a.routine-item {
 }
 
 .hotel-call {
-  flex: none;
+  flex: 0 1 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 0 var(--space-4);
+  max-width: 42%;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
   border: 1px solid var(--ink);
   background: var(--surface);
@@ -1304,10 +1352,13 @@ a.routine-item {
   font-weight: 500;
   box-shadow: var(--shadow-card);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hotel-ask {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   position: static;
   left: auto;
   bottom: auto;
@@ -1326,6 +1377,12 @@ a.routine-item {
   font-size: var(--text-sm);
   box-shadow: var(--shadow-card);
   z-index: auto;
+}
+
+.hotel-ask > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hotel-ask-icon {

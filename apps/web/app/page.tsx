@@ -56,6 +56,8 @@ export default function Home() {
           className="house-switch"
           onClick={() => setSwitching((open) => !open)}
           aria-expanded={switching}
+          aria-haspopup="listbox"
+          aria-label={`Household: ${household.name || 'This household'}. Change household.`}
         >
           <span>{household.name || 'This household'}</span>
           <span aria-hidden="true">⌄</span>
@@ -297,9 +299,9 @@ function Readiness() {
 
   return (
     <section className="welcome readiness">
-      <h2 className="display">
+      <h1 className="display">
         {coverage.covered} of {coverage.total} things covered
-      </h2>
+      </h1>
       {coverage.gaps.length > 0 ? (
         <div className="readiness-gaps">
           {coverage.gaps.map((gap) => (
@@ -311,7 +313,7 @@ function Readiness() {
       ) : (
         <p className="muted">Ready to send.</p>
       )}
-      <div className="row" style={{ gap: 'var(--space-2)', marginTop: 'var(--space-4)' }}>
+      <div className="row-wrap" style={{ marginTop: 'var(--space-4)' }}>
         {remaining > 0 ? (
           <Link href={gapHref(coverage.gaps[0]!)} className="btn">
             Fill the {remaining} gap{remaining === 1 ? '' : 's'}
@@ -344,12 +346,19 @@ function HouseSwitcher({
   const sample = sampleId ? households.find((h) => h.id === sampleId) : undefined;
 
   return (
-    <div className="card rows" style={{ marginBottom: 'var(--space-5)' }}>
+    <div
+      className="card rows"
+      style={{ marginBottom: 'var(--space-5)' }}
+      role="listbox"
+      aria-label="Households"
+    >
       {realHouseholds.map((h) => (
         <button
           key={h.id}
           type="button"
           className="rows-item row house-option"
+          role="option"
+          aria-selected={h.id === household.id}
           onClick={() => {
             actions.selectHousehold(h.id);
             onDone();
