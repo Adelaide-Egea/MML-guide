@@ -17,9 +17,17 @@ export function whatsappHref(message: string): string {
   return `https://wa.me/?text=${encodeURIComponent(message)}`;
 }
 
-/** Opens the phone's text app. `sms:?&body=` works on both iPhone and Android. */
+/** Opens the phone's text app with the message ready.
+ *
+ *  iPhone wants `sms:&body=`. Android Chrome wants `sms:?body=`. The old
+ *  `sms:?&body=` hybrid left an empty message on some Android phones.
+ */
 export function smsHref(message: string): string {
-  return `sms:?&body=${encodeURIComponent(message)}`;
+  const body = encodeURIComponent(message);
+  if (typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    return `sms:&body=${body}`;
+  }
+  return `sms:?body=${body}`;
 }
 
 /** Opens the mail app with the message as the body. */

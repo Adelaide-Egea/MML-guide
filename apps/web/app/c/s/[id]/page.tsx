@@ -1,24 +1,36 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { TopBar } from '../../../../components/Chrome.tsx';
+import {
+  loadCaregiverShareId,
+  loadCaregiverSnapshot,
+  persistCaregiverSnapshot,
+} from '../../../../lib/caregiver-session.ts';
 import { decodeSnapshot, installSnapshotMedia } from '../../../../lib/share.ts';
+import CaregiverPage from '../../page.tsx';
 
 /**
  * Short caregiver link: /c/s/{id}
  *
- * Loads the snapshot from Domela's private store, installs any photos, then
- * hands off to /c using sessionStorage so Ask and refresh keep working.
+ * Stay on this URL. Redirecting to /c dropped the guide if someone opened the
+ * WhatsApp preview in Safari, refreshed, or copied the address bar.
  */
 export default function ShortCaregiverPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+
+    if (loadCaregiverShareId() === id && loadCaregiverSnapshot()) {
+      setReady(true);
+      return;
+    }
+
     void (async () => {
       try {
         const response = await fetch(`/api/share/${encodeURIComponent(id)}`);
@@ -46,22 +58,20 @@ export default function ShortCaregiverPage() {
         } catch {
           // Text still shows without photos.
         }
-        window.sessionStorage.setItem(
-          'mml.caregiver-snapshot',
-          JSON.stringify({
-            ...decoded,
-            mediaBlobs: undefined,
-          }),
-        );
-        router.replace('/c');
+        persistCaregiverSnapshot(decoded, id);
+        if (!cancelled) setReady(true);
       } catch {
-        if (!cancelled) setError('This link could not be opened. Check your connection and try again.');
+        if (!cancelled) {
+          setError('This link could not be opened. Check your connection and try again.');
+        }
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [id, router]);
+  }, [id]);
+
+  if (ready) return <CaregiverPage />;
 
   return (
     <main className="shell">

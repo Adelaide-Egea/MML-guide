@@ -16,6 +16,11 @@ import {
 import { TopBar } from '../../../components/Chrome.tsx';
 import { LanguageToggle } from '../../../components/LanguageToggle.tsx';
 import { AskField } from '../../../components/AskField.tsx';
+import {
+  loadCaregiverShareId,
+  loadCaregiverSnapshot,
+  persistCaregiverSnapshot,
+} from '../../../lib/caregiver-session.ts';
 import type { GuideSnapshot } from '../../../lib/share.ts';
 import { track } from '../../../lib/trial.ts';
 
@@ -33,27 +38,26 @@ export default function CaregiverAskPage() {
   const [question, setQuestion] = useState('');
   const [busy, setBusy] = useState(false);
   const [shown, setShown] = useState<Shown | null>(null);
+  const [guideHref, setGuideHref] = useState('/c');
 
   useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem('mml.caregiver-snapshot');
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as GuideSnapshot;
-      setSnapshot(parsed);
-      setLanguage(parsed.handover.language || 'en');
-    } catch {
-      setSnapshot(null);
-    }
+    const shareId = loadCaregiverShareId();
+    setGuideHref(shareId ? `/c/s/${shareId}` : '/c');
+    const parsed = loadCaregiverSnapshot();
+    if (!parsed) return;
+    setSnapshot(parsed);
+    setLanguage(parsed.handover.language || 'en');
   }, []);
 
   useEffect(() => {
     if (!snapshot) return;
-    const next = {
-      ...snapshot,
-      mediaBlobs: undefined,
-      handover: { ...snapshot.handover, language },
-    };
-    window.sessionStorage.setItem('mml.caregiver-snapshot', JSON.stringify(next));
+    persistCaregiverSnapshot(
+      {
+        ...snapshot,
+        handover: { ...snapshot.handover, language },
+      },
+      loadCaregiverShareId(),
+    );
   }, [language, snapshot]);
 
   const chrome = chromeFor(language);
@@ -61,9 +65,9 @@ export default function CaregiverAskPage() {
   if (!snapshot) {
     return (
       <main className="shell">
-        <TopBar title={chrome.askTitle} back="/c" />
+        <TopBar title={chrome.askTitle} back={guideHref} />
         <p className="muted">{chrome.openGuideFirst}</p>
-        <Link href="/c" className="btn btn-quiet">
+        <Link href={guideHref} className="btn btn-quiet">
           {chrome.backToGuide}
         </Link>
       </main>
@@ -125,7 +129,7 @@ export default function CaregiverAskPage() {
 
   return (
     <main className="shell">
-      <TopBar title={chrome.askTitle} back="/c" />
+      <TopBar title={chrome.askTitle} back={guideHref} />
 
       <LanguageToggle value={language} onChange={setLanguage} />
 

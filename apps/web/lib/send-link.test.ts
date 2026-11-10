@@ -20,7 +20,10 @@ test('WhatsApp, text and mail links keep the full URL intact', () => {
     assert.ok(!href.includes('& Tom'), 'ampersand is encoded');
   }
   assert.ok(whatsappHref(message).startsWith('https://wa.me/?text='));
-  assert.ok(smsHref(message).startsWith('sms:?&body='));
+  const sms = smsHref(message);
+  assert.ok(sms.startsWith('sms:'));
+  assert.ok(sms.includes('body='));
+  assert.ok(sms.includes(encodeURIComponent(url)));
 });
 
 test('isShareCancel only matches a closed share sheet', () => {
