@@ -26,6 +26,11 @@ import {
 import { LanguageToggle } from '../../components/LanguageToggle.tsx';
 import { MediaThumb } from '../../components/MediaField.tsx';
 import { identityPair } from '../../lib/identity.ts';
+import {
+  loadCaregiverShareId,
+  loadCaregiverSnapshot,
+  persistCaregiverSnapshot,
+} from '../../lib/caregiver-session.ts';
 import { decodeSnapshot, installSnapshotMedia, type GuideSnapshot } from '../../lib/share.ts';
 import { useActions } from '../../lib/store.ts';
 import { linkifyPhones, telHref } from '../../lib/tel.ts';
@@ -61,13 +66,12 @@ export default function CaregiverPage() {
       setSnapshot(decoded);
       setLanguage(matchCareLanguage(decoded.handover.language || 'en').tag);
       track('caregiver_open', { ref: decoded.handover.id });
-      window.sessionStorage.setItem(
-        'mml.caregiver-snapshot',
-        JSON.stringify({
+      persistCaregiverSnapshot(
+        {
           ...decoded,
-          mediaBlobs: undefined,
           handover: { ...decoded.handover, language: decoded.handover.language },
-        }),
+        },
+        loadCaregiverShareId(),
       );
     };
 
@@ -82,29 +86,23 @@ export default function CaregiverPage() {
       return;
     }
 
-    try {
-      const raw = window.sessionStorage.getItem('mml.caregiver-snapshot');
-      if (raw) {
-        const parsed = JSON.parse(raw) as GuideSnapshot;
-        if (parsed?.household && parsed?.handover) {
-          void open(parsed, false);
-          return;
-        }
-      }
-    } catch {
-      // Fall through.
+    const parsed = loadCaregiverSnapshot();
+    if (parsed) {
+      void open(parsed, false);
+      return;
     }
     setError('This link has no guide in it.');
   }, []);
 
   useEffect(() => {
     if (!snapshot) return;
-    const next = {
-      ...snapshot,
-      mediaBlobs: undefined,
-      handover: { ...snapshot.handover, language },
-    };
-    window.sessionStorage.setItem('mml.caregiver-snapshot', JSON.stringify(next));
+    persistCaregiverSnapshot(
+      {
+        ...snapshot,
+        handover: { ...snapshot.handover, language },
+      },
+      loadCaregiverShareId(),
+    );
   }, [language, snapshot]);
 
   useEffect(() => {

@@ -166,7 +166,26 @@ export default function GuidePage() {
           value={handover.language}
           onChange={(language) => actions.saveHandover({ ...handover, language })}
         />
-        <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+        <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={includePhotos}
+            onChange={(e) => {
+              setIncludePhotos(e.target.checked);
+              setShareState('idle');
+              setShareNote(null);
+              setShareUrl(null);
+              setCopied(false);
+            }}
+          />
+          <span>
+            {chrome.includePhotos}
+            <span className="muted" style={{ display: 'block' }}>
+              {chrome.includePhotosHint}
+            </span>
+          </span>
+        </label>
+        <div className="share-actions">
           <button
             type="button"
             className="btn"
@@ -213,13 +232,15 @@ export default function GuidePage() {
                 setShareState('ready');
                 setShareNote(`Link ready. Choose how to send it. ${note}`);
                 track('share');
-                // Android usually still allows the share sheet here. iPhone usually
-                // refuses (the tap has expired); the buttons below cover that.
-                if (typeof navigator.share === 'function') {
+                // iPhone refuses share after an await (the tap has expired). Android
+                // Chrome usually still opens the sheet. The buttons below cover both.
+                const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                if (!ios && typeof navigator.share === 'function') {
                   try {
+                    const text = caregiverMessage(handover.caregiverName ?? '', result.url);
                     await navigator.share({
                       title: `Guide for ${handover.caregiverName || 'caregiver'}`,
-                      text: 'Everything you need while I am out.',
+                      text,
                       url: result.url,
                     });
                     setShareNote(`Sent. ${note}`);
@@ -238,15 +259,17 @@ export default function GuidePage() {
         </div>
         {shareUrl ? (
           <div className="stack no-print" style={{ gap: 'var(--space-2)' }}>
-            <div className="row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+            <div className="share-actions">
               {typeof navigator !== 'undefined' && typeof navigator.share === 'function' ? (
                 <button
                   type="button"
                   className="btn"
                   onClick={() => {
+                    const text = caregiverMessage(handover.caregiverName ?? '', shareUrl);
                     void navigator
                       .share({
                         title: `Guide for ${handover.caregiverName || 'caregiver'}`,
+                        text,
                         url: shareUrl,
                       })
                       .catch((error: unknown) => {
@@ -313,34 +336,15 @@ export default function GuidePage() {
             </div>
             <input
               id="caregiver-link"
+              className="input"
               type="text"
               readOnly
               value={shareUrl}
               aria-label="Caregiver link"
-              style={{ borderRadius: 'var(--radius)' }}
               onFocus={(e) => e.currentTarget.select()}
             />
           </div>
         ) : null}
-        <label className="row no-print" style={{ gap: 'var(--space-3)', alignItems: 'flex-start' }}>
-          <input
-            type="checkbox"
-            checked={includePhotos}
-            onChange={(e) => {
-              setIncludePhotos(e.target.checked);
-              setShareState('idle');
-              setShareNote(null);
-              setShareUrl(null);
-              setCopied(false);
-            }}
-          />
-          <span>
-            {chrome.includePhotos}
-            <span className="muted" style={{ display: 'block' }}>
-              {chrome.includePhotosHint}
-            </span>
-          </span>
-        </label>
         <p className="hint no-print">
           The link holds this guide for 14 days, including any health details you wrote, such as
           allergies or medicines. Only send it to the person who is looking after them.
