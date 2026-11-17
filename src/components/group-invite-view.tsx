@@ -1,7 +1,7 @@
 import { FilterTabs } from "@/components/filter-tabs";
 import { getValidMemberForGroup, memberIdForChannel } from "@/lib/cookies";
 import { formatTimeLabel } from "@/lib/dates";
-import { isCraftGroup, isCraftVotingOpen, withoutNotes } from "@/lib/home-event";
+import { isCraftGroup, withoutNotes } from "@/lib/home-event";
 import { meetingPlaces } from "@/lib/options";
 import { store } from "@/lib/store";
 import { pickTab } from "@/lib/tabs";
@@ -69,16 +69,26 @@ export async function GroupInviteView({
   const eveningRound = rounds.find((round) => round.kind === "evening") ?? null;
   const dayRound = rounds.find((round) => round.kind === "day") ?? null;
   const showCraft = isCraftGroup(group.id) && channel !== "day";
-  const homeEvent = showCraft ? await store.getOpenHomeEvent(group.id) : null;
-  const homeResponses = homeEvent
-    ? withoutNotes(await store.listHomeEventResponses(group.id, homeEvent.id, false))
-    : [];
-  const myCraft = homeEvent && member
-    ? await store.getHomeEventResponse(group.id, homeEvent.id, member.id)
-    : null;
-  const showCraftCard =
-    homeEvent &&
-    (member || !isCraftVotingOpen(homeEvent));
+  let homeEvent = null;
+  let homeResponses: ReturnType<typeof withoutNotes> = [];
+  let myCraft: Awaited<ReturnType<typeof store.getHomeEventResponse>> = null;
+  if (showCraft) {
+    try {
+      homeEvent = await store.getOpenHomeEvent(group.id);
+      if (homeEvent) {
+        homeResponses = withoutNotes(
+          await store.listHomeEventResponses(group.id, homeEvent.id, false),
+        );
+        myCraft = member
+          ? await store.getHomeEventResponse(group.id, homeEvent.id, member.id)
+          : null;
+      }
+    } catch {
+      homeEvent = null;
+      homeResponses = [];
+      myCraft = null;
+    }
+  }
   const showIdeas = channel !== "day";
   const tabs = memberTabs({
     channel,
@@ -120,7 +130,7 @@ export async function GroupInviteView({
         </div>
       </header>
 
-      {showCraftCard && homeEvent && (
+      {homeEvent && (
         <CraftEveningCard
           token={token}
           event={homeEvent}

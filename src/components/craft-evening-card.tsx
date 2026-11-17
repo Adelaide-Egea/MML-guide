@@ -52,7 +52,9 @@ export function CraftEveningCard({
       <CraftRecap event={event} members={members} responses={responses} />
     );
   }
-  if (!member) return null;
+  if (!member) {
+    return <CraftInviteTeaser event={event} />;
+  }
   return (
     <CraftPollForm
       token={token}
@@ -62,6 +64,26 @@ export function CraftEveningCard({
       member={member}
       myNote={myNote}
     />
+  );
+}
+
+function CraftInviteTeaser({ event }: { event: HomeEvent }) {
+  const welcome = event.note?.trim() || "Little babies are very welcome!";
+  return (
+    <section className="craft-card rounded-card p-4">
+      <h2 className="font-display text-xl text-[var(--ink)]">
+        🧶 {event.title}
+      </h2>
+      <p className="mt-1 text-body text-[var(--ink)]">
+        From <strong>{timeWord(event.start_time)}</strong>. {welcome}
+      </p>
+      <p className="mt-1 text-small text-[var(--grey)]">
+        Voting closes <strong>{craftDeadlineLabel(event.closes_at)}</strong>
+      </p>
+      <p className="mt-4 text-body font-semibold text-[var(--ink)]">
+        Tap your name below, then the evenings you can do.
+      </p>
+    </section>
   );
 }
 

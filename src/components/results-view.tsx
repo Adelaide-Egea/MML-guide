@@ -182,42 +182,51 @@ export function ResultsView({
         {counts.map(({ date, yesCount, ifNeededCount, who, ranks }) => {
           const pct = maxYes > 0 ? Math.max(8, (yesCount / maxYes) * 100) : 8;
           const winning = winners.some((w) => w.date === date);
+          const canChoose = Boolean(isAdmin && onChoose);
+          const row = (
+            <>
+              <div className="w-28 shrink-0 text-sm">
+                <div className="font-mono text-xs text-[var(--muted)]">
+                  {formatLongDate(date).split(" ").slice(0, 1).join(" ")}
+                </div>
+                <div className="truncate text-sm">
+                  {formatLongDate(date).replace(/^\w+ /, "")}
+                </div>
+              </div>
+              <div className="h-8 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    winning ? "bg-[var(--accent)]" : "bg-[var(--muted)]/40"
+                  }`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="w-16 text-right font-mono text-xs leading-tight">
+                <div>{yesCount} yes</div>
+                {ifNeededCount > 0 && (
+                  <div className="text-[var(--muted)]">{ifNeededCount} if</div>
+                )}
+              </div>
+              {isAdmin && (
+                <span className="sr-only">
+                  {who.map((id) => initials(memberMap.get(id) ?? "?")).join(" ")}
+                </span>
+              )}
+            </>
+          );
           return (
             <div key={date}>
-              <button
-                type="button"
-                disabled={!isAdmin || !onChoose}
-                onClick={() => onChoose?.(date)}
-                className="flex w-full items-center gap-3 text-left disabled:cursor-default"
-              >
-                <div className="w-28 shrink-0 text-sm">
-                  <div className="font-mono text-xs text-[var(--muted)]">
-                    {formatLongDate(date).split(" ").slice(0, 1).join(" ")}
-                  </div>
-                  <div className="truncate text-sm">
-                    {formatLongDate(date).replace(/^\w+ /, "")}
-                  </div>
-                </div>
-                <div className="h-8 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      winning ? "bg-[var(--accent)]" : "bg-[var(--muted)]/40"
-                    }`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <div className="w-16 text-right font-mono text-xs leading-tight">
-                  <div>{yesCount} yes</div>
-                  {ifNeededCount > 0 && (
-                    <div className="text-[var(--muted)]">{ifNeededCount} if</div>
-                  )}
-                </div>
-                {isAdmin && (
-                  <span className="sr-only">
-                    {who.map((id) => initials(memberMap.get(id) ?? "?")).join(" ")}
-                  </span>
-                )}
-              </button>
+              {canChoose ? (
+                <button
+                  type="button"
+                  onClick={() => onChoose?.(date)}
+                  className="flex w-full items-center gap-3 text-left"
+                >
+                  {row}
+                </button>
+              ) : (
+                <div className="flex w-full items-center gap-3">{row}</div>
+              )}
               <PlaceRanks rows={ranks} />
             </div>
           );

@@ -70,24 +70,38 @@ export function DayResultsView({
       </div>
 
       <div className="space-y-2">
-        {rows.map((r) => (
-          <button
-            key={r.date}
-            type="button"
-            disabled={!isAdmin || !onChoose}
-            onClick={() => onChoose?.(r.date)}
-            className="flex w-full flex-col gap-1 rounded-xl border border-[var(--border)] p-3 text-left disabled:cursor-default sm:flex-row sm:items-center sm:gap-3"
-          >
-            <div className="min-w-0 flex-1 text-sm font-medium">
-              {formatLongDate(r.date)}
+        {rows.map((r) => {
+          const canChoose = Boolean(isAdmin && onChoose);
+          const inner = (
+            <>
+              <div className="min-w-0 flex-1 text-sm font-medium">
+                {formatLongDate(r.date)}
+              </div>
+              <div className="flex gap-3 font-mono text-xs text-[var(--muted)]">
+                <span>AM {r.morning}</span>
+                <span>PM {r.afternoon}</span>
+                <span className="text-foreground">{r.total}</span>
+              </div>
+            </>
+          );
+          return canChoose ? (
+            <button
+              key={r.date}
+              type="button"
+              onClick={() => onChoose?.(r.date)}
+              className="flex w-full flex-col gap-1 rounded-xl border border-[var(--border)] p-3 text-left sm:flex-row sm:items-center sm:gap-3"
+            >
+              {inner}
+            </button>
+          ) : (
+            <div
+              key={r.date}
+              className="flex w-full flex-col gap-1 rounded-xl border border-[var(--border)] p-3 text-left sm:flex-row sm:items-center sm:gap-3"
+            >
+              {inner}
             </div>
-            <div className="flex gap-3 font-mono text-xs text-[var(--muted)]">
-              <span>AM {r.morning}</span>
-              <span>PM {r.afternoon}</span>
-              <span className="text-foreground">{r.total}</span>
-            </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
       <p className="text-xs text-[var(--muted)]">
         {members.length} mums in this group
