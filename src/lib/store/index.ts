@@ -1,5 +1,13 @@
 import { nextVisitWrite, VISIT_DEDUPE_MS } from "@/lib/analytics";
 import { isSupabaseConfigured } from "@/lib/env";
+import {
+  clipCraftNote,
+  isCraftGroup,
+  isCraftVotingOpen,
+  normalizeBringList,
+  normalizeDateList,
+} from "@/lib/home-event";
+import { dateKey } from "@/lib/replies";
 import type {
   AreaVote,
   DateVote,
@@ -7,6 +15,8 @@ import type {
   Group,
   GroupId,
   HistoryEntry,
+  HomeEvent,
+  HomeEventResponse,
   Member,
   Option,
   OptionComment,
@@ -669,4 +679,225 @@ export const store = {
     if (insertError) throw insertError;
     return "inserted";
   },
+
+  async getOpenHomeEvent(groupId: GroupId): Promise<HomeEvent | null> {
+    if (useMemory()) return memoryDb.getOpenHomeEvent(groupId);
+    if (!isCraftGroup(groupId)) return null;
+    const { data, error } = await db()
+      .from("home_events")
+      .select("*")
+      .eq("group_id", groupId)
+      .eq("status", "open")
+      .order("opened_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) {
+      if (isMissingHomeEventTable(error)) return null;
+      throw error;
+    }
+    return data ? normalizeHomeEvent(data) : null;
+  },
+
+  async getHomeEvent(
+    groupId: GroupId,
+    eventId: string,
+  ): Promise<HomeEvent | null> {
+    if (useMemory()) return memoryDb.getHomeEvent(groupId, eventId);
+    const { data, error } = await db()
+      .from("home_events")
+      .select("*")
+      .eq("group_id", groupId)
+      .eq("id", eventId)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? normalizeHomeEvent(data) : null;
+  },
+
+  async createHomeEvent(
+    groupId: GroupId,
+    data: {
+      title: string;
+      start_time: string;
+      note: string | null;
+      dates: string[];
+      closes_at: string;
+    },
+  ): Promise<HomeEvent> {
+    if (useMemory()) return memoryDb.createHomeEvent(groupId, data);
+    if (!isCraftGroup(groupId)) {
+      throw new Error("Craft evenings are only for Barnes Mums.");
+    }
+    const dates = normalizeDateList(data.dates);
+    if (dates.length === 0) throw new Error("Pick at least one date.");
+    const { data: row, error } = await db()
+      .from("home_events")
+      .insert({
+        group_id: groupId,
+        title: data.title.trim() || "Craft evening at Adelaide's",
+        start_time: data.start_time,
+        note: data.note,
+        dates,
+        closes_at: data.closes_at,
+        status: "open",
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return normalizeHomeEvent(row);
+  },
+
+  async updateHomeEvent(
+    groupId: GroupId,
+    eventId: string,
+    patch: Partial<Pick<HomeEvent, "closes_at" | "chosen_date" | "status">>,
+  ): Promise<HomeEvent> {
+    if (useMemory()) return memoryDb.updateHomeEvent(groupId, eventId, patch);
+    const existing = await this.getHomeEvent(groupId, eventId);
+    if (!existing) throw new Error("Craft evening not found.");
+    const next: Record<string, unknown> = {};
+    if (patch.closes_at !== undefined) next.closes_at = patch.closes_at;
+    if (patch.chosen_date !== undefined) {
+      next.chosen_date = patch.chosen_date
+        ? dateKey(patch.chosen_date)
+        : null;
+      if (
+        next.chosen_date &&
+        !existing.dates.includes(next.chosen_date as string)
+      ) {
+        throw new Error("That date isn't on this evening.");
+      }
+    }
+    if (patch.status !== undefined) next.status = patch.status;
+    const { data, error } = await db()
+      .from("home_events")
+      .update(next)
+      .eq("id", eventId)
+      .eq("group_id", groupId)
+      .select()
+      .single();
+    if (error) throw error;
+    return normalizeHomeEvent(data);
+  },
+
+  async listHomeEventResponses(
+    groupId: GroupId,
+    eventId: string,
+    includeNotes = false,
+  ): Promise<HomeEventResponse[]> {
+    if (useMemory()) {
+      return memoryDb.listHomeEventResponses(groupId, eventId, includeNotes);
+    }
+    const event = await this.getHomeEvent(groupId, eventId);
+    if (!event) return [];
+    const { data, error } = await db()
+      .from("home_event_responses")
+      .select("*")
+      .eq("event_id", eventId);
+    if (error) throw error;
+    return ((data as unknown as Record<string, unknown>[]) ?? []).map((row) =>
+      normalizeHomeEventResponse(row, includeNotes),
+    );
+  },
+
+  async getHomeEventResponse(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+  ): Promise<HomeEventResponse | null> {
+    if (useMemory()) {
+      return memoryDb.getHomeEventResponse(groupId, eventId, memberId);
+    }
+    if (!(await this.getHomeEvent(groupId, eventId))) return null;
+    const { data, error } = await db()
+      .from("home_event_responses")
+      .select("*")
+      .eq("event_id", eventId)
+      .eq("member_id", memberId)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? normalizeHomeEventResponse(data, true) : null;
+  },
+
+  async upsertHomeEventResponse(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+    data: { dates: string[]; bringing: string[]; note: string | null },
+    now = new Date(),
+  ): Promise<HomeEventResponse> {
+    if (useMemory()) {
+      return memoryDb.upsertHomeEventResponse(
+        groupId,
+        eventId,
+        memberId,
+        data,
+        now,
+      );
+    }
+    const event = await this.getHomeEvent(groupId, eventId);
+    if (!event) throw new Error("Craft evening not found.");
+    if (event.status === "archived" || !isCraftVotingOpen(event, now)) {
+      throw new Error("Voting has closed.");
+    }
+    const member = await this.getMember(groupId, memberId);
+    if (!member) throw new Error("Member not found.");
+    const allowed = new Set(event.dates);
+    const dates = normalizeDateList(data.dates).filter((date) => allowed.has(date));
+    const bringing = normalizeBringList(data.bringing);
+    const note = clipCraftNote(data.note);
+    const row = {
+      event_id: eventId,
+      member_id: memberId,
+      dates,
+      bringing,
+      note,
+      updated_at: now.toISOString(),
+    };
+    const { data: saved, error } = await db()
+      .from("home_event_responses")
+      .upsert(row)
+      .select()
+      .single();
+    if (error) throw error;
+    return normalizeHomeEventResponse(saved, true);
+  },
 };
+
+function isMissingHomeEventTable(error: { message?: string; code?: string }): boolean {
+  const message = error.message ?? "";
+  return (
+    error.code === "42P01" ||
+    error.code === "PGRST205" ||
+    /home_events|schema cache/i.test(message)
+  );
+}
+
+function normalizeHomeEvent(row: Record<string, unknown> | HomeEvent): HomeEvent {
+  const start = String(row.start_time ?? "20:00");
+  return {
+    id: String(row.id),
+    group_id: row.group_id === "french" ? "french" : "barnes",
+    title: String(row.title ?? "Craft evening at Adelaide's"),
+    start_time: start.length === 5 ? `${start}:00` : start,
+    note: (row.note as string | null) ?? null,
+    dates: normalizeDateList(row.dates),
+    opened_at: String(row.opened_at),
+    closes_at: String(row.closes_at),
+    chosen_date: row.chosen_date ? dateKey(String(row.chosen_date)) : null,
+    status: row.status === "archived" ? "archived" : "open",
+  };
+}
+
+function normalizeHomeEventResponse(
+  row: Record<string, unknown>,
+  includeNotes: boolean,
+): HomeEventResponse {
+  return {
+    event_id: String(row.event_id),
+    member_id: String(row.member_id),
+    dates: normalizeDateList(row.dates),
+    bringing: normalizeBringList(row.bringing),
+    note: includeNotes ? clipCraftNote(row.note) : null,
+    updated_at: String(row.updated_at ?? new Date().toISOString()),
+  };
+}

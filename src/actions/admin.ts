@@ -4,6 +4,19 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { addHoursLondon, generateCandidateDates } from "@/lib/dates";
 import { getSiteUrl } from "@/lib/env";
 import { requireGroup } from "@/lib/group-access";
+import {
+  bringTotals,
+  comingOnDate,
+  CRAFT_DEFAULT_DATES,
+  CRAFT_DEFAULT_NOTE,
+  CRAFT_DEFAULT_START,
+  CRAFT_DEFAULT_TITLE,
+  craftInviteMessage,
+  craftWhatsAppMessage,
+  isCraftGroup,
+  namedComing,
+  winningCraftDate,
+} from "@/lib/home-event";
 import { groupInviteUrl, groupVanityPaths } from "@/lib/invite-paths";
 import { store } from "@/lib/store";
 import type { GroupId, Option, OptionKind } from "@/lib/types";
@@ -557,6 +570,175 @@ export async function getPresenceMessage(groupId: GroupId, roundId?: string) {
   }
   const text = `It's ${dateLabel} for our ${group.name} night out. Add your name if you can make it (the other dates stay closed). ${link}`;
   return { ok: true as const, text };
+}
+
+export async function openCraftPoll(
+  groupId: GroupId,
+  input: { dates: string[]; closesAt: string },
+) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return {
+      ok: false as const,
+      error: "Craft evenings are only for Barnes Mums.",
+    };
+  }
+  const group = await requireGroup(groupId);
+  const existing = await store.getOpenHomeEvent(groupId);
+  if (existing) {
+    return {
+      ok: false as const,
+      error: "There's already a craft evening open.",
+    };
+  }
+  const dates = input.dates.length > 0 ? input.dates : CRAFT_DEFAULT_DATES;
+  const closesAt = input.closesAt || addHoursLondon(new Date(), 48).toISOString();
+  try {
+    await store.createHomeEvent(groupId, {
+      title: CRAFT_DEFAULT_TITLE,
+      start_time: CRAFT_DEFAULT_START,
+      note: CRAFT_DEFAULT_NOTE,
+      dates,
+      closes_at: closesAt,
+    });
+    revalidateAdmin(groupId, group.invite_token);
+    return { ok: true as const };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Couldn't open the craft evening.",
+    };
+  }
+}
+
+export async function extendCraftPoll(groupId: GroupId, hours = 12) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  const from = new Date(
+    Math.max(Date.now(), new Date(event.closes_at).getTime()),
+  );
+  await store.updateHomeEvent(groupId, event.id, {
+    closes_at: addHoursLondon(from, hours).toISOString(),
+  });
+  revalidateAdmin(groupId, group.invite_token);
+  return { ok: true as const };
+}
+
+export async function closeCraftPollNow(groupId: GroupId) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  await store.updateHomeEvent(groupId, event.id, {
+    closes_at: new Date().toISOString(),
+  });
+  revalidateAdmin(groupId, group.invite_token);
+  return { ok: true as const };
+}
+
+export async function setCraftChosenDate(groupId: GroupId, date: string) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  try {
+    await store.updateHomeEvent(groupId, event.id, { chosen_date: date });
+    revalidateAdmin(groupId, group.invite_token);
+    return { ok: true as const };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Couldn't save that date.",
+    };
+  }
+}
+
+export async function archiveCraftPoll(groupId: GroupId) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  const responses = await store.listHomeEventResponses(groupId, event.id, false);
+  const chosen = winningCraftDate(event, responses);
+  if (chosen) {
+    await store.addHistory(groupId, {
+      date: chosen,
+      option_id: null,
+      title: event.title,
+    });
+  }
+  await store.updateHomeEvent(groupId, event.id, { status: "archived" });
+  revalidateAdmin(groupId, group.invite_token);
+  return { ok: true as const };
+}
+
+export async function getCraftInviteMessage(groupId: GroupId) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "Open the poll first." };
+  const text = craftInviteMessage({
+    link: groupInviteUrl(group, "evening"),
+    closesAt: event.closes_at,
+  });
+  return { ok: true as const, text };
+}
+
+export async function getCraftWhatsAppMessage(groupId: GroupId) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  const [responses, members] = await Promise.all([
+    store.listHomeEventResponses(groupId, event.id, false),
+    store.listMembers(groupId, true),
+  ]);
+  const chosen = winningCraftDate(event, responses);
+  if (!chosen) return { ok: false as const, error: "Pick a date first." };
+  const coming = namedComing(comingOnDate(responses, chosen), members);
+  const totals = bringTotals(coming);
+  return {
+    ok: true as const,
+    text: craftWhatsAppMessage({
+      chosenDate: chosen,
+      coming,
+      totals,
+    }),
+  };
+}
+
+export async function getAdminCraftSnapshot(groupId: GroupId) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { event: null, responses: [] };
+  }
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { event: null, responses: [] };
+  const responses = await store.listHomeEventResponses(groupId, event.id, true);
+  return { event, responses };
 }
 
 export type { Option };

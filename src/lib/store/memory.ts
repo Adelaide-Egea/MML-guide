@@ -7,6 +7,9 @@ import type {
   Group,
   GroupId,
   HistoryEntry,
+  HomeEvent,
+  HomeEventResponse,
+  HomeEventStatus,
   Member,
   Option,
   OptionComment,
@@ -18,7 +21,16 @@ import type {
   Visit,
   VisitChannel,
 } from "@/lib/types";
+import {
+  clipCraftNote,
+  CRAFT_GROUP_ID,
+  isCraftGroup,
+  isCraftVotingOpen,
+  normalizeBringList,
+  normalizeDateList,
+} from "@/lib/home-event";
 import { nextVisitWrite, VISIT_DEDUPE_MS } from "@/lib/analytics";
+import { dateKey } from "@/lib/replies";
 import { SEED_GROUPS, SEED_OPTIONS, newToken } from "./seed-data";
 
 export interface DataStore {
@@ -34,6 +46,8 @@ export interface DataStore {
   history: HistoryEntry[];
   organisers: string[];
   visits: Visit[];
+  homeEvents: HomeEvent[];
+  homeEventResponses: HomeEventResponse[];
 }
 
 function buildSeedStore(): DataStore {
@@ -59,6 +73,8 @@ function buildSeedStore(): DataStore {
     history: [],
     organisers: [],
     visits: [],
+    homeEvents: [],
+    homeEventResponses: [],
   };
 }
 
@@ -519,4 +535,139 @@ export const memoryDb = {
     });
     return "inserted";
   },
+  getOpenHomeEvent(groupId: GroupId): HomeEvent | null {
+    if (!isCraftGroup(groupId)) return null;
+    const open = getMemoryStore()
+      .homeEvents.filter((event) => event.group_id === groupId && event.status === "open")
+      .sort(
+        (a, b) =>
+          new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime(),
+      );
+    return open[0] ?? null;
+  },
+  getHomeEvent(groupId: GroupId, eventId: string): HomeEvent | null {
+    return (
+      getMemoryStore().homeEvents.find(
+        (event) => event.id === eventId && event.group_id === groupId,
+      ) ?? null
+    );
+  },
+  createHomeEvent(
+    groupId: GroupId,
+    data: {
+      title: string;
+      start_time: string;
+      note: string | null;
+      dates: string[];
+      closes_at: string;
+    },
+  ): HomeEvent {
+    if (!isCraftGroup(groupId)) {
+      throw new Error("Craft evenings are only for Barnes Mums.");
+    }
+    if (memoryDb.getOpenHomeEvent(groupId)) {
+      throw new Error("There's already a craft evening open.");
+    }
+    const dates = normalizeDateList(data.dates);
+    if (dates.length === 0) throw new Error("Pick at least one date.");
+    const event: HomeEvent = {
+      id: randomUUID(),
+      group_id: CRAFT_GROUP_ID,
+      title: data.title.trim() || "Craft evening at Adelaide's",
+      start_time: data.start_time,
+      note: data.note,
+      dates,
+      opened_at: new Date().toISOString(),
+      closes_at: data.closes_at,
+      chosen_date: null,
+      status: "open",
+    };
+    getMemoryStore().homeEvents.push(event);
+    return event;
+  },
+  updateHomeEvent(
+    groupId: GroupId,
+    eventId: string,
+    patch: Partial<
+      Pick<HomeEvent, "closes_at" | "chosen_date" | "status">
+    >,
+  ): HomeEvent {
+    const event = memoryDb.getHomeEvent(groupId, eventId);
+    if (!event) throw new Error("Craft evening not found.");
+    if (patch.closes_at !== undefined) event.closes_at = patch.closes_at;
+    if (patch.chosen_date !== undefined) {
+      event.chosen_date = patch.chosen_date
+        ? dateOrThrow(event, patch.chosen_date)
+        : null;
+    }
+    if (patch.status !== undefined) {
+      event.status = patch.status as HomeEventStatus;
+    }
+    return event;
+  },
+  listHomeEventResponses(
+    groupId: GroupId,
+    eventId: string,
+    includeNotes = false,
+  ): HomeEventResponse[] {
+    const event = memoryDb.getHomeEvent(groupId, eventId);
+    if (!event) return [];
+    const rows = getMemoryStore().homeEventResponses.filter(
+      (row) => row.event_id === eventId,
+    );
+    if (includeNotes) return rows.map((row) => ({ ...row }));
+    return rows.map((row) => ({ ...row, note: null }));
+  },
+  getHomeEventResponse(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+  ): HomeEventResponse | null {
+    if (!memoryDb.getHomeEvent(groupId, eventId)) return null;
+    return (
+      getMemoryStore().homeEventResponses.find(
+        (row) => row.event_id === eventId && row.member_id === memberId,
+      ) ?? null
+    );
+  },
+  upsertHomeEventResponse(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+    data: { dates: string[]; bringing: string[]; note: string | null },
+    now = new Date(),
+  ): HomeEventResponse {
+    const event = memoryDb.getHomeEvent(groupId, eventId);
+    if (!event) throw new Error("Craft evening not found.");
+    if (event.status === "archived" || !isCraftVotingOpen(event, now)) {
+      throw new Error("Voting has closed.");
+    }
+    const member = memoryDb.getMember(groupId, memberId);
+    if (!member) throw new Error("Member not found.");
+    const allowed = new Set(event.dates);
+    const dates = normalizeDateList(data.dates).filter((date) => allowed.has(date));
+    const bringing = normalizeBringList(data.bringing);
+    const note = clipCraftNote(data.note);
+    const store = getMemoryStore();
+    const idx = store.homeEventResponses.findIndex(
+      (row) => row.event_id === eventId && row.member_id === memberId,
+    );
+    const row: HomeEventResponse = {
+      event_id: eventId,
+      member_id: memberId,
+      dates,
+      bringing,
+      note,
+      updated_at: now.toISOString(),
+    };
+    if (idx === -1) store.homeEventResponses.push(row);
+    else store.homeEventResponses[idx] = row;
+    return row;
+  },
 };
+
+function dateOrThrow(event: HomeEvent, date: string): string {
+  const key = dateKey(date);
+  if (!event.dates.includes(key)) throw new Error("That date isn't on this evening.");
+  return key;
+}

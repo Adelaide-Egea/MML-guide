@@ -27,6 +27,10 @@
   --linen: #F4EEE6;
   --line: #E6DFD5;
   --grey: #8A8178;
+  --craft-wash: #f3e4ee;
+  --craft-fill: #e8cddc;
+  --craft-line: #d7b7c8;
+  --craft-ink: #5c3d52;
 }
 
 @theme inline {
@@ -49,6 +53,10 @@
   --color-linen: var(--linen);
   --color-line: var(--line);
   --color-grey: var(--grey);
+  --color-craft-wash: var(--craft-wash);
+  --color-craft-fill: var(--craft-fill);
+  --color-craft-line: var(--craft-line);
+  --color-craft-ink: var(--craft-ink);
   --font-sans: var(--font-dm-sans);
   --font-display: var(--font-fraunces);
   --font-mono: var(--font-dm-sans);
@@ -73,6 +81,12 @@ body {
   font-size: 1rem;
   line-height: 1.45;
   min-height: 100dvh;
+}
+
+.craft-card {
+  background: var(--craft-wash);
+  border: 1px solid var(--craft-line);
+  color: var(--ink);
 }
 
 [class*="shadow"] {

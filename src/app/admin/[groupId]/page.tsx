@@ -1,9 +1,11 @@
+import { AdminCraftPanel } from "@/components/admin-craft-panel";
 import { AdminManage } from "@/components/admin-manage";
 import { RetireLongLink } from "@/components/retire-long-link";
 import { AdminRoundPanel } from "@/components/admin-round-panel";
 import { FilterTabs } from "@/components/filter-tabs";
 import { requireAdmin } from "@/lib/admin-auth";
 import { formatFromTime } from "@/lib/dates";
+import { isCraftGroup } from "@/lib/home-event";
 import { store } from "@/lib/store";
 import { pickTab } from "@/lib/tabs";
 import type { GroupId, Round } from "@/lib/types";
@@ -37,11 +39,15 @@ export default async function AdminGroupPage({
     "poll",
   );
 
-  const [members, roundsRaw, options] = await Promise.all([
+  const [members, roundsRaw, options, craftEvent] = await Promise.all([
     store.listMembers(groupId, false),
     store.listActiveRounds(groupId),
     store.listOptions(groupId),
+    isCraftGroup(groupId) ? store.getOpenHomeEvent(groupId) : Promise.resolve(null),
   ]);
+  const craftResponses = craftEvent
+    ? await store.listHomeEventResponses(groupId, craftEvent.id, true)
+    : [];
   const activeMembers = members.filter((m) => m.active);
   const rounds = sortTracks(roundsRaw);
   const openKinds = new Set(rounds.map((r) => r.kind));
@@ -76,6 +82,14 @@ export default async function AdminGroupPage({
       >
         {current === "poll" && (
           <div className="flex flex-col gap-4">
+            {isCraftGroup(groupId) && (
+              <AdminCraftPanel
+                groupId={groupId}
+                event={craftEvent}
+                members={activeMembers}
+                responses={craftResponses}
+              />
+            )}
             {rounds.length === 0 ? (
               <AdminRoundPanel
                 group={group}

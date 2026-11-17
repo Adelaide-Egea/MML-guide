@@ -1,6 +1,7 @@
 import { FilterTabs } from "@/components/filter-tabs";
 import { getValidMemberForGroup, memberIdForChannel } from "@/lib/cookies";
 import { formatTimeLabel } from "@/lib/dates";
+import { isCraftGroup, isCraftVotingOpen, withoutNotes } from "@/lib/home-event";
 import { meetingPlaces } from "@/lib/options";
 import { store } from "@/lib/store";
 import { pickTab } from "@/lib/tabs";
@@ -13,6 +14,7 @@ import { SuggestPlace } from "@/components/suggest-place";
 import { BrandMark } from "@/components/brand-mark";
 import { RoundTrackCard } from "@/components/round-track-card";
 import { VisitBeacon } from "@/components/visit-beacon";
+import { CraftEveningCard } from "@/components/craft-evening-card";
 
 export async function GroupInviteView({
   group,
@@ -66,6 +68,17 @@ export async function GroupInviteView({
   );
   const eveningRound = rounds.find((round) => round.kind === "evening") ?? null;
   const dayRound = rounds.find((round) => round.kind === "day") ?? null;
+  const showCraft = isCraftGroup(group.id) && channel !== "day";
+  const homeEvent = showCraft ? await store.getOpenHomeEvent(group.id) : null;
+  const homeResponses = homeEvent
+    ? withoutNotes(await store.listHomeEventResponses(group.id, homeEvent.id, false))
+    : [];
+  const myCraft = homeEvent && member
+    ? await store.getHomeEventResponse(group.id, homeEvent.id, member.id)
+    : null;
+  const showCraftCard =
+    homeEvent &&
+    (member || !isCraftVotingOpen(homeEvent));
   const showIdeas = channel !== "day";
   const tabs = memberTabs({
     channel,
@@ -106,6 +119,17 @@ export async function GroupInviteView({
           </p>
         </div>
       </header>
+
+      {showCraftCard && homeEvent && (
+        <CraftEveningCard
+          token={token}
+          event={homeEvent}
+          members={members}
+          responses={homeResponses}
+          member={member}
+          myNote={myCraft?.note ?? ""}
+        />
+      )}
 
       {!member || !member.active ? (
         <WhoAreYou token={token} members={members} channel={channel} />

@@ -203,3 +203,32 @@ export function weekdayOfDate(dateStr: string): number {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay();
 }
+
+export type HomeEventStatus = "open" | "archived";
+
+export type BringKind = "crafts" | "food" | "drink";
+
+export interface HomeEvent {
+  id: string;
+  group_id: GroupId;
+  title: string;
+  start_time: string;
+  note: string | null;
+  dates: string[];
+  opened_at: string;
+  closes_at: string;
+  chosen_date: string | null;
+  status: HomeEventStatus;
+}
+
+export interface HomeEventResponse {
+  event_id: string;
+  member_id: string;
+  dates: string[];
+  bringing: BringKind[];
+  note: string | null;
+  updated_at: string;
+}
+
+/** Member-facing copy of a response — the private note is never included. */
+export type PublicHomeEventResponse = Omit<HomeEventResponse, "note">;
