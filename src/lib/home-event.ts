@@ -59,6 +59,15 @@ export function isCraftGroup(groupId: string): boolean {
   return groupId === CRAFT_GROUP_ID;
 }
 
+/** Night-out dates don't sit under the craft card — it looks like an old poll. */
+export function roundsBesideCraft<T extends { kind: string }>(
+  rounds: T[],
+  homeEvent: { id: string } | null,
+): T[] {
+  if (!homeEvent) return rounds;
+  return rounds.filter((round) => round.kind !== "evening");
+}
+
 export function isCraftVotingOpen(event: HomeEvent, now = new Date()): boolean {
   if (event.status !== "open") return false;
   return new Date(event.closes_at).getTime() > now.getTime();

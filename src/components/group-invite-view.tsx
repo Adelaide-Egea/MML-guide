@@ -1,7 +1,7 @@
 import { FilterTabs } from "@/components/filter-tabs";
 import { getValidMemberForGroup, memberIdForChannel } from "@/lib/cookies";
 import { formatTimeLabel } from "@/lib/dates";
-import { isCraftGroup, withoutNotes } from "@/lib/home-event";
+import { isCraftGroup, roundsBesideCraft, withoutNotes } from "@/lib/home-event";
 import { meetingPlaces } from "@/lib/options";
 import { store } from "@/lib/store";
 import { pickTab } from "@/lib/tabs";
@@ -47,7 +47,7 @@ export async function GroupInviteView({
       ? withoutPhone(loaded)
       : null;
 
-  const rounds = sortTracks(await store.listActiveRounds(group.id)).filter(
+  const listedRounds = sortTracks(await store.listActiveRounds(group.id)).filter(
     (round) => !channel || round.kind === channel,
   );
   const options = await store.listOptions(group.id);
@@ -66,8 +66,6 @@ export async function GroupInviteView({
   const comingSoon = options.filter(
     (o) => o.upcoming && !o.seen && o.status === "approved",
   );
-  const eveningRound = rounds.find((round) => round.kind === "evening") ?? null;
-  const dayRound = rounds.find((round) => round.kind === "day") ?? null;
   const showCraft = isCraftGroup(group.id) && channel !== "day";
   let homeEvent = null;
   let homeResponses: ReturnType<typeof withoutNotes> = [];
@@ -89,6 +87,9 @@ export async function GroupInviteView({
       myCraft = null;
     }
   }
+  const rounds = roundsBesideCraft(listedRounds, homeEvent);
+  const eveningRound = rounds.find((round) => round.kind === "evening") ?? null;
+  const dayRound = rounds.find((round) => round.kind === "day") ?? null;
   const showIdeas = channel !== "day";
   const tabs = memberTabs({
     channel,
@@ -164,6 +165,7 @@ export async function GroupInviteView({
               roundCards={roundCards}
               eveningRound={eveningRound}
               dayRound={dayRound}
+              hidingEveningForCraft={Boolean(homeEvent)}
               channel={channel}
               options={options}
               comments={comments}
@@ -187,6 +189,7 @@ function MemberPanel({
   roundCards,
   eveningRound,
   dayRound,
+  hidingEveningForCraft,
   channel,
   options,
   comments,
@@ -207,6 +210,7 @@ function MemberPanel({
   }[];
   eveningRound: Round | null;
   dayRound: Round | null;
+  hidingEveningForCraft?: boolean;
   channel?: RoundKind;
   options: Awaited<ReturnType<typeof store.listOptions>>;
   comments: Awaited<ReturnType<typeof store.listGroupOptionComments>>;
@@ -220,7 +224,7 @@ function MemberPanel({
   if (current === "ideas") {
     return (
       <div className="flex flex-col gap-4">
-        {!eveningRound && channel !== "day" && !dayRound && (
+        {!eveningRound && channel !== "day" && !dayRound && !hidingEveningForCraft && (
           <p className="text-body text-[var(--ink)]">
             {channel === "evening" ? "No night out open." : "Nothing open."}
           </p>

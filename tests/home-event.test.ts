@@ -7,6 +7,7 @@ import {
   craftWhatsAppMessage,
   dateVoteCounts,
   isCraftVotingOpen,
+  roundsBesideCraft,
   withoutNotes,
   winningCraftDate,
 } from "@/lib/home-event";
@@ -116,6 +117,15 @@ describe("craft evening helpers", () => {
     const later = new Date("2026-11-19T12:00:00.000Z");
     expect(isCraftVotingOpen(open, now)).toBe(true);
     expect(isCraftVotingOpen(open, later)).toBe(false);
+  });
+
+  it("hides leftover night-out rounds while a craft evening is on the page", () => {
+    const rounds = [
+      { kind: "evening" },
+      { kind: "day" },
+    ];
+    expect(roundsBesideCraft(rounds, event())).toEqual([{ kind: "day" }]);
+    expect(roundsBesideCraft(rounds, null)).toEqual(rounds);
   });
 
   it("builds the invite and recap WhatsApp texts", () => {
