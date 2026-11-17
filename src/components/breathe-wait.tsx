@@ -8,9 +8,11 @@ const CUES = ["Breathe in", "Hold", "Breathe out", "Hold"] as const;
 export function BreatheWait({
   label = "Opening organiser",
   compact = false,
+  overlay = false,
 }: {
   label?: string;
   compact?: boolean;
+  overlay?: boolean;
 }) {
   const [step, setStep] = useState(0);
 
@@ -21,10 +23,10 @@ export function BreatheWait({
     return () => window.clearInterval(id);
   }, []);
 
-  return (
+  const inner = (
     <div
       className={
-        compact
+        compact && !overlay
           ? "flex items-center justify-center gap-4 py-2"
           : "flex min-h-[70dvh] flex-col items-center justify-center gap-6 px-page text-center"
       }
@@ -33,12 +35,18 @@ export function BreatheWait({
     >
       <span
         aria-hidden
-        className={`breathe-orb ${compact ? "breathe-orb--sm" : ""}`}
+        className={`breathe-orb ${compact && !overlay ? "breathe-orb--sm" : ""}`}
       />
       <div>
         <p className="text-body text-[var(--ink)]">{CUES[step]}</p>
         <p className="mt-1 text-small text-[var(--grey)]">{label}</p>
       </div>
     </div>
+  );
+
+  if (!overlay) return inner;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-[var(--linen)]">{inner}</div>
   );
 }

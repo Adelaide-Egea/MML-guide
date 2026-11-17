@@ -1,6 +1,7 @@
 "use client";
 
 import { identifyMember, joinAsNewMember } from "@/actions/member";
+import { BreatheWait } from "@/components/breathe-wait";
 import type { RoundKind } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -33,6 +34,10 @@ export function WhoAreYou({
   const ordered = [...members].sort((a, b) =>
     a.first_name.localeCompare(b.first_name, "en", { sensitivity: "base" }),
   );
+
+  if (pending) {
+    return <BreatheWait overlay label="Opening your page" />;
+  }
 
   return (
     <div>
