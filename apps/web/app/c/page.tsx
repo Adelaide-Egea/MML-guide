@@ -390,7 +390,9 @@ function ScenarioChip({
           ? chrome.scenarioCleaner
           : handover.scenario === 'petsitter'
             ? chrome.scenarioPetSitter
-            : handover.scenario === 'goingtoyours'
+            : handover.scenario === 'houseguest'
+              ? chrome.scenarioHouseGuest
+              : handover.scenario === 'goingtoyours'
               ? chrome.scenarioGoingToYours
               : chrome.scenarioWeekend;
   return (

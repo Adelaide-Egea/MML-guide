@@ -76,6 +76,7 @@ export interface ChromeCopy {
   readonly scenarioWeekend: string;
   readonly scenarioCleaner: string;
   readonly scenarioPetSitter: string;
+  readonly scenarioHouseGuest: string;
   readonly scenarioGoingToYours: string;
   readonly shapeEvening: string;
   readonly shapeFullDay: (who: string) => string;
@@ -93,6 +94,7 @@ export interface ChromeCopy {
   readonly expectationWeekend: string;
   readonly expectationCleaner: string;
   readonly expectationPetSitter: string;
+  readonly expectationHouseGuest: string;
   readonly expectationGoingToYours: string;
   /** Honest line next to safety: allergies stay in the parent's words. */
   readonly factsAsWritten: string;
@@ -250,6 +252,7 @@ const EN: ChromeCopy = {
   scenarioWeekend: 'Weekend',
   scenarioCleaner: 'Cleaner',
   scenarioPetSitter: 'Pet sitter',
+  scenarioHouseGuest: 'House guest',
   scenarioGoingToYours: 'Going to yours',
   shapeEvening: 'Tonight: dinner, bath, bed.',
   shapeFullDay: (who) => `A full day with ${who}.`,
@@ -263,6 +266,7 @@ const EN: ChromeCopy = {
   expectationWeekend: 'A few days. Everything you need is here.',
   expectationCleaner: "The house, room by room, in the order I'd walk it.",
   expectationPetSitter: "Feeding, walks and the vet's number are below.",
+  expectationHouseGuest: 'Make yourself at home. How the house works is below.',
   expectationGoingToYours: 'Everything that came in the bag, and what has to come home.',
   factsAsWritten: 'As the parent wrote — not translated.',
   bulletRecapTitle: 'Bullet recap for the caregiver',
@@ -357,6 +361,7 @@ const FR: ChromeCopy = {
   scenarioWeekend: 'Week-end',
   scenarioCleaner: 'Ménage',
   scenarioPetSitter: 'Garde d’animaux',
+  scenarioHouseGuest: 'Invités',
   scenarioGoingToYours: 'Chez vous',
   shapeEvening: 'Ce soir : dîner, bain, coucher.',
   shapeFullDay: (who) => `Une journée complète avec ${who}.`,
@@ -370,6 +375,7 @@ const FR: ChromeCopy = {
   expectationWeekend: 'Quelques jours. Tout ce qu’il faut est ici.',
   expectationCleaner: 'La maison, pièce par pièce, dans l’ordre où je la ferais.',
   expectationPetSitter: 'Repas, promenades et le numéro du véto sont ci-dessous.',
+  expectationHouseGuest: 'Faites comme chez vous. Le fonctionnement de la maison est ci-dessous.',
   expectationGoingToYours: 'Tout ce qui est dans le sac, et ce qui doit rentrer.',
   factsAsWritten: 'Tel que le parent l’a écrit — non traduit.',
   bulletRecapTitle: 'Résumé en puces pour le caregiver',
@@ -450,6 +456,7 @@ const PT_BR: ChromeCopy = {
   useProduct: (product) => `Usar ${product}`,
   scenarioCleaner: 'Limpeza',
   scenarioPetSitter: 'Cuidador de animais',
+  scenarioHouseGuest: 'Hóspedes',
   scenarioGoingToYours: 'Na sua casa',
 };
 
@@ -512,6 +519,7 @@ const ES: ChromeCopy = {
   useProduct: (product) => `Usar ${product}`,
   scenarioCleaner: 'Limpieza',
   scenarioPetSitter: 'Cuidador de mascotas',
+  scenarioHouseGuest: 'Invitados',
   scenarioGoingToYours: 'En su casa',
 };
 
@@ -561,6 +569,7 @@ const TL: ChromeCopy = {
   useProduct: (product) => `Gamitin ang ${product}`,
   scenarioCleaner: 'Tagalinis',
   scenarioPetSitter: 'Tagapag-alaga ng hayop',
+  scenarioHouseGuest: 'Bisita',
   scenarioGoingToYours: 'Sa inyo',
 };
 
@@ -609,6 +618,7 @@ const AR: ChromeCopy = {
   useProduct: (product) => `استخدم ${product}`,
   scenarioCleaner: 'تنظيف',
   scenarioPetSitter: 'مجالسة حيوانات',
+  scenarioHouseGuest: 'ضيوف',
   scenarioGoingToYours: 'عندكم',
 };
 
@@ -658,6 +668,7 @@ const PL: ChromeCopy = {
   useProduct: (product) => `Użyj ${product}`,
   scenarioCleaner: 'Sprzątanie',
   scenarioPetSitter: 'Opieka nad zwierzakiem',
+  scenarioHouseGuest: 'Goście',
   scenarioGoingToYours: 'U was',
 };
 
@@ -707,6 +718,7 @@ const RO: ChromeCopy = {
   useProduct: (product) => `Folosește ${product}`,
   scenarioCleaner: 'Curățenie',
   scenarioPetSitter: 'Îngrijire animale',
+  scenarioHouseGuest: 'Oaspeți',
   scenarioGoingToYours: 'La voi',
 };
 
@@ -756,6 +768,7 @@ const IT: ChromeCopy = {
   useProduct: (product) => `Usa ${product}`,
   scenarioCleaner: 'Pulizie',
   scenarioPetSitter: 'Pet sitter',
+  scenarioHouseGuest: 'Ospiti',
   scenarioGoingToYours: 'Da voi',
 };
 
@@ -812,6 +825,7 @@ export function localizeExpectation(text: string, chrome: ChromeCopy): string {
     [EN.expectationWeekend]: chrome.expectationWeekend,
     [EN.expectationCleaner]: chrome.expectationCleaner,
     [EN.expectationPetSitter]: chrome.expectationPetSitter,
+    [EN.expectationHouseGuest]: chrome.expectationHouseGuest,
     [EN.expectationGoingToYours]: chrome.expectationGoingToYours,
   };
   return map[trimmed] ?? text;

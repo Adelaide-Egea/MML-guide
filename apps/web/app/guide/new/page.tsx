@@ -28,6 +28,7 @@ const SCENARIO_CARD: Record<
   weekend: { label: 'Weekend', icon: '⌂', hint: 'A few days in this house' },
   cleaner: { label: 'Cleaner', icon: '◇', hint: 'Room by room' },
   petsitter: { label: 'Pet sitter', icon: '△', hint: 'Animals only' },
+  houseguest: { label: 'House guest', icon: '○', hint: 'Staying while you are away' },
   goingtoyours: { label: 'Going to yours', icon: '→', hint: 'They travel to the caregiver' },
 };
 
@@ -53,12 +54,33 @@ function subjectIdsForScenario(
       return subjects.filter((s) => s.kind === 'place').map((s) => s.id);
     case 'petsitter':
       return subjects.filter((s) => s.kind === 'pet').map((s) => s.id);
+    case 'houseguest':
+      // The home and any pets: guests (friends, family, holiday lets) have no children to mind.
+      return subjects.filter((s) => s.kind === 'place' || s.kind === 'pet').map((s) => s.id);
     case 'goingtoyours':
       return subjects.filter((s) => s.kind !== 'place').map((s) => s.id);
+    case 'weekend':
+      // A few days away: the children, and also the pets and the home they live in.
+      return subjects.map((s) => s.id);
     case 'evening':
     case 'fullday':
-    case 'weekend':
       return subjects.filter((s) => s.kind === 'child').map((s) => s.id);
+  }
+}
+
+/** What the parent needs to add before this kind of visit has anyone to cover. */
+function missingSubjectHint(scenario: Scenario): string {
+  switch (scenario) {
+    case 'cleaner':
+      return 'a place';
+    case 'petsitter':
+      return 'a pet';
+    case 'houseguest':
+      return 'a place or a pet';
+    case 'weekend':
+      return 'a child, a pet or a place';
+    default:
+      return 'a child';
   }
 }
 
@@ -195,7 +217,9 @@ export default function NewGuide() {
           ? chrome.scenarioCleaner
           : scenario === 'petsitter'
             ? chrome.scenarioPetSitter
-            : scenario === 'goingtoyours'
+            : scenario === 'houseguest'
+              ? chrome.scenarioHouseGuest
+              : scenario === 'goingtoyours'
               ? chrome.scenarioGoingToYours
               : chrome.scenarioWeekend;
 
@@ -285,8 +309,7 @@ export default function NewGuide() {
         </button>
         {subjectIds.length === 0 && (
           <p className="hint" style={{ textAlign: 'center' }}>
-            Add a {scenario === 'cleaner' ? 'place' : scenario === 'petsitter' ? 'pet' : 'child'} to
-            this household first.
+            Add {missingSubjectHint(scenario)} to this household first.
           </p>
         )}
       </form>
