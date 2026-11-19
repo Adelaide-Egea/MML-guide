@@ -3,6 +3,7 @@ import {
   bringTotals,
   comingOnDate,
   CRAFT_DEFAULT_DATES,
+  craftExtraDayMessage,
   craftInviteMessage,
   craftWhatsAppMessage,
   dateVoteCounts,
@@ -136,6 +137,13 @@ describe("craft evening helpers", () => {
     expect(invite).toContain("Craft evening at mine");
     expect(invite).toContain("https://mums-night-out.vercel.app/barnesmums");
 
+    const extra = craftExtraDayMessage({
+      date: "2026-12-04",
+      link: "https://mums-night-out.vercel.app/barnesmums",
+    });
+    expect(extra).toContain("Friday 4 December");
+    expect(extra).toContain("https://mums-night-out.vercel.app/barnesmums");
+
     const whatsapp = craftWhatsAppMessage({
       chosenDate: "2026-11-26",
       coming: [
@@ -205,6 +213,22 @@ describe("craft evening store", () => {
         new Date("2026-11-19T11:00:00.000Z"),
       ),
     ).toThrow(/closed/i);
+  });
+
+  it("can add an extra evening without dropping the others", () => {
+    const created = memoryDb.createHomeEvent("barnes", {
+      title: "Craft evening at Adelaide's",
+      start_time: "20:00",
+      note: "Little babies are very welcome!",
+      dates: CRAFT_DEFAULT_DATES,
+      closes_at: "2026-11-21T17:00:00.000Z",
+    });
+    memoryDb.updateHomeEvent("barnes", created.id, {
+      dates: [...created.dates, "2026-12-04"],
+    });
+    const next = memoryDb.getHomeEvent("barnes", created.id);
+    expect(next?.dates).toContain("2026-11-24");
+    expect(next?.dates).toContain("2026-12-04");
   });
 
   it("does not leak a Barnes craft evening onto the French group", () => {

@@ -188,6 +188,17 @@ export function craftDeadlineLabel(closesAt: string): string {
   return formatClosesExact(closesAt);
 }
 
+export function craftExtraDayMessage(input: {
+  date: string;
+  link: string;
+}): string {
+  return [
+    `Hey — I've added another evening to the craft poll: ${formatLongDate(input.date)} from 8pm.`,
+    `Tap it if you can come (same link):`,
+    input.link,
+  ].join("\n");
+}
+
 export function craftInviteMessage(input: {
   link: string;
   closesAt: string;

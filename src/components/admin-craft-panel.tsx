@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  addCraftDate,
   archiveCraftPoll,
   closeCraftPollNow,
   extendCraftPoll,
+  getCraftExtraDayMessage,
   getCraftInviteMessage,
   getCraftWhatsAppMessage,
   openCraftPoll,
@@ -41,7 +43,7 @@ export function AdminCraftPanel({
 }: {
   groupId: GroupId;
   event: HomeEvent | null;
-  members: Pick<Member, "id" | "first_name">[];
+  members: Pick<Member, "id" | "first_name" | "phone">[];
   responses: HomeEventResponse[];
 }) {
   if (groupId !== "barnes") return null;
@@ -155,16 +157,26 @@ function CraftLiveAdmin({
 }: {
   groupId: GroupId;
   event: HomeEvent;
-  members: Pick<Member, "id" | "first_name">[];
+  members: Pick<Member, "id" | "first_name" | "phone">[];
   responses: HomeEventResponse[];
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  const [extraDate, setExtraDate] = useState("");
+  const [addedDate, setAddedDate] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
   const byId = useMemo(
     () => new Map(members.map((member) => [member.id, member.first_name])),
     [members],
   );
   const counts = dateVoteCounts(event.dates, responses);
+  const answeredIds = new Set(responses.map((row) => row.member_id));
+  const phones = members.filter((member) => member.phone?.trim());
+  const answeredPhones = phones.filter((member) => answeredIds.has(member.id));
+  const extraForMessage =
+    addedDate ??
+    event.dates.filter((date) => !CRAFT_DEFAULT_DATES.includes(date)).at(-1) ??
+    null;
 
   return (
     <section className="craft-card rounded-card p-4">
@@ -221,7 +233,58 @@ function CraftLiveAdmin({
           </tbody>
         </table>
       </div>
+      <label className="mt-4 block text-body font-semibold text-[var(--ink)]">
+        Add another evening
+        <input
+          type="date"
+          value={extraDate}
+          onChange={(e) => setExtraDate(e.target.value)}
+          className="mt-2 min-h-tap w-full rounded-card border border-[var(--craft-line)] bg-[var(--background-elevated)] px-3 text-body"
+        />
+      </label>
+      {addError && <p className="mt-2 text-small text-[var(--danger)]">{addError}</p>}
+      <button
+        type="button"
+        className="mt-2 min-h-tap w-full rounded-xl border border-[var(--craft-line)] bg-[var(--background-elevated)] font-semibold"
+        onClick={() =>
+          startTransition(async () => {
+            setAddError(null);
+            const res = await addCraftDate(groupId, extraDate);
+            if (!res.ok) {
+              setAddError(res.error);
+              return;
+            }
+            setAddedDate(res.date);
+            setExtraDate("");
+            router.refresh();
+          })
+        }
+      >
+        Add evening
+      </button>
+      <p className="mt-3 text-small text-[var(--grey)]">
+        The app doesn&apos;t send texts. Copy the note and WhatsApp them, or tell
+        them one by one.
+      </p>
+      {(answeredPhones.length > 0 ? answeredPhones : phones).length > 0 && (
+        <ul className="mt-2 space-y-1 text-small text-[var(--ink)]">
+          {(answeredPhones.length > 0 ? answeredPhones : phones).map((member) => (
+            <li key={member.id}>
+              {member.first_name}: {member.phone}
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="mt-4 flex flex-col gap-2">
+        {extraForMessage && (
+          <CopyButton
+            label="Copy extra-day message"
+            getText={async () => {
+              const res = await getCraftExtraDayMessage(groupId, extraForMessage);
+              return res.ok ? res.text : null;
+            }}
+          />
+        )}
         <button
           type="button"
           className="min-h-tap w-full rounded-xl border border-[var(--craft-line)] bg-[var(--background-elevated)] font-semibold"
@@ -262,7 +325,7 @@ function CraftRecapAdmin({
 }: {
   groupId: GroupId;
   event: HomeEvent;
-  members: Pick<Member, "id" | "first_name">[];
+  members: Pick<Member, "id" | "first_name" | "phone">[];
   responses: HomeEventResponse[];
 }) {
   const router = useRouter();

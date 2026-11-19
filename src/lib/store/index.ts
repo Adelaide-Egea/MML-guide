@@ -749,12 +749,19 @@ export const store = {
   async updateHomeEvent(
     groupId: GroupId,
     eventId: string,
-    patch: Partial<Pick<HomeEvent, "closes_at" | "chosen_date" | "status">>,
+    patch: Partial<Pick<HomeEvent, "closes_at" | "chosen_date" | "status" | "dates">>,
   ): Promise<HomeEvent> {
     if (useMemory()) return memoryDb.updateHomeEvent(groupId, eventId, patch);
     const existing = await this.getHomeEvent(groupId, eventId);
     if (!existing) throw new Error("Craft evening not found.");
     const next: Record<string, unknown> = {};
+    const dates = patch.dates
+      ? normalizeDateList(patch.dates)
+      : existing.dates;
+    if (patch.dates !== undefined) {
+      if (dates.length === 0) throw new Error("Pick at least one date.");
+      next.dates = dates;
+    }
     if (patch.closes_at !== undefined) next.closes_at = patch.closes_at;
     if (patch.chosen_date !== undefined) {
       next.chosen_date = patch.chosen_date
@@ -762,7 +769,7 @@ export const store = {
         : null;
       if (
         next.chosen_date &&
-        !existing.dates.includes(next.chosen_date as string)
+        !dates.includes(next.chosen_date as string)
       ) {
         throw new Error("That date isn't on this evening.");
       }

@@ -11,9 +11,11 @@ import {
   CRAFT_DEFAULT_NOTE,
   CRAFT_DEFAULT_START,
   CRAFT_DEFAULT_TITLE,
+  craftExtraDayMessage,
   craftInviteMessage,
   craftWhatsAppMessage,
   isCraftGroup,
+  isCraftVotingOpen,
   namedComing,
   winningCraftDate,
 } from "@/lib/home-event";
@@ -645,6 +647,58 @@ export async function closeCraftPollNow(groupId: GroupId) {
   });
   revalidateAdmin(groupId, group.invite_token);
   return { ok: true as const };
+}
+
+export async function addCraftDate(groupId: GroupId, date: string) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  const extra = date.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(extra)) {
+    return { ok: false as const, error: "Pick a date." };
+  }
+  if (event.dates.includes(extra)) {
+    return { ok: false as const, error: "That evening is already on the poll." };
+  }
+  const dates = [...event.dates, extra].sort();
+  try {
+    const patch: { dates: string[]; closes_at?: string } = { dates };
+    if (!isCraftVotingOpen(event)) {
+      patch.closes_at = addHoursLondon(new Date(), 12).toISOString();
+    }
+    await store.updateHomeEvent(groupId, event.id, patch);
+    revalidateAdmin(groupId, group.invite_token);
+    return { ok: true as const, date: extra };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Couldn't add that evening.",
+    };
+  }
+}
+
+export async function getCraftExtraDayMessage(groupId: GroupId, date: string) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  if (!event.dates.includes(date)) {
+    return { ok: false as const, error: "That evening isn't on the poll yet." };
+  }
+  return {
+    ok: true as const,
+    text: craftExtraDayMessage({
+      date,
+      link: groupInviteUrl(group, "evening"),
+    }),
+  };
 }
 
 export async function setCraftChosenDate(groupId: GroupId, date: string) {

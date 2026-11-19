@@ -589,11 +589,16 @@ export const memoryDb = {
     groupId: GroupId,
     eventId: string,
     patch: Partial<
-      Pick<HomeEvent, "closes_at" | "chosen_date" | "status">
+      Pick<HomeEvent, "closes_at" | "chosen_date" | "status" | "dates">
     >,
   ): HomeEvent {
     const event = memoryDb.getHomeEvent(groupId, eventId);
     if (!event) throw new Error("Craft evening not found.");
+    if (patch.dates !== undefined) {
+      const dates = normalizeDateList(patch.dates);
+      if (dates.length === 0) throw new Error("Pick at least one date.");
+      event.dates = dates;
+    }
     if (patch.closes_at !== undefined) event.closes_at = patch.closes_at;
     if (patch.chosen_date !== undefined) {
       event.chosen_date = patch.chosen_date
