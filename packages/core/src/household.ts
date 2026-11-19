@@ -317,6 +317,7 @@ export type Scenario =
   | 'weekend'
   | 'cleaner'
   | 'petsitter'
+  | 'houseguest'
   | 'goingtoyours';
 
 export const SCENARIOS: readonly Scenario[] = [
@@ -325,6 +326,7 @@ export const SCENARIOS: readonly Scenario[] = [
   'weekend',
   'cleaner',
   'petsitter',
+  'houseguest',
   'goingtoyours',
 ];
 
@@ -336,6 +338,7 @@ export const DEFAULT_EXPECTATION: Record<Scenario, string> = {
   weekend: 'A few days. Everything you need is here.',
   cleaner: "The house, room by room, in the order I'd walk it.",
   petsitter: "Feeding, walks and the vet's number are below.",
+  houseguest: 'Make yourself at home. How the house works is below.',
   goingtoyours: 'Everything that came in the bag, and what has to come home.',
 };
 
@@ -349,6 +352,7 @@ export function durationFromScenario(scenario: Scenario): HandoverDuration {
     case 'petsitter':
       return 'fullday';
     case 'weekend':
+    case 'houseguest':
     case 'goingtoyours':
       return 'fewdays';
   }

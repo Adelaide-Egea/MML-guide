@@ -14,7 +14,15 @@ test('scenario derives the legacy duration', () => {
   assert.equal(durationFromScenario('weekend'), 'fewdays');
   assert.equal(durationFromScenario('cleaner'), 'fullday');
   assert.equal(durationFromScenario('petsitter'), 'fullday');
+  assert.equal(durationFromScenario('houseguest'), 'fewdays');
   assert.equal(durationFromScenario('goingtoyours'), 'fewdays');
+});
+
+test('house guests get their own stock greeting', () => {
+  assert.equal(
+    DEFAULT_EXPECTATION.houseguest,
+    'Make yourself at home. How the house works is below.',
+  );
 });
 
 test('old duration-only handovers lift to a scenario', () => {

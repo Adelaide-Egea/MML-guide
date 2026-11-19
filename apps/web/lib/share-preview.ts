@@ -18,6 +18,7 @@ function scenarioLabel(scenario: Scenario, language: string): string {
     weekend: chrome.scenarioWeekend,
     cleaner: chrome.scenarioCleaner,
     petsitter: chrome.scenarioPetSitter,
+    houseguest: chrome.scenarioHouseGuest,
     goingtoyours: chrome.scenarioGoingToYours,
   };
   return labels[scenario] ?? '';
