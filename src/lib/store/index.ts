@@ -868,6 +868,48 @@ export const store = {
     if (error) throw error;
     return normalizeHomeEventResponse(saved, true);
   },
+
+  /** Organiser moves someone between evenings — works after voting closes. */
+  async setHomeEventResponseDatesAsAdmin(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+    dates: string[],
+    now = new Date(),
+  ): Promise<HomeEventResponse> {
+    if (useMemory()) {
+      return memoryDb.setHomeEventResponseDatesAsAdmin(
+        groupId,
+        eventId,
+        memberId,
+        dates,
+        now,
+      );
+    }
+    const event = await this.getHomeEvent(groupId, eventId);
+    if (!event) throw new Error("Craft evening not found.");
+    if (event.status === "archived") throw new Error("This craft evening is archived.");
+    const member = await this.getMember(groupId, memberId);
+    if (!member) throw new Error("Member not found.");
+    const allowed = new Set(event.dates);
+    const clean = normalizeDateList(dates).filter((date) => allowed.has(date));
+    const existing = await this.getHomeEventResponse(groupId, eventId, memberId);
+    const row = {
+      event_id: eventId,
+      member_id: memberId,
+      dates: clean,
+      bringing: existing?.bringing ?? [],
+      note: existing?.note ?? null,
+      updated_at: now.toISOString(),
+    };
+    const { data: saved, error } = await db()
+      .from("home_event_responses")
+      .upsert(row)
+      .select()
+      .single();
+    if (error) throw error;
+    return normalizeHomeEventResponse(saved, true);
+  },
 };
 
 function isMissingHomeEventTable(error: { message?: string; code?: string }): boolean {

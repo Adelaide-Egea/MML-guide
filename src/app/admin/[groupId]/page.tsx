@@ -1,4 +1,4 @@
-import { AdminCraftPanel } from "@/components/admin-craft-panel";
+import { AdminCraftPanel, AdminCraftResults } from "@/components/admin-craft-panel";
 import { AdminManage } from "@/components/admin-manage";
 import { RetireLongLink } from "@/components/retire-long-link";
 import { AdminRoundPanel } from "@/components/admin-round-panel";
@@ -6,6 +6,7 @@ import { FilterTabs } from "@/components/filter-tabs";
 import { requireAdmin } from "@/lib/admin-auth";
 import { formatFromTime } from "@/lib/dates";
 import { isCraftGroup } from "@/lib/home-event";
+import { groupChannelLinks } from "@/lib/invite-paths";
 import { store } from "@/lib/store";
 import { pickTab } from "@/lib/tabs";
 import type { GroupId, Round } from "@/lib/types";
@@ -64,6 +65,17 @@ export default async function AdminGroupPage({
       </Link>
       <h1 className="font-display text-title text-[var(--ink)]">{group.name}</h1>
       <p className="text-small text-[var(--grey)]">{formatFromTime(group.start_time)}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {groupChannelLinks(group).map((link) => (
+          <a
+            key={link.path}
+            href={link.path}
+            className="inline-flex min-h-tap items-center rounded-xl border border-[var(--line)] bg-white px-3 text-small font-semibold text-[var(--ink)]"
+          >
+            {group.id === "barnes" ? `See ${link.label.toLowerCase()} page` : "See group page"} →
+          </a>
+        ))}
+      </div>
 
       <div className="mt-4">
         <FilterTabs
@@ -155,8 +167,18 @@ export default async function AdminGroupPage({
         )}
         {current === "results" && (
           <div className="flex flex-col gap-4">
+            {craftEvent && (
+              <AdminCraftResults
+                groupId={groupId}
+                event={craftEvent}
+                members={activeMembers}
+                responses={craftResponses}
+              />
+            )}
             {rounds.length === 0 ? (
-              <p className="text-body text-[var(--ink)]">No poll open.</p>
+              craftEvent ? null : (
+                <p className="text-body text-[var(--ink)]">No poll open.</p>
+              )
             ) : (
               await Promise.all(
                 rounds.map(async (round) => {

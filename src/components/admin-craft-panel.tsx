@@ -2,6 +2,7 @@
 
 import {
   addCraftDate,
+  adminSetCraftDates,
   archiveCraftPoll,
   closeCraftPollNow,
   extendCraftPoll,
@@ -26,6 +27,7 @@ import {
   bringLine,
   CRAFT_DEFAULT_DATES,
   craftHeadlineTime,
+  craftWhoByDate,
   dateVoteCounts,
   isCraftVotingOpen,
   winningCraftDate,
@@ -361,6 +363,12 @@ function CraftRecapAdmin({
           ))}
         </select>
       </label>
+      <CraftWhoCanCome
+        groupId={groupId}
+        event={event}
+        members={members}
+        responses={responses}
+      />
       <p className="mt-3 text-small text-[var(--grey)]">
         Notes stay here — mums never see them.
       </p>
@@ -399,5 +407,207 @@ function CraftRecapAdmin({
         />
       </div>
     </section>
+  );
+}
+
+/** Results tab: the craft evening as a scoreboard, open or closed. */
+export function AdminCraftResults({
+  groupId,
+  event,
+  members,
+  responses,
+}: {
+  groupId: GroupId;
+  event: HomeEvent;
+  members: Pick<Member, "id" | "first_name">[];
+  responses: HomeEventResponse[];
+}) {
+  const chosen = winningCraftDate(event, responses);
+  return (
+    <section className="craft-card rounded-card p-4">
+      <h2 className="font-display text-xl text-[var(--ink)]">🧶 {event.title}</h2>
+      <p className="mt-1 text-small text-[var(--grey)]">
+        {isCraftVotingOpen(event)
+          ? `Voting closes ${formatClosesExact(event.closes_at)}`
+          : `Voting closed · ${chosen ? `on for ${formatLongDate(chosen)}` : "no date yet"}`}
+      </p>
+      <CraftWhoCanCome
+        groupId={groupId}
+        event={event}
+        members={members}
+        responses={responses}
+      />
+    </section>
+  );
+}
+
+/**
+ * Who can come on each evening, and a grid to move people yourself.
+ * Tap a cell to tick/untick that evening for that person.
+ */
+function CraftWhoCanCome({
+  groupId,
+  event,
+  members,
+  responses,
+}: {
+  groupId: GroupId;
+  event: HomeEvent;
+  members: Pick<Member, "id" | "first_name">[];
+  responses: HomeEventResponse[];
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [overrides, setOverrides] = useState<Record<string, string[]>>({});
+  const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+
+  const effective = useMemo(() => {
+    const rows = new Map(
+      responses.map((row) => [row.member_id, { member_id: row.member_id, dates: row.dates }]),
+    );
+    for (const [memberId, dates] of Object.entries(overrides)) {
+      rows.set(memberId, { member_id: memberId, dates });
+    }
+    return [...rows.values()];
+  }, [responses, overrides]);
+
+  const { byDate, noDate, noReply } = craftWhoByDate(event.dates, effective, members);
+  const top = winningCraftDate({ dates: event.dates, chosen_date: null }, effective);
+  const answered = new Set(effective.map((row) => row.member_id));
+  const people = [...members].sort((a, b) => {
+    const aa = answered.has(a.id) ? 0 : 1;
+    const bb = answered.has(b.id) ? 0 : 1;
+    if (aa !== bb) return aa - bb;
+    return a.first_name.localeCompare(b.first_name, "en", { sensitivity: "base" });
+  });
+
+  function toggle(memberId: string, date: string) {
+    const current =
+      overrides[memberId] ??
+      responses.find((row) => row.member_id === memberId)?.dates ??
+      [];
+    const next = current.includes(date)
+      ? current.filter((d) => d !== date)
+      : [...current, date].sort();
+    setOverrides((prev) => ({ ...prev, [memberId]: next }));
+    setError(null);
+    startTransition(async () => {
+      const res = await adminSetCraftDates(groupId, memberId, next);
+      if (!res.ok) {
+        setError(res.error);
+        setOverrides((prev) => ({ ...prev, [memberId]: current }));
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="mt-4">
+      <h3 className="text-body font-semibold text-[var(--ink)]">Who can come</h3>
+      <ul className="mt-2 flex flex-col gap-2">
+        {byDate.map(({ date, names }) => (
+          <li
+            key={date}
+            className={`rounded-card border px-3 py-2 ${
+              date === top && names.length > 0
+                ? "border-[var(--craft-ink)] bg-[var(--craft-fill)]"
+                : "border-[var(--craft-line)] bg-[var(--background-elevated)]"
+            }`}
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="font-semibold text-[var(--ink)]">
+                {formatWeekdayShort(date)} {formatDayNumber(date)} {formatMonthShort(date)}
+              </span>
+              <span className="font-mono text-body">{names.length}</span>
+            </div>
+            <p className="text-small text-[var(--grey)]">
+              {names.length === 0 ? "Nobody yet" : names.join(", ")}
+            </p>
+          </li>
+        ))}
+      </ul>
+      {noDate.length > 0 && (
+        <p className="mt-2 text-small text-[var(--grey)]">
+          <strong className="text-[var(--ink)]">Can&apos;t do any:</strong> {noDate.join(", ")}
+        </p>
+      )}
+      {noReply.length > 0 && (
+        <p className="mt-1 text-small text-[var(--grey)]">
+          <strong className="text-[var(--ink)]">No reply:</strong> {noReply.join(", ")}
+        </p>
+      )}
+
+      <button
+        type="button"
+        aria-expanded={editing}
+        className="mt-3 min-h-tap w-full rounded-xl border border-[var(--craft-line)] bg-[var(--background-elevated)] font-semibold"
+        onClick={() => setEditing((v) => !v)}
+      >
+        {editing ? "Done moving people" : "Move people between evenings"}
+      </button>
+
+      {editing && (
+        <div className="mt-3 overflow-x-auto">
+          <p className="mb-2 text-small text-[var(--grey)]">
+            Tap a box to add or remove someone from that evening. Saves straight away.
+          </p>
+          <table className="w-full text-small">
+            <thead>
+              <tr className="text-[var(--grey)]">
+                <th className="pb-2 pr-2 text-left font-semibold">Who</th>
+                {event.dates.map((date) => (
+                  <th key={date} className="px-1 pb-2 text-center font-semibold">
+                    <span className="block text-[10px] uppercase tracking-[0.12em]">
+                      {formatWeekdayShort(date)}
+                    </span>
+                    <span className="font-mono">{formatDayNumber(date)}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {people.map((member) => {
+                const row = effective.find((r) => r.member_id === member.id);
+                return (
+                  <tr key={member.id} className="border-t border-[var(--craft-line)]">
+                    <td
+                      className={`py-1 pr-2 ${
+                        row ? "text-[var(--ink)]" : "text-[var(--grey)]"
+                      }`}
+                    >
+                      {member.first_name}
+                    </td>
+                    {event.dates.map((date) => {
+                      const on = row?.dates.includes(date) ?? false;
+                      return (
+                        <td key={date} className="px-1 py-1 text-center">
+                          <button
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`${member.first_name} on ${formatLongDate(date)}`}
+                            disabled={pending}
+                            onClick={() => toggle(member.id, date)}
+                            className={`h-11 w-11 rounded-lg border text-body ${
+                              on
+                                ? "border-[var(--craft-ink)] bg-[var(--craft-fill)] font-semibold"
+                                : "border-[var(--craft-line)] bg-[var(--background-elevated)] text-[var(--grey)]"
+                            }`}
+                          >
+                            {on ? "✓" : ""}
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {error && <p className="mt-2 text-small text-[var(--danger)]">{error}</p>}
+    </div>
   );
 }

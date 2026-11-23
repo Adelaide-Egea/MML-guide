@@ -669,6 +669,38 @@ export const memoryDb = {
     else store.homeEventResponses[idx] = row;
     return row;
   },
+  /** Organiser moves someone between evenings — works after voting closes. */
+  setHomeEventResponseDatesAsAdmin(
+    groupId: GroupId,
+    eventId: string,
+    memberId: string,
+    dates: string[],
+    now = new Date(),
+  ): HomeEventResponse {
+    const event = memoryDb.getHomeEvent(groupId, eventId);
+    if (!event) throw new Error("Craft evening not found.");
+    if (event.status === "archived") throw new Error("This craft evening is archived.");
+    const member = memoryDb.getMember(groupId, memberId);
+    if (!member) throw new Error("Member not found.");
+    const allowed = new Set(event.dates);
+    const clean = normalizeDateList(dates).filter((date) => allowed.has(date));
+    const store = getMemoryStore();
+    const idx = store.homeEventResponses.findIndex(
+      (row) => row.event_id === eventId && row.member_id === memberId,
+    );
+    const existing = idx === -1 ? null : store.homeEventResponses[idx];
+    const row: HomeEventResponse = {
+      event_id: eventId,
+      member_id: memberId,
+      dates: clean,
+      bringing: existing?.bringing ?? [],
+      note: existing?.note ?? null,
+      updated_at: now.toISOString(),
+    };
+    if (idx === -1) store.homeEventResponses.push(row);
+    else store.homeEventResponses[idx] = row;
+    return row;
+  },
 };
 
 function dateOrThrow(event: HomeEvent, date: string): string {
