@@ -243,3 +243,58 @@ describe("craft evening store", () => {
     expect(memoryDb.getOpenHomeEvent("french")).toBeNull();
   });
 });
+
+describe("organiser view of the craft poll", () => {
+  it("lists who can come on each evening, who can't do any, and who didn't reply", async () => {
+    const { craftWhoByDate } = await import("@/lib/home-event");
+    const members = [
+      { id: "a", first_name: "Zoé" },
+      { id: "b", first_name: "Anna" },
+      { id: "c", first_name: "Marie" },
+      { id: "d", first_name: "Lou" },
+    ];
+    const out = craftWhoByDate(
+      ["2026-11-24", "2026-11-26"],
+      [
+        { member_id: "a", dates: ["2026-11-24", "2026-11-26"] },
+        { member_id: "b", dates: ["2026-11-24"] },
+        { member_id: "c", dates: [] },
+      ],
+      members,
+    );
+    expect(out.byDate).toEqual([
+      { date: "2026-11-24", names: ["Anna", "Zoé"] },
+      { date: "2026-11-26", names: ["Zoé"] },
+    ]);
+    expect(out.noDate).toEqual(["Marie"]);
+    expect(out.noReply).toEqual(["Lou"]);
+  });
+
+  it("lets the organiser move someone after voting has closed", () => {
+    resetMemoryStore();
+    ensureDemoMembers();
+    const ev = memoryDb.createHomeEvent("barnes", {
+      title: "Craft evening at Adelaide's",
+      start_time: "20:00",
+      note: null,
+      dates: ["2026-11-24", "2026-11-26"],
+      closes_at: "2026-11-20T10:00:00.000Z",
+    });
+    const member = memoryDb.listMembers("barnes", false)[0];
+    const row = memoryDb.setHomeEventResponseDatesAsAdmin(
+      "barnes",
+      ev.id,
+      member.id,
+      ["2026-11-26", "2027-01-01"],
+    );
+    expect(row.dates).toEqual(["2026-11-26"]);
+    expect(row.bringing).toEqual([]);
+    expect(() =>
+      memoryDb.upsertHomeEventResponse("barnes", ev.id, member.id, {
+        dates: ["2026-11-24"],
+        bringing: [],
+        note: null,
+      }),
+    ).toThrow("Voting has closed.");
+  });
+});

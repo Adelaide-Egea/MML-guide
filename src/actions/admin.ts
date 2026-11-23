@@ -681,6 +681,31 @@ export async function addCraftDate(groupId: GroupId, date: string) {
   }
 }
 
+/** Move someone between craft evenings (tick/untick a date for them). */
+export async function adminSetCraftDates(
+  groupId: GroupId,
+  memberId: string,
+  dates: string[],
+) {
+  await requireAdmin();
+  if (!isCraftGroup(groupId)) {
+    return { ok: false as const, error: "Craft evenings are only for Barnes Mums." };
+  }
+  const group = await requireGroup(groupId);
+  const event = await store.getOpenHomeEvent(groupId);
+  if (!event) return { ok: false as const, error: "No craft evening open." };
+  try {
+    await store.setHomeEventResponseDatesAsAdmin(groupId, event.id, memberId, dates);
+    revalidateAdmin(groupId, group.invite_token);
+    return { ok: true as const };
+  } catch (err) {
+    return {
+      ok: false as const,
+      error: err instanceof Error ? err.message : "Couldn't save that change.",
+    };
+  }
+}
+
 export async function getCraftExtraDayMessage(groupId: GroupId, date: string) {
   await requireAdmin();
   if (!isCraftGroup(groupId)) {

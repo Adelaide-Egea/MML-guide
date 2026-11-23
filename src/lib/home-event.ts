@@ -253,3 +253,36 @@ export function namedComing(
 export function craftHeadlineTime(startTime: string): string {
   return formatFromTime(startTime || CRAFT_DEFAULT_START);
 }
+
+/** Organiser view: who said yes to each evening, plus who said none / didn't reply. */
+export function craftWhoByDate(
+  dates: string[],
+  responses: Pick<HomeEventResponse, "member_id" | "dates">[],
+  members: Pick<Member, "id" | "first_name">[],
+): {
+  byDate: { date: string; names: string[] }[];
+  noDate: string[];
+  noReply: string[];
+} {
+  const nameOf = new Map(members.map((m) => [m.id, m.first_name]));
+  const sortNames = (names: string[]) =>
+    [...names].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+  const byDate = dates.map((date) => ({
+    date,
+    names: sortNames(
+      responses
+        .filter((row) => row.dates.map(dateKey).includes(dateKey(date)))
+        .map((row) => nameOf.get(row.member_id) ?? "Someone"),
+    ),
+  }));
+  const answered = new Set(responses.map((row) => row.member_id));
+  const noDate = sortNames(
+    responses
+      .filter((row) => !row.dates.some((d) => dates.includes(dateKey(d))))
+      .map((row) => nameOf.get(row.member_id) ?? "Someone"),
+  );
+  const noReply = sortNames(
+    members.filter((m) => !answered.has(m.id)).map((m) => m.first_name),
+  );
+  return { byDate, noDate, noReply };
+}
